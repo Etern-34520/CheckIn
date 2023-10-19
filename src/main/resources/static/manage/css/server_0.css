@@ -1,0 +1,26 @@
+#leftTop{
+    height: 70px;
+    flex: none;
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: #19191a;
+    cursor: pointer;
+    user-select:none;
+}
+#leftTop:hover{
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: rgba(128,128,128,0.2);
+    cursor: pointer;
+    user-select:none;
+}
+#leftBottom{
+    margin-top: 4px;
+    flex: 1;
+    overflow-y: auto;
+}
+#right{
+    margin-left: 4px;
+    flex: 1;
+    margin-top: 4px;
+}
