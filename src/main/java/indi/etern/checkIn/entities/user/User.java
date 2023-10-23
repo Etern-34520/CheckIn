@@ -1,16 +1,27 @@
 package indi.etern.checkIn.entities.user;
 
-import indi.etern.checkIn.dao.PersistableWithStaticHash;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
-public class User implements PersistableWithStaticHash {
+@Entity
+@Table(name = "Users")
+public class User {
     protected String name;
+    @Id
     protected int QQNumber;
     protected String password;
+    @ManyToOne
     protected Role role;
     public User(String name, int QQNumber, String password) {
         this.name = name;
         this.QQNumber = QQNumber;
         this.password = password;
+    }
+    
+    protected User() {
+    
     }
     
     public void setName(String name) {
@@ -40,7 +51,7 @@ public class User implements PersistableWithStaticHash {
         this.role = role;
         role.getUsers().add(this);
     }
-    @Override
+//    @Override
     public String getStaticHash() {
         return String.valueOf(QQNumber);
     }

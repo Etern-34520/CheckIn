@@ -1,4 +1,4 @@
-package indi.etern.checkIn.dao;
+package indi.etern.checkIn.repositories;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

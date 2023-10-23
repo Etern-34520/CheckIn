@@ -1,6 +1,5 @@
 package indi.etern.checkIn;
 
-import indi.etern.checkIn.dao.Dao;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.MultipartResolver;
@@ -11,15 +10,15 @@ import org.springframework.web.servlet.view.JstlView;
 
 @Configuration
 public class MVCConfig {
-    private final Dao dao = new Dao("indi.etern.checkIn.beans");
+//    private final Dao dao = new Dao();
     @Bean
     public String getDaoBeanPackReference() {
         return "indi.etern.checkIn.entities";
     }
-    @Bean
-    public Dao getDao(){
-        return dao;
-    }
+//    @Bean
+//    public Dao getDao(){
+//        return dao;
+//    }
     @Bean
     public ViewResolver viewResolver() {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();

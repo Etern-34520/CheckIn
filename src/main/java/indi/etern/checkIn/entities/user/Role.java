@@ -1,18 +1,26 @@
 package indi.etern.checkIn.entities.user;
 
-import indi.etern.checkIn.dao.PersistableWithStaticHash;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-public class Role implements PersistableWithStaticHash {
-    private final String type;
+@Entity
+public class Role {
+    @Id
+    private String type;
+    @OneToMany(mappedBy = "role")
     private final Set<User> users = new HashSet<>();
     protected static Map<String,Role> roleMap;
     
     protected Role(String type){
         this.type = type;
+    }
+    
+    protected Role() {
+    
     }
     
     static public Role getInstance(String type){
@@ -32,7 +40,7 @@ public class Role implements PersistableWithStaticHash {
     public String getType() {
         return type;
     }
-    @Override
+//    @Override
     public String getStaticHash() {
         return type;
     }

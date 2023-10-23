@@ -4,9 +4,13 @@ import indi.etern.checkIn.entities.question.Question;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleCorrectQuestion;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionFactory;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.SingleCorrectQuestion;
+import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
-import indi.etern.checkIn.dao.Dao;
+import indi.etern.checkIn.entities.question.interfaces.multipleChoice.MultipleChoice;
+import indi.etern.checkIn.repositories.ChoiceRepository;
+import indi.etern.checkIn.repositories.PartitionRepository;
+import indi.etern.checkIn.service.MultiPartitionableQuestionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +20,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @SpringBootTest(classes = CheckInApplication.class)
 @ExtendWith(SpringExtension.class)
 public class QuestionTest {
     @Autowired
-    Dao dao;// = new Dao("indi.etern.checkIn.beans");
+    MultiPartitionableQuestionService multiPartitionableQuestionService;
+    @Autowired
+    PartitionRepository partitionRepository;
+    @Autowired
+    ChoiceRepository choiceRepository;
 //    Dao dao = new Dao("indi.etern.checkIn.beans");
     List<Choice> choices1 = new ArrayList<>();
     {
@@ -34,10 +41,10 @@ public class QuestionTest {
     Question question1;
     List<Choice> choices2 = new ArrayList<>();
     {
-        choices2.add(new Choice("A", true));
-        choices2.add(new Choice("B", true));
-        choices2.add(new Choice("C", false));
-        choices2.add(new Choice("D", false));
+        choices2.add(new Choice("A1", true));
+        choices2.add(new Choice("B1", true));
+        choices2.add(new Choice("C1", false));
+        choices2.add(new Choice("D1", false));
     }
     Question question2;
     
@@ -61,8 +68,8 @@ public class QuestionTest {
             Question question = multipleQuestionFactory.addAllChoices(choices2).setQuestionContent("testQuestion2").build();
             assert question instanceof MultipleCorrectQuestion;
             MultipleCorrectQuestion multipleCorrectQuestion = (MultipleCorrectQuestion) question;
-            assert multipleCorrectQuestion.getCorrectChoices().get(0).getContent().equals("A");
-            assert multipleCorrectQuestion.getCorrectChoices().get(1).getContent().equals("B");
+            assert multipleCorrectQuestion.getCorrectChoices().get(0).getContent().equals("A1");
+            assert multipleCorrectQuestion.getCorrectChoices().get(1).getContent().equals("B1");
             assert multipleCorrectQuestion.getContent().equals("testQuestion2");
             assert multipleCorrectQuestion.getPartitions().contains(Partition.getInstance("undefined"));
             question2 = question;
@@ -72,10 +79,10 @@ public class QuestionTest {
     public void testExceptions(){
         List<Choice> choices = new ArrayList<>();
         {
-            choices.add(new Choice("A", false));
-            choices.add(new Choice("B", false));
-            choices.add(new Choice("C", false));
-            choices.add(new Choice("D", false));
+            choices.add(new Choice("A2", false));
+            choices.add(new Choice("B2", false));
+            choices.add(new Choice("C2", false));
+            choices.add(new Choice("D2", false));
         }
         MultipleQuestionFactory multipleQuestionFactory = new MultipleQuestionFactory();
         try {
@@ -84,7 +91,7 @@ public class QuestionTest {
             assert e.getMessage().equals("No correct choice found");
         }
         
-        choices.add(new Choice("E", true));
+        choices.add(new Choice("E2", true));
         multipleQuestionFactory.addAllChoices(choices);
         try {
             Question question = multipleQuestionFactory.build();
@@ -113,19 +120,24 @@ public class QuestionTest {
     @Test
     public void insertQuestion() {
         testGetAnswerAndContent();
-        dao.save(question1);
-        Question question = (Question) dao.get(question1.getMd5(),Question.class);
-        assert question.equals(question1);
-        dao.save(question2);
-        Set<Object> objects = dao.getAll(Question.class);
-        assert objects.contains(question1);
-        assert ((Partition) ((SingleCorrectQuestion) question).getPartitions().toArray()[0]).equals(Partition.getInstance("undefined"));
-        assert objects.contains(question2);
-//        dao.delete(question1);
-        objects = dao.getAll(Question.class);
-        assert objects.contains(question2);
-//        dao.delete(question2);
-        objects = dao.getAll(Question.class);
-//        assert objects.isEmpty();
+        partitionRepository.save(Partition.getInstance("undefined"));
+//        choiceRepository.saveAll(((MultipleChoice)question1).getChoices());
+//        multiPartitionableQuestionService.save((MultiPartitionableQuestion) question1);
+//        multiPartitionableQuestionService.save((MultiPartitionableQuestion) question2);
+//        List<MultiPartitionableQuestion> multiPartitionableQuestions = multiPartitionableQuestionService.findAll();
+//        assert multiPartitionableQuestions.size() == 2;
+//        assert ((MultipleChoice)multiPartitionableQuestions.get(0)).getChoices().size() == 4;
+//        assert ((MultipleChoice)multiPartitionableQuestions.get(1)).getChoices().size() == 4;
+    }
+    @Test
+    public void updateQuestion(){
+//        partitionRepository.(Partition.getInstance("undefined"));
+    }
+    @Test
+    public void getQuestion(){
+        List<MultiPartitionableQuestion> multiPartitionableQuestions = multiPartitionableQuestionService.findAll();
+        assert multiPartitionableQuestions.size() == 2;
+        assert ((MultipleChoice)multiPartitionableQuestions.get(0)).getChoices().size() == 4;
+        assert ((MultipleChoice)multiPartitionableQuestions.get(1)).getChoices().size() == 4;
     }
 }

@@ -1,13 +1,17 @@
 package indi.etern.checkIn.entities.question;
 
-import indi.etern.checkIn.dao.PersistableWithStaticHash;
+import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-public abstract class Question implements PersistableWithStaticHash {
+@MappedSuperclass
+@Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
+public abstract class Question implements Serializable {
+    @Column(name = "content")
     protected String content;
+    @Transient
     protected int hashcode = super.hashCode();
     
     @Override
@@ -17,8 +21,9 @@ public abstract class Question implements PersistableWithStaticHash {
     
     protected Question() {
     }
-    
-    private String md5;
+    @Id
+    @Column(name = "id")
+    protected String md5;
     public String getMd5() {
         return md5;
     }

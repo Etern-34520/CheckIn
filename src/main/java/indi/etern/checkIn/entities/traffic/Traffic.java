@@ -1,13 +1,11 @@
 package indi.etern.checkIn.entities.traffic;
 
-import indi.etern.checkIn.dao.PersistableWithStaticHash;
-
-public class Traffic implements PersistableWithStaticHash {
+public class Traffic {
     String dateString;
     private Traffic() {
         dateString = java.time.LocalDate.now().toString();
     }
-    @Override
+//    @Override
     public String getStaticHash() {
         return dateString;
     }

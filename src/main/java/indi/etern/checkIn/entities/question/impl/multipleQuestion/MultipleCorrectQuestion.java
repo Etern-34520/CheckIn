@@ -4,13 +4,19 @@ import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestio
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.MultipleCorrect;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
+@Entity
+@Inheritance(strategy= InheritanceType.SINGLE_TABLE)
 public class MultipleCorrectQuestion extends MultiPartitionableQuestion implements MultipleCorrect {
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "question_id",referencedColumnName = "id")
     List<Choice> choices;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "question_id",referencedColumnName = "id")
     List<Choice> correctChoices;
     
     /**
@@ -27,10 +33,14 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
             throw new QuestionException("Question content not set");
         }
         content = questionContent;
+        for (Choice choice:choices){
+            choice.setQuestion(this);
+        }
         this.choices = choices;
         this.correctChoices = getCorrectChoices(choices);
         this.partitions = partitions;
         initMD5();
+//        super.id = md5;
     }
     
     private static List<Choice> getCorrectChoices(List<Choice> choices) {

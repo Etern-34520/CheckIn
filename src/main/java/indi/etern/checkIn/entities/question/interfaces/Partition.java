@@ -1,18 +1,24 @@
 package indi.etern.checkIn.entities.question.interfaces;
 
-import indi.etern.checkIn.dao.ExternalPersistence;
-import indi.etern.checkIn.dao.PersistableWithStaticHash;
+import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-public class Partition implements PersistableWithStaticHash {
+@Entity
+@Table(name = "partitions")
+public class Partition implements Serializable {
     private static final Map<String,Partition> partitionMap = new HashMap<>();
+    @Id
+    @Column(name = "name")
     String name;
-    @ExternalPersistence
-    transient Set<MultiPartitionableQuestion> questions = new HashSet<>();
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "partitions_questions_mapping",
+            joinColumns  = @JoinColumn(name = "partition_id",referencedColumnName = "name"),
+            inverseJoinColumns = @JoinColumn(name = "question_id",referencedColumnName = "id"))
+    Set<MultiPartitionableQuestion> questions = new HashSet<>();
     protected Partition(){}
     private Partition(String string){
         name = string;
@@ -48,7 +54,7 @@ public class Partition implements PersistableWithStaticHash {
         return name;
     }
     
-    @Override
+//    @Override
     public String getStaticHash() {
         return name;
     }
