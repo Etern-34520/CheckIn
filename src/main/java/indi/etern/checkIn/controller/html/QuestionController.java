@@ -1,4 +1,4 @@
-package indi.etern.checkIn.controller;
+package indi.etern.checkIn.controller.html;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;

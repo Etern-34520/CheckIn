@@ -1,25 +1,26 @@
-#contentRoot{
+#contentRoot {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-
     /*background-color: #1e1e1e;*/
 }
-#topMask{
+
+#topMask {
     width: 100%;
     height: 100%;
-    display: none;/*for js*/
+    display: none; /*for js*/
     flex-direction: row;
     position: absolute;
     top: 0;
     left: 0;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
 }
-body{
+
+body {
     width: 100%;
     height: 100%;
     background-color: #0f0f10;
@@ -29,47 +30,143 @@ body{
     font-size: 16px;
     color: #fff;
 }
-.roundedDiv{
+
+*[rounded] {
     border-radius: 8px;
     border: 0;
     padding: 4px;
     margin: 6px;
     background-color: #19191a;
 }
-button,input[type=submit],input[type=button]{
+
+button, input[type=submit], input[type=button] {
     border-radius: 6px;
     border: 0;
     transition: 0.2s;
     margin-right: 4px;
-    color: rgba(200,200,200);
-    background: rgba(128,128,128,0);
+    color: rgba(200, 200, 200);
+    background: rgba(128, 128, 128, 0);
     cursor: pointer;
-    user-select:none;
+    user-select: none;
 }
-button:hover,input[type=submit]:hover,input[type=button]:hover{
+
+button:hover, input[type=submit]:hover, input[type=button]:hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(128,128,128,0.2);
+    background: rgba(128, 128, 128, 0.2);
     cursor: pointer;
 }
-.blank{
+
+.blank {
     flex: 1;
 }
-.forScroll{
+
+.forScroll {
     display: flex;
     flex-direction: column;
     flex: 1;
+    overflow: auto;
+    padding: 5px;
 }
-div[clickable]{
+
+div[clickable] {
     cursor: pointer;
-    color: rgba(200,200,200);
+    color: rgba(200, 200, 200);
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(128,128,128,0);
-    user-select:none;
+    background: rgba(128, 128, 128, 0);
+    user-select: none;
 }
-div[clickable]:hover{
+
+div[clickable]:hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(128,128,128,0.2);
+    background: rgba(128, 128, 128, 0.2);
+}
+
+*[text] {
+    color: #d2d2d2;
+    font-family: 'Roboto', sans-serif;
+}
+
+*[preText] {
+    white-space: pre;
+}
+
+.titleLabel {
+    margin: 8px;
+    font-size: 18px;
+}
+
+input[type="text"], input[type="password"], textarea {
+    border-radius: 6px;
+    transition: 0.2s;
+    height: 40px;
+    width: auto;
+    margin: 4px;
+    color: rgba(200, 200, 200);
+    background: rgba(0, 0, 0, 0.2);
+    user-select: none;
+    padding: 4px;
+    outline: none;
+    border: 0 rgba(0, 0, 0, 0);
+    cursor: pointer;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(0, 0, 0, 0);
+    outline: none;
+    cursor: text;
+}
+
+input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+#loginFormDiv > form > div > input {
+    width: 100%;
+    margin: 0;
+}
+
+#loginFormDiv > form > div {
+    margin-top: 4px;
+}
+
+#buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+#loginButton {
+    flex: 0;
+    width: 60px;
+    height: 30px;
+    min-width: 60px;
+    background: rgba(61, 139, 255, 0.2);
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+#loginButton:hover {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: rgba(61, 139, 255, 0.4);
+}
+
+.title {
+    margin: 8px
+}
+
+#loginForm {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin-bottom: 0;
+    margin-left: 8px;
+    margin-right: 8px;
 }

@@ -8,16 +8,19 @@
 <%--for manage——server:home --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <link rel="stylesheet" href="./css/server_0.css">
-<div id="managePage">
+<div id="managePage" onload="initChart()">
     <div id="left">
-        <div id="leftTop" class="roundedDiv">
+        <div id="leftTop" rounded>
 
         </div>
-        <div id="leftBottom" class="roundedDiv">
-
+        <div id="leftBottom" rounded>
+            <div id="chart"></div>
+            <div id="todayTraffics"></div>
         </div>
     </div>
-    <div id="right" class="roundedDiv">
+    <div id="right" rounded>
+        <div class="subContentRoot">
 
+        </div>
     </div>
 </div>

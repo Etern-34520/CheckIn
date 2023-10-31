@@ -7,8 +7,12 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
-public abstract class MultiPartitionableQuestion extends Question implements MultiPartitionable {
-    @ManyToMany(mappedBy = "questions")
+public class MultiPartitionableQuestion extends Question implements MultiPartitionable {
+    
+    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JoinTable(name = "partitions_questions_mapping",
+            joinColumns  = @JoinColumn(name = "question_id",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "partition_id",referencedColumnName = "id"))
     protected Set<Partition> partitions;
     /*
     @Id

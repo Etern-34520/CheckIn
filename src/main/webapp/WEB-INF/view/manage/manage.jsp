@@ -19,30 +19,32 @@
     <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-    <script src="./js/manage.js"></script>
     <script src="./../js/question.js"></script>
+    <script src="./../js/webSocket.js"></script>
+    <script src="./js/manage.js"></script>
+    <script src="./js/server_2.js"></script>
 </head>
 <body>
 <div id="tipsMask">
 </div>
 <div id="contentRoot">
-    <div id="top" class="roundedDiv">
-        <button type="button" id="menuButton" class="button" onclick="showMenu()">=</button>
+    <div id="top" rounded>
+        <button type="button" id="menuButton" class="button" style="font-size: 20px" onclick="showMenu()">=</button>
         <div id="pagePath">
             <div class="path" undeleted>
                 CheckIn
             </div>
         </div>
-        <button type="button" id="addQuestion" class="button">+</button>
-        <button type="button" id="upload" class="button"></button>
-        <button type="button" id="save" class="button"></button>
+        <button type="button" id="addQuestion" class="button" style="font-size: 20px">+</button>
+        <button type="button" id="upload" class="button" style="font-size: 20px"></button>
+        <button type="button" id="save" class="button" style="font-size: 20px"></button>
     </div>
     <div id="content"></div>
 </div>
 <div id="topMask" onclick="closeMenu()">
-    <div id="menu" class="roundedDiv">
+    <div id="menu" rounded>
         <div id="menuTop">
-            <button type="button" id="menuInsideButton" class="button" onclick="closeMenu()"><</button>
+            <button type="button" id="menuInsideButton" class="button" style="font-size: 20px" onclick="closeMenu()"><</button>
         </div>
         <div class="forScroll">
             <div id="menuButtons">
@@ -67,8 +69,8 @@
             </div>
             <div class="blank"></div>
             <div id="menuBottom">
-                <div id="userPanel" class="roundedDiv" clickable>
-
+                <div id="userPanel" rounded clickable>
+                    ${cookie.get("qq").getValue()}
                 </div>
                 <button type="button" id="logoutButton" class="button" onclick="logout()">Logout</button>
             </div>

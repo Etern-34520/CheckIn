@@ -1,0 +1,56 @@
+.questions {
+    display: flex;
+    flex-direction: column;
+}
+
+.question {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+}
+
+.question > div{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px;
+}
+
+.question div[rounded]{
+    margin: 0 2px;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.addButtons {
+    display: flex;
+    flex-direction: row;
+    margin-top: 8px;
+}
+
+.questionContent {
+    flex: 1;
+}
+
+.questionType {
+    flex: 0;
+}
+
+.addButtons > button {
+    height: 40px;
+    flex: 1;
+}
+
+.questionChoices {
+    display: flex;
+    flex-direction: row;
+}
+
+.questionChoice {
+    background-color: rgba(0, 0, 0, 0.15);
+    color: rgba(255, 60, 60, 0.5);
+}
+
+.questionChoice[correct] {
+    color: rgba(60, 255, 60, 0.5);
+}

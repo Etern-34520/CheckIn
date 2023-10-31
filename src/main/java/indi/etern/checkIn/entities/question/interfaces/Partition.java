@@ -11,17 +11,29 @@ import java.util.Set;
 @Table(name = "partitions")
 public class Partition implements Serializable {
     private static final Map<String,Partition> partitionMap = new HashMap<>();
+    
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "partitions_SEQ")
+    @SequenceGenerator(name = "partitions_SEQ", sequenceName = "partitions_SEQ", allocationSize = 1)
+    private int id;
+    
     @Column(name = "name")
     String name;
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(name = "partitions_questions_mapping",
-            joinColumns  = @JoinColumn(name = "partition_id",referencedColumnName = "name"),
-            inverseJoinColumns = @JoinColumn(name = "question_id",referencedColumnName = "id"))
-    Set<MultiPartitionableQuestion> questions = new HashSet<>();
+    @ManyToMany(mappedBy = "partitions",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+//    @NotFound(action= NotFoundAction.IGNORE)
+    /*To fix not found question id
+    * caused by:
+    * before the question save
+    * jpa must save the partition
+    * but the partition refers to the unsaved question
+    * don't worry about the sync
+    * jpa will save the question at last
+    */
+    Set<MultiPartitionableQuestion> questions;
     protected Partition(){}
     private Partition(String string){
         name = string;
+        questions = new HashSet<>();
     }
     
     public static Partition getInstance(String string){
@@ -29,6 +41,10 @@ public class Partition implements Serializable {
             partitionMap.put(string,new Partition(string));
         }
         return partitionMap.get(string);
+    }
+    
+    public static Partition getExample(String name){
+        return new Partition(name);
     }
     
     public String getName() {

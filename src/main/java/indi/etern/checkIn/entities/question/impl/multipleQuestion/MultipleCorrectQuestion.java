@@ -15,13 +15,9 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "question_id",referencedColumnName = "id")
     List<Choice> choices;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "question_id",referencedColumnName = "id")
+    @Transient
     List<Choice> correctChoices;
     
-    /**
-     * for serialization
-     */
     protected MultipleCorrectQuestion() {
     }
     
@@ -61,7 +57,19 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
     public List<Choice> getChoices() {
         return choices;
     }
-    
+    @PostLoad//FIXME
+    public void filterCorrectChoices() {
+        if (choices == null){
+            return;
+        }
+        List<Choice> newChoices = new ArrayList<>();
+        for (Choice choice : choices){
+            if (choice.isCorrect()){
+                newChoices.add(choice);
+            }
+        }
+        correctChoices = newChoices;
+    }
     @Override
     public List<Choice> getCorrectChoices() {
         return correctChoices;

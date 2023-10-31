@@ -1,6 +1,5 @@
 package indi.etern.checkIn.entities.question.impl.multipleQuestion;
 
-import indi.etern.checkIn.entities.question.Question;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
@@ -37,7 +36,7 @@ public class MultipleQuestionFactory {
         partitions.add(partition);
         return this;
     }
-    public Question build(){
+    public MultiPartitionableQuestion build(){
         if (haveBuilt){
             throw new MultipleQuestionFactoryException("MultipleQuestionFactory has already built");
         }

@@ -1,0 +1,54 @@
+#left {
+    width: 250px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+    overflow-y: auto;
+}
+
+#right {
+    margin-left: 4px;
+    flex: 1;
+    margin-top: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.partitionButton {
+    height: 40px;
+    font-size: 16px;
+    margin: 4px 0;
+    overflow: hidden;
+}
+
+.partitionButton[selected = "selected"] {
+    background: rgba(128, 128, 128, 0.2);
+}
+
+#partitionButtons {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-top: 4px;
+}
+
+.partitionButton > input[type="text"] {
+    background: rgba(0, 0, 0, 0.1);
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.partitionButton > input[type="text"]:focus {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.subContentRoot {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: auto;
+    margin: 8px;
+}

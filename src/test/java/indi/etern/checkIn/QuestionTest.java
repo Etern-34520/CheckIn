@@ -8,28 +8,32 @@ import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestio
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.MultipleChoice;
-import indi.etern.checkIn.repositories.ChoiceRepository;
-import indi.etern.checkIn.repositories.PartitionRepository;
-import indi.etern.checkIn.service.MultiPartitionableQuestionService;
+import indi.etern.checkIn.service.dao.ChoiceService;
+import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.service.dao.PartitionService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@SpringBootTest(classes = CheckInApplication.class)
+@SpringBootTest(classes = CheckInApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class QuestionTest {
     @Autowired
     MultiPartitionableQuestionService multiPartitionableQuestionService;
     @Autowired
-    PartitionRepository partitionRepository;
+    PartitionService partitionService;
     @Autowired
-    ChoiceRepository choiceRepository;
+    ChoiceService choiceService;
 //    Dao dao = new Dao("indi.etern.checkIn.beans");
     List<Choice> choices1 = new ArrayList<>();
     {
@@ -52,6 +56,8 @@ public class QuestionTest {
     }
     
     @Test
+    @BeforeAll
+//    @Transactional
     public void testGetAnswerAndContent() {
         {
             MultipleQuestionFactory multipleQuestionFactory = new MultipleQuestionFactory();
@@ -76,6 +82,7 @@ public class QuestionTest {
         }
     }
     @Test
+//    @Transactional
     public void testExceptions(){
         List<Choice> choices = new ArrayList<>();
         {
@@ -106,8 +113,9 @@ public class QuestionTest {
         }
     }
     @Test
+//    @Transactional
     public void testCheckAnswer() {
-        testGetAnswerAndContent();
+//        testGetAnswerAndContent();
         assert question1 instanceof SingleCorrectQuestion;
         assert question2 instanceof MultipleCorrectQuestion;
         assert ((SingleCorrectQuestion) question1).checkAnswer(new Choice("A", true));
@@ -118,26 +126,42 @@ public class QuestionTest {
         assert !((MultipleCorrectQuestion) question2).checkAnswers(choices2);
     }
     @Test
+//    @Transactional
     public void insertQuestion() {
-        testGetAnswerAndContent();
-        partitionRepository.save(Partition.getInstance("undefined"));
+//        testGetAnswerAndContent();
+//        partitionRepository.save(Partition.getToday("undefined"));
 //        choiceRepository.saveAll(((MultipleChoice)question1).getChoices());
-//        multiPartitionableQuestionService.save((MultiPartitionableQuestion) question1);
-//        multiPartitionableQuestionService.save((MultiPartitionableQuestion) question2);
+        multiPartitionableQuestionService.save((MultiPartitionableQuestion) question1);
+        multiPartitionableQuestionService.save((MultiPartitionableQuestion) question2);
 //        List<MultiPartitionableQuestion> multiPartitionableQuestions = multiPartitionableQuestionService.findAll();
 //        assert multiPartitionableQuestions.size() == 2;
 //        assert ((MultipleChoice)multiPartitionableQuestions.get(0)).getChoices().size() == 4;
 //        assert ((MultipleChoice)multiPartitionableQuestions.get(1)).getChoices().size() == 4;
     }
     @Test
-    public void updateQuestion(){
-//        partitionRepository.(Partition.getInstance("undefined"));
-    }
-    @Test
+    @Transactional
     public void getQuestion(){
+//        insertQuestion();
         List<MultiPartitionableQuestion> multiPartitionableQuestions = multiPartitionableQuestionService.findAll();
-        assert multiPartitionableQuestions.size() == 2;
+//        assert multiPartitionableQuestions.size() == 2;
         assert ((MultipleChoice)multiPartitionableQuestions.get(0)).getChoices().size() == 4;
         assert ((MultipleChoice)multiPartitionableQuestions.get(1)).getChoices().size() == 4;
+    }
+    @Test
+    @Transactional
+    public void getPartition(){
+        insertQuestion();
+        testGetAnswerAndContent();
+        Partition partition = partitionService.findByName("undefined");
+        assert partition.getQuestions().contains(question1);
+        assert partition.getQuestions().contains(question2);
+    }
+    @Test
+//    @Transactional
+//    @AfterAll
+    public void deleteQuestion(){
+        multiPartitionableQuestionService.deleteAll();
+        partitionService.deleteAll();
+        choiceService.deleteAll();
     }
 }

@@ -1,4 +1,4 @@
-package indi.etern.checkIn.service;
+package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.repositories.MultiplePartitionableQuestionRepository;
@@ -23,6 +23,10 @@ public class MultiPartitionableQuestionService {
     
     public void saveAndFlush(MultiPartitionableQuestion multiPartitionableQuestion){
         multiplePartitionableQuestionRepository.saveAndFlush(multiPartitionableQuestion);
+    }
+    
+    public void deleteAll() {
+        multiplePartitionableQuestionRepository.deleteAll();
     }
 }
 

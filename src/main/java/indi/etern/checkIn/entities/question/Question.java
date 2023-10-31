@@ -11,8 +11,8 @@ import java.security.NoSuchAlgorithmException;
 public abstract class Question implements Serializable {
     @Column(name = "content")
     protected String content;
-    @Transient
-    protected int hashcode = super.hashCode();
+    
+    protected int hashcode;
     
     @Override
     public int hashCode() {
@@ -28,6 +28,7 @@ public abstract class Question implements Serializable {
         return md5;
     }
     protected void initMD5(){
+//        hashcode = super.hashCode();
         String input = toString();
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
@@ -42,6 +43,7 @@ public abstract class Question implements Serializable {
                 result.insert(0, "0");
             }
             this.md5 = result.toString();
+            this.hashcode = Integer.parseInt(new BigInteger(result.toString(),16).toString().substring(0,9));
         } catch (NoSuchAlgorithmException e) {
             // impossible
         }

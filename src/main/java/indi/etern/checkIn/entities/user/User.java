@@ -1,27 +1,40 @@
 package indi.etern.checkIn.entities.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 @Entity
 @Table(name = "Users")
 public class User {
     protected String name;
     @Id
-    protected int QQNumber;
+    protected long QQNumber;
     protected String password;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "ROLE_TYPE")
+    @NotFound(action= NotFoundAction.IGNORE)
     protected Role role;
-    public User(String name, int QQNumber, String password) {
+    public User(String name, long QQNumber, String password) {
         this.name = name;
         this.QQNumber = QQNumber;
         this.password = password;
+        role = Role.getInstance("user");
     }
     
     protected User() {
+    }
     
+    public static User exampleOfName(String name) {
+        final User user = new User();
+        user.name = name;
+        return user;
+    }
+    
+    public static User exampleOfQQNumber(int qqNumber){
+        final User user = new User();
+        user.QQNumber = qqNumber;
+        return user;
     }
     
     public void setName(String name) {
@@ -31,7 +44,7 @@ public class User {
     public String getName() {
         return name;
     }
-    public int getQQNumber() {
+    public long getQQNumber() {
         return QQNumber;
     }
     public void setQQNumber(int QQNumber) {
@@ -57,12 +70,12 @@ public class User {
     }
     @Override
     public String toString() {
-        return name + QQNumber + password + role.hashCode();
+        return "name:" + name + ";QQ:" + QQNumber + ";password:" + password;
     }
     @Override
     public boolean equals(Object object) {
         if (object instanceof User user) {
-            return user.name.equals(this.name) && user.QQNumber == this.QQNumber && user.password.equals(this.password);
+            return user.name.equals(this.name) && user.QQNumber == this.QQNumber && user.password.equals(this.password) && user.role.equals(this.role);
         } else {
             return false;
         }

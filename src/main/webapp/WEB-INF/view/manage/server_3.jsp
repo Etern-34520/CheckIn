@@ -10,11 +10,11 @@
 <link rel="stylesheet" href="./css/server_0.css">
 <div id="managePage">
     <div id="left">
-        <div id="leftBottom" class="roundedDiv">
+        <div id="leftBottom" rounded>
 
         </div>
     </div>
-    <div id="right" class="roundedDiv">
+    <div id="right" rounded>
 
     </div>
 </div>

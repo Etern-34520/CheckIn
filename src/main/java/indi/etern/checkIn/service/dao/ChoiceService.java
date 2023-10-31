@@ -1,4 +1,4 @@
-package indi.etern.checkIn.service;
+package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.repositories.ChoiceRepository;
@@ -25,5 +25,9 @@ public class ChoiceService {
     
     public void saveAndFlush(Choice choice){
         choiceRepository.saveAndFlush(choice);
+    }
+    
+    public void deleteAll() {
+        choiceRepository.deleteAll();
     }
 }

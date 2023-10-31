@@ -1,9 +1,8 @@
 package indi.etern.checkIn.entities.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -11,9 +10,10 @@ import java.util.Set;
 public class Role {
     @Id
     private String type;
-    @OneToMany(mappedBy = "role")
+    
+    @OneToMany(mappedBy = "role",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private final Set<User> users = new HashSet<>();
-    protected static Map<String,Role> roleMap;
+    protected static Map<String,Role> roleMap = new HashMap<>();
     
     protected Role(String type){
         this.type = type;

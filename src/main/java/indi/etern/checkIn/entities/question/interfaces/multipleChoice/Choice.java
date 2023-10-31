@@ -1,6 +1,5 @@
 package indi.etern.checkIn.entities.question.interfaces.multipleChoice;
 
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.SingleCorrectQuestion;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import jakarta.persistence.*;
 
@@ -9,7 +8,15 @@ import java.io.Serializable;
 @Table(name = "choices")
 public class Choice implements Serializable {
     @Id
+    @Column(name = "ID")
+    /*
+    * don't know how it must be String
+    * else jpa will throw exception
+    */
+    private String id;
+    @Column(name = "CONTENT")
     private String content;
+    @Column(name = "IS_CORRECT")
     private Boolean isCorrect;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "question_id",referencedColumnName = "id")
@@ -24,6 +31,7 @@ public class Choice implements Serializable {
     public Choice(String content, boolean isCorrect) {
         this.content = content;
         this.isCorrect = isCorrect;
+        id = String.valueOf(super.hashCode());
     }
     public void setQuestion(MultiPartitionableQuestion question){
         this.question = question;
@@ -51,14 +59,4 @@ public class Choice implements Serializable {
         }
     }
     
-    @OneToOne(mappedBy = "correctChoice", optional = false)
-    private SingleCorrectQuestion singleCorrectQuestion;
-    
-    public SingleCorrectQuestion getSingleCorrectQuestion() {
-        return singleCorrectQuestion;
-    }
-    
-    public void setSingleCorrectQuestion(SingleCorrectQuestion singleCorrectQuestion) {
-        this.singleCorrectQuestion = singleCorrectQuestion;
-    }
 }

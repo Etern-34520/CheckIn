@@ -15,8 +15,7 @@ public class SingleCorrectQuestion extends MultiPartitionableQuestion implements
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "QUESTION_ID",referencedColumnName = "ID")
     List<Choice> choices;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "id",referencedColumnName = "QUESTION_ID")
+    @Transient
     Choice correctChoice;
     
     protected SingleCorrectQuestion() {
@@ -64,7 +63,15 @@ public class SingleCorrectQuestion extends MultiPartitionableQuestion implements
     public List<Choice> getChoices() {
         return choices;
     }
-    
+    @PostLoad
+    public void filterCorrectChoices() {
+        for (Choice choice : choices){
+            if (choice.isCorrect()){
+                correctChoice = choice;
+                break;
+            }
+        }
+    }
     @Override
     public Choice getCorrectChoice() {
         return correctChoice;

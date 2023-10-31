@@ -1,4 +1,4 @@
-package indi.etern.checkIn.controller;
+package indi.etern.checkIn.controller.html;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,5 +13,9 @@ public class ErrorPageController {
     @RequestMapping("/500")
     public String error500() {
         return "error/500";
+    }
+    @RequestMapping("/")
+    public String error() {
+        return "error/index";
     }
 }

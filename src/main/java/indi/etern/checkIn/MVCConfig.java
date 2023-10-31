@@ -10,11 +10,11 @@ import org.springframework.web.servlet.view.JstlView;
 
 @Configuration
 public class MVCConfig {
-//    private final Dao dao = new Dao();
-    @Bean
-    public String getDaoBeanPackReference() {
-        return "indi.etern.checkIn.entities";
-    }
+////    private final Dao dao = new Dao();
+//    @Bean
+//    public String getDaoBeanPackReference() {
+//        return "indi.etern.checkIn.entities";
+//    }
 //    @Bean
 //    public Dao getDao(){
 //        return dao;
