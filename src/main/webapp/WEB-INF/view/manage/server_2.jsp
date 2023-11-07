@@ -10,15 +10,16 @@
 <%--for manage——server:home --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <jsp:useBean id="partitionInfo" class="indi.etern.checkIn.beans.PartitionInfo" scope="request"/>
-<link rel="stylesheet" href="./css/server_2.css">
-<div id="managePage">
+<div id="managePage" index="2" page-type="server">
     <div id="left" rounded>
-        <label class="titleLabel" text>分区</label>
-        <div id="partitionButtons">
-            <c:forEach var="partition" items="${partitionInfo.partitions}">
-                <button type="button" class="partitionButton" onclick="switchToPartition(this)" preText>${fn:escapeXml(partition.name)}</button>
-            </c:forEach>
-            <button type="button" id="addPartitionButton" class="partitionButton" style="font-size: 20px" onclick="newPartition()">+</button>
+        <div class="subContentRoot">
+            <label class="titleLabel" text>分区</label>
+            <div id="partitionButtons">
+                <c:forEach var="partition" items="${partitionInfo.partitions}">
+                    <button type="button" class="partitionButton" onclick="switchToPartition(this)" preText editing="false">${fn:escapeXml(partition.name)}</button>
+                </c:forEach>
+                <button type="button" id="addPartitionButton" style="font-size: 20px" onclick="newPartition()">+</button>
+            </div>
         </div>
     </div>
     <div id="right" rounded>

@@ -7,8 +7,7 @@
 --%>
 <%--for manage——server:home --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<link rel="stylesheet" href="./css/server_0.css">
-<div id="managePage" onload="initChart()">
+<div id="managePage" index="0" page-type="server" onload="initChart()">
     <div id="left">
         <div id="leftTop" rounded>
 

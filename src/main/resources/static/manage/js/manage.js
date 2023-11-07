@@ -12,6 +12,28 @@ $(function () {//页面加载完成后执行
             opacity: 1
         }, 200, "easeInCubic");
     }, 100);
+    $.contextMenu({
+        selector: "button.partitionButton[editing='false']",
+        callback: function (key, options, e) {
+            switch (key) {
+                case "edit":
+                    break;
+                case "delete":
+                    const messageJson = {
+                        "type": "deletePartition",
+                        "partitionName": $(this).text()
+                    };
+                    sendMessage(JSON.stringify(messageJson), function (event) {
+                        console.log(event);
+                    });
+                    break;
+            }
+        },
+        items: {
+            "edit": {name: "Edit", icon: "edit"},
+            "delete": {name: "Delete", icon: "delete"},
+        }
+    });
 })
 
 function showMenu() {
@@ -23,7 +45,7 @@ function showMenu() {
     let $menu = $("#menu");
     $topMask.css("display", "flex");
     $topMask.animate({
-        opacity: 150,
+        opacity: 1,
     }, 100, "easeInOutCubic", function () {
         $menu.animate({
             marginLeft: 8,
@@ -53,13 +75,12 @@ function selectButtonOf(pageClass, index) {
 }
 
 function changePath(path) {
-    pathBlocks = path.split("/");
+    let pathBlocks = path.split("/");
     for (let pathBlock of pathBlocks) {
         pathBlock = "> " + pathBlock;
-        let $path1 = $(".path");
-        $path1.not($("[undeleted]")).remove();
+        clearPath();
         let pathHtml = `
-<div class="path" preText rounded clickable onclick="backToPageOfPath(${pathBlock})">${pathBlock}</div>
+<div class="path" preText rounded clickable onclick="doBackFunc('${pathBlock}')">${pathBlock}</div>
 `
         let $path = $(
             pathHtml
@@ -68,14 +89,31 @@ function changePath(path) {
     }
 }
 
-function addPath(pathName) {
-    pathName = "> " + pathName;
+function escapeHTML(string) {
+    string = "" + string;
+    return string.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, "").replace(/'/g, "'");
+}
+
+function clearPath() {
+    let $path1 = $(".path");
+    $path1.not($("[undeleted]")).remove();
+}
+
+// let pagePathMap = new Map();
+// let breakBool = true;
+let nameToFuncMap = new Map();
+
+function addPath(pathName, backFunc) {
+    // breakBool = true;
+    nameToFuncMap.set(pathName, backFunc);
+    pathName = escapeHTML(pathName);
     let pathHtml = `
-<div class="path" preText rounded clickable onclick="backToPageOfPath(${pathName})">${pathName}</div>
+<div class="path" preText rounded clickable onclick="doBackFunc('${pathName}')"></div>
 `
     let $path = $(
         pathHtml
     );
+    $path.text("> " + pathName);
     $path.css("opacity", 0);
     $path.css("marginLeft", -20);
     $path.css("marginRight", 20);
@@ -87,11 +125,44 @@ function addPath(pathName) {
     }, 200, "easeInOutCubic");
 }
 
-function backToPageOfPath(pathName) {
-
+function doBackFunc(pathName) {
+    nameToFuncMap.get(pathName)();//执行回调函数
+    removePathAfter(pathName);
 }
 
-function removePathContainsAfter(pathName) {
+function containsPath(pathName) {
+    let $pagePath = $("#pagePath");
+    let $paths = $pagePath.children(".path");
+    for (const $path of $paths) {
+        if ($path.innerText === "> " + pathName) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function removePath(pathName) {
+    if (pathLock) return "pathLock";
+    pathLock = true;
+    let $pagePath = $("#pagePath");
+    let $paths = $pagePath.children(".path");
+    for (const $path of $paths) {
+        if ($path.innerText === "> " + pathName) {
+            $path.animate({
+                opacity: 0,
+                marginLeft: -20,
+                marginRight: 20,
+            }, 200, "easeInOutCubic", function () {
+                setTimeout(function () {
+                    $path.remove();
+                }, 100);
+            });
+            break;
+        }
+    }
+}
+
+function removePathAfter(pathName, contains = false, doCallBackFunc = false) {
     if (pathLock) return "pathLock";
     pathLock = true;
     let $pagePath = $("#pagePath");
@@ -104,15 +175,20 @@ function removePathContainsAfter(pathName) {
         }
     }
     if (indexOfPathName !== -1) {
-        for (let i = indexOfPathName + 1; i < $paths.length; i++) {
+        for (let i = indexOfPathName + (contains?0:1); i < $paths.length; i++) {
             $paths.eq(i).animate({
                 opacity: 0,
                 marginLeft: -20,
                 marginRight: 20,
             }, 200, "easeInOutCubic", function () {
-                $paths.eq(i).remove();
+                setTimeout(function () {
+                    $paths.eq(i).remove();
+                }, 100);
             });
         }
+    }
+    if (doCallBackFunc) {
+        $paths[indexOfPathName - (contains?1:0)].onclick();
     }
     pathLock = false;
     return "success";
@@ -124,10 +200,10 @@ function switchToPage(pageClass, index) {
         type: 'get',
         data: "page=" + index + "&pageClass=" + pageClass,
         success: function (res) {
-            var $content = $('#content');
+            const $content = $('#content');
             $content.html(res);
             try {
-                document.getElementById("managePage").onload();
+                document.getElementById("managePage").onload(undefined);
             } catch (e) {
                 //ignored
             }
@@ -137,7 +213,21 @@ function switchToPage(pageClass, index) {
                 // $content.animate({opacity: 1}, 100, "easeOutCubic");
             }
             const pathName = $("#" + pageClass + "Menu button").eq(index).text();
-            changePath(pathName);
+            // changePath(pathName);
+            clearPath();
+            addPath(pathName, function () {
+                const $content = $('#content');
+                $content.html(res);
+                let $leftSubContentRoot = $("#left .subContentRoot");
+                const leftSubContentHtml = $leftSubContentRoot.html();
+                $leftSubContentRoot.html("");
+                transitionPage($("#left"), leftSubContentHtml);
+                try {
+                    document.getElementById("managePage").onload(undefined);
+                } catch (e) {
+                    //ignored
+                }
+            });
             selectButtonOf(pageClass, index);
             closeMenu();
         },
@@ -148,7 +238,7 @@ function switchToPage(pageClass, index) {
 }
 
 
-function showTip(type, content) {
+function showTip(type, content, autoClose = true) {
     var title = '';
     switch (type) {
         case 'error':
@@ -165,6 +255,7 @@ function showTip(type, content) {
     }
     //-------------------
     let tip = new Tip(title, content);
+    tip.autoClose = autoClose;
     var $tip = tip.getJQueryObject();
     $tip.appendTo($("#tipsMask"));
     //-------------------
@@ -173,11 +264,12 @@ function showTip(type, content) {
 
 class Tip {
     tipHtml;
+    mouseEntered = false;
+    autoClose = true;
 
     constructor(title, content) {
-        this.mouseEntered = false;
         this.tipHtml = `
-<div class='roundedDiv' component_type="tip">
+<div component_type="tip" rounded>
 <div class="tipTop">
 <div class='tipTitle'>
 ${title}
@@ -190,7 +282,6 @@ ${title}
 ${content}
 </div>
 </div>`;
-
     }
 
     getHtml() {
@@ -212,22 +303,16 @@ ${content}
                     onmouseleave();
                 }).bind();
             }.bind(this));
-            const closeTipWhileMouseNotHover = this.closeTipWhileMouseNotHover;
-            setTimeout(function () {
-                    closeTipWhileMouseNotHover($tip, this)
-                }.bind(this)
-                /*
-                $tip.animate({
-                    opacity: 0,
-                },200,function (){
-                    $tip.remove();
-                });*/
-                , 1500);
+            if (this.autoClose) {
+                const closeTipWhileMouseNotHover = this.closeTipWhileMouseNotHover;
+                setTimeout(function () {
+                        closeTipWhileMouseNotHover($tip, this)
+                    }.bind(this)
+                    , 1500);
+            }
         }.bind(this));
         return $tip;
     }
-
-    mouseEntered;
 
     closeTipWhileMouseNotHover($tip, thisObj) {
         if (thisObj.mouseEntered === true)
@@ -248,7 +333,7 @@ ${content}
                     paddingTop: 0,
                     paddingBottom: 0,
                 }, 250, "easeInOutCubic", function () {
-                    // $tip.remove();
+                    $tip.remove();
                 });
             }.bind(this));
         }
@@ -292,7 +377,7 @@ function initChart() {
         type: 'get',
         data: "type=traffic",
         success: function (res) {
-            var myChart = echarts.init(document.getElementById('chart'));
+            var myChart = echarts.init(document.getElementById('chart'), "walden");
             var dates = [];
             var counts = [];
             const trafficObj = JSON.parse(res);
@@ -371,9 +456,12 @@ function initChart() {
 }
 
 var pathLock = false;
-function easePage($root, html, pathName) {
-    if (pathLock) return "pathLock";
-    pathLock = true;
+
+function transitionPage($root, html, pathName, backFunc) {
+    if (pathName instanceof String || backFunc instanceof Function) {
+        if (pathLock) return "pathLock";
+        pathLock = true;
+    }
     let $subContentRoot = $root.children(".subContentRoot");
     $subContentRoot.animate({
         marginTop: -100,
@@ -381,8 +469,10 @@ function easePage($root, html, pathName) {
         opacity: 0,
     }, 300, "easeInCubic", function () {
         // changePath("Questions/" + pathName);
-        addPath(pathName);
-        pathLock = false;
+        if (pathName instanceof String || backFunc instanceof Function) {
+            addPath(pathName, backFunc);
+            pathLock = false;
+        }
         setTimeout(function () {
             $subContentRoot.html(html);
             $subContentRoot.css("marginTop", 8);
@@ -390,10 +480,15 @@ function easePage($root, html, pathName) {
             $subContentRoot.animate({
                 opacity: 1,
             }, 300, "easeOutCubic");
+            try {
+                $subContentRoot.children().eq(0)[0].onload(undefined)
+            } catch (ignored){}
         }, 200)
     });
-    setTimeout(function () {
-        if (pathLock) pathLock = false;
-    },500);
+    if (pathName instanceof String || backFunc instanceof Function) {
+        setTimeout(function () {
+            if (pathLock) pathLock = false;//防止出错锁死
+        }, 500);
+    }
     return "success";
 }

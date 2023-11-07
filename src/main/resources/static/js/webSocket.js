@@ -2,15 +2,14 @@ var websocket = null;
 
 //判断当前浏览器是否支持WebSocket
 if ('WebSocket' in window) {
-    // 改成你的地址
     websocket = new WebSocket("ws://"+window.location.href.split("/manage")[0].replace("http://","")+"/api/websocket/" + $.cookie("qq"));
 } else {
-    alert('Browser don\'t support websocket')
+    showTip("error","你使用的浏览器不支持WebSocket",false);
 }
 
 //连接发生错误的回调方法
-websocket.onerror = function () {
-    showTip("error","WebSocket连接发生错误");
+websocket.onerror = function (error) {
+    showTip("error","WebSocket连接失败"+error,false);
 };
 
 //连接成功建立的回调方法
@@ -24,6 +23,12 @@ websocket.onmessage = function (event) {
     switch (message.type) {
         case "updatePartitionList":
             updatePartition(message.partitions);
+            break;
+        case "error":
+            if (message.autoClose === undefined) {
+                message.autoClose = true;
+            }
+            showTip("error",message.data,message.autoClose);
             break;
     }
 }
@@ -60,17 +65,3 @@ function sendMessage(message,func) {
         showTip("error",data);
     }
 }
-
-/*
-function getPage(type,func){
-    try {
-        websocket.send('{"type":"' + type + '"}');
-            // setMessageInnerHTML("websocket.send: " + message);
-        websocket.onmessage = function (event) {
-            showTip("success","获取页面："+type+" 成功");
-            func(event);
-        }
-    } catch (err) {
-        showTip("error","获取页面："+type+" 失败");
-    }
-}*/

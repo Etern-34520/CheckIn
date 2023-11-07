@@ -1,3 +1,35 @@
+@media (prefers-color-scheme: dark) {
+    :root {
+        --font-color: rgba(200, 200, 200);
+        --body-background-color: #0f0f10;
+        --rounded-div-background-color: #19191a;
+        --component-background-color: rgba(128, 128, 128, 0);
+        --component-background-color-hover: rgba(128, 128, 128, 0.2);
+        --input-background-color: rgba(128, 128, 128, 0.1);
+        --input-background-color-hover: rgba(128, 128, 128, 0.2);
+        --context-menu-background-color: rgba(25, 25, 25, 0.7);
+        --context-menu-item-background-color-hover: rgba(128, 128, 128, 0.2);
+        --highlight-component-background-color: rgba(61, 139, 255, 0.2);
+        --highlight-component-background-color-hover: rgba(61, 139, 255, 0.4);
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --font-color: rgb(23, 23, 23);
+        --body-background-color: #fff;
+        --rounded-div-background-color: #f0f0f0;
+        --component-background-color: rgba(128, 128, 128, 0);
+        --component-background-color-hover: rgba(128, 128, 128, 0.2);
+        --input-background-color: rgba(128, 128, 128, 0.1);
+        --input-background-color-hover: rgba(128, 128, 128, 0.2);
+        --context-menu-background-color: rgba(230, 230, 230, 0.7);
+        --context-menu-item-background-color-hover: rgba(128, 128, 128, 0.2);
+        --highlight-component-background-color: rgba(61, 139, 255, 0.5);
+        --highlight-component-background-color-hover: rgba(61, 139, 255, 0.7);
+    }
+}
+
 #contentRoot {
     width: 100%;
     height: 100%;
@@ -8,27 +40,15 @@
     /*background-color: #1e1e1e;*/
 }
 
-#topMask {
-    width: 100%;
-    height: 100%;
-    display: none; /*for js*/
-    flex-direction: row;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-}
-
 body {
     width: 100%;
     height: 100%;
-    background-color: #0f0f10;
+    background-color: var(--body-background-color);
     margin: 0;
     padding: 0;
     font-family: 'Roboto', sans-serif;
     font-size: 16px;
-    color: #fff;
+    color: var(--font-color);
 }
 
 *[rounded] {
@@ -36,7 +56,7 @@ body {
     border: 0;
     padding: 4px;
     margin: 6px;
-    background-color: #19191a;
+    background-color: var(--rounded-div-background-color);
 }
 
 button, input[type=submit], input[type=button] {
@@ -44,8 +64,8 @@ button, input[type=submit], input[type=button] {
     border: 0;
     transition: 0.2s;
     margin-right: 4px;
-    color: rgba(200, 200, 200);
-    background: rgba(128, 128, 128, 0);
+    color: var(--font-color);
+    background: var(--component-background-color);
     cursor: pointer;
     user-select: none;
 }
@@ -53,7 +73,7 @@ button, input[type=submit], input[type=button] {
 button:hover, input[type=submit]:hover, input[type=button]:hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(128, 128, 128, 0.2);
+    background: var(--component-background-color-hover);
     cursor: pointer;
 }
 
@@ -71,21 +91,21 @@ button:hover, input[type=submit]:hover, input[type=button]:hover {
 
 div[clickable] {
     cursor: pointer;
-    color: rgba(200, 200, 200);
+    color: var(--font-color);
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(128, 128, 128, 0);
+    background: var(--component-background-color);
     user-select: none;
 }
 
 div[clickable]:hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(128, 128, 128, 0.2);
+    background: var(--component-background-color-hover);
 }
 
 *[text] {
-    color: #d2d2d2;
+    color: var(--font-color);
     font-family: 'Roboto', sans-serif;
 }
 
@@ -104,8 +124,8 @@ input[type="text"], input[type="password"], textarea {
     height: 40px;
     width: auto;
     margin: 4px;
-    color: rgba(200, 200, 200);
-    background: rgba(0, 0, 0, 0.2);
+    color: var(--font-color);
+    background: var(--input-background-color);
     user-select: none;
     padding: 4px;
     outline: none;
@@ -116,7 +136,7 @@ input[type="text"], input[type="password"], textarea {
 input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--input-background-color-hover);
     border-color: rgba(0, 0, 0, 0);
     outline: none;
     cursor: text;
@@ -125,7 +145,22 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--input-background-color-hover)
+}
+
+select {
+    background: var(--input-background-color);
+    border: 0;
+    border-radius: 4px;
+    height: 40px;
+    margin: 4px;
+    color: var(--font-color);
+}
+
+select:hover {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: var(--input-background-color-hover)
 }
 
 #loginFormDiv > form > div > input {
@@ -147,7 +182,7 @@ input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
     width: 60px;
     height: 30px;
     min-width: 60px;
-    background: rgba(61, 139, 255, 0.2);
+    background: var(--highlight-component-background-color);
     transition: 0.2s;
     transition-timing-function: ease-in-out;
 }
@@ -155,7 +190,7 @@ input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
 #loginButton:hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(61, 139, 255, 0.4);
+    background: var(--highlight-component-background-color-hover);
 }
 
 .title {
@@ -169,4 +204,9 @@ input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
     margin-bottom: 0;
     margin-left: 8px;
     margin-right: 8px;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
 }

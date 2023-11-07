@@ -24,24 +24,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @ServerEndpoint("/api/websocket/{sid}")
 public class Connector {
-    private static PartitionService partitionService;
-    @Autowired
-    public void setPartitionService(PartitionService partitionService){
-        Connector.partitionService = partitionService;
-    }
-    private static WebSocketService webSocketService;
-    @Autowired
-    public void setWebSocketService(WebSocketService webSocketService){
-        Connector.webSocketService = webSocketService;
-    }
-    private Gson gson = new Gson();
     public static final HashSet<String> ALL = new HashSet<>(0);
+    public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
     private static final Logger logger = LoggerFactory.getLogger(CheckInApplication.class);
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
-    
-    
-    public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
-    
+    private static PartitionService partitionService;
+    private static WebSocketService webSocketService;
+    private Gson gson = new Gson();
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
     //接收sid
@@ -50,6 +39,37 @@ public class Connector {
     
     public Connector() {
 //        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);
+    }
+
+    /**
+     * 获取当前在线人数
+     */
+    public static int getOnlineCount() {
+        return onlineCount.get();
+    }
+    
+    /**
+     * 当前在线人数 +1
+     */
+    public static void addOnlineCount() {
+        onlineCount.getAndIncrement();
+    }
+    
+    /**
+     * 当前在线人数 -1
+     */
+    public static void subOnlineCount() {
+        onlineCount.getAndDecrement();
+    }
+    
+    @Autowired
+    public void setPartitionService(PartitionService partitionService) {
+        Connector.partitionService = partitionService;
+    }
+    
+    @Autowired
+    public void setWebSocketService(WebSocketService webSocketService) {
+        Connector.webSocketService = webSocketService;
     }
     
     /**
@@ -84,32 +104,43 @@ public class Connector {
     
     /**
      * 收到客户端消息后调用的方法
+     *
      * @param message 客户端发送过来的消息
      */
     @OnMessage
     public void onMessage(String message, Session session) {
         try {
             logger.info("sid_" + sid + ":" + message);
-            Map<String,Object> contentMap = new Gson().fromJson(message, HashMap.class);
-            switch ((String) contentMap.get("type")){
-                case "addPartition":
-                    partitionService.save(Partition.getInstance((String) contentMap.get("partitionName")));
-                    Map<String,Object> dataMap = new HashMap<>();
-                    dataMap.put("type","updatePartitionList");
-                    final List<Partition> partitions = partitionService.findAll();
-                    final List<String> partitionNames = new ArrayList<>();
-                    for (Partition partition : partitions) {
-                        partitionNames.add(partition.getName());
+            Map<String, Object> contentMap = new Gson().fromJson(message, HashMap.class);
+            final String partitionName = (String) contentMap.get("partitionName");
+            switch ((String) contentMap.get("type")) {
+                case "addPartition" -> {
+                    partitionService.save(Partition.getInstance(partitionName));
+                    sendUpdatePartitionToAll();
+                }
+                case "deletePartition" -> {
+                    Partition partition = partitionService.findByName(partitionName);
+                    if (partition.getQuestions().isEmpty()){
+                        partitionService.delete(partition);
+                        sendUpdatePartitionToAll();
+                    } else {
+                        Map<String,String> dataMap = new HashMap<>();
+                        dataMap.put("type","error");
+                        dataMap.put("data","partition "+partitionName+" is not empty");
+                        sendMessage(gson.toJson(dataMap));
                     }
-                    dataMap.put("partitions", partitionNames);
-                    webSocketService.sendMessageToAll(gson.toJson(dataMap));
+                }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             try {
-                logger.error(e.getMessage());
-                sendMessage("error:" + e.getMessage());
-            } catch (IOException exception){
-                logger.error("while sending message:"+message+"to sid_" + sid + ":" + exception.getMessage());
+                logger.error(e.getClass().getName() + ":" + e.getMessage());
+                Map<String,String> dataMap = new HashMap<>();
+                dataMap.put("type","error");
+                dataMap.put("data",e.getClass().getSimpleName()+":"+e.getMessage());
+                sendMessage(gson.toJson(dataMap));
+//                sendMessage("error:" + e.getMessage());
+            } catch (IOException exception) {
+                logger.error("while sending message:" + message + "to sid_" + sid + ":" + exception.getMessage());
             }
         }
         /*// 群发消息
@@ -117,6 +148,18 @@ public class Connector {
         for (Connector item : CONNECTORS) {
             sids.add(item.sid);
         }*/
+    }
+    
+    private void sendUpdatePartitionToAll() throws IOException {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("type", "updatePartitionList");
+        final List<Partition> partitions = partitionService.findAll();
+        final List<String> partitionNames = new ArrayList<>();
+        for (Partition partition : partitions) {
+            partitionNames.add(partition.getName());
+        }
+        dataMap.put("partitions", partitionNames);
+        webSocketService.sendMessageToAll(gson.toJson(dataMap));
     }
     
     /**
@@ -128,37 +171,11 @@ public class Connector {
         error.printStackTrace();
     }
     
-    
-    
     /**
      * 实现服务器主动推送消息到 指定客户端
      */
     public void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
-    }
-    
-    /**
-     * 获取当前在线人数
-     *
-     */
-    public static int getOnlineCount() {
-        return onlineCount.get();
-    }
-    
-    /**
-     * 当前在线人数 +1
-     *
-     */
-    public static void addOnlineCount() {
-        onlineCount.getAndIncrement();
-    }
-    
-    /**
-     * 当前在线人数 -1
-     *
-     */
-    public static void subOnlineCount() {
-        onlineCount.getAndDecrement();
     }
     
 }

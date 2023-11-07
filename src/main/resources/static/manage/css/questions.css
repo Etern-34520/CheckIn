@@ -19,7 +19,7 @@
 
 .question div[rounded]{
     margin: 0 2px;
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--input-background-color);
 }
 
 .addButtons {
@@ -48,9 +48,9 @@
 
 .questionChoice {
     background-color: rgba(0, 0, 0, 0.15);
-    color: rgba(255, 60, 60, 0.5);
+    color: rgba(255, 60, 60, 0.7);
 }
 
 .questionChoice[correct] {
-    color: rgba(60, 255, 60, 0.5);
+    color: rgba(60, 255, 60, 0.7);
 }

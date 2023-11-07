@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%--
   Created by IntelliJ IDEA.
   User: o_345
@@ -11,9 +12,9 @@
 <jsp:useBean id="partition" scope="request" type="indi.etern.checkIn.entities.question.interfaces.Partition"/>
 <c:set var="partition" value="${partition}"/>
 <div class="questions" text>
-    ${param.get("name")}
+    ${fn:escapeXml(param.get("name"))}
     <c:forEach var="question" items="${partition.questions}">
-        <div class="question" clickable onclick="editQuestion('${question.md5}')">
+        <div class="question" rounded clickable onclick="editQuestion('${question.md5}')">
             <div class="t1">
                 <div class="questionContent" rounded>
                     <c:out value="${question.content}"/>

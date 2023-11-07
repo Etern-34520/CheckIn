@@ -74,6 +74,10 @@ public class Partition implements Serializable {
     public String getStaticHash() {
         return name;
     }
+    
+    public int getId() {
+        return id;
+    }
     /*
     @Override
     public void beforeSave(Dao dao){

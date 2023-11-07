@@ -1,3 +1,73 @@
+@media (prefers-color-scheme: dark) {
+    :root{
+        --menu-background-color: rgba(25,25,25,0.7);
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root{
+        --menu-background-color: rgba(230,230,230,0.7);
+    }
+}
+
+.context-menu-list {
+    border-radius: 8px;
+    border: 0;
+    padding: 4px;
+    margin: 6px;
+    background-color: var(--context-menu-background-color);
+    -webkit-box-shadow: 3px 0 15px rgba(0,0,0,0.5);
+    box-shadow: 3px 0 15px rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+}
+.context-menu-item {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-radius: 8px;
+    border: 0;
+    background-color: var(--context-menu-background-color);
+    color: var(--font-color);
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.context-menu-item.context-menu-hover {
+    background-color: var(--context-menu-item-background-color-hover);
+    color: var(--font-color);
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.context-menu-icon::before {
+    color: var(--font-color);
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.context-menu-item.context-menu-hover::before:hover {
+    color: var(--font-color);
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.context-menu-icon.context-menu-hover::before {
+    color: var(--font-color);
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+li[class="context-menu-item context-menu-separator context-menu-not-selectable"]{
+
+}
+
+.context-menu-item .context-menu-hover {
+    border-radius: 8px;
+    border: 0;
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background-color: var(--component-background-color-hover);
+}
+
 #top{
     height: 35px;
     flex: none;
@@ -31,7 +101,7 @@
     color: #aaa;
 }
 #top>button , #menuTop>button{
-    background: rgba(128,128,128,0.1);
+    background: var(--input-background-color);
     width: 35px;
     height: 100%;/*35px*/
     flex: none;
@@ -39,10 +109,10 @@
 #top>button:hover , #menuTop>button:hover{
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(128,128,128,0.2);
+    background: var(--input-background-color-hover);
 }
 .selectedMenuButton{
-    background: rgba(128,128,128,0.2);
+    background: var(--component-background-color-hover);
 }
 #menu{
     height: auto;
@@ -50,7 +120,7 @@
     margin: 6px 6px 6px -100%;
     display: flex;
     flex-direction: column;
-    background: rgba(25,25,26,0.7);
+    background: var(--menu-background-color);
     backdrop-filter: blur(60px);
     overflow: hidden;
 }
@@ -63,6 +133,19 @@
     flex-direction: column;
     height: 35px;
 }
+
+#topMask {
+    width: 100%;
+    height: 100%;
+    display: none; /*for js*/
+    flex-direction: row;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--context-menu-background-color);
+    backdrop-filter: blur(8px);
+}
+
 .menuButtons>button{
     width: 100%;
     height: 35px;
@@ -94,7 +177,7 @@
     flex-direction: row;
     height: 100%;
 }
-.roundedDiv[component_type="tip"]{
+div[component_type="tip"]{
     pointer-events: auto;
     width: auto;
     margin: 0;
@@ -123,7 +206,7 @@
 .path{
     padding-top: 5px;
     max-height: 25px;
-    color: rgba(200,200,200)
+    color: var(--font-color);
 }
 #contentRoot{
     z-index: auto;

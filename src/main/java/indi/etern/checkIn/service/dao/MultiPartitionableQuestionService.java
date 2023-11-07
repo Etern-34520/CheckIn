@@ -21,6 +21,10 @@ public class MultiPartitionableQuestionService {
         return multiplePartitionableQuestionRepository.findAll();
     }
     
+    public MultiPartitionableQuestion getByMD5(String md5){
+        return multiplePartitionableQuestionRepository.findById(md5).orElse(null);
+    }
+    
     public void saveAndFlush(MultiPartitionableQuestion multiPartitionableQuestion){
         multiplePartitionableQuestionRepository.saveAndFlush(multiPartitionableQuestion);
     }
@@ -28,5 +32,6 @@ public class MultiPartitionableQuestionService {
     public void deleteAll() {
         multiplePartitionableQuestionRepository.deleteAll();
     }
+    
 }
 

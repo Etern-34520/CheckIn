@@ -111,10 +111,16 @@ public class Manage {
                                 .build();
                 request.setAttribute("question", multiPartitionableQuestion);
                 modelAndView.addObject("question", multiPartitionableQuestion);
+                modelAndView.addObject("isNew",Boolean.TRUE);
                 modelAndView.setViewName("manage/pages/editQuestion");
             }
             case "editQuestion" -> {
-//                MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService
+                MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getByMD5(request.getParameter("md5"));
+                modelAndView.addObject("question", multiPartitionableQuestion);
+                modelAndView.addObject("isNew",Boolean.FALSE);
+            }
+            case "partitionQuestionLeft" -> {
+            
             }
         }
         return modelAndView;

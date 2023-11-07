@@ -6,7 +6,6 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class PartitionService {
     public void saveAndFlush(Partition partition){
         partitionRepository.saveAndFlush(partition);
     }
-    @Transactional(readOnly = true)
+//    @Transactional(readOnly = true)
     public Partition findByName(String name) {
         Partition examplePartition = Partition.getExample(name);
         ExampleMatcher exampleMatcher = ExampleMatcher
@@ -38,5 +37,14 @@ public class PartitionService {
     
     public void deleteAll() {
         partitionRepository.deleteAll();
+    }
+    
+    public void deleteByName(String partitionName) {
+        Partition partition = findByName(partitionName);
+        partitionRepository.deleteById(partition.getId());
+    }
+    
+    public void delete(Partition partition) {
+        partitionRepository.delete(partition);
     }
 }

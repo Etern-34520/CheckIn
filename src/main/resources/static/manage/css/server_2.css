@@ -1,4 +1,4 @@
-#left {
+#managePage[index="2"][page-type="server"] #left {
     width: 250px;
     flex: none;
     display: flex;
@@ -7,7 +7,7 @@
     overflow-y: auto;
 }
 
-#right {
+#managePage[index="2"][page-type="server"] #right {
     margin-left: 4px;
     flex: 1;
     margin-top: 4px;
@@ -16,39 +16,158 @@
     flex-direction: column;
 }
 
-.partitionButton {
+#managePage[index="2"][page-type="server"] .partitionButton {
     height: 40px;
     font-size: 16px;
     margin: 4px 0;
     overflow: hidden;
 }
 
-.partitionButton[selected = "selected"] {
-    background: rgba(128, 128, 128, 0.2);
+#addPartitionButton {
+    height: 40px;
+    font-size: 16px;
+    margin: 4px 0;
+    overflow: hidden;
 }
 
-#partitionButtons {
+#optionsDiv {
+    flex: 1;
+}
+
+#imagesDiv {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 4px;
+    height: 100px;
+    padding: 4px;
+    flex: 1;
+}
+
+.imageDiv {
+    background-size: 100% 100%;
+    height: 100px;
+    padding: 0;
+    margin: 0 4px;
+}
+
+.imageDiv > div {
+    text-align: center;
+    line-height: 100px;
+    font-size: 24px;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: rgb(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px)
+}
+
+label.fileUpload {
+    border-radius: 6px;
+    border: 0;
+    transition: 0.2s;
+    margin: 4px;
+    padding: 4px;
+    min-width: 40px;
+    color: var(--font-color);
+    transition-timing-function: ease-in-out;
+    background: rgba(128, 128, 128, 0.1);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+label.fileUpload:hover {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: var(--component-background-color-hover);
+    cursor: pointer;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+#managePage[index="2"][page-type="server"] .partitionButton[selected = "selected"] {
+    background: var(--component-background-color-hover);
+}
+
+#managePage[index="2"][page-type="server"] div[selected = "selected"] {
+    background: var(--component-background-color-hover);
+}
+
+#managePage[index="2"][page-type="server"] #partitionButtons {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-top: 4px;
 }
 
-.partitionButton > input[type="text"] {
+#managePage[index="2"][page-type="server"] .partitionButton > input[type="text"] {
     background: rgba(0, 0, 0, 0.1);
     margin: 0;
     height: 100%;
     width: 100%;
 }
 
-.partitionButton > input[type="text"]:focus {
-    background: rgba(0, 0, 0, 0.2);
+#managePage[index="2"][page-type="server"] .partitionButton > input[type="text"]:focus {
+    background: var(--input-background-color);
 }
 
-.subContentRoot {
+#managePage[index="2"][page-type="server"] .subContentRoot {
     display: flex;
     flex-direction: column;
     flex: 1;
     overflow: auto;
     margin: 8px;
+}
+
+#managePage[index="2"][page-type="server"] .optionDiv {
+    display: flex;
+    align-items: center;
+}
+
+#managePage[index="2"][page-type="server"] .optionDiv > input[type="text"] {
+    flex: 1;
+}
+
+#managePage[index="2"][page-type="server"] .optionDiv > input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
+
+#managePage[index="2"][page-type="server"] .optionDiv > .deleteOptionButton {
+    flex: 0;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+#managePage[index="2"][page-type="server"] #formDiv button {
+    background: var(--input-background-color)
+}
+
+#managePage[index="2"][page-type="server"] #formDiv button:hover {
+    background: var(--input-background-color-hover)
+}
+
+#managePage[index="2"][page-type="server"] #formButtonsDiv button {
+    background: var(--highlight-component-background-color);
+    height: 30px;
+    width: 60px;
+    margin: 8px 4px;
+}
+
+#managePage[index="2"][page-type="server"] #formButtonsDiv button:hover {
+    background: var(--highlight-component-background-color-hover);
+}
+
+#left > .subContentRoot > div > div > div > div.pointer {
+    font-size: 16px;
+    color: var(--highlight-component-background-color-hover);
+    opacity: 0;
 }

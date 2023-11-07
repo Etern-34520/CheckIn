@@ -11,7 +11,7 @@ public class ManageMenuItemInfo {
     public List<String> menuItemUserStrings = new ArrayList<>();
     public ManageMenuItemInfo(){
         menuItemServerStrings.add("Home");
-        menuItemServerStrings.add("traffic");
+        menuItemServerStrings.add("Traffic");
         menuItemServerStrings.add("Questions");
         menuItemServerStrings.add("Partition");
         menuItemServerStrings.add("Information");
