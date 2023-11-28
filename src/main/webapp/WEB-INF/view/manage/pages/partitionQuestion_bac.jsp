@@ -14,7 +14,7 @@
 <div class="questions" text>
     ${fn:escapeXml(param.get("name"))}
     <c:forEach var="question" items="${partition.questions}">
-        <div class="question" rounded clickable onclick="md5ToQuestionFormDataMap = new Map();editQuestion('${question.md5}')">
+        <div class="question" rounded clickable onclick="questionMD5ToFormDataMap = new Map(); questionMD5ToOriginalFormDataMap = new Map();editQuestion('${question.md5}')">
             <div class="t1">
                 <div class="questionContent" rounded><c:out value="${question.content}"/></div>
                 <div class="questionMD5" rounded><c:out value="${question.md5}"/></div>

@@ -1,18 +1,19 @@
 package indi.etern.checkIn.entities.question.impl.multipleQuestion;
 
+import com.google.gson.Gson;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.SingleCorrect;
+import indi.etern.checkIn.entities.user.User;
 import jakarta.persistence.*;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class SingleCorrectQuestion extends MultiPartitionableQuestion implements SingleCorrect {
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "QUESTION_ID",referencedColumnName = "ID")
     List<Choice> choices;
     @Transient
@@ -21,7 +22,7 @@ public class SingleCorrectQuestion extends MultiPartitionableQuestion implements
     protected SingleCorrectQuestion() {
     }
     
-    public SingleCorrectQuestion(String questionContent, List<Choice> choices, Set<Partition> partitions) {
+    public SingleCorrectQuestion(String questionContent, List<Choice> choices, Set<Partition> partitions, User author) {
         if (choices.size() < 2) {
             throw new QuestionException("Less than two choices");
         }
@@ -35,8 +36,8 @@ public class SingleCorrectQuestion extends MultiPartitionableQuestion implements
         this.choices = choices;
         this.correctChoice = getCorrectChoice(choices);
         this.partitions = partitions;
-        initMD5();
-        
+        this.author = author;
+//        initMD5();
 //        super.id = md5;
     }
     
@@ -100,5 +101,26 @@ public class SingleCorrectQuestion extends MultiPartitionableQuestion implements
                 ", content='" + content + '\'' +
                 ", partitions='" + (partitions != null ? partitions.toString() : "[]") + '\'' +
                 '}';
+    }
+    @Override
+    public String toJsonData() {
+        Map<String,Object> dataMap = new HashMap<>();
+        dataMap.put("type","singleCorrect");
+        dataMap.put("content",content);
+        List<Map<String,String>> choices = new ArrayList<>();
+        for (Choice choice : this.choices) {
+            Map<String,String> choiceMap = new HashMap<>();
+            choiceMap.put("content",choice.getContent());
+            choiceMap.put("correct",String.valueOf(choice.isCorrect()));
+            choices.add(choiceMap);
+        }
+        dataMap.put("choices",choices);
+        dataMap.put("correctChoice","{content:"+correctChoice.getContent()+",correct:"+correctChoice.isCorrect()+"}");
+        final List<String> partitionNames = new ArrayList<>();
+        for (Partition partition : partitions) {
+            partitionNames.add(partition.getName());
+        }
+        dataMap.put("partitions", partitionNames);
+        return new Gson().toJson(dataMap);
     }
 }

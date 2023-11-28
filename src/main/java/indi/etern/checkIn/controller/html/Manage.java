@@ -1,9 +1,10 @@
 package indi.etern.checkIn.controller.html;
 
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionFactory;
+import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionBuilder;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
+import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.UserService;
@@ -16,6 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Controller
 public class Manage {
@@ -37,21 +44,25 @@ public class Manage {
         Cookie[] cookies = request.getCookies();
         long qq = 0;
         String password = null;
-        for (Cookie cookie : cookies) {
-            switch (cookie.getName()) {
-                case "password":
-                    password = cookie.getValue();
-                    break;
-                case "qq":
-                    try {
-                        qq = Long.parseLong(cookie.getValue());
-                    } catch (NumberFormatException e) {
-                        return false;
-                    }
-                    break;
-                default:
-                    break;
+        try {
+            for (Cookie cookie : cookies) {
+                switch (cookie.getName()) {
+                    case "password":
+                        password = cookie.getValue();
+                        break;
+                    case "qq":
+                        try {
+                            qq = Long.parseLong(cookie.getValue());
+                        } catch (NumberFormatException e) {
+                            return false;
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
+        } catch (NullPointerException e){
+            return false;
         }
         return userService.check(qq, password);
     }
@@ -102,27 +113,56 @@ public class Manage {
             case "partitionQuestion" ->
                     modelAndView.addObject("partition", partitionService.findByName(request.getParameter("name")));
             case "newQuestion" -> {
-                MultipleQuestionFactory multipleQuestionFactory = new MultipleQuestionFactory();
-                MultiPartitionableQuestion multiPartitionableQuestion =
-                        multipleQuestionFactory.setQuestionContent("")
-                                .addChoice(new Choice("", true))
-                                .addChoice(new Choice("", false))
-                                .addPartition(Partition.getInstance("undefined"))
-                                .build();
-                request.setAttribute("question", multiPartitionableQuestion);
-                modelAndView.addObject("question", multiPartitionableQuestion);
-                modelAndView.addObject("isNew",Boolean.TRUE);
-                modelAndView.setViewName("manage/pages/editQuestion");
+                newQuestion(request, modelAndView);
             }
             case "editQuestion" -> {
                 MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getByMD5(request.getParameter("md5"));
-                modelAndView.addObject("question", multiPartitionableQuestion);
-                modelAndView.addObject("isNew",Boolean.FALSE);
+                if (multiPartitionableQuestion != null){
+                    modelAndView.addObject("question", multiPartitionableQuestion);
+                    modelAndView.addObject("isNew",Boolean.FALSE);
+                } else {
+//                    newQuestion(request, modelAndView);
+                }
             }
             case "partitionQuestionLeft" -> {
             
             }
         }
         return modelAndView;
+    }
+    
+    private static void newQuestion(HttpServletRequest request, ModelAndView modelAndView) {
+        
+        //生成时间戳md5
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+        String timeStamp = df.format(new Date());
+        MessageDigest md5Digest = null;
+        try {
+            md5Digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException impossible) {
+        }
+        md5Digest.update(timeStamp.getBytes());
+        byte[] byteArray = md5Digest.digest();
+        
+        BigInteger bigInt = new BigInteger(1, byteArray);
+        StringBuilder result = new StringBuilder(bigInt.toString(16));
+        while (result.length() < 32) {
+            result.insert(0, "0");
+        }
+        
+        //构建样本题目
+        MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
+        MultiPartitionableQuestion multiPartitionableQuestion =
+                multipleQuestionFactory.setQuestionContent("")
+                        .addChoice(new Choice("", true))
+                        .addChoice(new Choice("", false))
+                        .addPartition(Partition.getInstance("undefined"))
+                        .setMD5(result.toString())
+                        .setAuthor(User.exampleOfName("unknown"))//TODO 默认当前用户
+                        .build();
+        request.setAttribute("question", multiPartitionableQuestion);
+        modelAndView.addObject("question", multiPartitionableQuestion);
+        modelAndView.addObject("isNew",Boolean.TRUE);
+        modelAndView.setViewName("manage/pages/editQuestion");
     }
 }

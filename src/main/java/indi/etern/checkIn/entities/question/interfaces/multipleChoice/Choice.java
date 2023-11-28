@@ -18,7 +18,7 @@ public class Choice implements Serializable {
     private String content;
     @Column(name = "IS_CORRECT")
     private Boolean isCorrect;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = {CascadeType.PERSIST,CascadeType.DETACH,CascadeType.REFRESH,CascadeType.REMOVE}, fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id",referencedColumnName = "id")
     private MultiPartitionableQuestion question;
     protected Choice() {

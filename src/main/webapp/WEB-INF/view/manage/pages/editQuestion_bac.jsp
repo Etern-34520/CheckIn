@@ -63,13 +63,13 @@
                                    id="choice${stat.index+1}" value="${choice.content}">
                             <button id="delete${stat.index+1}" class="deleteOptionButton" type="button"
                                     style="height: 32px;width: 32px;margin: 4px;font-size: 24px"
-                                    onclick="deleteChoice(this)">-
+                                    onclick="deleteOption(this)">-
                             </button>
                         </div>
                     </c:forEach>
                 </div>
                 <button type="button" style="height:40px;margin-top: 8px;margin-left: 36px;font-size: 24px"
-                        onclick="addNewChoice()">+
+                        onclick="addOption()">+
                 </button>
             </div>
         </div>

@@ -15,6 +15,12 @@ public class UserService {
     @Resource
     private UserRepository userRepository;
     
+    public static UserService singletonInstance;
+    
+    protected UserService() {
+        singletonInstance = this;
+    }
+    
     public boolean check(long qq, String password) {
         if (qq <= 0 || password == null || password.isEmpty()) {
             return false;

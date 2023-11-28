@@ -8,11 +8,18 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PartitionService {
     @Resource
     private PartitionRepository partitionRepository;
+    
+    public static PartitionService singletonInstance;
+    
+    protected PartitionService() {
+        singletonInstance = this;
+    }
     
     public void save(Partition partition) {
         partitionRepository.save(partition);
@@ -32,7 +39,16 @@ public class PartitionService {
                 .matching()
                 .withIgnorePaths("id");
         Example<Partition> example = Example.of(examplePartition, exampleMatcher);
-        return partitionRepository.findOne(example).orElseThrow();//FIXME 懒加载报错
+        return partitionRepository.findOne(example).orElseThrow();
+    }
+    
+    public Optional<Partition> tryFindByName(String name) {
+        Partition examplePartition = Partition.getExample(name);
+        ExampleMatcher exampleMatcher = ExampleMatcher
+                .matching()
+                .withIgnorePaths("id");
+        Example<Partition> example = Example.of(examplePartition, exampleMatcher);
+        return partitionRepository.findOne(example);
     }
     
     public void deleteAll() {
@@ -46,5 +62,9 @@ public class PartitionService {
     
     public void delete(Partition partition) {
         partitionRepository.delete(partition);
+    }
+    
+    public boolean existsById(int id) {
+        return partitionRepository.existsById(id);
     }
 }

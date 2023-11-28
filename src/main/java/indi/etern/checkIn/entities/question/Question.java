@@ -1,6 +1,8 @@
 package indi.etern.checkIn.entities.question;
 
+import indi.etern.checkIn.entities.user.User;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -9,10 +11,16 @@ import java.security.NoSuchAlgorithmException;
 @MappedSuperclass
 @Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
 public abstract class Question implements Serializable {
+    @Getter
     @Column(name = "content")
     protected String content;
     
     protected int hashcode;
+    
+    @Getter
+    @JoinColumn(name = "AUTHOR_QQNUMBER")
+    @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.DETACH,CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    protected User author;
     
     @Override
     public int hashCode() {
@@ -21,13 +29,13 @@ public abstract class Question implements Serializable {
     
     protected Question() {
     }
+    
+    @Getter
     @Id
     @Column(name = "id")
     protected String md5;
-    public String getMd5() {
-        return md5;
-    }
-    protected void initMD5(){
+    
+    public void initMD5(){
 //        hashcode = super.hashCode();
         String input = toString();
         try {
@@ -48,12 +56,7 @@ public abstract class Question implements Serializable {
             // impossible
         }
     }
-    public String getContent() {
-        return content;
-    }
-    public String getStaticHash() {
-        return md5;
-    }
+    
     @Override
     public boolean equals(Object object) {
         if (object instanceof Question question) {
@@ -62,4 +65,6 @@ public abstract class Question implements Serializable {
             return false;
         }
     }
+    
+    abstract public String toJsonData();
 }

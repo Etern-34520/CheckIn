@@ -1,4 +1,4 @@
-package indi.etern.checkIn.service;
+package indi.etern.checkIn.utils;
 
 import lombok.Getter;
 import lombok.NonNull;

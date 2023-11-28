@@ -11,7 +11,7 @@ public class Role {
     @Id
     private String type;
     
-    @OneToMany(mappedBy = "role",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "role",cascade = {CascadeType.PERSIST,CascadeType.DETACH,CascadeType.REFRESH,CascadeType.REMOVE}, fetch = FetchType.LAZY)
     private final Set<User> users = new HashSet<>();
     protected static Map<String,Role> roleMap = new HashMap<>();
     

@@ -34,6 +34,30 @@ $(function () {//页面加载完成后执行
             "delete": {name: "Delete", icon: "delete"},
         }
     });
+    $.contextMenu({
+        selector: "div.question",
+        callback: function (key,options,e){
+            let $questionMD5Div = $(this).find("div.t1 > div.questionMD5");
+            switch (key) {
+                case "edit":
+                    editQuestion($questionMD5Div.text());
+                    break;
+                case "delete":
+                    const messageJson = {
+                        "type": "deleteQuestion",
+                        "questionMD5": $questionMD5Div.text()
+                    };
+                    sendMessage(JSON.stringify(messageJson), function (event) {
+                        console.log(event);
+                    });
+                    break;
+            }
+        },
+        items: {
+            "edit": {name: "Edit", icon: "edit"},
+            "delete": {name: "Delete", icon: "delete"},
+        }
+    })
 })
 
 function showMenu() {
@@ -194,7 +218,7 @@ function removePathAfter(pathName, contains = false, doCallBackFunc = false) {
     return "success";
 }
 
-function switchToPage(pageClass, index) {
+function switchToPage(pageClass, index, clearPathBool = true) {
     $.ajax({
         url: location.href,
         type: 'get',
@@ -210,24 +234,25 @@ function switchToPage(pageClass, index) {
             if ($.cookie('page') !== index) {
                 $.cookie('page', index);
                 $.cookie('pageClass', pageClass);
-                // $content.animate({opacity: 1}, 100, "easeOutCubic");
             }
             const pathName = $("#" + pageClass + "Menu button").eq(index).text();
-            // changePath(pathName);
-            clearPath();
-            addPath(pathName, function () {
-                const $content = $('#content');
-                $content.html(res);
-                let $leftSubContentRoot = $("#left .subContentRoot");
-                const leftSubContentHtml = $leftSubContentRoot.html();
-                $leftSubContentRoot.html("");
-                transitionPage($("#left"), leftSubContentHtml);
-                try {
-                    document.getElementById("managePage").onload(undefined);
-                } catch (e) {
-                    //ignored
-                }
-            });
+            if (clearPathBool) {
+                clearPath();
+                addPath(pathName, function () {
+                    switchToPage(pageClass, index, false);
+                    // const $content = $('#content');
+                    // $content.html(res);
+                    // let $leftSubContentRoot = $("#left .subContentRoot");
+                    // const leftSubContentHtml = $leftSubContentRoot.html();
+                    // $leftSubContentRoot.html("");
+                    // transitionPage($("#left"), leftSubContentHtml);
+                    // try {
+                    //     document.getElementById("managePage").onload(undefined);
+                    // } catch (e) {
+                    //     //ignored
+                    // }
+                });
+            }
             selectButtonOf(pageClass, index);
             closeMenu();
         },
@@ -264,7 +289,7 @@ function showTip(type, content, autoClose = true) {
 
 class Tip {
     tipHtml;
-    mouseEntered = false;
+    mouseEnteredTimes = 0;
     autoClose = true;
 
     constructor(title, content) {
@@ -295,30 +320,26 @@ ${content}
             marginBottom: 8,
         }, 200, "easeInOutCubic", function () {
             $tip.on("mouseenter", function () {
-                this.mouseEntered = true;
-                let onmouseleave = function () {
-                    this.mouseEntered = false;
-                }.bind(this);
-                $tip.on("mouseleave", function () {
-                    onmouseleave();
-                }).bind();
+                this.mouseEnteredTimes++;
+            }.bind(this));
+            $tip.on("mouseleave", function () {
+                setTimeout(function (){this.closeTipWhileMouseNotHover($tip,this)}.bind(this), 1000);
             }.bind(this));
             if (this.autoClose) {
                 const closeTipWhileMouseNotHover = this.closeTipWhileMouseNotHover;
                 setTimeout(function () {
                         closeTipWhileMouseNotHover($tip, this)
                     }.bind(this)
-                    , 1500);
+                    , 2000);
             }
         }.bind(this));
         return $tip;
     }
 
     closeTipWhileMouseNotHover($tip, thisObj) {
-        if (thisObj.mouseEntered === true)
-            setTimeout(function () {
-                thisObj.closeTipWhileMouseNotHover($tip, thisObj)
-            }.bind(this), 1000);
+        if (thisObj.mouseEnteredTimes > 0) {
+            thisObj.mouseEnteredTimes--;
+        }
         else {
             $tip.animate({
                 marginLeft: $tip.width() + 20,
@@ -457,7 +478,7 @@ function initChart() {
 
 var pathLock = false;
 
-function transitionPage($root, html, pathName, backFunc) {
+function transitionPage($root, html, pathName, backFunc, callBack) {
     if (pathName instanceof String || backFunc instanceof Function) {
         if (pathLock) return "pathLock";
         pathLock = true;
@@ -477,11 +498,14 @@ function transitionPage($root, html, pathName, backFunc) {
             $subContentRoot.html(html);
             $subContentRoot.css("marginTop", 8);
             $subContentRoot.css("marginBottom", 8);
+            if (callBack instanceof  Function){
+                callBack();
+            }
             $subContentRoot.animate({
                 opacity: 1,
             }, 300, "easeOutCubic");
             try {
-                $subContentRoot.children().eq(0)[0].onload(undefined)
+                $subContentRoot.children()[0].onload(undefined)
             } catch (ignored){}
         }, 200)
     });

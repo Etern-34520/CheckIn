@@ -22,6 +22,12 @@
     background: var(--input-background-color);
 }
 
+.questionContent {
+    white-space: normal;
+    word-break: break-all;
+    overflow: hidden;
+}
+
 .addButtons {
     display: flex;
     flex-direction: row;
@@ -44,6 +50,7 @@
 .questionChoices {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .questionChoice {

@@ -16,7 +16,7 @@ public class DateTraffic {
     LocalDate localDate;
     @Column(name = "COUNT")
     int count;
-    @OneToMany(cascade = {CascadeType.DETACH,CascadeType.PERSIST,CascadeType.REFRESH,CascadeType.REMOVE},fetch = FetchType.EAGER)
+    @OneToMany(cascade = {CascadeType.DETACH,CascadeType.PERSIST,CascadeType.REFRESH,CascadeType.REMOVE},fetch = FetchType.LAZY)
     @JoinColumn(name = "DATE",referencedColumnName = "DATE")
     List<UserTraffic> userTraffics;
     public DateTraffic() {

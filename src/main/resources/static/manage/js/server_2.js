@@ -91,13 +91,7 @@ function switchToPartition(button) {
         error: function (res) {
             showTip("error", res.status);
         }
-    })
-    // getPage("page_partition", function (event) {
-    //     $right.text(event);
-    //     $("#partitionName").text(partitionName);
-    //     changePath(partitionName);
-    //     removePathContainsAfter(partitionName);
-    // });
+    });
 }
 
 function updatePartition(partitionNames) {
@@ -151,4 +145,28 @@ function updatePartition(partitionNames) {
             }
         }
     }
+}
+
+function removeQuestionDiv(questionMD5) {
+    let $questionMD5Divs = $("div.questions > div.question div.questionMD5");
+    for (const questionMD5Div of $questionMD5Divs) {
+        let $questionMD5Div = $(questionMD5Div);
+        if ($questionMD5Div.text() === questionMD5) {
+            let $questionDiv = $questionMD5Div.parent().parent();
+            $questionDiv.animate({
+                height: 0,
+                opacity: 0
+            },200,"easeOutQuad",function (){
+                setTimeout(function (){
+                    $questionDiv.remove();
+                },100);
+            });
+            break;
+        }
+    }
+}
+
+function updateQuestionDiv(questionJsonData) {
+    let questionObject = JSON.parse(questionJsonData);
+
 }

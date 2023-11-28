@@ -2,16 +2,16 @@ package indi.etern.checkIn;
 
 import indi.etern.checkIn.entities.question.Question;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleCorrectQuestion;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionFactory;
+import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionBuilder;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.SingleCorrectQuestion;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.MultipleChoice;
+import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.ChoiceService;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,12 +56,13 @@ public class QuestionTest {
     }
     
     @Test
-    @BeforeAll
-//    @Transactional
+//    @BeforeAll
+    @Transactional
     public void testGetAnswerAndContent() {
+        final User etern = new User("etern", 941651914, "114514");
         {
-            MultipleQuestionFactory multipleQuestionFactory = new MultipleQuestionFactory();
-            Question question = multipleQuestionFactory.addAllChoices(choices1).setQuestionContent("testQuestion1").build();
+            MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
+            Question question = multipleQuestionFactory.addChoices(choices1).setQuestionContent("testQuestion1").setAuthor(etern).build();
             assert question instanceof SingleCorrectQuestion;
             SingleCorrectQuestion multipleCorrectQuestion = (SingleCorrectQuestion) question;
             assert multipleCorrectQuestion.getCorrectChoice().getContent().equals("A");
@@ -70,8 +71,8 @@ public class QuestionTest {
             question1 = question;
         }
         {
-            MultipleQuestionFactory multipleQuestionFactory = new MultipleQuestionFactory();
-            Question question = multipleQuestionFactory.addAllChoices(choices2).setQuestionContent("testQuestion2").build();
+            MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
+            Question question = multipleQuestionFactory.addChoices(choices2).setQuestionContent("testQuestion2").setAuthor(etern).build();
             assert question instanceof MultipleCorrectQuestion;
             MultipleCorrectQuestion multipleCorrectQuestion = (MultipleCorrectQuestion) question;
             assert multipleCorrectQuestion.getCorrectChoices().get(0).getContent().equals("A1");
@@ -91,25 +92,25 @@ public class QuestionTest {
             choices.add(new Choice("C2", false));
             choices.add(new Choice("D2", false));
         }
-        MultipleQuestionFactory multipleQuestionFactory = new MultipleQuestionFactory();
+        MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
         try {
-            Question question = multipleQuestionFactory.addAllChoices(choices).build();
+            Question question = multipleQuestionBuilder.addChoices(choices).build();
         } catch (Exception e){
             assert e.getMessage().equals("No correct choice found");
         }
         
         choices.add(new Choice("E2", true));
-        multipleQuestionFactory.addAllChoices(choices);
+        multipleQuestionBuilder.addChoices(choices);
         try {
-            Question question = multipleQuestionFactory.build();
+            Question question = multipleQuestionBuilder.build();
         } catch (Exception e){
             assert e.getMessage().equals("Question content not set");
         }
-        Question question = multipleQuestionFactory.setQuestionContent("testQuestion").build();
+        Question question = multipleQuestionBuilder.setQuestionContent("testQuestion").build();
         try {
-            Question question1 = multipleQuestionFactory.addAllChoices(choices).build();
+            Question question1 = multipleQuestionBuilder.addChoices(choices).build();
         } catch (Exception e){
-            assert e.getMessage().equals("MultipleQuestionFactory has already built");
+            assert e.getMessage().equals("MultipleQuestionBuilder has already built");
         }
     }
     @Test

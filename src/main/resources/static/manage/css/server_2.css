@@ -155,17 +155,6 @@ input[type="file"] {
     background: var(--input-background-color-hover)
 }
 
-#managePage[index="2"][page-type="server"] #formButtonsDiv button {
-    background: var(--highlight-component-background-color);
-    height: 30px;
-    width: 60px;
-    margin: 8px 4px;
-}
-
-#managePage[index="2"][page-type="server"] #formButtonsDiv button:hover {
-    background: var(--highlight-component-background-color-hover);
-}
-
 #left > .subContentRoot > div > div > div > div.pointer {
     font-size: 16px;
     color: var(--highlight-component-background-color-hover);

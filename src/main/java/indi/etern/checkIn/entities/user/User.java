@@ -11,7 +11,7 @@ public class User {
     @Id
     protected long QQNumber;
     protected String password;
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.DETACH,CascadeType.REFRESH,CascadeType.REMOVE}, fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE_TYPE")
     @NotFound(action= NotFoundAction.IGNORE)
     protected Role role;
@@ -75,7 +75,7 @@ public class User {
     @Override
     public boolean equals(Object object) {
         if (object instanceof User user) {
-            return user.name.equals(this.name) && user.QQNumber == this.QQNumber && user.password.equals(this.password) && user.role.equals(this.role);
+            return user.QQNumber == this.QQNumber;
         } else {
             return false;
         }

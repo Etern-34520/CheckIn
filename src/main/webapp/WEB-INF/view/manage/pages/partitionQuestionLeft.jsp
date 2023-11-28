@@ -9,7 +9,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <jsp:useBean id="partitionInfo" class="indi.etern.checkIn.beans.PartitionInfo" scope="request"/>
 <c:forEach var="partition" items="${partitionInfo.partitions}">
-    <div style="background:var(--input-background-color);margin: 0" rounded clickable id="partition${partition.id}">
+    <div style="background:var(--input-background-color);margin: 0 0 8px;" rounded clickable
+         id="partition${partition.id}">
         <div style="margin: 0" rounded clickable onclick="togglePartition(this)">
                 ${partition.name}
         </div>
@@ -22,9 +23,11 @@
                 </c:when>
                 <c:otherwise>
                     <c:forEach var="question" items="${partition.questions}">
-                        <div rounded clickable class="question${question.md5}" style="height: 21px;overflow: hidden;display: flex;flex-direction: row">
+                        <div rounded clickable class="question${question.md5}"
+                             style="height: 21px;overflow: hidden;display: flex;flex-direction: row"
+                             onclick="switchToQuestion('${question.md5}')">
                             <div class="pointer" style="width: 10px">•</div>
-                            <div style="flex: 1">
+                            <div style="flex: 1;line-height: 21px">
                                     ${question.content}
                             </div>
                         </div>
@@ -34,3 +37,4 @@
         </div>
     </div>
 </c:forEach>
+<button style="height: 30px;margin: 0" highlight onclick="updateAllQuestions()">全部更新</button>

@@ -13,20 +13,31 @@
              scope="application"/>
 <head>
     <title>CheckIn</title>
-    <script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
+    <%--<script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-<%--    https://cdn.staticfile.org/jquery-contextmenu/2.9.2/font/context-menu-icons.ttf--%>
+    --%>
+    <script src="./../lib/http_cdn.staticfile.org_echarts_4.3.0_echarts.js"></script>
+    <script src="./../lib/http_cdn.staticfile.org_jquery_3.7.1_jquery.js"></script>
+    <script src="./../lib/http_cdn.staticfile.org_jquery-color_2.1.2_jquery.color.js"></script>
+    <script src="./../lib/http_cdn.staticfile.org_jquery-cookie_1.4.1_jquery.cookie.js"></script>
+    <script src="./../lib/http_cdn.staticfile.org_jquery-easing_1.4.1_jquery.easing.js"></script>
+    <%--    https://cdn.staticfile.org/jquery-contextmenu/2.9.2/font/context-menu-icons.ttf--%>
     <script src="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.contextMenu.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.ui.position.min.js"></script>
+
+    <script src="./../lib/http_connect.qq.com_qc_jssdk.js"></script>
+    <script src="./../lib/http_js.hcaptcha.com_1_api.js"></script>
+    <script src="./../lib/md5.min.js"></script>
+
     <script src="./../js/question.js"></script>
     <script src="./../js/webSocket.js"></script>
     <script src="./js/manage.js"></script>
     <script src="./js/echart.js"></script>
     <script src="./js/server_2.js"></script>
-    <script src="./js/server_2_editForm.js"></script>
-    <script src="./js/server_2_leftPartitionDetail.js"></script>
+    <script src="./js/question_form_data.js"></script>
+<%--    <script src="./js/server_2_editForm.js"></script>--%>
     <link rel="stylesheet" href="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css">
     <link rel="stylesheet" href="./../css/global.css">
     <link rel="stylesheet" href="./css/manage.css">
@@ -44,7 +55,7 @@
                 CheckIn
             </div>
         </div>
-        <button type="button" id="addQuestion" class="button" style="font-size: 20px" onclick="editQuestion('')">+</button>
+        <button type="button" id="addQuestion" class="button" style="font-size: 20px" onclick="addQuestion()">+</button>
         <button type="button" id="upload" class="button" style="font-size: 20px"></button>
         <button type="button" id="save" class="button" style="font-size: 20px"></button>
     </div>

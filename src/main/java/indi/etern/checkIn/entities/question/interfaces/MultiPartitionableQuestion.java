@@ -9,7 +9,7 @@ import java.util.Set;
 @Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
 public class MultiPartitionableQuestion extends Question implements MultiPartitionable {
     
-    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinTable(name = "partitions_questions_mapping",
             joinColumns  = @JoinColumn(name = "question_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "partition_id",referencedColumnName = "id"))
@@ -22,5 +22,10 @@ public class MultiPartitionableQuestion extends Question implements MultiPartiti
     @Override
     public Set<Partition> getPartitions() {
         return partitions;
+    }
+    
+    @Override
+    public String toJsonData(){
+        throw new RuntimeException("Not implemented");
     }
 }

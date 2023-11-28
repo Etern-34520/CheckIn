@@ -10,7 +10,7 @@
     flex: none;
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: #19191a;
+    background: var(--rounded-div-background-color);
     cursor: pointer;
     user-select:none;
 }

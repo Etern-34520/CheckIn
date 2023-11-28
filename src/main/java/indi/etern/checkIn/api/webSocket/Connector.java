@@ -2,7 +2,9 @@ package indi.etern.checkIn.api.webSocket;
 
 import com.google.gson.Gson;
 import indi.etern.checkIn.CheckInApplication;
+import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
+import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.websocket.*;
@@ -14,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.util.*;
@@ -30,6 +34,8 @@ public class Connector {
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
     private static PartitionService partitionService;
     private static WebSocketService webSocketService;
+    private static MultiPartitionableQuestionService multiPartitionableQuestionService;
+    private static TransactionTemplate transactionTemplate;
     private Gson gson = new Gson();
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
@@ -40,7 +46,7 @@ public class Connector {
     public Connector() {
 //        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);
     }
-
+    
     /**
      * 获取当前在线人数
      */
@@ -70,6 +76,16 @@ public class Connector {
     @Autowired
     public void setWebSocketService(WebSocketService webSocketService) {
         Connector.webSocketService = webSocketService;
+    }
+    
+    @Autowired
+    public void setMultiPartitionableQuestionService(MultiPartitionableQuestionService multiPartitionableQuestionService) {
+        Connector.multiPartitionableQuestionService = multiPartitionableQuestionService;
+    }
+    
+    @Autowired
+    public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+        Connector.transactionTemplate = transactionTemplate;
     }
     
     /**
@@ -118,25 +134,44 @@ public class Connector {
                     partitionService.save(Partition.getInstance(partitionName));
                     sendUpdatePartitionToAll();
                 }
-                case "deletePartition" -> {
-                    Partition partition = partitionService.findByName(partitionName);
-                    if (partition.getQuestions().isEmpty()){
-                        partitionService.delete(partition);
-                        sendUpdatePartitionToAll();
-                    } else {
-                        Map<String,String> dataMap = new HashMap<>();
-                        dataMap.put("type","error");
-                        dataMap.put("data","partition "+partitionName+" is not empty");
-                        sendMessage(gson.toJson(dataMap));
+                case "deletePartition" -> transactionTemplate.execute((TransactionCallback<Object>) result -> {
+                    try {
+                        Partition partition = partitionService.findByName(partitionName);
+                        if (partition.getQuestions().isEmpty()) {
+                            partitionService.delete(partition);
+                            sendUpdatePartitionToAll();
+                        } else {
+                            Map<String, String> dataMap = new HashMap<>();
+                            dataMap.put("type", "error");
+                            dataMap.put("data", "partition " + partitionName + " is not empty");
+                            sendMessage(gson.toJson(dataMap));
+                        }
+                    } catch (Exception e) {
+                        return Boolean.FALSE;
                     }
+                    return Boolean.TRUE;
+                });
+                case "deleteQuestion" -> {
+                    final String questionMD5 = (String) contentMap.get("questionMD5");
+                    transactionTemplate.execute((TransactionCallback<Object>) result -> {
+                        MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getByMD5(questionMD5);
+                        Set<Partition> partitions = multiPartitionableQuestion.getPartitions();
+                        for (Partition partition : partitions) {
+                            partition.getQuestions().remove(multiPartitionableQuestion);
+                            partitionService.saveAndFlush(partition);
+                        }
+                        return Boolean.TRUE;
+                    });
+                    multiPartitionableQuestionService.deleteById(questionMD5);
+                    sendDeleteQuestionToAll(questionMD5);
                 }
             }
         } catch (Exception e) {
             try {
                 logger.error(e.getClass().getName() + ":" + e.getMessage());
-                Map<String,String> dataMap = new HashMap<>();
-                dataMap.put("type","error");
-                dataMap.put("data",e.getClass().getSimpleName()+":"+e.getMessage());
+                Map<String, String> dataMap = new HashMap<>();
+                dataMap.put("type", "error");
+                dataMap.put("data", e.getClass().getSimpleName() + ":" + e.getMessage());
                 sendMessage(gson.toJson(dataMap));
 //                sendMessage("error:" + e.getMessage());
             } catch (IOException exception) {
@@ -148,6 +183,13 @@ public class Connector {
         for (Connector item : CONNECTORS) {
             sids.add(item.sid);
         }*/
+    }
+    
+    private void sendDeleteQuestionToAll(String questionMD5) throws IOException {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("type", "deleteQuestion");
+        dataMap.put("questionMD5", questionMD5);
+        webSocketService.sendMessageToAll(gson.toJson(dataMap));
     }
     
     private void sendUpdatePartitionToAll() throws IOException {

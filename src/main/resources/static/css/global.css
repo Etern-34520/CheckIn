@@ -17,8 +17,8 @@
 @media (prefers-color-scheme: light) {
     :root {
         --font-color: rgb(23, 23, 23);
-        --body-background-color: #fff;
-        --rounded-div-background-color: #f0f0f0;
+        --body-background-color: #f0f0f0;
+        --rounded-div-background-color: #fff;
         --component-background-color: rgba(128, 128, 128, 0);
         --component-background-color-hover: rgba(128, 128, 128, 0.2);
         --input-background-color: rgba(128, 128, 128, 0.1);
@@ -57,6 +57,18 @@ body {
     padding: 4px;
     margin: 6px;
     background-color: var(--rounded-div-background-color);
+}
+
+*[highlight] {
+    transition-timing-function: ease-in-out;
+    transition: 0.2s;
+    background: var(--highlight-component-background-color);
+}
+
+*[highlight]:hover {
+    transition-timing-function: ease-in-out;
+    transition: 0.2s;
+    background: var(--highlight-component-background-color-hover);
 }
 
 button, input[type=submit], input[type=button] {
@@ -163,47 +175,8 @@ select:hover {
     background: var(--input-background-color-hover)
 }
 
-#loginFormDiv > form > div > input {
-    width: 100%;
-    margin: 0;
-}
-
-#loginFormDiv > form > div {
-    margin-top: 4px;
-}
-
-#buttons {
-    display: flex;
-    flex-direction: row;
-}
-
-#loginButton {
-    flex: 0;
-    width: 60px;
-    height: 30px;
-    min-width: 60px;
-    background: var(--highlight-component-background-color);
-    transition: 0.2s;
-    transition-timing-function: ease-in-out;
-}
-
-#loginButton:hover {
-    transition: 0.2s;
-    transition-timing-function: ease-in-out;
-    background: var(--highlight-component-background-color-hover);
-}
-
 .title {
     margin: 8px
-}
-
-#loginForm {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    margin-bottom: 0;
-    margin-left: 8px;
-    margin-right: 8px;
 }
 
 input[type="checkbox"] {
