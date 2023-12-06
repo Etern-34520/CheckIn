@@ -3,6 +3,7 @@ package indi.etern.checkIn.entities.question.interfaces;
 import indi.etern.checkIn.entities.question.Question;
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
@@ -25,7 +26,16 @@ public class MultiPartitionableQuestion extends Question implements MultiPartiti
     }
     
     @Override
+    public Set<Integer> getPartitionIds() {
+        Set<Integer> ids = new HashSet<>();
+        for (Partition partition : partitions) {
+            ids.add(partition.getId());
+        }
+        return ids;
+    }
+    
+    @Override
     public String toJsonData(){
-        throw new RuntimeException("Not implemented");
+        throw new UnsupportedOperationException("Not supported yet");
     }
 }

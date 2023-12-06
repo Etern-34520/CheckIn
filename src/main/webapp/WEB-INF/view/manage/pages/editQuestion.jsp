@@ -11,7 +11,7 @@
 <jsp:useBean id="userInfo" scope="request" class="indi.etern.checkIn.beans.UserInfo"/>
 <jsp:useBean id="question" scope="request"
              type="indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion"/>
-<jsp:useBean id="isNew" scope="request" type="java.lang.Boolean"/>
+<jsp:useBean id="ignorePartitionSelection" scope="request" type="java.lang.Boolean"/>
 <c:set var="md5" value="${question.md5}"/>
 <form id="questionEditForm" onload="initQuestionForm()">
     <div id="formBox">
@@ -22,17 +22,19 @@
                 <div style="display: flex;flex-direction: column;width: 100%;padding-right: 4px;height: 300px;">
                     <label for="questionContent" text>Content</label>
                     <textarea id="questionContent" name="questionContent"
-                              style="height: 300px;resize: none" text oninput="contentChanged()">${question.content}</textarea>
+                              style="height: 300px;resize: none" text>${question.content}</textarea>
                 </div>
                 <div style="display: flex;flex-direction: column;width: 200px;padding-right: 4px;height: 300px;">
                     <label text>Partition</label>
-                    <div rounded style="background: var(--input-background-color);flex: 1" id="partitionSelectionsDiv">
+                    <div rounded style="background: var(--input-background-color);flex: 1;overflow: auto"
+                         id="partitionSelectionsDiv">
                         <c:forEach var="partition" items="${partitionInfo.partitions}">
                             <c:set var="partitionInclude" value="${question.partitions.contains(partition)}"/>
-                            <div rounded clickable onclick="selectQuestionPartition(this)" id="partition_select_${partition.id}" ${question.partitions.contains(partition)?"selected=\"pre\"":""}>
-                                <input type="hidden" id="question_partition_${partition.name}"
-                                       name="question_partition_${partition.name}" value="false">
-                                    ${partition.name}
+                            <div rounded clickable onclick="selectQuestionPartition(this)"
+                                 id="partition_select_${partition.id}" ${!ignorePartitionSelection && question.partitionIds.contains(partition.id)?"selected=\"pre\"":""}>
+                                <input type="hidden" id="question_partition_${partition.id}"
+                                       name="question_partition_${partition.id}" value="false">
+                                <label>${partition.name}</label>
                             </div>
                         </c:forEach>
                     </div>
@@ -49,7 +51,8 @@
             <label text>Images</label>
             <div rounded style="display: flex;flex-direction: row;background: var(--input-background-color)">
                 <label class="fileUpload" for="imageInput" style="font-size: 24px" text>+</label>
-                <input id="imageInput" type="file" onchange="addImages(this)" multiple accept="image/jpeg,image/png,image/gif">
+                <input id="imageInput" type="file" onchange="addImages(this)" multiple
+                       accept="image/jpeg,image/png,image/gif">
                 <div id="imagesDiv">
                 </div>
             </div>

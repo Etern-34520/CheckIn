@@ -51,12 +51,20 @@ body {
     color: var(--font-color);
 }
 
+body > div > div[rounded] {
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+
 *[rounded] {
     border-radius: 8px;
-    border: 0;
+    border: 0px;
     padding: 4px;
     margin: 6px;
     background-color: var(--rounded-div-background-color);
+}
+
+*[border] {
+    border: 1px solid rgba(128, 128, 128, 0.2);
 }
 
 *[highlight] {
@@ -116,6 +124,10 @@ div[clickable]:hover {
     background: var(--component-background-color-hover);
 }
 
+div[clickable] > label {
+    cursor: pointer;
+}
+
 *[text] {
     color: var(--font-color);
     font-family: 'Roboto', sans-serif;
@@ -125,7 +137,7 @@ div[clickable]:hover {
     white-space: pre;
 }
 
-.titleLabel {
+label[titleLabel] {
     margin: 8px;
     font-size: 18px;
 }

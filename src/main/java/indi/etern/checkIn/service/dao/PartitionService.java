@@ -67,4 +67,8 @@ public class PartitionService {
     public boolean existsById(int id) {
         return partitionRepository.existsById(id);
     }
+    
+    public Optional<Partition> findById(Integer id) {
+        return partitionRepository.findById(id);
+    }
 }

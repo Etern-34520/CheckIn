@@ -14,6 +14,7 @@ import java.util.*;
 @Table(name = "partitions")
 public class Partition implements Serializable {
     private static final Map<String, Partition> partitionMap = new HashMap<>();
+    private static final Map<Integer, Partition> partitionIdMap = new HashMap<>();
     @Column(name = "name", unique = true, length = 191, nullable = false)//max 767 bytes
     String name;
     @ManyToMany(mappedBy = "partitions", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
@@ -52,11 +53,27 @@ public class Partition implements Serializable {
             final Optional<Partition> optionalPartition = PartitionService.singletonInstance.tryFindByName(string);
             if (optionalPartition.isPresent()) {
                 partitionMap.put(string, optionalPartition.get());
+                partitionIdMap.put(optionalPartition.get().getId(), optionalPartition.get());
             } else {
-                partitionMap.put(string, new Partition(string));
+                Partition partition = new Partition(string);
+                partitionMap.put(string, partition);
+                partitionIdMap.put(partition.getId(), partition);
             }
         }
         return partitionMap.get(string);
+    }
+    
+    public static Partition getInstance(int partitionId) {
+        if (partitionIdMap.get(partitionId) == null) {
+            final Optional<Partition> optionalPartition = PartitionService.singletonInstance.findById(partitionId);
+            if (optionalPartition.isPresent()) {
+                partitionMap.put(optionalPartition.get().getName(), optionalPartition.get());
+                partitionIdMap.put(optionalPartition.get().getId(), optionalPartition.get());
+            } else {
+                return null;
+            }
+        }
+        return partitionIdMap.get(partitionId);
     }
     
     public static Partition getExample(String name) {
@@ -75,12 +92,12 @@ public class Partition implements Serializable {
         if (questions instanceof PersistentSet<MultiPartitionableQuestion> partitionableQuestionPersistentSet) {
             TransactionTemplate transactionTemplate = TransactionTemplateUtil.getTransactionTemplate();
             transactionTemplate.execute((TransactionCallback<Object>) result -> {
-                questions = PartitionService.singletonInstance.findByName(name).questions;
+                questions = PartitionService.singletonInstance.findById(id).orElseThrow().questions;
                 return Boolean.TRUE;
             });
         }
         Vector<MultiPartitionableQuestion> removeQuestions = new Vector<>();
-        questions.forEach(question1 -> {//FIXME lazy
+        questions.forEach(question1 -> {
             if (question1.getMd5().equals(question.getMd5())) {
                 removeQuestions.add(question1);
             }
@@ -116,6 +133,12 @@ public class Partition implements Serializable {
     
     public int getId() {
         return id;
+    }
+    
+    public void setName(String newName) {
+        name = newName;
+        partitionMap.remove(name);
+        partitionMap.put(name, this);
     }
     /*
     @Override

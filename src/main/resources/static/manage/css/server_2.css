@@ -8,9 +8,9 @@
 }
 
 #managePage[index="2"][page-type="server"] #right {
-    margin-left: 4px;
-    flex: 1;
+    margin-left: 2px;
     margin-top: 4px;
+    flex: 1;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -155,7 +155,7 @@ input[type="file"] {
     background: var(--input-background-color-hover)
 }
 
-#left > .subContentRoot > div > div > div > div.pointer {
+#partitionDivs div.pointer {
     font-size: 16px;
     color: var(--highlight-component-background-color-hover);
     opacity: 0;

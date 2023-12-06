@@ -1,10 +1,10 @@
 let md5ToQuestionFormDataMap = new Map();
 
-function addQuestion() {
-    editQuestion("");
+function addQuestion(partitionId) {
+    editQuestion("", partitionId);
 }
 
-function editQuestion(questionMD5) {
+function editQuestion(questionMD5, partitionId) {
     let data = "md5=" + questionMD5 + "";
     if (questionMD5 === undefined) {
         questionMD5 = "";
@@ -13,6 +13,11 @@ function editQuestion(questionMD5) {
     if (questionMD5 === "") {//new question
         data = data + "new=true";
         url = "page/newQuestion";
+        if (partitionId !== undefined) {
+            data = data + "&partitionId=" + partitionId;
+        } else {
+            data = data + "&ignorePartitionSelection=false"
+        }
     }
     let $left = $("#left");
     $.ajax({
@@ -32,6 +37,7 @@ function editQuestion(questionMD5) {
             // $right.html(res);
         }, error: function (res) {
             showTip("error", res.status);
+            console.error(res)
         }
     });
 }
@@ -40,13 +46,18 @@ function selectQuestionPartition(partitionDiv) {
     md5ToQuestionFormDataMap.get($("#md5").val()).selectQuestionPartition(partitionDiv);
 }
 
-function switchToQuestion(questionMD5) {
+function switchToQuestion(questionMD5, element) {
     let data = "new=true";
     let url = "page/newQuestion";
     let currentQuestionFormData = md5ToQuestionFormDataMap.get(questionMD5);
+    const partitionId = $(element).attr("initPartition");
+    $(element).removeAttr("initPartition");
     if (currentQuestionFormData === undefined) {
         url = "page/editQuestion";
         data = "md5=" + questionMD5;
+        if (partitionId !== undefined) {
+            data = data + "&partitionId=" + partitionId;
+        }
     }
     $.ajax({
         url: url, method: "post", data: data, success: function (res) {
@@ -65,6 +76,23 @@ function switchToQuestion(questionMD5) {
                 for (let key of currentQuestionFormData.keys()) {
                     formDataMap.set(key, currentQuestionFormData.get(key));
                 }
+                // let hasPartition = false;
+                // for (const key of formDataMap.keys()) {
+                //     if (key.startsWith("question_partition_")) {
+                //         if (formDataMap.get(key) === "true") {
+                //             // hasPartition = true;
+                //             break;
+                //         }
+                //     }
+                // }
+                /*if (!hasPartition) {
+                    const partitionId = $(element).attr("initPartition");
+                    if (partitionId !== undefined) {
+                        // $("#partitionSelectionsDiv").find("#partition_select_" + partitionId).trigger("click");
+                        formDataMap.set("question_partition_" + partitionId, "true");
+                        $(element).removeAttr("initPartition");
+                    }
+                }*/
                 for (const key of formDataMap.keys()) {
                     let $formElement = $questionEditForm.find("*[name=" + key + "]");
                     if ((!isNaN(Number(key)) || key.startsWith("correct")) && $questionEditForm.find("*[name=" + key + "]").length === 0) {
@@ -88,6 +116,7 @@ function switchToQuestion(questionMD5) {
             });
         }, error: function (res) {
             showTip("error", res.status);
+            console.error(res);
         }
     });
 
@@ -96,7 +125,7 @@ function switchToQuestion(questionMD5) {
 
 function initQuestionForm() {
     try {
-        var newQ = false;
+        let newQ = false;
         let questionFormData = md5ToQuestionFormDataMap.get($("#md5").val());
         if (questionFormData === undefined) {
             newQ = true;
@@ -126,6 +155,9 @@ function initQuestionForm() {
             questionFormData.updateDataAndCheckChange();
         });
         $questionEditForm.find("select").on("input", function () {
+            questionFormData.updateDataAndCheckChange();
+        });
+        $questionEditForm.find("textarea").on("input", function () {
             questionFormData.updateDataAndCheckChange();
         });
     } catch (e) {
@@ -159,7 +191,7 @@ class QuestionFormData {
         this.formData = new FormData(formElement);
         this.originalFormData = new FormData(formElement);
         if (loadImagesFromServer)
-            this.loadImagesFromServer();//TODO 图片重复
+            this.loadImagesFromServer();
     }
 
     loadImagesFromServer() {
@@ -173,7 +205,6 @@ class QuestionFormData {
                     for (let i = 0; i < originalImageCount; i++) {
                         let imageName = res.names[i];
                         let imageSize = res.sizes[i];
-                        //FIXME 转码错误
                         let imageData = dataURLtoFile(res.imagesBase64[imageName], imageName);
                         this.addImageData(imageData, false);
                     }
@@ -181,6 +212,7 @@ class QuestionFormData {
             }.bind(this),
             error: function (res) {
                 showTip("error", res.status, false);
+                console.error(res);
             }.bind(this)
         })
     }
@@ -192,6 +224,7 @@ class QuestionFormData {
     }
 
     /**FormData*/ toUploadFormData() {
+        this.updateDataAndCheckChange(this.formData);
         const uploadFormData = new FormData();
         const originalFormData = new FormData();
         for (const key of this.formData.keys()) {
@@ -205,29 +238,20 @@ class QuestionFormData {
             index++;
         }
 
-        // this.originalFormData = this.formData;//FIXME dont use reference but copy
         this.originalImageNamesAndSizesToDataMap = new Map();
         for (const key of this.imageNamesAndSizesToDataMap.keys()) {
             this.originalImageNamesAndSizesToDataMap.set(key, this.imageNamesAndSizesToDataMap.get(key));
         }
         this.updateDataAndCheckChange(this.formData);
 
-        // //debug
-        // let reader = new FileReader();
-        // reader.readAsDataURL(Array.from(this.imageNamesAndSizesToDataMap.values())[1]);
-        // reader.onload = function () {
-        //     console.log(reader.result);
-        // }
-
         return uploadFormData;
     }
 
     /**void*/ contentChanged() {
-        this.updateDataAndCheckChange();
-        let partitionId = $("#md5").val();
+        // this.updateDataAndCheckChange();
         let $questionContent = $("#questionContent");
         let questionMD5 = $('#md5').val();
-        let $questions = $(`#left > .subContentRoot > div > div > div.question${questionMD5} > div:nth-child(2)`);
+        let $questions = $("#partitionDivs div.question" + questionMD5 + "> div:nth-child(2)");
         if ($questions.length >= 1) {
             $questions.text($questionContent.val());
         }
@@ -261,13 +285,14 @@ class QuestionFormData {
 
         this.changed = this.checkChange();
 
+        this.contentChanged();
         if (this.changed) {
-            $("#left > .subContentRoot > div > div > div.question" + questionMD5 + " > div.pointer").animate({
+            $("#partitionDivs div.question" + questionMD5 + " > div.pointer").animate({
                 opacity: 1
             }, 200, "easeInOutQuad");
             // questionMD5ToChangedBooleanMap.set(questionMD5, true);
         } else {
-            $("#left > .subContentRoot > div > div > div.question" + questionMD5 + " > div.pointer").animate({
+            $("#partitionDivs div.question" + questionMD5 + " > div.pointer").animate({
                 opacity: 0
             }, 200, "easeInOutQuad");
             // questionMD5ToChangedBooleanMap.set(questionMD5, false);
@@ -279,6 +304,9 @@ class QuestionFormData {
     /**boolean*/ checkChange() {
         let changed = false;
         for (const key of this.formData.keys()) {
+            if (key.startsWith("question_partition_") && this.formData.get(key) === "false") {
+                continue;
+            }
             if (this.formData.get(key) !== this.originalFormData.get(key)) {
                 changed = true;
                 break;
@@ -286,6 +314,13 @@ class QuestionFormData {
         }
         if (!changed) {//已经改变了就无需再检查
             for (const key of this.originalFormData.keys()) {
+                if (key.startsWith("question_partition_") && this.formData.get(key) === "false") {
+                    if (this.originalFormData.get(key) === "true") {
+                        changed = true;
+                        break;
+                    } else
+                        continue;
+                }
                 if (this.formData.get(key) !== this.originalFormData.get(key)) {
                     changed = true;
                     break;
@@ -312,28 +347,28 @@ class QuestionFormData {
     }
 
     /**void*/ addNewChoice(/**boolean*/animate = true) {
-        var optionsDiv = document.getElementById('optionsDiv');
-        var div = document.createElement('div');
-        div.className = "optionDiv"
-        var index = optionsDiv.children.length;
-        let $optionDiv = $(div);
-        $optionDiv.slideUp(0);
-        div.innerHTML = `
+        const $optionsDiv = $("#optionsDiv");
+        let index = $optionsDiv.children().length;
+        const divHtml = `
+<div class="optionDiv" style="display: none">
 <input type="checkbox" name="correct` + (index + 1) + `" id="correct` + (index + 1) + `" value="true">
 <input type="text" style="margin-left: 8px" name="` + (index + 1) + `"  id="` + (index + 1) + `" value="">
 <button class="deleteOptionButton" type="button" style="height: 32px;width: 32px;margin: 4px;font-size: 24px" onclick="deleteChoice(this)">-</button>
-`
-        optionsDiv.append(div);
+</div>
+`;
+        let $optionDiv = $(divHtml);
+        $optionDiv.slideUp(0);
+        $optionsDiv.append($optionDiv);
         if (animate) {
             $optionDiv.slideDown(150);
         } else {
             $optionDiv.slideDown(0);
         }
-        $optionDiv.children("input").on("input", function () {
+        $optionDiv.find("input").on("input", function () {
             this.updateDataAndCheckChange();
         }.bind(this));
         let $deleteOptionButton = $(".deleteOptionButton");
-        if (document.getElementById("optionsDiv").children.length <= 2) {
+        if ($optionsDiv.children().length <= 2) {
             $deleteOptionButton.fadeOut(200, "easeInOutCubic");
         } else {
             $deleteOptionButton.fadeIn(200, "easeInOutCubic");
@@ -400,12 +435,15 @@ onmouseout="hideDeleteDiv(this);">-
         let partitionId = partitionDiv.id.replace("partition_select_", "");
         let selected = $partitionSelection.attr("selected") === "selected";
         if (selected) {
+            if ($partitionSelection.parent().find("div[selected='selected']").length <= 1) {
+                showTip("info", "至少选择一个分区");
+                return;
+            }
             $partitionSelection.removeAttr("selected");
             hiddenPartitionInput.attr("value", "false");
         } else {
             hiddenPartitionInput.attr("value", "true");
             $partitionSelection.attr("selected", "");
-
         }
         let questionMd5 = this.formData.get("md5");
         let $questionContent = $("#questionContent");
@@ -424,10 +462,7 @@ onmouseout="hideDeleteDiv(this);">-
                 }, 200, "easeInOutQuad", function () {
                     $questionsOfPartitionByMd5.remove();
                     if ($questionsOfPartitions.children().length === 0) {
-                        let $empty = $(`
-<div rounded style="cursor: auto;background: rgba(0,0,0,0);">
-empty
-</div>`);
+                        let $empty = $(`<div rounded style="cursor: auto;background: rgba(0,0,0,0);" class="empty">empty</div>`);
                         // $empty.css("display", "none");
                         $empty.css("opacity", "0");
                         $empty.css("height", "0");
@@ -451,7 +486,7 @@ empty
             } else {
                 let $firstChild = $questionsOfPartitions.children().eq(0);
                 let $partitionDiv = $(`
-<div rounded clickable class="question${questionMd5}" style="height: 21px;overflow: hidden;display: flex;flex-direction: row" onclick="switchToQuestion('${questionMd5}')">
+<div rounded clickable class="question${questionMd5}" style="height: 21px;overflow: hidden;display: flex;flex-direction: row" onclick="switchToQuestion('${questionMd5}',this)">
 <div class="pointer" style="width: 10px">•</div>
 <div style="flex: 1">
 ${$questionContent.val()}
@@ -528,18 +563,14 @@ ${$questionContent.val()}
 
 //following functions for current questionFormData
 function togglePartition(titleDiv) {
-    let $brothers = $(titleDiv).parent().children();
-    $brothers.eq(1).toggle(200, function () {
-        if ($brothers.eq(0).attr('selected') === 'selected') {
-            $brothers.eq(0).removeAttr('selected');
+    const $titleDiv = $(titleDiv);
+    $titleDiv.parent().parent().children().eq(1).toggle(200, function () {
+        if ($titleDiv.attr('selected') === 'selected') {
+            $titleDiv.removeAttr('selected');
         } else {
-            $brothers.eq(0).attr('selected', true);
+            $titleDiv.attr('selected', true);
         }
-    })
-}
-
-function contentChanged() {
-    md5ToQuestionFormDataMap.get($("#md5").val()).contentChanged();
+    });
 }
 
 function addNewChoice(animate = true) {
@@ -612,9 +643,14 @@ function updateAllQuestions() {
                 contentType: false,
                 success: function () {
                     showTip("info", "upload success: " + questionMD5);
+                    const $questionSimpleDiv = $(`.question${questionMD5}`);
+                    if ($questionSimpleDiv.css("opacity") !== 1) {
+                        $questionSimpleDiv.fadeTo(200, 1, "easeInOutQuad");
+                    }
                 },
                 error: function (res) {
                     showTip("error", "upload failed: " + questionMD5 + ";" + res.responseJSON.message, false);
+                    console.error(res);
                 }
             });
         }

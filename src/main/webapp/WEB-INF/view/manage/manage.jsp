@@ -43,12 +43,13 @@
     <link rel="stylesheet" href="./css/manage.css">
     <link rel="stylesheet" href="./css/server_0.css">
     <link rel="stylesheet" href="./css/server_2.css">
+    <link rel="stylesheet" href="./css/questions.css">
 </head>
 <body>
 <div id="tipsMask">
 </div>
 <div id="contentRoot">
-    <div id="top" rounded>
+    <div id="top" rounded border>
         <button type="button" id="menuButton" class="button" style="font-size: 20px" onclick="showMenu()">=</button>
         <div id="pagePath">
             <div class="path" undeleted>

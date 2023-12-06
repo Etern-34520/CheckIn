@@ -28,7 +28,7 @@ public class QuestionDataReadController {
     public String getImageQuantity(@PathVariable String questionMD5) {
         MultiPartitionableQuestion question = multiPartitionableQuestionService.getByMD5(questionMD5);
         if (question instanceof ImagesWith questionWithImages) {
-            return String.valueOf(questionWithImages.getImagePathStrings().size());//TODO
+            return String.valueOf(questionWithImages.getImagePathStrings().size());
         } else {
             return "0";
         }

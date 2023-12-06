@@ -131,7 +131,9 @@ public class Connector {
             final String partitionName = (String) contentMap.get("partitionName");
             switch ((String) contentMap.get("type")) {
                 case "addPartition" -> {
-                    partitionService.save(Partition.getInstance(partitionName));
+                    final Partition partition = Partition.getInstance(partitionName);
+                    partitionService.save(partition);
+                    sendMessage("{\"type\":\"addPartitionCallBack\",\"id\":"+partition.getId()+"}");
                     sendUpdatePartitionToAll();
                 }
                 case "deletePartition" -> transactionTemplate.execute((TransactionCallback<Object>) result -> {
@@ -165,6 +167,13 @@ public class Connector {
                     multiPartitionableQuestionService.deleteById(questionMD5);
                     sendDeleteQuestionToAll(questionMD5);
                 }
+                case "editPartition" -> {
+                    final String newName = (String) contentMap.get("partitionName");
+                    Partition partition = partitionService.findById(Integer.valueOf(contentMap.get("partitionId").toString())).orElseThrow();
+                    partition.setName(newName);
+                    partitionService.saveAndFlush(partition);
+                    sendUpdatePartitionToAll();
+                }
             }
         } catch (Exception e) {
             try {
@@ -196,11 +205,15 @@ public class Connector {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("type", "updatePartitionList");
         final List<Partition> partitions = partitionService.findAll();
-        final List<String> partitionNames = new ArrayList<>();
+        final Map<String,String> partitionIdNameMap = new HashMap<>();
+//        final List<String> partitionNames = new ArrayList<>();
+//        final List<Integer> partitionIds = new ArrayList<>();
         for (Partition partition : partitions) {
-            partitionNames.add(partition.getName());
+            partitionIdNameMap.put(String.valueOf(partition.getId()),partition.getName());
         }
-        dataMap.put("partitions", partitionNames);
+//        dataMap.put("partitions", partitionNames);
+//        dataMap.put("partitionIds", partitionIds);
+        dataMap.put("partitionIdNameMap", partitionIdNameMap);
         webSocketService.sendMessageToAll(gson.toJson(dataMap));
     }
     

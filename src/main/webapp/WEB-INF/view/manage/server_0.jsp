@@ -9,15 +9,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <div id="managePage" index="0" page-type="server" onload="initChart()">
     <div id="left">
-        <div id="leftTop" rounded>
+        <div id="leftTop" rounded border>
 
         </div>
-        <div id="leftBottom" rounded>
+        <div id="leftBottom" rounded border>
             <div id="chart"></div>
             <div id="todayTraffics"></div>
         </div>
     </div>
-    <div id="right" rounded>
+    <div id="right" rounded border>
         <div class="subContentRoot">
 
         </div>

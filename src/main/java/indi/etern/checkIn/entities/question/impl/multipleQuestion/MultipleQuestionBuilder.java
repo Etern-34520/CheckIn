@@ -150,7 +150,7 @@ public class MultipleQuestionBuilder {
                     BufferedOutputStream bos = new BufferedOutputStream(outputStream, 1024);
                     final InputStream inputStream = imagePart.getInputStream();
 //                    inputStream.skip(new String(imagePart.getInputStream().readNBytes(25)).split("base64,",2)[0].length()+7);
-                    inputStream.transferTo(bos);//FIXME
+                    inputStream.transferTo(bos);
                     inputStream.close();
                     outputStream.close();
                     bos.close();
@@ -195,6 +195,15 @@ public class MultipleQuestionBuilder {
     
     public MultipleQuestionBuilder setMD5(String md5) {
         this.md5 = md5;
+        return this;
+    }
+    
+    public MultipleQuestionBuilder addPartition(int partitionId) {
+        Partition partition = Partition.getInstance(partitionId);
+        if (partition == null) {
+            partition = Partition.getInstance("undefined");
+        }
+        partitions.add(partition);
         return this;
     }
 }

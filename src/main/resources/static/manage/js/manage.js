@@ -1,22 +1,10 @@
-$(function () {//页面加载完成后执行
-    if ($.cookie('page') == null || $.cookie('pageClass') == null) {
-        $.cookie('page', 0);
-        $.cookie('pageClass', 'server');
-    }
-    switchToPage($.cookie('pageClass'), $.cookie('page'));
-    $("#top").animate({
-        opacity: 1
-    }, 200, "easeInCubic");
-    setTimeout(function () {
-        $("#content").animate({
-            opacity: 1
-        }, 200, "easeInCubic");
-    }, 100);
+function initContextMenu() {
     $.contextMenu({
         selector: "button.partitionButton[editing='false']",
         callback: function (key, options, e) {
             switch (key) {
                 case "edit":
+                    editPartitionName.call(this);
                     break;
                 case "delete":
                     const messageJson = {
@@ -24,7 +12,7 @@ $(function () {//页面加载完成后执行
                         "partitionName": $(this).text()
                     };
                     sendMessage(JSON.stringify(messageJson), function (event) {
-                        console.log(event);
+                        // console.log(event);
                     });
                     break;
             }
@@ -36,8 +24,8 @@ $(function () {//页面加载完成后执行
     });
     $.contextMenu({
         selector: "div.question",
-        callback: function (key,options,e){
-            let $questionMD5Div = $(this).find("div.t1 > div.questionMD5");
+        callback: function (key, options, e) {
+            let $questionMD5Div = $(this).find("div.questionMD5");
             switch (key) {
                 case "edit":
                     editQuestion($questionMD5Div.text());
@@ -57,7 +45,60 @@ $(function () {//页面加载完成后执行
             "edit": {name: "Edit", icon: "edit"},
             "delete": {name: "Delete", icon: "delete"},
         }
-    })
+    });
+    $.contextMenu({
+        selector: "div.partitionQuestionsList > div:not(.empty)",
+        callback: function (key, options, e) {
+            let $questionMD5Div = $(this);
+
+            function deleteQuestionDiv(questionMD5) {
+                const messageJson = {
+                    "type": "deleteQuestion",
+                    "questionMD5": questionMD5
+                };
+                sendMessage(JSON.stringify(messageJson), function (event) {
+                    console.log(event);//FIXME
+                    $("div.partitionQuestionsList > div.question" + messageJson.questionMD5).remove();
+                    $questionMD5Div.remove();
+                }, function (event) {
+                    $("div.partitionQuestionsList > div." + messageJson.questionMD5).remove();
+                    $questionMD5Div.remove();
+                });
+            }
+
+            switch (key) {
+                case "delete":
+                    const questionMD5 = $questionMD5Div.attr("class").substring(8).replace(" context-menu-active", "");
+                    if ($("#md5").val() === questionMD5)
+                        transitionPage($("#right"), "", undefined, undefined, function () {
+                            deleteQuestionDiv(questionMD5);
+                        });
+                    else
+                        deleteQuestionDiv(questionMD5);
+                    break;
+            }
+        },
+        items: {
+            "delete": {name: "Delete", icon: "delete"},
+        }
+    });
+}
+
+$(function () {//页面加载完成后执行
+    if ($.cookie('page') == null || $.cookie('pageClass') == null) {
+        $.cookie('page', 0);
+        $.cookie('pageClass', 'server');
+    }
+    switchToPage($.cookie('pageClass'), $.cookie('page'));
+    $("#top").animate({
+        opacity: 1
+    }, 200, "easeInCubic");
+    setTimeout(function () {
+        $("#content").animate({
+            opacity: 1
+        }, 200, "easeInCubic");
+    }, 100);
+    initContextMenu();
 })
 
 function showMenu() {
@@ -146,7 +187,7 @@ function addPath(pathName, backFunc) {
         opacity: 1,
         marginLeft: 3,
         marginRight: 3
-    }, 200, "easeInOutCubic");
+    }, 200, "easeInCubic");
 }
 
 function doBackFunc(pathName) {
@@ -176,7 +217,7 @@ function removePath(pathName) {
                 opacity: 0,
                 marginLeft: -20,
                 marginRight: 20,
-            }, 200, "easeInOutCubic", function () {
+            }, 200, "easeInCubic", function () {
                 setTimeout(function () {
                     $path.remove();
                 }, 100);
@@ -199,7 +240,7 @@ function removePathAfter(pathName, contains = false, doCallBackFunc = false) {
         }
     }
     if (indexOfPathName !== -1) {
-        for (let i = indexOfPathName + (contains?0:1); i < $paths.length; i++) {
+        for (let i = indexOfPathName + (contains ? 0 : 1); i < $paths.length; i++) {
             $paths.eq(i).animate({
                 opacity: 0,
                 marginLeft: -20,
@@ -212,13 +253,13 @@ function removePathAfter(pathName, contains = false, doCallBackFunc = false) {
         }
     }
     if (doCallBackFunc) {
-        $paths[indexOfPathName - (contains?1:0)].onclick();
+        $paths[indexOfPathName - (contains ? 1 : 0)].onclick();
     }
     pathLock = false;
     return "success";
 }
 
-function switchToPage(pageClass, index, clearPathBool = true) {
+function switchToPage(pageClass, index, clearPathBool = true, callback) {
     $.ajax({
         url: location.href,
         type: 'get',
@@ -239,22 +280,19 @@ function switchToPage(pageClass, index, clearPathBool = true) {
             if (clearPathBool) {
                 clearPath();
                 addPath(pathName, function () {
-                    switchToPage(pageClass, index, false);
-                    // const $content = $('#content');
-                    // $content.html(res);
-                    // let $leftSubContentRoot = $("#left .subContentRoot");
-                    // const leftSubContentHtml = $leftSubContentRoot.html();
-                    // $leftSubContentRoot.html("");
-                    // transitionPage($("#left"), leftSubContentHtml);
-                    // try {
-                    //     document.getElementById("managePage").onload(undefined);
-                    // } catch (e) {
-                    //     //ignored
-                    // }
+                    $("#content").fadeTo(200, 0, "easeInCubic", function () {
+                        switchToPage(pageClass, index, false, function () {
+                            setTimeout(function () {
+                                $("#content").fadeTo(200, 1, "easeInCubic");
+                            }, 200);
+                        });
+                    });
                 });
             }
             selectButtonOf(pageClass, index);
             closeMenu();
+            if (callback instanceof Function)
+                callback();
         },
         error: function (res) {
             showTip('error', '加载页面时发生错误:' + res.status);
@@ -323,7 +361,9 @@ ${content}
                 this.mouseEnteredTimes++;
             }.bind(this));
             $tip.on("mouseleave", function () {
-                setTimeout(function (){this.closeTipWhileMouseNotHover($tip,this)}.bind(this), 1000);
+                setTimeout(function () {
+                    this.closeTipWhileMouseNotHover($tip, this)
+                }.bind(this), 1000);
             }.bind(this));
             if (this.autoClose) {
                 const closeTipWhileMouseNotHover = this.closeTipWhileMouseNotHover;
@@ -339,8 +379,7 @@ ${content}
     closeTipWhileMouseNotHover($tip, thisObj) {
         if (thisObj.mouseEnteredTimes > 0) {
             thisObj.mouseEnteredTimes--;
-        }
-        else {
+        } else {
             $tip.animate({
                 marginLeft: $tip.width() + 20,
                 marginRight: -$tip.width() - 20,
@@ -362,7 +401,7 @@ ${content}
 }
 
 function closeTipOfButton(tipCloseButton) {
-    var $tip = $(tipCloseButton).parent().parent();
+    const $tip = $(tipCloseButton).parent().parent();
     $tip.animate({
         marginLeft: $tip.width() + 20,
         marginRight: -$tip.width() - 20,
@@ -445,6 +484,7 @@ function initChart() {
         },
         error: function (res) {
             showTip("error", res.data);
+            console.error(res);
         }
     });
     $.ajax({
@@ -472,13 +512,14 @@ function initChart() {
         },
         error: function (res) {
             showTip("error", res.data);
+            console.error(res)
         }
     })
 }
 
 var pathLock = false;
 
-function transitionPage($root, html, pathName, backFunc, callBack) {
+function transitionPage($root, html, pathName, backFunc, doneCallBack) {
     if (pathName instanceof String || backFunc instanceof Function) {
         if (pathLock) return "pathLock";
         pathLock = true;
@@ -498,15 +539,16 @@ function transitionPage($root, html, pathName, backFunc, callBack) {
             $subContentRoot.html(html);
             $subContentRoot.css("marginTop", 8);
             $subContentRoot.css("marginBottom", 8);
-            if (callBack instanceof  Function){
-                callBack();
+            if (doneCallBack instanceof Function) {
+                doneCallBack();
             }
             $subContentRoot.animate({
                 opacity: 1,
             }, 300, "easeOutCubic");
             try {
                 $subContentRoot.children()[0].onload(undefined)
-            } catch (ignored){}
+            } catch (ignored) {
+            }
         }, 200)
     });
     if (pathName instanceof String || backFunc instanceof Function) {

@@ -59,7 +59,7 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
     public List<Choice> getChoices() {
         return choices;
     }
-    @PostLoad//FIXME
+    @PostLoad
     public void filterCorrectChoices() {
         if (choices == null){
             return;
@@ -108,7 +108,7 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
     @Override
     public String toJsonData() {
         Map<String,Object> dataMap = new HashMap<>();
-        dataMap.put("type","multipleCorrect");
+        dataMap.put("type",getClass().getSimpleName());
         dataMap.put("content",content);
         List<Map<String,String>> choices = new ArrayList<>();
         List<Map<String,String>> correctChoices = new ArrayList<>();
@@ -124,10 +124,14 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
         dataMap.put("choices",choices);
         dataMap.put("correctChoices",correctChoices);
         final List<String> partitionNames = new ArrayList<>();
+        final List<Integer> partitionIds = new ArrayList<>();
         for (Partition partition : partitions) {
             partitionNames.add(partition.getName());
+            partitionIds.add(partition.getId());
         }
         dataMap.put("partitions", partitionNames);
+        dataMap.put("partitionIds",partitionIds);
+        dataMap.put("md5",md5);
         return new Gson().toJson(dataMap);
     }
 }

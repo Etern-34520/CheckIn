@@ -1,6 +1,5 @@
 package indi.etern.checkIn.repositories;
 
-import indi.etern.checkIn.entities.convertor.LocalDateToDateConvertor;
 import indi.etern.checkIn.entities.traffic.DateTraffic;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,7 +9,6 @@ import java.util.Optional;
 
 public interface DateTrafficRepository extends JpaRepository<DateTraffic,LocalDate> {
     default Optional<DateTraffic> findByLocalDate(LocalDate localDate){
-        LocalDateToDateConvertor localDateToDateConvertor = new LocalDateToDateConvertor();//FIXME
         return findById(localDate);
     }
     

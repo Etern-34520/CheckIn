@@ -13,13 +13,13 @@
 <div id="managePage" index="2" page-type="server">
     <div id="left" rounded border>
         <div class="subContentRoot">
-            <label titleLabel text>分区</label>
-            <div id="partitionButtons">
-                <c:forEach var="partition" items="${partitionInfo.partitions}">
-                    <button type="button" id="partitionButton${partition.id}" class="partitionButton" onclick="switchToPartition(this)" preText editing="false">${fn:escapeXml(partition.name)}</button>
-                </c:forEach>
-                <button type="button" id="addPartitionButton" style="font-size: 20px" onclick="newPartition()">+</button>
-            </div>
+            <label titleLabel text>用户</label>
+<%--            <div id="partitionButtons">--%>
+<%--                <c:forEach var="partition" items="${partitionInfo.partitions}">--%>
+<%--                    <button type="button" id="partitionButton${partition.id}" class="partitionButton" onclick="switchToPartition(this)" preText editing="false">${fn:escapeXml(partition.name)}</button>--%>
+<%--                </c:forEach>--%>
+<%--                <button type="button" id="addPartitionButton" style="font-size: 20px" onclick="newPartition()">+</button>--%>
+<%--            </div>--%>
         </div>
     </div>
     <div id="right" rounded border="">

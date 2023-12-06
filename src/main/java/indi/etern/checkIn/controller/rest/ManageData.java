@@ -79,7 +79,7 @@ public class ManageData {
     
     @PostMapping(path = "/updateQuestion/{questionMD5}")
     @ResponseBody
-    public synchronized String updateQuestion(HttpServletRequest httpServletRequest, @PathVariable String questionMD5) {//FIXME 线程不安全
+    public synchronized String updateQuestion(HttpServletRequest httpServletRequest, @PathVariable String questionMD5) {
         try {
             MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
 //            final MultiPartitionableQuestion partitionableQuestion = multiPartitionableQuestionService.getByMD5(httpServletRequest.getParameter("md5"));
@@ -112,8 +112,9 @@ public class ManageData {
                     String choiceContent = map.get(key)[0];
                     choiceParamMap.put(Integer.parseInt(key), new Object[]{choiceContent, false});
                 } else if (key.startsWith("question_partition_") && map.get(key)[0].equals("true")){
-                    String partitionName = key.substring(19);
-                    multipleQuestionFactory.addPartition(partitionName);
+                    int partitionId = Integer.parseInt(key.substring(19));
+//                    multipleQuestionFactory.addPartition(partitionName);
+                    multipleQuestionFactory.addPartition(partitionId);
                 }
             }
             for (String key : map.keySet()) {
