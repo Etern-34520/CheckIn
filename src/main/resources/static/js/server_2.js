@@ -9,7 +9,7 @@ function editPartitionName() {
     $editInput.val(originalName);
     $partitionButton.text("");
     $partitionButton.append($editInput);
-    $editInput.focus();
+    // $editInput.focus();
     $editInput.focus();
     $partitionButton.off("keydown");
     $partitionButton.on("keydown", function (event) {
@@ -59,11 +59,11 @@ function saveEditing($editingInput, $partitionButton, previousName) {
     initContextMenu();
     editing = false;
     $partitionButton.attr("editing", "false");
-    sendMessage(JSON.stringify({
+    sendMessage({
         "type": "editPartition",
         "partitionName": $partitionButton.text(),
         "partitionId": $partitionButton.attr("id").substring(15)
-    }), function (e) {
+    }, function (e) {
         showTip("info", "Partition name changed");
     });
 }
@@ -79,6 +79,9 @@ function initQuestionViewImages() {
 function initQuestionViewImage(questionMD5) {
     $.ajax({
         url: "./../question/image/" + questionMD5 + "/", method: "get",
+        xhrFields:{
+            withCredentials:true
+        },
         success: function (res) {
             let originalImageCount = res.count;
             if (originalImageCount >= 1) {
@@ -103,17 +106,22 @@ function initQuestionViewImage(questionMD5) {
         const img = new Image();
         img.src = reader.result;
         img.onload = function () {
-            const $questionDiv = $("#" + questionMD5);
-            const width = (img.width / (img.height / ($questionDiv.height())));
+            const $questionDiv = $("#" + questionMD5 + " .questionOverviewImages");
+            const width = (img.width / (img.height / (100)));
             let $imageDiv = $(`
 <div id="${imageNameAndSize}" class="imageDiv" style="border-radius:8px;background-image: url('${reader.result}');width: ${width + 'px'}"></div>`);
+/*
             $imageDiv.css({
                 marginLeft: -5, opacity: 0
             });
+*/
+            $questionDiv.attr("rounded","");
             $questionDiv.append($imageDiv);
+/*
             $imageDiv.animate({
                 marginLeft: 0, opacity: 1
             }, 300, 'easeInOutCubic');
+*/
         }.bind(this);
     }.bind(this);
 }
@@ -138,7 +146,7 @@ function addNewPartitionButton($nameInput, $newPartitionButton) {
         "type": "addPartition",
         "partitionName": partitionName
     };
-    sendMessage(JSON.stringify(messageJson), function (event) {
+    sendMessage(messageJson, function (event) {
         const message = JSON.parse(event.data);
         if (message.type === "addPartitionCallBack") {
             $newPartitionButton.attr("id", "partitionButton" + message.id);
@@ -195,7 +203,11 @@ function newPartition() {
     // $newPartitionButton.stop();
 }
 
+let transferring = false;
+
 function switchToPartition(button) {
+    if (transferring) return;
+    transferring = true;
     let $button = $(button);
     if ($button.attr("editing") === "true") return;
     $(".partitionButton").removeAttr("selected");
@@ -203,11 +215,13 @@ function switchToPartition(button) {
     let partitionName = $button.text();
     let partitionID = $button.attr("id").substring(15);
     let $right = $("#right");
-    removePathAfter("Questions", false, false);
+    removePathAfter("题库", false, false);
     $.ajax({
         url: "page/partitionQuestion",
         method: "post",
-        // data: "name=" + partitionName + "",
+        xhrFields:{
+            withCredentials:true
+        },
         data: {
             "id": partitionID
         },
@@ -216,10 +230,13 @@ function switchToPartition(button) {
             transitionPage($right, res, partitionName, function () {
                 transitionPage($right, res);
                 transitionPage($("#left"), leftHtml);
+            },function () {
+                transferring = false;
             });
         },
         error: function (res) {
             showTip("error", res.status);
+            transferring = false;
         }
     });
 }
@@ -393,7 +410,11 @@ function removeQuestionDiv(questionMD5) {
             let $questionDiv = $("#" + questionMD5);
             $questionDiv.animate({
                 height: 0,
-                opacity: 0
+                opacity: 0,
+                marginTop: 0,
+                marginBottom: 0,
+                paddingTop: 0,
+                paddingBottom: 0,
             }, 200, "easeOutQuad", function () {
                 setTimeout(function () {
                     $questionDiv.remove();
@@ -461,7 +482,25 @@ function updateQuestionDiv(questionJsonData) {
         if (!containedInCurrentPartition) {
             return;
         }
-        const questionHtml = generateQuestionHtml(questionObject);
+        $.ajax({
+            url: "./page/questionOverview",
+            data: {
+                md5: questionObject.md5
+            },
+            success: function (res) {
+                const $questionDiv = $(res);
+                $questionDiv.css({
+                    maxHeight: 0,
+                    opacity: 0
+                });
+                $questionsDiv.append($questionDiv);
+                $questionDiv.animate({
+                    maxHeight: 1000,
+                    opacity: 1
+                }, 200, "easeOutQuad");
+            }
+        });
+        /*const questionHtml = generateQuestionHtml(questionObject);
         showTip("info", "New question added:" + questionObject.md5);
         const $questionDiv = $(questionHtml);
         $questionDiv.css({
@@ -472,7 +511,7 @@ function updateQuestionDiv(questionJsonData) {
         $questionDiv.animate({
             maxHeight: 1000,
             opacity: 1
-        }, 200, "easeOutQuad");
+        }, 200, "easeOutQuad");*/
     } else {
         let deletedFromCurrentPartition = true;
         const $questionDiv = $questionDivs.eq(0);

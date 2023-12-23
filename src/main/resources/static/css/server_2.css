@@ -59,8 +59,9 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    background: rgb(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px)
+    background: rgb(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    color:rgba(200, 200, 200);
 }
 
 label.fileUpload {
@@ -115,14 +116,6 @@ input[type="file"] {
 
 #managePage[index="2"][page-type="server"] .partitionButton > input[type="text"]:focus {
     background: var(--input-background-color);
-}
-
-#managePage[index="2"][page-type="server"] .subContentRoot {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: auto;
-    margin: 8px;
 }
 
 #managePage[index="2"][page-type="server"] .optionDiv {

@@ -31,7 +31,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(path = "manage/data")
 public class ManageData {
-    Logger logger = LoggerFactory.getLogger(getClass());
+    final Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     DateTrafficService dateTrafficService;
     @Autowired
@@ -42,10 +42,11 @@ public class ManageData {
     WebSocketService webSocketService;
     @Autowired
     UserService userService;
+    @Autowired
+    Gson gson;
     
     @GetMapping(params = "type=traffic")
     public String getTrafficJsonData() {
-        Gson gson = new Gson();
         final LocalDate now = LocalDate.now();
         List<DateTraffic> dateTraffics = dateTrafficService.getAllFromTo(now.minusDays(6), now);
         List<Map<String, String>> jsonData = new ArrayList<>();
@@ -60,7 +61,6 @@ public class ManageData {
     
     @GetMapping(params = {"type=trafficDetail", "pageIndex"})
     public String getTrafficDetailData(int pageIndex) {
-        Gson gson = new Gson();
         Sort sort = Sort.by(Sort.Direction.DESC, "localDate");
         Pageable pageable = PageRequest.of(pageIndex, 20, sort);
         DateTraffic dateTraffic = dateTrafficService.getByLocalDate(LocalDate.now().minusDays(pageIndex));
@@ -81,18 +81,15 @@ public class ManageData {
     @ResponseBody
     public synchronized String updateQuestion(HttpServletRequest httpServletRequest, @PathVariable String questionMD5) {
         try {
-            MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
-//            final MultiPartitionableQuestion partitionableQuestion = multiPartitionableQuestionService.getByMD5(httpServletRequest.getParameter("md5"));
-//            if (partitionableQuestion != null)
-//                multipleQuestionFactory.md5From(partitionableQuestion);
+            MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
             final String md5 = httpServletRequest.getParameter("md5");
             if (md5 != null) {
-                multipleQuestionFactory.setMD5(md5);
+                multipleQuestionBuilder.setMD5(md5);
             }
             Map<String, String[]> map = httpServletRequest.getParameterMap();
             
             //content
-            multipleQuestionFactory.setQuestionContent(httpServletRequest.getParameter("questionContent"));
+            multipleQuestionBuilder.setQuestionContent(httpServletRequest.getParameter("questionContent"));
             
             //image
             int imageIndex = 0;
@@ -101,7 +98,7 @@ public class ManageData {
                 if (part == null) {
                     break;
                 }
-                multipleQuestionFactory.addImage(part);
+                multipleQuestionBuilder.addImage(part);
                 imageIndex++;
             }
             
@@ -113,8 +110,8 @@ public class ManageData {
                     choiceParamMap.put(Integer.parseInt(key), new Object[]{choiceContent, false});
                 } else if (key.startsWith("question_partition_") && map.get(key)[0].equals("true")){
                     int partitionId = Integer.parseInt(key.substring(19));
-//                    multipleQuestionFactory.addPartition(partitionName);
-                    multipleQuestionFactory.addPartition(partitionId);
+//                    multipleQuestionBuilder.addPartition(partitionName);
+                    multipleQuestionBuilder.addPartition(partitionId);
                 }
             }
             for (String key : map.keySet()) {
@@ -131,18 +128,20 @@ public class ManageData {
                 Choice choice = new Choice((String) choiceParam[0], (Boolean) choiceParam[1]);
                 choices.add(choice);
             }
-            multipleQuestionFactory.addChoices(choices);
+            multipleQuestionBuilder.addChoices(choices);
             
-            User author = userService.findByQQNumber(Long.parseLong(httpServletRequest.getParameter("author"))).get();
-            multipleQuestionFactory.setAuthor(author);
+            User author = userService.findByQQNumber(Long.parseLong(httpServletRequest.getParameter("author"))).orElseThrow();
+            multipleQuestionBuilder.setAuthor(author);
             
-            MultiPartitionableQuestion multiPartitionableQuestion = multipleQuestionFactory.build();
+            multipleQuestionBuilder.setEnable(Boolean.parseBoolean(httpServletRequest.getParameter("enabled")));
+            
+            MultiPartitionableQuestion multiPartitionableQuestion = multipleQuestionBuilder.build();
             multiPartitionableQuestionService.update(multiPartitionableQuestion);
             
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("type", "updateQuestion");
             dataMap.put("question", multiPartitionableQuestion.toJsonData());
-            webSocketService.sendMessageToAll(new Gson().toJson(dataMap));
+            webSocketService.sendMessageToAll(gson.toJson(dataMap));
 //            multiPartitionableQuestionService.save(multiPartitionableQuestion);
         } catch (Exception e) {
             logger.error(e.getMessage());

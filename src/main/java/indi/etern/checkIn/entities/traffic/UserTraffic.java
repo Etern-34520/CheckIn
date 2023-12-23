@@ -1,6 +1,7 @@
 package indi.etern.checkIn.entities.traffic;
 
 import com.google.gson.Gson;
+import indi.etern.checkIn.MVCConfig;
 import indi.etern.checkIn.entities.convertor.LocalDateToDateConvertor;
 import indi.etern.checkIn.entities.convertor.LocalTimeToTimestampConvertor;
 import jakarta.persistence.*;
@@ -52,12 +53,12 @@ public class UserTraffic {
             String headValue = httpServletRequest.getHeader(headName);//根据请求头的名字获取对应的请求头的值
             headerInfo.put(headName, headValue);
         }
-        Gson gson = new Gson();
+        Gson gson = MVCConfig.getGson();
         deviceInfo = gson.toJson(headerInfo);
     }
     public Map<String,String> getHeaderInfo(){
         if (headerInfo == null){
-            headerInfo = new Gson().fromJson(deviceInfo,Map.class);
+            headerInfo = MVCConfig.getGson().fromJson(deviceInfo,Map.class);
         }
         return headerInfo;
     }

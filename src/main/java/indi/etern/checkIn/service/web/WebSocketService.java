@@ -2,6 +2,7 @@ package indi.etern.checkIn.service.web;
 
 import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.api.webSocket.Connector;
+import indi.etern.checkIn.entities.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class WebSocketService {
     /**
      * 群发自定义消息
      */
-    public void sendMessages(String message, HashSet<String> toSids) throws IOException {
+    public void sendMessages(String message, HashSet<String> toSids) {
         logger.info("webSocket to:" + toSids + ", msg:" + message);
         
         for (Connector item : CONNECTORS) {
@@ -29,13 +30,12 @@ public class WebSocketService {
                 } else if (toSids.contains(item.getSid())) {
                     item.sendMessage(message);
                 }
-            } catch (IOException e) {
-                continue;
+            } catch (IOException ignored) {
             }
         }
     }
     
-    public void sendMessage(String message, String sid) throws IOException {
+    public void sendMessage(String message, String sid) {
         logger.info("webSocket to:" + sid + ", msg:" + message);
         
         for (Connector item : CONNECTORS) {
@@ -48,7 +48,7 @@ public class WebSocketService {
         }
     }
     
-    public void sendMessageToAll(String message) throws IOException {
+    public void sendMessageToAll(String message) {
         logger.info("webSocket to all, msg:" + message);
         for (Connector item : CONNECTORS) {
             try {
@@ -57,5 +57,20 @@ public class WebSocketService {
                 logger.error("send : error",e);
             }
         }
+    }
+    
+    public boolean isOnline(String sid) {
+        boolean online = false;
+        for (Connector item : CONNECTORS) {
+            if (item.getSid().equals(sid)) {
+                online = true;
+                break;
+            }
+        }
+        return online;
+    }
+    
+    public boolean isOnline(User user) {
+        return isOnline(String.valueOf(user.getQQNumber()));
     }
 }

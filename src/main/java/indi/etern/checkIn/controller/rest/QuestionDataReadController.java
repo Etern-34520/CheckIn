@@ -23,6 +23,8 @@ public class QuestionDataReadController {
     MultiPartitionableQuestionService multiPartitionableQuestionService;
     @Autowired
     PartitionService partitionService;
+    @Autowired
+    Gson gson;
     
     @GetMapping(path = "image/count/{questionMD5}")
     public String getImageQuantity(@PathVariable String questionMD5) {
@@ -39,7 +41,6 @@ public class QuestionDataReadController {
     public String getAllImageJsonData(@PathVariable String questionMD5) {
         MultiPartitionableQuestion question = multiPartitionableQuestionService.getByMD5(questionMD5);
         if (question instanceof ImagesWith questionWithImages) {
-            Gson gson = new Gson();
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("count", questionWithImages.getImagePathStrings().size());
             

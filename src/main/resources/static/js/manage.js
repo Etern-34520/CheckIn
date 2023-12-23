@@ -1,7 +1,38 @@
+$.ajaxSetup({
+    beforeSend: function (xhr) {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + $.cookie("token"));
+    },
+});
+
+$(document).keyup(function (event) {
+    let serverMenuNum = $("#serverMenu button").length;
+    let userMenuNum = $("#userMenu button").length;
+    const menuNum = serverMenuNum + userMenuNum;
+    let numKey = event.keyCode - 48;
+    if (numKey >= 0 && numKey <= menuNum && event.ctrlKey && event.altKey) {
+        const inServerMenu = numKey <= serverMenuNum;
+        const pageClass = inServerMenu ? "server" : "user";
+        const index = inServerMenu ? numKey - 1 : numKey - 1 - serverMenuNum;
+        switchToPageWithAnimate(pageClass, index, true);
+    }
+});
+
+function deleteQuestion(questionMd5) {
+    const messageJson = {
+        "type": "deleteQuestion",
+        "questionMD5": questionMd5
+    };
+    sendMessage(messageJson, function (event) {
+        console.log(event);
+    });
+}
+
 function initContextMenu() {
+    const animation = {duration: 150, show: 'fadeIn', hide: 'fadeOut'};
     $.contextMenu({
         selector: "button.partitionButton[editing='false']",
-        callback: function (key, options, e) {
+        animation: animation,
+        callback: function (key) {
             switch (key) {
                 case "edit":
                     editPartitionName.call(this);
@@ -11,8 +42,7 @@ function initContextMenu() {
                         "type": "deletePartition",
                         "partitionName": $(this).text()
                     };
-                    sendMessage(JSON.stringify(messageJson), function (event) {
-                        // console.log(event);
+                    sendMessage(messageJson, function (event) {
                     });
                     break;
             }
@@ -24,6 +54,7 @@ function initContextMenu() {
     });
     $.contextMenu({
         selector: "div.question",
+        animation: animation,
         callback: function (key, options, e) {
             let $questionMD5Div = $(this).find("div.questionMD5");
             switch (key) {
@@ -31,13 +62,7 @@ function initContextMenu() {
                     editQuestion($questionMD5Div.text());
                     break;
                 case "delete":
-                    const messageJson = {
-                        "type": "deleteQuestion",
-                        "questionMD5": $questionMD5Div.text()
-                    };
-                    sendMessage(JSON.stringify(messageJson), function (event) {
-                        console.log(event);
-                    });
+                    deleteQuestion($questionMD5Div.text());
                     break;
             }
         },
@@ -48,6 +73,7 @@ function initContextMenu() {
     });
     $.contextMenu({
         selector: "div.partitionQuestionsList > div:not(.empty)",
+        animation: animation,
         callback: function (key, options, e) {
             let $questionMD5Div = $(this);
 
@@ -56,7 +82,7 @@ function initContextMenu() {
                     "type": "deleteQuestion",
                     "questionMD5": questionMD5
                 };
-                sendMessage(JSON.stringify(messageJson), function (event) {
+                sendMessage(messageJson, function (event) {
                     console.log(event);//FIXME
                     $("div.partitionQuestionsList > div.question" + messageJson.questionMD5).remove();
                     $questionMD5Div.remove();
@@ -111,7 +137,7 @@ function showMenu() {
     $topMask.css("display", "flex");
     $topMask.animate({
         opacity: 1,
-    }, 100, "easeInOutCubic", function () {
+    }, 150, "easeOutCubic", function () {
         $menu.animate({
             marginLeft: 8,
         }, 200, "easeOutCubic")
@@ -123,15 +149,22 @@ function showMenu() {
 function closeMenu() {
     let $topMask = $("#topMask");
     let $menu = $("#menu");
+    let $dialog = $("#dialog");
     $menu.animate({
         marginLeft: -$menu.width() - 20,
-    }, 200, "easeInOutCubic", function () {
+    }, 200, "easeInCubic", function () {
         $topMask.animate({
             opacity: 0,
-        }, 150, "easeInOutCubic", function () {
+        }, 150, "easeInCubic", function () {
+            newUserLock = false;
             $topMask.css("display", "none");
         });
-    })
+    });
+    $dialog.animate({
+        opacity: 0,
+    }, 200, "easeInCubic", function () {
+        $dialog.remove();
+    });
 }
 
 function selectButtonOf(pageClass, index) {
@@ -206,6 +239,8 @@ function containsPath(pathName) {
     return false;
 }
 
+let pathLock;
+
 function removePath(pathName) {
     if (pathLock) return "pathLock";
     pathLock = true;
@@ -259,11 +294,27 @@ function removePathAfter(pathName, contains = false, doCallBackFunc = false) {
     return "success";
 }
 
+function switchToPageWithAnimate(pageClass, index, clearPathBool = true, callback) {
+    $("#content").fadeTo(200, 0, "easeInCubic", function () {
+        switchToPage(pageClass, index, clearPathBool, function () {
+            if (callback instanceof Function) {
+                callback();
+            }
+            setTimeout(function () {
+                $("#content").fadeTo(200, 1, "easeInCubic");
+            }, 200);
+        });
+    });
+}
+
 function switchToPage(pageClass, index, clearPathBool = true, callback) {
     $.ajax({
         url: location.href,
         type: 'get',
         data: "page=" + index + "&pageClass=" + pageClass,
+        xhrFields: {
+            withCredentials: true
+        },
         success: function (res) {
             const $content = $('#content');
             $content.html(res);
@@ -276,17 +327,11 @@ function switchToPage(pageClass, index, clearPathBool = true, callback) {
                 $.cookie('page', index);
                 $.cookie('pageClass', pageClass);
             }
-            const pathName = $("#" + pageClass + "Menu button").eq(index).text();
+            const pathName = $("#" + pageClass + "Menu button").eq(index).attr("blockString");
             if (clearPathBool) {
                 clearPath();
                 addPath(pathName, function () {
-                    $("#content").fadeTo(200, 0, "easeInCubic", function () {
-                        switchToPage(pageClass, index, false, function () {
-                            setTimeout(function () {
-                                $("#content").fadeTo(200, 1, "easeInCubic");
-                            }, 200);
-                        });
-                    });
+                    switchToPageWithAnimate(pageClass, index, false);
                 });
             }
             selectButtonOf(pageClass, index);
@@ -412,9 +457,37 @@ function closeTipOfButton(tipCloseButton) {
     });
 }
 
+function popDialog(html, callBack) {
+    const $topMask = $("#topMask");
+    $topMask.css("display", "flex");
+    let $dialog = $("<div rounded id='dialog'></div>");
+    $dialog.html(html);
+    $dialog.css("opacity", 0);
+    $topMask.append($dialog);
+    $topMask.animate({opacity: 1}, 200, "easeOutCubic", function () {
+        if (callBack instanceof Function)
+            callBack();
+        $dialog.animate({
+            opacity: 1,
+        }, 200, "easeOutCubic");
+    });
+    $dialog.on("click", function (e) {
+        e.stopPropagation();
+    });
+    // const previousOnClick = $topMask.on("click");
+    $topMask.on("click", function () {
+        $topMask.animate({
+            opacity: 0,
+        }, 200, "easeInCubic", function () {
+            $topMask.css("display", "none");
+            // $topMask.on("click", previousOnClick);
+        });
+    });
+}
 
 function logout() {
     closeMenu();
+    closeWebSocket();
     $("#content").animate({
         opacity: 0
     }, 200, "easeInCubic");
@@ -423,7 +496,8 @@ function logout() {
             opacity: 0
         }, 200, "easeInCubic", function () {
             $.removeCookie("qq", {path: "/checkIn"});
-            $.removeCookie("password", {path: "checkIn"});
+            // $.removeCookie("password", {path: "checkIn"});
+            $.removeCookie("token", {path: "/checkIn"});
             window.location.href = "./../login/"
         });
     }, 100);
@@ -436,6 +510,9 @@ function initChart() {
         url: 'data',
         type: 'get',
         data: "type=traffic",
+        xhrFields: {
+            withCredentials: true
+        },
         success: function (res) {
             var myChart = echarts.init(document.getElementById('chart'), "walden");
             var dates = [];
@@ -491,6 +568,9 @@ function initChart() {
         url: 'data',
         type: 'get',
         data: 'type=trafficDetail&pageIndex=' + trafficPageIndex,
+        xhrFields: {
+            withCredentials: true
+        },
         success: function (res) {
             const trafficObj = JSON.parse(res);
             $todayTrafficsDiv = $("#todayTraffics");
@@ -517,10 +597,10 @@ function initChart() {
     })
 }
 
-var pathLock = false;
+pathLock = false;
 
-function transitionPage($root, html, pathName, backFunc, doneCallBack) {
-    if (pathName instanceof String || backFunc instanceof Function) {
+function transitionPage($root, html, pathName, pathBackFunc, callBack) {
+    if (pathName instanceof String || pathBackFunc instanceof Function) {
         if (pathLock) return "pathLock";
         pathLock = true;
     }
@@ -531,16 +611,16 @@ function transitionPage($root, html, pathName, backFunc, doneCallBack) {
         opacity: 0,
     }, 300, "easeInCubic", function () {
         // changePath("Questions/" + pathName);
-        if (pathName instanceof String || backFunc instanceof Function) {
-            addPath(pathName, backFunc);
+        if (pathName instanceof String || pathBackFunc instanceof Function) {
+            addPath(pathName, pathBackFunc);
             pathLock = false;
         }
         setTimeout(function () {
             $subContentRoot.html(html);
             $subContentRoot.css("marginTop", 8);
             $subContentRoot.css("marginBottom", 8);
-            if (doneCallBack instanceof Function) {
-                doneCallBack();
+            if (callBack instanceof Function) {
+                callBack();
             }
             $subContentRoot.animate({
                 opacity: 1,
@@ -551,7 +631,7 @@ function transitionPage($root, html, pathName, backFunc, doneCallBack) {
             }
         }, 200)
     });
-    if (pathName instanceof String || backFunc instanceof Function) {
+    if (pathName instanceof String || pathBackFunc instanceof Function) {
         setTimeout(function () {
             if (pathLock) pathLock = false;//防止出错锁死
         }, 500);

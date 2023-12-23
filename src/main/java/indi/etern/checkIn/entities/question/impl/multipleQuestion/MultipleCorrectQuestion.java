@@ -1,6 +1,6 @@
 package indi.etern.checkIn.entities.question.impl.multipleQuestion;
 
-import com.google.gson.Gson;
+import indi.etern.checkIn.MVCConfig;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
@@ -37,8 +37,6 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
         this.correctChoices = getCorrectChoices(choices);
         this.partitions = partitions;
         this.author = author;
-//        initMD5();
-//        super.id = md5;
     }
     
     private static List<Choice> getCorrectChoices(List<Choice> choices) {
@@ -132,6 +130,6 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
         dataMap.put("partitions", partitionNames);
         dataMap.put("partitionIds",partitionIds);
         dataMap.put("md5",md5);
-        return new Gson().toJson(dataMap);
+        return MVCConfig.getGson().toJson(dataMap);
     }
 }

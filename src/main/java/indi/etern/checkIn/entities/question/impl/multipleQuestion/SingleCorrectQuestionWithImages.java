@@ -7,10 +7,12 @@ import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.user.User;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
 
+@Setter
 @Entity
 public class SingleCorrectQuestionWithImages extends SingleCorrectQuestion implements ImagesWith {
     @Convert(converter = StringListConverter.class)
@@ -18,11 +20,6 @@ public class SingleCorrectQuestionWithImages extends SingleCorrectQuestion imple
     
     public SingleCorrectQuestionWithImages(String questionContent, List<Choice> choices, Set<Partition> partitions, User author) {
         super(questionContent, choices, partitions, author);
-        this.imagePathStrings = imagePathStrings;
-    }
-    
-    public void setImagePathStrings(List<String> imagePathStrings) {
-        this.imagePathStrings = imagePathStrings;
     }
     
     protected SingleCorrectQuestionWithImages() {}

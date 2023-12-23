@@ -25,7 +25,7 @@
     padding-bottom: 6px;
     border-radius: 8px;
     border: 0;
-    background-color: var(--context-menu-background-color);
+    background: none;
     color: var(--font-color);
     transition: 0.2s;
     transition-timing-function: ease-in-out;
@@ -204,10 +204,38 @@ div[component_type="tip"]{
     flex-direction: row;
 }
 .path{
-    padding-top: 5px;
     max-height: 25px;
     color: var(--font-color);
+    padding-top: 4px;
+    line-height: 25px;
 }
 #contentRoot{
     z-index: auto;
+}
+
+.subContentRoot {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: auto;
+    margin: 8px;
+}
+
+#dialog {
+    /*width: 1000px;*/
+    min-width: 400px;
+    width: fit-content;
+    max-width: 90%;
+    /*height: 500px;*/
+    min-height: 250px;
+    height: fit-content;
+    max-height: 90%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#topMask > div {
+    box-shadow: 0 2px 15px rgba(0,0,0,0.5);
 }

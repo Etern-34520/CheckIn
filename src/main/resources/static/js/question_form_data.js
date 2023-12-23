@@ -21,16 +21,22 @@ function editQuestion(questionMD5, partitionId) {
     }
     let $left = $("#left");
     $.ajax({
+        xhrFields:{
+            withCredentials:true
+        },
         url: "page/partitionQuestionLeft", method: "post", data: "", success: function (res) {
             transitionPage($left, res);
         },
     });
     $.ajax({
+        xhrFields:{
+            withCredentials:true
+        },
         url: url, method: "post", data: data, success: function (res) {
             let $right = $("#right");
             // removePathContainsAfter("Edit Question")
-            let pathBlock = "Edit Question";
-            removePathAfter("Questions", false, false);
+            let pathBlock = "编辑";
+            removePathAfter("题库", false, false);
             transitionPage($right, res, pathBlock, function () {
                 // switchToPage("server",2);
             });
@@ -60,6 +66,9 @@ function switchToQuestion(questionMD5, element) {
         }
     }
     $.ajax({
+        xhrFields:{
+            withCredentials:true
+        },
         url: url, method: "post", data: data, success: function (res) {
             let $right = $("#right");
             // removePathContainsAfter("Edit Question")
@@ -76,23 +85,6 @@ function switchToQuestion(questionMD5, element) {
                 for (let key of currentQuestionFormData.keys()) {
                     formDataMap.set(key, currentQuestionFormData.get(key));
                 }
-                // let hasPartition = false;
-                // for (const key of formDataMap.keys()) {
-                //     if (key.startsWith("question_partition_")) {
-                //         if (formDataMap.get(key) === "true") {
-                //             // hasPartition = true;
-                //             break;
-                //         }
-                //     }
-                // }
-                /*if (!hasPartition) {
-                    const partitionId = $(element).attr("initPartition");
-                    if (partitionId !== undefined) {
-                        // $("#partitionSelectionsDiv").find("#partition_select_" + partitionId).trigger("click");
-                        formDataMap.set("question_partition_" + partitionId, "true");
-                        $(element).removeAttr("initPartition");
-                    }
-                }*/
                 for (const key of formDataMap.keys()) {
                     let $formElement = $questionEditForm.find("*[name=" + key + "]");
                     if ((!isNaN(Number(key)) || key.startsWith("correct")) && $questionEditForm.find("*[name=" + key + "]").length === 0) {
@@ -166,7 +158,7 @@ function initQuestionForm() {
 }
 
 function dataURLtoFile(dataUrl, filename) {
-    var arr = dataUrl.split(','),
+    let arr = dataUrl.split(','),
         mime = arr[0].match(/:(.*?);/)[1],
         bstr = atob(arr[1]),
         n = bstr.length,
@@ -198,6 +190,9 @@ class QuestionFormData {
         let originalImageCount = 0;
         let questionMD5 = this.formData.get("md5");
         $.ajax({
+            xhrFields:{
+                withCredentials:true
+            },
             url: "./../question/image/" + questionMD5 + "/", method: "get",
             success: function (res) {
                 originalImageCount = res.count;
@@ -635,24 +630,33 @@ function updateAllQuestions() {
     for (let formData of md5ToQuestionFormDataMap.values()) {
         if (formData.changed) {
             let questionMD5 = formData.get("md5");
-            $.ajax({
-                url: "data/updateQuestion/" + questionMD5,
-                method: "post",
-                data: formData.toUploadFormData(),
-                processData: false,
-                contentType: false,
-                success: function () {
-                    showTip("info", "upload success: " + questionMD5);
-                    const $questionSimpleDiv = $(`.question${questionMD5}`);
-                    if ($questionSimpleDiv.css("opacity") !== 1) {
-                        $questionSimpleDiv.fadeTo(200, 1, "easeInOutQuad");
-                    }
-                },
-                error: function (res) {
-                    showTip("error", "upload failed: " + questionMD5 + ";" + res.responseJSON.message, false);
-                    console.error(res);
-                }
-            });
+            updateQuestionBy(questionMD5,formData);
         }
     }
+}
+
+function updateQuestionBy(questionMD5,formData){
+    if (formData === undefined)
+        formData = md5ToQuestionFormDataMap.get(questionMD5);
+    $.ajax({
+        url: "data/updateQuestion/" + questionMD5,
+        method: "post",
+        data: formData.toUploadFormData(),
+        processData: false,
+        contentType: false,
+        xhrFields:{
+            withCredentials:true
+        },
+        success: function () {
+            showTip("info", "upload success: " + questionMD5);
+            const $questionSimpleDiv = $(`.question${questionMD5}`);
+            if ($questionSimpleDiv.css("opacity") !== 1) {
+                $questionSimpleDiv.fadeTo(200, 1, "easeInOutQuad");
+            }
+        },
+        error: function (res) {
+            showTip("error", "upload failed: " + questionMD5 + ";" + res.responseJSON.message, false);
+            console.error(res);
+        }
+    });
 }

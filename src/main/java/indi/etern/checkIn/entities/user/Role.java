@@ -1,11 +1,14 @@
 package indi.etern.checkIn.entities.user;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+@Getter
 @Entity
 public class Role {
     @Id
@@ -33,17 +36,6 @@ public class Role {
         }
     }
     
-    public Set<User> getUsers() {
-        return users;
-    }
-    
-    public String getType() {
-        return type;
-    }
-//    @Override
-    public String getStaticHash() {
-        return type;
-    }
     @Override
     public boolean equals(Object object){
         if (object instanceof Role role) {
@@ -51,5 +43,9 @@ public class Role {
         } else {
             return false;
         }
+    }
+    
+    public SimpleGrantedAuthority getSimpleGrantedAuthority(){
+        return new SimpleGrantedAuthority(type);
     }
 }

@@ -9,11 +9,6 @@
     margin-bottom: 8px;
 }
 
-.question > div {
-    display: flex;
-    flex-direction: column;
-}
-
 .question > .l1 {
     flex: 1;
     flex-direction: column;
@@ -35,15 +30,11 @@
 }
 
 .question > div{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
     padding: 2px;
 }
 
 .question div[rounded]{
-    margin: 0 2px;
+    margin: 2px;
     background: var(--input-background-color);
 }
 
@@ -57,10 +48,6 @@
     display: flex;
     flex-direction: row;
     margin-top: 8px;
-}
-
-.questionContent {
-    flex: 1;
 }
 
 .questionType {

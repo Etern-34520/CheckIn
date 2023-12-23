@@ -8,22 +8,36 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%--for manage——server:home --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<jsp:useBean id="partitionInfo" class="indi.etern.checkIn.beans.PartitionInfo" scope="request"/>
-<div id="managePage" index="2" page-type="server">
-    <div id="left" rounded border>
-        <div class="subContentRoot">
+<%@ page contentType="text/html;charset=UTF-8" %>
+<jsp:useBean id="userInfo" scope="request" type="indi.etern.checkIn.beans.UserInfo"/>
+<jsp:useBean id="webSocketService" scope="request" type="indi.etern.checkIn.service.web.WebSocketService"/>
+<div id="managePage" index="0" page-type="user">
+    <div rounded style="display: flex;flex: 1;" border>
+        <div id="searchAndFilterDiv">
             <label titleLabel text>用户</label>
-<%--            <div id="partitionButtons">--%>
-<%--                <c:forEach var="partition" items="${partitionInfo.partitions}">--%>
-<%--                    <button type="button" id="partitionButton${partition.id}" class="partitionButton" onclick="switchToPartition(this)" preText editing="false">${fn:escapeXml(partition.name)}</button>--%>
-<%--                </c:forEach>--%>
-<%--                <button type="button" id="addPartitionButton" style="font-size: 20px" onclick="newPartition()">+</button>--%>
-<%--            </div>--%>
+            <div style="display: flex">
+                <label for="userSearch"></label>
+                <input id="userSearch" type="text" style="flex: 1" preText="搜索">
+                <button>search</button>
+            </div>
+            <button rounded style="font-size: 30px;" onclick="newUser()">+</button>
         </div>
-    </div>
-    <div id="right" rounded border="">
-        <div class="subContentRoot">
+        <div style="width: 2px;margin: 4px;border-radius: 1px;background: rgba(128,128,128,0.2)"></div>
+        <div class="userDivs">
+            <c:forEach var="user1" items="${userInfo.users}" varStatus="userStat">
+                <c:set var="user" value="${user1}" scope="page"/>
+                <c:if test="${userStat.index%2==0}">
+                    <%@ include file="pages/userPane.jsp" %>
+                </c:if>
+            </c:forEach>
+        </div>
+        <div class="userDivs" style="padding-right: 2%;">
+            <c:forEach var="user2" items="${userInfo.users}" varStatus="userStat">
+                <c:set var="user" value="${user2}" scope="page"/>
+                <c:if test="${userStat.index%2==1}">
+                    <%@ include file="pages/userPane.jsp" %>
+                </c:if>
+            </c:forEach>
         </div>
     </div>
 </div>

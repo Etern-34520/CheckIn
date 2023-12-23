@@ -3,13 +3,17 @@ let firstConnect = true;
 
 function connectWebSocket(button) {
     if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://" + window.location.href.split("/manage")[0].replace("http://", "").replace("https://", "") + "/api/websocket/" + $.cookie("qq"));
+        const rootUrl = window.location.href.split("/manage")[0].replace("http://", "").replace("https://", "");
+        const url = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${rootUrl}/api/websocket/${$.cookie("qq")}`;
+        websocket = new WebSocket(url);
+
         if (firstConnect) {
             firstConnect = false;
         } else {
             websocket.onopen = function () {
                 showTip("info", "WebSocket连接成功");
                 closeTipOfButton(button);
+                sendToken();
             }
         }
     } else {
@@ -18,29 +22,29 @@ function connectWebSocket(button) {
 }
 
 connectWebSocket();
+let currentErrorCallback;
 websocket.onerror = function (error) {
     showTip("error", "WebSocket连接失败" + error, false);
 };
 
-let currentErrorCallback;
-
 websocket.onmessage = function (event) {
     const message = JSON.parse(event.data);
     switch (message.type) {
-        case "updatePartitionList":
-            updatePartition(new Map(Object.entries(message.partitionIdNameMap)));
-            break;
         case "error":
             if (currentErrorCallback instanceof Function) {
-                currentErrorCallback(message);
+                const isContinue = currentErrorCallback(message);
+                if (isContinue === false) break;
                 currentErrorCallback = undefined;
             } else {
                 if (message.autoClose === undefined) {
                     message.autoClose = true;
                 }
                 showTip("error", message.data, message.autoClose);
-                console.error(message);
+                // console.error(message);
             }
+            break;
+        case "updatePartitionList":
+            updatePartition(new Map(Object.entries(message.partitionIdNameMap)));
             break;
         case "deleteQuestion":
             removeQuestionDiv(message.questionMD5);
@@ -48,11 +52,33 @@ websocket.onmessage = function (event) {
         case "updateQuestion":
             updateQuestionDiv(message.question);
             break;
+        case "deleteUser":
+            removeUserDiv(message.QQ);
+            break;
+        case "updateUser":
+            updateUserDiv(message.user);
+            break;
+        case "addUser":
+            addUserDiv(message.user);
+            break;
+        case "offLine":
+            $.cookie("logoutReason","你已被强制下线",{path: "/checkIn"})
+            logout();
+            break;
     }
 }
 
+const sendToken = function () {
+    const token = $.cookie("token");
+    sendMessage({
+        type: "token",
+        token: token,
+    });
+};
+websocket.onopen = sendToken;
+
 websocket.onclose = function () {
-    showTip("error", "WebSocket连接已关闭<br><button clickable rounded highlight onclick='connectWebSocket(this)'>尝试重连</button>", false);
+    showTip("error", "WebSocket连接已关闭<br><button rounded highlight onclick='connectWebSocket(this)'>尝试重连</button>", false);
 }
 
 window.onbeforeunload = function () {
@@ -60,17 +86,23 @@ window.onbeforeunload = function () {
 }
 
 function closeWebSocket() {
+    websocket.onclose = undefined;
     websocket.close();
 }
 
 function sendMessage(message, callback, errorCallback) {
     try {
-        websocket.send(message);
+        if (message instanceof String) {
+            websocket.send(message);
+        } else {
+            websocket.send(JSON.stringify(message));
+        }
         let previousOnMessage = websocket.onmessage;
         let previousOnError = websocket.onerror;
         websocket.onmessage = function (event) {
             previousOnMessage(event);
-            callback(event);
+            if (callback instanceof Function)
+                callback(event);
             websocket.onmessage = previousOnMessage;
             websocket.onerror = previousOnError;
         }

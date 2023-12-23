@@ -29,7 +29,7 @@
 #managePage[index="0"][page-type="server"] #right{
     margin-left: 4px;
     flex: 1;
-    margin-top: 4px;
+    margin-top: 6px;
     display: flex;
     flex-direction: column;
 }

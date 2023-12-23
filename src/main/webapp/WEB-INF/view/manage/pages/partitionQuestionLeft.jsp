@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%--
   Created by IntelliJ IDEA.
   User: o_345
@@ -6,14 +7,14 @@
   Time: 18:39
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <jsp:useBean id="partitionInfo" class="indi.etern.checkIn.beans.PartitionInfo" scope="request"/>
 <div id="partitionDivs">
     <c:forEach var="partition" items="${partitionInfo.partitions}">
         <div style="background:var(--input-background-color);margin: 0 0 8px;" rounded clickable
              id="partition${partition.id}" class="partitionDiv">
             <div style="display: flex;flex-direction: row" class="partitionTop">
-                <div style="margin: 0;flex: 1" rounded clickable onclick="togglePartition(this)">${partition.name}</div>
+                <div style="margin: 0;flex: 1" rounded clickable onclick="togglePartition(this)">${fn:escapeXml(partition.name)}</div>
                 <button style="width: 20px;margin: 0 0 0 2px;font-size: 18px" onclick="newQuestionOf(this)">+</button>
             </div>
             <div style="display: none" class="partitionQuestionsList">

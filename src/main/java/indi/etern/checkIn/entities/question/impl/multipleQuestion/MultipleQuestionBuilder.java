@@ -5,6 +5,7 @@ import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestio
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.servlet.http.Part;
 import org.apache.commons.io.file.PathUtils;
 
@@ -21,14 +22,14 @@ import java.util.stream.Stream;
 
 public class MultipleQuestionBuilder {
     MultiPartitionableQuestion multipleQuestion;
-    List<Choice> choices = new ArrayList<>();
-    boolean haveBuilt = false;
+    final List<Choice> choices = new ArrayList<>();
     String md5;
     String questionContent;
-    Set<Partition> partitions = new HashSet<>();
-    List<Part> imageParts = new ArrayList<>();
+    final Set<Partition> partitions = new HashSet<>();
+    final List<Part> imageParts = new ArrayList<>();
     
     User author;
+    boolean enable = false;
     
     public MultipleQuestionBuilder addChoice(Choice choice) {
         choices.add(choice);
@@ -70,11 +71,12 @@ public class MultipleQuestionBuilder {
         return this;
     }
     
+    public MultipleQuestionBuilder setEnable(boolean enable) {
+        this.enable = enable;
+        return this;
+    }
+    
     public MultiPartitionableQuestion build() {
-        if (haveBuilt) {
-            throw new MultipleQuestionBuilderException("MultipleQuestionBuilder has already built");
-        }
-        
         boolean singleCorrect = false;
         boolean multipleCorrect = false;
         for (Choice choice : choices) {
@@ -95,9 +97,6 @@ public class MultipleQuestionBuilder {
         if (choices.size() < 2) {
             throw new QuestionException("Less than two choices");
         }
-        if (author == null) {
-            throw new MultipleQuestionBuilderException("Author not set");
-        }
         
         if (partitions.isEmpty()) {
             partitions.add(Partition.getInstance("undefined"));
@@ -113,6 +112,7 @@ public class MultipleQuestionBuilder {
             else
                 multipleQuestion = new MultipleCorrectQuestionWithImages(questionContent, choices, partitions, author);
         }
+        multipleQuestion.setEnabled(enable);
         if (md5 != null) {
             try {
                 final Field md5Field = Question.class.getDeclaredField("md5");
@@ -126,7 +126,9 @@ public class MultipleQuestionBuilder {
         }
         if (!questionContent.isEmpty()) {//非模板题目
             for (Partition partition : partitions) {
-                partition.addQuestion(multipleQuestion);
+//                final PartitionService partitionService = (PartitionService) CheckInApplication.applicationContext.getBean("partitionService");
+                PartitionService.singletonInstance.addQuestionOf(partition,multipleQuestion);
+//                partition.addQuestion(multipleQuestion);
             }
         }
         List<String> imagePathStrings = new ArrayList<>();
@@ -185,13 +187,8 @@ public class MultipleQuestionBuilder {
         } else if (multipleQuestion instanceof SingleCorrectQuestionWithImages) {
             ((SingleCorrectQuestionWithImages) multipleQuestion).setImagePathStrings(imagePathStrings);
         }
-        haveBuilt = true;
         return multipleQuestion;
     }
-
-//    public void md5From(MultiPartitionableQuestion question) {
-//        md5 = question.getMd5();
-//    }
     
     public MultipleQuestionBuilder setMD5(String md5) {
         this.md5 = md5;

@@ -46,7 +46,7 @@ body {
     background-color: var(--body-background-color);
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', "微软雅黑", sans-serif;
     font-size: 16px;
     color: var(--font-color);
 }
@@ -57,10 +57,15 @@ body > div > div[rounded] {
 
 *[rounded] {
     border-radius: 8px;
-    border: 0px;
+    border: 0;
     padding: 4px;
     margin: 6px;
     background-color: var(--rounded-div-background-color);
+}
+
+button[rounded] {
+    margin: 4px;
+    padding: 8px;
 }
 
 *[border] {
@@ -73,7 +78,7 @@ body > div > div[rounded] {
     background: var(--highlight-component-background-color);
 }
 
-*[highlight]:hover {
+*[highlight]:not([disabled]):hover {
     transition-timing-function: ease-in-out;
     transition: 0.2s;
     background: var(--highlight-component-background-color-hover);
@@ -83,14 +88,13 @@ button, input[type=submit], input[type=button] {
     border-radius: 6px;
     border: 0;
     transition: 0.2s;
-    margin-right: 4px;
     color: var(--font-color);
     background: var(--component-background-color);
     cursor: pointer;
     user-select: none;
 }
 
-button:hover, input[type=submit]:hover, input[type=button]:hover {
+button:not([disabled]):hover, input[type=submit]:not([disabled]):hover, input[type=button]:not([disabled]):hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
     background: var(--component-background-color-hover);
@@ -107,6 +111,28 @@ button:hover, input[type=submit]:hover, input[type=button]:hover {
     flex: 1;
     overflow: auto;
     padding: 5px;
+}
+
+.line {
+    height: 2px;
+    margin: 4px;
+    border-radius: 1px;
+    background: rgba(128, 128, 128, 0.2);
+    flex: none;
+}
+
+*[text] {
+    color: var(--font-color);
+    font-family: 'Roboto', "微软雅黑", sans-serif;
+}
+
+*[preText] {
+    white-space: pre;
+}
+
+label[titleLabel] {
+    margin: 8px;
+    font-size: 18px;
 }
 
 div[clickable] {
@@ -128,21 +154,11 @@ div[clickable] > label {
     cursor: pointer;
 }
 
-*[text] {
-    color: var(--font-color);
-    font-family: 'Roboto', sans-serif;
-}
-
-*[preText] {
-    white-space: pre;
-}
-
-label[titleLabel] {
-    margin: 8px;
-    font-size: 18px;
-}
-
-input[type="text"], input[type="password"], textarea {
+input[type="text"],
+input[type="password"],
+input[type="number"],
+textarea,
+button[clickable] {
     border-radius: 6px;
     transition: 0.2s;
     height: 40px;
@@ -157,7 +173,17 @@ input[type="text"], input[type="password"], textarea {
     cursor: pointer;
 }
 
-input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+input[disabled],
+textarea[disabled],
+button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+input[type="text"]:not([disabled]):focus,
+input[type="password"]:not([disabled]):focus,
+input[type="number"]:not([disabled]):focus,
+textarea:not([disabled]):focus {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
     background: var(--input-background-color-hover);
@@ -166,25 +192,44 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     cursor: text;
 }
 
-input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
+input[type="text"]:not([disabled]):hover,
+input[type="password"]:not([disabled]):hover,
+input[type="number"]:not([disabled]):hover,
+textarea:not([disabled]):hover,
+button[clickable]:not([disabled]):hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
     background: var(--input-background-color-hover)
+}
+
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+}
+
+input::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 
 select {
     background: var(--input-background-color);
     border: 0;
     border-radius: 4px;
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
     height: 40px;
     margin: 4px;
     color: var(--font-color);
+    cursor: pointer;
 }
 
 select:hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: var(--input-background-color-hover)
+    background: var(--input-background-color-hover);
 }
 
 .title {
@@ -194,4 +239,53 @@ select:hover {
 input[type="checkbox"] {
     width: 20px;
     height: 20px;
+}
+
+.toggleSwitchBasic {
+    cursor: pointer;
+    border-radius: 15px;
+    background: var(--context-menu-background-color);
+    display: flex;
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.toggleSwitchBasic[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toggleSwitchDot {
+    background: var(--font-color);
+    opacity: 0.8;
+    margin: 4px;
+    border-radius: 50%;
+    position: relative;
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.toggleSwitchBasic:not([disabled='true']) .toggleSwitchDot:hover {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: var(--font-color);
+    opacity: 1;
+}
+
+div[component_type="shrinkButtonPointer"] >div:first-child {
+    position: absolute;
+    background: var(--font-color);
+    width: 10px;
+    height: 2px;
+    border-radius: 1px;
+    transform: translate(-2px, -1px) rotate(-45deg)
+}
+
+div[component_type="shrinkButtonPointer"] >div:last-child {
+    position: absolute;
+    background: var(--font-color);
+    width: 10px;
+    height: 2px;
+    border-radius: 1px;
+    transform: translate(-8px, -1px) rotate(45deg)
 }

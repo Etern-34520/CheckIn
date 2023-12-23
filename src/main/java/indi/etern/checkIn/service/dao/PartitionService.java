@@ -1,21 +1,25 @@
 package indi.etern.checkIn.service.dao;
 
+import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.repositories.PartitionRepository;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class PartitionService {
+    public static PartitionService singletonInstance;
+    @Autowired
+    TransactionTemplate transactionTemplate;
     @Resource
     private PartitionRepository partitionRepository;
-    
-    public static PartitionService singletonInstance;
     
     protected PartitionService() {
         singletonInstance = this;
@@ -29,10 +33,11 @@ public class PartitionService {
         return partitionRepository.findAll();
     }
     
-    public void saveAndFlush(Partition partition){
+    public void saveAndFlush(Partition partition) {
         partitionRepository.saveAndFlush(partition);
     }
-//    @Transactional(readOnly = true)
+    
+    //    @Transactional(readOnly = true)
     public Partition findByName(String name) {
         Partition examplePartition = Partition.getExample(name);
         ExampleMatcher exampleMatcher = ExampleMatcher
@@ -70,5 +75,17 @@ public class PartitionService {
     
     public Optional<Partition> findById(Integer id) {
         return partitionRepository.findById(id);
+    }
+    
+    
+    public void addQuestionOf(Partition partition, MultiPartitionableQuestion multipleQuestion) {
+        transactionTemplate.execute((callback) -> {
+            final Optional<Partition> partitionOptional = partitionRepository.findById(partition.getId());
+            Partition partition1;
+            partition1 = partitionOptional.orElse(partition);
+            partition1.getQuestions().add(multipleQuestion);
+            partitionRepository.saveAndFlush(partition1);
+            return Boolean.TRUE;
+        });
     }
 }

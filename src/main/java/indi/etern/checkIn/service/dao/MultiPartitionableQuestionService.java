@@ -30,7 +30,7 @@ public class MultiPartitionableQuestionService {
     TransactionTemplate transactionTemplate;
     @Autowired
     PartitionService partitionService;
-    Logger logger = LoggerFactory.getLogger(getClass());
+    final Logger logger = LoggerFactory.getLogger(getClass());
     @Resource
     private MultiplePartitionableQuestionRepository multiplePartitionableQuestionRepository;
     private volatile boolean update = false;
@@ -63,6 +63,19 @@ public class MultiPartitionableQuestionService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public void unbindAndDeleteById(String questionMD5) {
+        transactionTemplate.execute((TransactionCallback<Object>) result -> {
+            MultiPartitionableQuestion multiPartitionableQuestion = getByMD5(questionMD5);
+            Set<Partition> partitions = multiPartitionableQuestion.getPartitions();
+            for (Partition partition : partitions) {
+                partition.getQuestions().remove(multiPartitionableQuestion);
+                partitionService.saveAndFlush(partition);
+            }
+            return Boolean.TRUE;
+        });
+        deleteById(questionMD5);
     }
     
     public void deleteById(String id) {

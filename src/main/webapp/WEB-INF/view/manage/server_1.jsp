@@ -6,8 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%--for manage——server:home --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<link rel="stylesheet" href="./css/server_0.css">
+<%@ page contentType="text/html;charset=UTF-8" %>
 <div id="managePage">
     <div id="left">
         <div id="leftBottom" rounded>

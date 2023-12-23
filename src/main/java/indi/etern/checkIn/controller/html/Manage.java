@@ -15,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.math.BigInteger;
@@ -23,6 +25,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Controller
 public class Manage {
@@ -50,6 +54,7 @@ public class Manage {
             md5Digest = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException ignored) {
         }
+        assert md5Digest != null;
         md5Digest.update(timeStamp.getBytes());
         byte[] byteArray = md5Digest.digest();
         
@@ -76,17 +81,25 @@ public class Manage {
             } else {
                 modelAndView.addObject("ignorePartitionSelection", Boolean.FALSE);
             }
+        Object objUser = request.getAttribute("currentUser");
+        User user;
+        if (objUser instanceof User user1) {
+            user = user1;
+        } else {
+            user = User.exampleOfName("unknown");
+        }
         MultiPartitionableQuestion multiPartitionableQuestion =
                 multipleQuestionFactory.setQuestionContent("")
                         .addChoice(new Choice("", true))
                         .addChoice(new Choice("", false))
                         .addPartition(partition)
                         .setMD5(result.toString())
-                        .setAuthor(User.exampleOfName("unknown"))//TODO 默认当前用户
+                        .setAuthor(user)//TODO 默认当前用户
+                        .setEnable(false)
+//                        .setEnable(Boolean.parseBoolean(request.getParameter("enabled")))
                         .build();
 //        request.setAttribute("question", multiPartitionableQuestion);
         modelAndView.addObject("question", multiPartitionableQuestion);
-//        request.setAttribute("ignorePartitionSelection",Boolean.FALSE);
         modelAndView.setViewName("manage/pages/editQuestion");
     }
     
@@ -117,16 +130,11 @@ public class Manage {
         return userService.check(qq, password);
     }
     
-    @GetMapping("/manage/")
+    @RequestMapping("/manage/")
     public ModelAndView manage(HttpServletRequest request) {
-        if (!checkLoginCookie(request)) {
-            ModelAndView mv = new ModelAndView();
-            mv.setViewName("redirect:/login/");
-            return mv;
-        } else if (request.getParameter("page") == null) {
+        if (request.getParameter("page") == null) {
             ModelAndView mv = new ModelAndView();
             mv.setViewName("manage/manage");
-//        return mv;
             return mv;
         } else {
             ModelAndView mv = new ModelAndView();
@@ -135,21 +143,7 @@ public class Manage {
         }
     }
     
-    /*@GetMapping("/api/webSocket/{cid}/manage/newPartition")
-    public void pushMessage(String message, @PathVariable String cid) {
-        try {
-            webSocketService.sendMessage(message, cid);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }*/
-    
-    @GetMapping("/manage/data")
-    public String getDataOf(@RequestAttribute(name = "type") String type) {
-        return "";
-    }
-    
-    @GetMapping("/login/")
+    @RequestMapping("/login/")
     public ModelAndView login() {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("manage/login");
@@ -164,43 +158,62 @@ public class Manage {
             case "partitionQuestion" ->
                     modelAndView.addObject("partition", partitionService.findById(Integer.valueOf(request.getParameter("id"))).orElseThrow());
             case "newQuestion" -> newQuestion(request, modelAndView);
-            case "editQuestion" -> {
-                MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getByMD5(request.getParameter("md5"));
-                if (multiPartitionableQuestion != null) {
-                    modelAndView.addObject("question", multiPartitionableQuestion);
-                    modelAndView.addObject("ignorePartitionSelection", Boolean.FALSE);
-                } else {
-                    String partitionIdString = request.getParameter("partitionId");
-                    Partition partition;
-                    if (partitionIdString == null) {
-                        partition = Partition.getInstance("undefined");
-                        final String ignorePartitionSelection = request.getParameter("ignorePartitionSelection");
-                        if (ignorePartitionSelection == null || !ignorePartitionSelection.equals("true")) {
-                            modelAndView.addObject("ignorePartitionSelection", Boolean.TRUE);
-                        } else {
-                            modelAndView.addObject("ignorePartitionSelection", Boolean.FALSE);
-                        }
-                    } else {
-                        partition = Partition.getInstance(Integer.parseInt(partitionIdString));
-                        modelAndView.addObject("ignorePartitionSelection", Boolean.FALSE);
-                    }
-                    MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
-                    multiPartitionableQuestion =
-                            multipleQuestionFactory.setQuestionContent("")
-                                    .addChoice(new Choice("", true))
-                                    .addChoice(new Choice("", false))
-                                    .addPartition(partition)
-                                    .setMD5(request.getParameter("md5"))
-                                    .setAuthor(User.exampleOfName("unknown"))//TODO 默认当前用户
-                                    .build();
-//                    request.setAttribute("question", multiPartitionableQuestion);
-                    modelAndView.addObject("question", multiPartitionableQuestion);
-                }
+            case "editQuestion" -> editQuestion(request, modelAndView);
+//            case "partitionQuestionLeft" -> {}
+            case "userInfo" -> userInfo(request,modelAndView);
+            case "userPane" -> {
+                modelAndView.addObject("webSocketService",webSocketService);
+                modelAndView.addObject("user",userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
             }
-            case "partitionQuestionLeft" -> {
-            
-            }
+            case "changeRole" -> modelAndView.addObject("user",userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
+            case "questionOverview" -> modelAndView.addObject("question",multiPartitionableQuestionService.getByMD5(request.getParameter("md5")));
         }
         return modelAndView;
+    }
+    
+    private void userInfo(HttpServletRequest request, ModelAndView modelAndView) {
+        final String qqString = request.getParameter("QQ");
+        final long qq = Long.parseLong(qqString);
+        Optional<User> optionalUser = userService.findByQQNumber(qq);
+        if (optionalUser.isPresent()) {
+            modelAndView.addObject("user1",optionalUser.get());
+        } else {
+            throw new NoSuchElementException("user with qq:"+qqString);
+        }
+    }
+    
+    private void editQuestion(HttpServletRequest request, ModelAndView modelAndView) {
+        MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getByMD5(request.getParameter("md5"));
+        modelAndView.addObject("newQuestion", Boolean.FALSE);
+        if (multiPartitionableQuestion != null) {
+            modelAndView.addObject("question", multiPartitionableQuestion);
+            modelAndView.addObject("ignorePartitionSelection", Boolean.FALSE);
+        } else {
+            String partitionIdString = request.getParameter("partitionId");
+            Partition partition;
+            if (partitionIdString == null) {
+                partition = Partition.getInstance("undefined");
+                final String ignorePartitionSelection = request.getParameter("ignorePartitionSelection");
+                if (ignorePartitionSelection == null || !ignorePartitionSelection.equals("true")) {
+                    modelAndView.addObject("ignorePartitionSelection", Boolean.TRUE);
+                } else {
+                    modelAndView.addObject("ignorePartitionSelection", Boolean.FALSE);
+                }
+            } else {
+                partition = Partition.getInstance(Integer.parseInt(partitionIdString));
+                modelAndView.addObject("ignorePartitionSelection", Boolean.FALSE);
+            }
+            MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
+            multiPartitionableQuestion =
+                    multipleQuestionFactory.setQuestionContent("")
+                            .addChoice(new Choice("", true))
+                            .addChoice(new Choice("", false))
+                            .addPartition(partition)
+                            .setMD5(request.getParameter("md5"))
+                            .setAuthor(User.exampleOfName("unknown"))//TODO 默认当前用户
+                            .build();
+//                    request.setAttribute("question", multiPartitionableQuestion);
+            modelAndView.addObject("question", multiPartitionableQuestion);
+        }
     }
 }

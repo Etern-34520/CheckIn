@@ -3,34 +3,30 @@ package indi.etern.checkIn.entities.question;
 import indi.etern.checkIn.entities.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+@Getter
 @MappedSuperclass
 @Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
 public abstract class Question implements Serializable {
-    @Getter
     @Column(name = "content")
     protected String content;
     
-    protected int hashcode;
+//    protected int hashcode;
     
-    @Getter
     @JoinColumn(name = "AUTHOR_QQNUMBER")
     @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.DETACH,CascadeType.REFRESH}, fetch = FetchType.EAGER)
-    protected User author;
-    
-    @Override
-    public int hashCode() {
-        return hashcode;
-    }
+    @NotFound(action = NotFoundAction.IGNORE)
+    protected User author = null;// = User.exampleOfName("unknown");
     
     protected Question() {
     }
     
-    @Getter
     @Id
     @Column(name = "id")
     protected String md5;
@@ -51,7 +47,7 @@ public abstract class Question implements Serializable {
                 result.insert(0, "0");
             }
             this.md5 = result.toString();
-            this.hashcode = Integer.parseInt(new BigInteger(result.toString(),16).toString().substring(0,9));
+//            this.hashcode = Integer.parseInt(new BigInteger(result.toString(),16).toString().substring(0,9));
         } catch (NoSuchAlgorithmException e) {
             // impossible
         }

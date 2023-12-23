@@ -2,6 +2,7 @@ package indi.etern.checkIn.entities.question.interfaces;
 
 import indi.etern.checkIn.entities.question.Question;
 import jakarta.persistence.*;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,16 +11,14 @@ import java.util.Set;
 @Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
 public class MultiPartitionableQuestion extends Question implements MultiPartitionable {
     
-    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinTable(name = "partitions_questions_mapping",
             joinColumns  = @JoinColumn(name = "question_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "partition_id",referencedColumnName = "id"))
     protected Set<Partition> partitions;
-    /*
-    @Id
-    @Column(name = "id")
-    protected String id;
-    */
+    @Setter
+    private boolean enabled = false;
+    
     @Override
     public Set<Partition> getPartitions() {
         return partitions;
@@ -38,4 +37,9 @@ public class MultiPartitionableQuestion extends Question implements MultiPartiti
     public String toJsonData(){
         throw new UnsupportedOperationException("Not supported yet");
     }
+    
+    public boolean getEnabled() {
+        return enabled;
+    }
+    
 }

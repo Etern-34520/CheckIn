@@ -1,5 +1,7 @@
 package indi.etern.checkIn;
 
+import com.google.gson.Gson;
+import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.MultipartResolver;
@@ -10,15 +12,9 @@ import org.springframework.web.servlet.view.JstlView;
 
 @Configuration
 public class MVCConfig {
-////    private final Dao dao = new Dao();
-//    @Bean
-//    public String getDaoBeanPackReference() {
-//        return "indi.etern.checkIn.entities";
-//    }
-//    @Bean
-//    public Dao getDao(){
-//        return dao;
-//    }
+@Getter
+    private static Gson gson;
+    
     @Bean
     public ViewResolver viewResolver() {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
@@ -34,5 +30,11 @@ public class MVCConfig {
     @Bean
     public MultipartResolver multipartResolver() {
         return new StandardServletMultipartResolver();
+    }
+    
+    @Bean
+    public Gson gson(){
+        gson = new Gson();
+        return gson;
     }
 }

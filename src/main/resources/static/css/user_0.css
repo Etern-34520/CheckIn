@@ -1,0 +1,52 @@
+#managePage[index="0"][page-type="user"] {
+    display: flex;
+    flex-direction: row;
+    overflow-y: auto;
+}
+
+#managePage[index="0"][page-type="user"] #searchAndFilterDiv {
+    width: 300px;
+    margin-left: 2px;
+    margin-top: 4px;
+    padding-left: 2%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#managePage[index="0"][page-type="user"] .userDivs {
+    margin-left: 2px;
+    margin-top: 4px;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: baseline;
+    justify-content: center;
+}
+
+#managePage[index="0"][page-type="user"] .userDiv {
+    display: flex;
+    min-width: 400px;
+    height: fit-content;
+    flex: 1;
+    box-shadow: 0 3px 15px 0 rgba(0,0,0,0.2);
+}
+
+#managePage[index="0"][page-type="user"] .userAvatar {
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    background-size: 100% 100%;
+}
+
+#managePage[index="0"][page-type="user"] .userInfoDiv {
+    margin-left: 10px;
+    flex: 1;
+}
+
+#managePage[index="0"][page-type="user"] .optionButton{
+    padding: 6px;
+    margin: 2px;
+}

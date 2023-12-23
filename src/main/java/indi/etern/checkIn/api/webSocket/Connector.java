@@ -2,15 +2,20 @@ package indi.etern.checkIn.api.webSocket;
 
 import com.google.gson.Gson;
 import indi.etern.checkIn.CheckInApplication;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
+import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
+import indi.etern.checkIn.entities.user.Role;
+import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
+import indi.etern.checkIn.service.dao.RoleService;
+import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.socket.SubProtocolCapable;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,43 +33,39 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Slf4j
 @ServerEndpoint("/api/websocket/{sid}")
-public class Connector {
+public class Connector implements SubProtocolCapable {
     public static final HashSet<String> ALL = new HashSet<>(0);
     public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
     private static final Logger logger = LoggerFactory.getLogger(CheckInApplication.class);
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
     private static PartitionService partitionService;
     private static WebSocketService webSocketService;
+    private static UserService userService;
     private static MultiPartitionableQuestionService multiPartitionableQuestionService;
     private static TransactionTemplate transactionTemplate;
-    private Gson gson = new Gson();
+    private static JwtTokenProvider jwtTokenProvider;
+    private static Gson gson;
+    private static RoleService roleService;
+    private String token;
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
     //接收sid
     @Getter
     private String sid = "";
+    private User sessionUser;
     
     public Connector() {
 //        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);
     }
     
-    /**
-     * 获取当前在线人数
-     */
     public static int getOnlineCount() {
         return onlineCount.get();
     }
     
-    /**
-     * 当前在线人数 +1
-     */
     public static void addOnlineCount() {
         onlineCount.getAndIncrement();
     }
     
-    /**
-     * 当前在线人数 -1
-     */
     public static void subOnlineCount() {
         onlineCount.getAndDecrement();
     }
@@ -79,6 +81,16 @@ public class Connector {
     }
     
     @Autowired
+    public void setUserService(UserService userService) {
+        Connector.userService = userService;
+    }
+    
+    @Autowired
+    public void setRoleService(RoleService roleService) {
+        Connector.roleService = roleService;
+    }
+    
+    @Autowired
     public void setMultiPartitionableQuestionService(MultiPartitionableQuestionService multiPartitionableQuestionService) {
         Connector.multiPartitionableQuestionService = multiPartitionableQuestionService;
     }
@@ -88,9 +100,16 @@ public class Connector {
         Connector.transactionTemplate = transactionTemplate;
     }
     
-    /**
-     * 连接建立成功调用的方法
-     */
+    @Autowired
+    public void setJwtTokenProvider(JwtTokenProvider jwtTokenProvider) {
+        Connector.jwtTokenProvider = jwtTokenProvider;
+    }
+    
+    @Autowired
+    public void setGson(Gson gson) {
+        Connector.gson = gson;
+    }
+    
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) {
         this.session = session;
@@ -101,9 +120,6 @@ public class Connector {
         logger.info("sid_" + sid + ":connected");
     }
     
-    /**
-     * 连接关闭调用的方法
-     */
     @OnClose
     public void onClose() {
         CONNECTORS.remove(this);  // 从set中删除
@@ -114,26 +130,29 @@ public class Connector {
     }
     
     private void releaseResource() {
-        // 这里写释放资源和要处理的业务
-//        logger.info("close:"+sid);
     }
     
-    /**
-     * 收到客户端消息后调用的方法
-     *
-     * @param message 客户端发送过来的消息
-     */
     @OnMessage
     public void onMessage(String message, Session session) {
         try {
             logger.info("sid_" + sid + ":" + message);
-            Map<String, Object> contentMap = new Gson().fromJson(message, HashMap.class);
+            Map<String, Object> contentMap = gson.fromJson(message, HashMap.class);
             final String partitionName = (String) contentMap.get("partitionName");
+            if (checkToken(contentMap)) return;//TODO TIP
+            
+            long qqInContentMap = 0;
+            String qqStr = "";
+            Object qqObject = contentMap.get("QQ");
+            if (qqObject != null) {
+                qqStr = (String) qqObject;
+                qqInContentMap = Long.parseLong(qqStr);
+            }
             switch ((String) contentMap.get("type")) {
+//                case "token" -> token = (String) contentMap.get("token");
                 case "addPartition" -> {
                     final Partition partition = Partition.getInstance(partitionName);
                     partitionService.save(partition);
-                    sendMessage("{\"type\":\"addPartitionCallBack\",\"id\":"+partition.getId()+"}");
+                    sendMessage("{\"type\":\"addPartitionCallBack\",\"id\":" + partition.getId() + "}");
                     sendUpdatePartitionToAll();
                 }
                 case "deletePartition" -> transactionTemplate.execute((TransactionCallback<Object>) result -> {
@@ -143,10 +162,7 @@ public class Connector {
                             partitionService.delete(partition);
                             sendUpdatePartitionToAll();
                         } else {
-                            Map<String, String> dataMap = new HashMap<>();
-                            dataMap.put("type", "error");
-                            dataMap.put("data", "partition " + partitionName + " is not empty");
-                            sendMessage(gson.toJson(dataMap));
+                            sendError("partition " + partitionName + " is not empty");
                         }
                     } catch (Exception e) {
                         return Boolean.FALSE;
@@ -155,16 +171,8 @@ public class Connector {
                 });
                 case "deleteQuestion" -> {
                     final String questionMD5 = (String) contentMap.get("questionMD5");
-                    transactionTemplate.execute((TransactionCallback<Object>) result -> {
-                        MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getByMD5(questionMD5);
-                        Set<Partition> partitions = multiPartitionableQuestion.getPartitions();
-                        for (Partition partition : partitions) {
-                            partition.getQuestions().remove(multiPartitionableQuestion);
-                            partitionService.saveAndFlush(partition);
-                        }
-                        return Boolean.TRUE;
-                    });
-                    multiPartitionableQuestionService.deleteById(questionMD5);
+                    multiPartitionableQuestionService.unbindAndDeleteById(questionMD5);
+//                    multiPartitionableQuestionService.deleteById(questionMD5);
                     sendDeleteQuestionToAll(questionMD5);
                 }
                 case "editPartition" -> {
@@ -174,63 +182,190 @@ public class Connector {
                     partitionService.saveAndFlush(partition);
                     sendUpdatePartitionToAll();
                 }
+                case "newUser" -> {
+                    final long qqNumber = Long.parseLong(contentMap.get("qq").toString());
+                    if (userService.existsByQQNumber(qqNumber)) {
+                        sendError("user already exists");
+//                        dataMap.put("reason", "user already exists");
+                    } else {
+                        final String initPassword = UUID.randomUUID().toString();
+                        User newUser = new User((String) contentMap.get("name"), qqNumber, initPassword);
+                        newUser.setRole(Role.getInstance(contentMap.get("role").toString()));
+                        userService.save(newUser);
+                        {
+                            Map<String, String> dataMap = new HashMap<>();
+                            dataMap.put("type", "success");
+                            dataMap.put("initPassword", initPassword);
+                            sendMessage(gson.toJson(dataMap));
+                        }
+                        {
+                            Map<String, Object> dataMap = new HashMap<>();
+                            dataMap.put("type", "addUser");
+                            Map<String, Object> userMap = new HashMap<>();
+                            userMap.put("name", newUser.getName());
+                            userMap.put("qq", newUser.getQQNumber());
+                            userMap.put("role", newUser.getRole().getType());
+                            dataMap.put("user", userMap);
+                            webSocketService.sendMessageToAll(gson.toJson(dataMap));
+                        }
+                    }
+                }
+                case "deleteUser" -> {
+                    final Optional<User> optionalUser = userService.findByQQNumber(qqInContentMap);
+                    if (optionalUser.isPresent()) {
+                        User user = optionalUser.get();
+                        if (!user.equals(sessionUser) && webSocketService.isOnline(qqStr)) {
+                            sendUserIsOnlineError();
+                            return;
+                        }
+                        userService.unbindAndDelete(user);
+                        {
+                            Map<String, Object> dataMap = new HashMap<>();
+                            dataMap.put("type", "deleteUser");
+                            dataMap.put("QQ", qqInContentMap);
+                            webSocketService.sendMessageToAll(gson.toJson(dataMap));
+                        }
+                    }
+                }
+                case "changeUserName" -> {
+                    final String newUserName = (String) contentMap.get("newName");
+                    if (newUserName != null) {
+                        sessionUser.setName(newUserName);
+                        userService.save(sessionUser);
+                        sendUpdateUser(sessionUser);
+                    } else
+                        sendError("newNameIsNull");
+                }
+                case "changePassword" -> {
+                    if (sessionUser.getPassword().equals(contentMap.get("oldPassword"))) {
+                        sessionUser.setPassword((String) contentMap.get("newPassword"));
+                        userService.save(sessionUser);
+                        sendMessage("{\"type\":\"success\"}");
+                    } else {
+                        sendMessage("{\"type\":\"error\"}");
+                    }
+                }
+                case "enableUser" -> {
+                    final Optional<User> optionalUser = userService.findByQQNumber(qqInContentMap);
+                    if (optionalUser.isPresent()) {
+                        final User user = optionalUser.get();
+                        if (webSocketService.isOnline(user)) {
+                            sendUserIsOnlineError();
+                        } else {
+                            user.setEnabled(true);
+                            userService.save(user);
+                            sendUpdateUser(user);
+                        }
+                    }
+//                    userService.enableByQQNumber(qqInContentMap);
+                }
+                case "disableUser" -> {
+                    final Optional<User> optionalUser = userService.findByQQNumber(qqInContentMap);
+                    if (optionalUser.isPresent()) {
+                        final User user = optionalUser.get();
+                        if (webSocketService.isOnline(user)) {
+                            sendUserIsOnlineError();
+                        } else {
+                            user.setEnabled(false);
+                            userService.save(user);
+                            sendUpdateUser(user);
+                        }
+                    }
+//                    userService.disableByQQNumber(qqInContentMap);
+                }
+                case "offLine" -> webSocketService.sendMessage("{\"type\":\"offLine\"}", qqStr);
+                case "changeRole" -> {
+                    if (userService.existsByQQNumber(qqInContentMap)) {
+                        User user = userService.changeRoleById(qqInContentMap, contentMap.get("role").toString());
+                        Map<String, String> dataMap = new HashMap<>();
+                        dataMap.put("type", "success");
+                        sendMessage(gson.toJson(dataMap));
+                        sendUpdateUser(user);
+                    } else {
+                        sendError("user not found");
+                    }
+                }
             }
         } catch (Exception e) {
             try {
                 logger.error(e.getClass().getName() + ":" + e.getMessage());
-                Map<String, String> dataMap = new HashMap<>();
-                dataMap.put("type", "error");
-                dataMap.put("data", e.getClass().getSimpleName() + ":" + e.getMessage());
-                sendMessage(gson.toJson(dataMap));
-//                sendMessage("error:" + e.getMessage());
+                sendError(e.getClass().getSimpleName() + ":" + e.getMessage());
             } catch (IOException exception) {
                 logger.error("while sending message:" + message + "to sid_" + sid + ":" + exception.getMessage());
             }
         }
-        /*// 群发消息
-        HashSet<String> sids = new HashSet<>();
-        for (Connector item : CONNECTORS) {
-            sids.add(item.sid);
-        }*/
     }
     
-    private void sendDeleteQuestionToAll(String questionMD5) throws IOException {
+    private void sendUpdateUser(User user) {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("type", "updateUser");
+        dataMap.put("user", user.toDataMap());
+        webSocketService.sendMessageToAll(gson.toJson(dataMap));
+    }
+    
+    private void sendUserIsOnlineError() throws IOException {
+        sendError("user is online");
+    }
+    
+    private void sendError(String data) throws IOException {
+        Map<String, String> dataMap = new HashMap<>();
+        dataMap.put("type", "error");
+        dataMap.put("data", data);
+        sendMessage(gson.toJson(dataMap));
+    }
+    
+    private boolean checkToken(Map<String, Object> contentMap) throws IOException {
+        if (contentMap.get("type").equals("token")) {
+            token = (String) contentMap.get("token");
+            sessionUser = jwtTokenProvider.getUser(token);
+            return true;
+        } else if (token == null || token.isEmpty()) {
+            Map<String, String> dataMap = new HashMap<>();
+            dataMap.put("type", "error");
+            dataMap.put("data", "token is empty");
+            sendMessage(gson.toJson(dataMap));
+            return true;
+        } else if (!jwtTokenProvider.validateToken(token)) {
+            Map<String, String> dataMap = new HashMap<>();
+            dataMap.put("type", "error");
+            dataMap.put("data", "token is invalid");
+            sendMessage(gson.toJson(dataMap));
+            return true;
+        } else return sessionUser != null && !sessionUser.isEnabled();
+    }
+    
+    private void sendDeleteQuestionToAll(String questionMD5) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("type", "deleteQuestion");
         dataMap.put("questionMD5", questionMD5);
         webSocketService.sendMessageToAll(gson.toJson(dataMap));
     }
     
-    private void sendUpdatePartitionToAll() throws IOException {
+    private void sendUpdatePartitionToAll() {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("type", "updatePartitionList");
         final List<Partition> partitions = partitionService.findAll();
-        final Map<String,String> partitionIdNameMap = new HashMap<>();
-//        final List<String> partitionNames = new ArrayList<>();
-//        final List<Integer> partitionIds = new ArrayList<>();
+        final Map<String, String> partitionIdNameMap = new HashMap<>();
         for (Partition partition : partitions) {
-            partitionIdNameMap.put(String.valueOf(partition.getId()),partition.getName());
+            partitionIdNameMap.put(String.valueOf(partition.getId()), partition.getName());
         }
-//        dataMap.put("partitions", partitionNames);
-//        dataMap.put("partitionIds", partitionIds);
         dataMap.put("partitionIdNameMap", partitionIdNameMap);
         webSocketService.sendMessageToAll(gson.toJson(dataMap));
     }
     
-    /**
-     * 发生错误回调
-     */
     @OnError
     public void onError(Session session, Throwable error) {
-        logger.error(session.getBasicRemote() + " error");
+        logger.error(session.getBasicRemote().toString());
         error.printStackTrace();
     }
     
-    /**
-     * 实现服务器主动推送消息到 指定客户端
-     */
     public void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
     }
     
+    @NonNull
+    @Override
+    public List<String> getSubProtocols() {
+        return new ArrayList<>();
+    }
 }
