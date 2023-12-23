@@ -33,4 +33,3 @@ build/
 ### VS Code ###
 .vscode/
 /data/
-/src/main/resources/static/lib/

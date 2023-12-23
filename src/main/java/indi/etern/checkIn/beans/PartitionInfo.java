@@ -15,7 +15,7 @@ public class PartitionInfo {
     //Bean占位
     private List<Partition> partitions;
     //Bean占位
-    private List<String> partitionName = new ArrayList<>();
+    private final List<String> partitionName = new ArrayList<>();
     private Partition getByName;
     
     public List<Partition> getPartitions() {

@@ -6,7 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%--for manage——server:home --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <div id="managePage" index="0" page-type="server" onload="initChart()">
     <div id="left">
         <div id="leftTop" rounded border>

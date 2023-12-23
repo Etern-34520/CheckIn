@@ -7,10 +7,12 @@ import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.user.User;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
 
+@Setter
 @Entity
 public class MultipleCorrectQuestionWithImages extends MultipleCorrectQuestion implements ImagesWith {
     @Convert(converter = StringListConverter.class)
@@ -25,7 +27,4 @@ public class MultipleCorrectQuestionWithImages extends MultipleCorrectQuestion i
         return imagePathStrings;
     }
     
-    public void setImagePathStrings(List<String> imagePathStrings) {
-        this.imagePathStrings = imagePathStrings;
-    }
 }

@@ -8,7 +8,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%--for manage——server:home --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <jsp:useBean id="partitionInfo" class="indi.etern.checkIn.beans.PartitionInfo" scope="request"/>
 <div id="managePage" index="2" page-type="server">
     <div id="left" rounded border>
