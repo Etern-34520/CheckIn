@@ -1,5 +1,6 @@
 package indi.etern.checkIn.service.web;
 
+import com.google.gson.JsonObject;
 import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.api.webSocket.Connector;
 import indi.etern.checkIn.entities.user.User;
@@ -15,13 +16,15 @@ import static indi.etern.checkIn.api.webSocket.Connector.CONNECTORS;
 @Service
 public class WebSocketService {
     private static final Logger logger = LoggerFactory.getLogger(CheckInApplication.class);
-    
+    public static WebSocketService singletonInstance;
+    protected WebSocketService() {
+        singletonInstance = this;
+    }
     /**
      * 群发自定义消息
      */
     public void sendMessages(String message, HashSet<String> toSids) {
         logger.info("webSocket to:" + toSids + ", msg:" + message);
-        
         for (Connector item : CONNECTORS) {
             try {
                 //这里可以设定只推送给传入的sid，为null则全部推送
@@ -51,10 +54,13 @@ public class WebSocketService {
     public void sendMessageToAll(String message) {
         logger.info("webSocket to all, msg:" + message);
         for (Connector item : CONNECTORS) {
-            try {
-                item.sendMessage(message);
-            } catch (IOException e) {
-                logger.error("send : error",e);
+            if (item.isOpen()) {
+                try {
+                    item.sendMessageWithOutLog(message);
+                } catch (IllegalStateException ignored) {
+                } catch (Exception e) {
+                    logger.error("error occurred when send to sid_"+item.getSid(),e);
+                }
             }
         }
     }
@@ -72,5 +78,9 @@ public class WebSocketService {
     
     public boolean isOnline(User user) {
         return isOnline(String.valueOf(user.getQQNumber()));
+    }
+    
+    public void sendMessageToAll(JsonObject jsonObject) {
+        sendMessageToAll(jsonObject.toString());
     }
 }

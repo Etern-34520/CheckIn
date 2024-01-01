@@ -31,7 +31,7 @@
       <c:if test="${toggleSwitchState}">background: var(--highlight-component-background-color-hover)</c:if> " component_type="toggleSwitch" move_distance="${moveLeft}"
       <c:if test="${toggleSwitchDisabled}">disabled="disabled"</c:if>
       onclick="toggleSwitch($(this),${moveLeft},${toggleSwitchOn},${toggleSwitchOff})">
-    <input type="hidden" name="${toggleSwitchId}" id="input_${toggleSwitchId}" value="${toggleSwitchState}">
+    <input type="hidden" class="toggleSwitchInput" name="${toggleSwitchId}" id="input_${toggleSwitchId}" value="${empty toggleSwitchState?"true":toggleSwitchState}">
     <span class="toggleSwitchDot" style="height: ${dotSize}px;width: ${dotSize}px;<c:if
             test="${toggleSwitchState}">left: ${moveLeft}px</c:if>"></span>
 </span>

@@ -3,6 +3,8 @@ package indi.etern.checkIn.entities.question.interfaces;
 import indi.etern.checkIn.entities.question.Question;
 import jakarta.persistence.*;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +14,7 @@ import java.util.Set;
 public class MultiPartitionableQuestion extends Question implements MultiPartitionable {
     
     @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "partitions_questions_mapping",
             joinColumns  = @JoinColumn(name = "question_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "partition_id",referencedColumnName = "id"))
@@ -38,7 +41,7 @@ public class MultiPartitionableQuestion extends Question implements MultiPartiti
         throw new UnsupportedOperationException("Not supported yet");
     }
     
-    public boolean getEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
     

@@ -15,7 +15,7 @@
              id="partition${partition.id}" class="partitionDiv">
             <div style="display: flex;flex-direction: row" class="partitionTop">
                 <div style="margin: 0;flex: 1" rounded clickable onclick="togglePartition(this)">${fn:escapeXml(partition.name)}</div>
-                <button style="width: 20px;margin: 0 0 0 2px;font-size: 18px" onclick="newQuestionOf(this)">+</button>
+                <button style="min-width: 20px;margin: 0 0 0 2px;font-size: 18px" onclick="newQuestionOf('${partition.id}')">+</button>
             </div>
             <div style="display: none" class="partitionQuestionsList">
                 <c:choose>
@@ -27,8 +27,8 @@
                             <div rounded clickable class="question${question.md5}"
                                  style="height: 21px;overflow: hidden;display: flex;flex-direction: row"
                                  onclick="switchToQuestion('${question.md5}',this)">
-                                <div class="pointer" style="width: 10px">•</div>
-                                <div style="flex: 1;line-height: 21px">${question.content}</div>
+                                <div class="pointer">•</div>
+                                <div class="questionContentOverview">${question.content}</div>
                             </div>
                         </c:forEach>
                     </c:otherwise>

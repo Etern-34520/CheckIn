@@ -1,6 +1,7 @@
 #managePage[index="2"][page-type="server"] #left {
     width: 250px;
-    flex: none;
+    min-width: 200px;
+    flex: 2;
     display: flex;
     flex-direction: column;
     margin-top: 4px;
@@ -10,7 +11,7 @@
 #managePage[index="2"][page-type="server"] #right {
     margin-left: 2px;
     margin-top: 4px;
-    flex: 1;
+    flex: 12;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -20,6 +21,7 @@
     height: 40px;
     font-size: 16px;
     margin: 4px 0;
+    padding: 1px;
     overflow: hidden;
 }
 
@@ -92,11 +94,17 @@ input[type="file"] {
     display: none;
 }
 
-#managePage[index="2"][page-type="server"] .partitionButton[selected = "selected"] {
-    background: var(--component-background-color-hover);
+#managePage[index="2"][page-type="server"] #partitionSelectionsDiv div {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    border: solid 2px rgba(0, 0, 0, 0);
 }
 
-#managePage[index="2"][page-type="server"] div[selected = "selected"] {
+#managePage[index="2"][page-type="server"] #partitionSelectionsDiv div[selected = "selected"] {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    /*border: solid 2px;*/
+    border-color: rgba(0, 0, 0, 0) var(--highlight-color);
     background: var(--component-background-color-hover);
 }
 
@@ -149,7 +157,15 @@ input[type="file"] {
 }
 
 #partitionDivs div.pointer {
+    width: 10px;
+    flex: none;
     font-size: 16px;
     color: var(--highlight-component-background-color-hover);
     opacity: 0;
+}
+
+#partitionDivs div.questionContentOverview {
+    flex: 1;
+    line-height: 21px;
+    white-space: nowrap;
 }

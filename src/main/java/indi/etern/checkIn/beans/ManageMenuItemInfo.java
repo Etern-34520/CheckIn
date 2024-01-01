@@ -19,7 +19,7 @@ public class ManageMenuItemInfo {
         menuItemServerStrings.add("信息");
         menuItemUserStrings.add("用户管理");
         menuItemUserStrings.add("权限组管理");
-        menuItemUserStrings.add("设置");
+        menuItemUserStrings.add("账户设置");
     }
     
 }

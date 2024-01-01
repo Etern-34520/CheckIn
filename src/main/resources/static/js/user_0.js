@@ -28,10 +28,10 @@ function updateUserDiv(user) {
     $userDiv.find(".userQQ").text(user.QQ);
     $userDiv.find(".userName").text(user.name);
     $userDiv.find(".userRole").text(user.role);
-    $("#userSelect"+user.QQ).text(user.name)
+    $("#userSelect" + user.QQ).text(user.name)
     // $userDiv.find(".userStatus").text(user.status);
-    switchToIgnoreHandler($userDiv.find("span[component_type='toggleSwitch']"),user.enabled);
-    if (user.QQ==$.cookie("qq")) {
+    switchToIgnoreHandler($userDiv.find("span[component_type='toggleSwitch']"), user.enabled);
+    if (user.QQ == $.cookie("qq")) {
         $(".currentUserName").text(user.name);
         $(".currentUserRole").text(user.role);
     }
@@ -102,7 +102,7 @@ function sendNewUser() {
     $okButton.attr("disabled", true);
     sendMessage({
         type: "newUser",
-        qq: $userQQInput.val(),
+        QQ: $userQQInput.val(),
         name: $userNameInput.val(),
         role: $("#userRoleSelection").val()
     }, function (res) {
@@ -128,19 +128,23 @@ function sendNewUser() {
 
 //used in user page
 // noinspection JSUnusedGlobalSymbols
-function enableUser(qqNumber) {
+function enableUser(qqNumber, $toggleSwitch) {
     sendMessage({
         type: "enableUser",
         QQ: qqNumber.toString()
+    }, undefined, function () {
+        switchOffIgnoreHandler($toggleSwitch);
     });
 }
 
 // noinspection JSUnusedGlobalSymbols
 
-function disableUser(qqNumber) {
+function disableUser(qqNumber, $toggleSwitch) {
     sendMessage({
         type: "disableUser",
         QQ: qqNumber.toString()
+    }, undefined, function () {
+        switchOnIgnoreHandler($toggleSwitch);
     });
 }
 
@@ -164,6 +168,7 @@ function tip(content, hide = true) {
         opacity: 0
     }, 200, "easeOutQuad", callback);
 }
+
 function initChangePassword() {
     $("#okButton").on("click", function () {
         const newPassword = $("#newPassword").val();
@@ -173,6 +178,7 @@ function initChangePassword() {
             } else {
                 sendMessage({
                     type: "changePassword",
+                    QQ: $.cookie("qq"),
                     oldPassword: $("#currentPassword").val(),
                     newPassword: newPassword,
                 }, function (event) {

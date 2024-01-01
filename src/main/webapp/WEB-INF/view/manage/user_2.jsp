@@ -15,7 +15,7 @@
     <div rounded style="display: flex;flex: 1;flex-direction: column;padding: 16px;overflow: auto;" border>
         <div style="flex: 1;padding: 16px">
             <label titleLabel text>账户设置</label>
-            <div style="display: flex;flex-direction: row;background: var(--input-background-color);padding: 16px"
+            <div style="display: flex;flex-direction: row;padding: 16px;background: var(--shrinkPane-background-color);box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.2);"
                  rounded>
                 <div class="userAvatar"
                      style="background-image: url('https://q1.qlogo.cn/g?b=qq&nk=${currentUser.QQNumber}&s=640')"></div>
@@ -27,18 +27,11 @@
             </div>
             <components:shrinkPane title="我的题目" useLabelTitle="true">
                 <jsp:attribute name="content">
-                    <c:choose>
-                        <c:when test="${!empty currentUser.multiPartitionableQuestions}">
-                            <c:forEach var="question" items="${currentUser.multiPartitionableQuestions}">
-                                <components:questionOverview inUser_2="true" question="${question}"/>
-                            </c:forEach>
-                        </c:when>
-                        <c:otherwise>
-                            <div style="margin: 8px">
-                                空
+                            <div class="questions">
+                                <c:forEach var="question" items="${currentUser.multiPartitionableQuestions}">
+                                    <components:questionOverview inUser_2="true" question="${question}"/>
+                                </c:forEach>
                             </div>
-                        </c:otherwise>
-                    </c:choose>
                 </jsp:attribute>
             </components:shrinkPane>
             <br>

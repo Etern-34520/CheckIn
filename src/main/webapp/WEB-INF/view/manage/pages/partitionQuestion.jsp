@@ -10,6 +10,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <jsp:useBean id="partition" scope="request" type="indi.etern.checkIn.entities.question.interfaces.Partition"/>
+<jsp:useBean id="permission_create_and_edit_owns_question" type="java.lang.Boolean" scope="request"/>
 <c:set var="partition" value="${partition}"/>
 <div style="display: flex;flex-direction: column;" onload="initQuestionViewImages()">
     <label id="partitionLabel${partition.id}" titleLabel text>
@@ -20,11 +21,13 @@
             <components:questionOverview question="${question}"/>
         </c:forEach>
     </div>
-    <div class="addButtons">
-        <button type="button" text style="font-size: 20px"
-                onclick="addQuestion('${partition.id}')">
-            +
-        </button>
+    <div class="addButtons" style="margin: 4px">
+        <c:if test="${permission_create_and_edit_owns_question}">
+            <button type="button" text style="font-size: 20px"
+                    onclick="addQuestion('${partition.id}')">
+                +
+            </button>
+        </c:if>
 <%--        <button type="button" text style="font-size: 20px">↑</button>--%>
     </div>
 </div>

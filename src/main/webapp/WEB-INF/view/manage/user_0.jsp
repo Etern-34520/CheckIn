@@ -24,19 +24,15 @@
         </div>
         <div style="width: 2px;margin: 4px;border-radius: 1px;background: rgba(128,128,128,0.2)"></div>
         <div class="userDivs">
-            <c:forEach var="user1" items="${userInfo.users}" varStatus="userStat">
+            <c:forEach var="user1" items="${userInfo.users}" varStatus="userStat" begin="0" step="2">
                 <c:set var="user" value="${user1}" scope="page"/>
-                <c:if test="${userStat.index%2==0}">
-                    <%@ include file="pages/userPane.jsp" %>
-                </c:if>
+                <%@ include file="pages/userPane.jsp" %>
             </c:forEach>
         </div>
         <div class="userDivs" style="padding-right: 2%;">
-            <c:forEach var="user2" items="${userInfo.users}" varStatus="userStat">
+            <c:forEach var="user2" items="${userInfo.users}" varStatus="userStat" begin="1" step="2">
                 <c:set var="user" value="${user2}" scope="page"/>
-                <c:if test="${userStat.index%2==1}">
-                    <%@ include file="pages/userPane.jsp" %>
-                </c:if>
+                <%@ include file="pages/userPane.jsp" %>
             </c:forEach>
         </div>
     </div>

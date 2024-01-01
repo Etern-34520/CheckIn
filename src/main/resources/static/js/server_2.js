@@ -157,7 +157,7 @@ function addNewPartitionButton($nameInput, $newPartitionButton) {
 
 function newPartition() {
     let newPartitionButtonHtml =
-        '<button class="partitionButton" id="newPartitionButton" preText editing="true"><input type="text" value="New Partition"></button>';
+        '<button class="partitionButton" id="newPartitionButton" preText editing="true" style="border: none;padding: 0"><input type="text" value="New Partition"></button>';
     let $newPartitionButton = $(newPartitionButtonHtml);
     $newPartitionButton.css({
         height: 0,
@@ -206,10 +206,10 @@ function newPartition() {
 let transferring = false;
 
 function switchToPartition(button) {
-    if (transferring) return;
-    transferring = true;
     let $button = $(button);
     if ($button.attr("editing") === "true") return;
+    if (transferring) return;
+    transferring = true;
     $(".partitionButton").removeAttr("selected");
     $button.attr("selected", "true");
     let partitionName = $button.text();
@@ -284,7 +284,7 @@ function updatePartition(partitionIdNameMap) {
 <div style="background:var(--input-background-color);margin: 0 0 8px;" rounded="" clickable="" id="partition${partitionId}" class="partitionDiv">
 <div style="display: flex;flex-direction: row" class="partitionTop">
 <div style="margin: 0;flex: 1" rounded="" clickable="" onclick="togglePartition(this)">${partitionName}</div>
-<button style="width: 20px;margin: 0 0 0 2px;font-size: 18px" onclick="newQuestionOf(this)">+</button>
+<button style="width: 20px;margin: 0 0 0 2px;font-size: 18px" onclick="newQuestionOf('${partitionId}')">+</button>
 </div>
 <div style="display: none" class="partitionQuestionsList">
 <div rounded="" style="cursor: auto;background: none;" class="empty">empty</div>
@@ -579,8 +579,9 @@ ${questionObject.content}
     }
 }
 
-function newQuestionOf(button) {
-    let $button = $(button);
+function newQuestionOf(partitionId) {
+    editQuestion("", partitionId, false);
+    /*let $button = $(button);
     let $partitionDiv = $button.parent().parent();
     let $questionsDiv = $partitionDiv.children().eq(1);
     let questionMd5 = md5(new Date().getTime().toString()+Math.random().toString());
@@ -601,5 +602,5 @@ function newQuestionOf(button) {
     $questionsDiv.append($newQuestionDiv);
     $newQuestionDiv.animate({
         maxHeight:100
-    },100,"easeOutCubic");
+    },100,"easeOutCubic");*/
 }

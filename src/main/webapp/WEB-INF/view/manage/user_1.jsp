@@ -11,35 +11,38 @@
 <%--for manage——server:home --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <jsp:useBean id="roleInfo" scope="request" type="indi.etern.checkIn.beans.RoleInfo"/>
+<jsp:useBean id="permission_delete_role" type="java.lang.Boolean" scope="request"/>
+<jsp:useBean id="permission_edit_permission" type="java.lang.Boolean" scope="request"/>
+<jsp:useBean id="permission_create_role" type="java.lang.Boolean" scope="request"/>
 <div id="managePage" index="0" page-type="user">
-    <div rounded style="display: flex;flex: 1;flex-direction: column" border>
-        <c:forEach var="role" items="${roleInfo.roles}">
-            <components:shrinkPane useLabelTitle="true">
-                <jsp:attribute name="title">
-                    ${fn:escapeXml(role.type)}
-                </jsp:attribute>
-                <jsp:attribute name="content">
-                    <div style="display: flex;flex-direction: row">
-                        <c:choose>
-                            <c:when test="${empty role.users}">
-                                <span style="margin-left: 8px;">空</span>
-                            </c:when>
-                            <c:otherwise>
-                                <div style="display: flex;flex-direction: row;overflow: auto">
-                                    <c:forEach var="user" items="${role.users}">
-                                        <%@ include file="pages/userPane.jsp" %>
-                                    </c:forEach>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
+    <div class="forScroll" rounded style="display: flex;flex: 1;flex-direction: column" border>
+        <div id="roles">
+            <c:forEach var="role" items="${roleInfo.roles}">
+                <components:shrinkPane id="role_${role.type.replace(' ','_')}">
+                    <jsp:attribute name="title">
+                        <div style="margin: 8px">${fn:escapeXml(role.type)}</div>
                         <div class="blank"></div>
-                        <button highlight rounded style="margin-right: 0;">删除</button>
-                    </div>
-                </jsp:attribute>
-            </components:shrinkPane>
-        </c:forEach>
-        <button rounded style="margin: 6px;font-size: 28px">
-            +
-        </button>
+                        <c:if test="${permission_delete_role}">
+                        <button highlight rounded onclick="deleteRole('${role.type}')">删除</button>
+                        </c:if>
+                        <c:if test="${permission_edit_permission}">
+                        <button highlight rounded style="margin-right: 16px" onclick="editingPermissionOf('${role.type}')">修改权限</button>
+                        </c:if>
+                    </jsp:attribute>
+                    <jsp:attribute name="content">
+                        <div style="display: flex;flex-direction: row">
+                            <div style="display: flex;flex-direction: row;overflow: auto;flex-wrap: wrap">
+                                <c:forEach var="user" items="${role.users}">
+                                    <%@ include file="pages/userPane.jsp" %>
+                                </c:forEach>
+                            </div>
+                        </div>
+                    </jsp:attribute>
+                </components:shrinkPane>
+            </c:forEach>
+        </div>
+        <c:if test="${permission_create_role}">
+            <button rounded style="margin: 6px;font-size: 28px" onclick="createRole()" id="createRoleButton">+</button>
+        </c:if>
     </div>
 </div>

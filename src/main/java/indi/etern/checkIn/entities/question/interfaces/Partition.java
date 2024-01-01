@@ -3,6 +3,8 @@ package indi.etern.checkIn.entities.question.interfaces;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -26,6 +28,7 @@ public class Partition implements Serializable {
      * don't worry about the sync
      * jpa will save the question at last*/
     @ManyToMany(mappedBy = "partitions", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+    @Fetch(value = FetchMode.SUBSELECT)
     @NotFound(action = NotFoundAction.IGNORE)
     Set<MultiPartitionableQuestion> questions;
     

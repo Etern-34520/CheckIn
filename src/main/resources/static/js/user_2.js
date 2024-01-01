@@ -7,6 +7,7 @@ function initUserDetailPage() {
             } else {
                 sendMessage({
                     type: "changePassword",
+                    QQ: $.cookie("qq"),
                     oldPassword: $("#currentPassword").val(),
                     newPassword: newPassword,
                 }, function (event) {
@@ -25,6 +26,7 @@ function initUserDetailPage() {
         const newUserName = $("#newUserNameInput").val();
         sendMessage({
             type: "changeUserName",
+            QQ: $.cookie("qq"),
             newName: newUserName
         }, function (event) {
             if (JSON.parse(event.data).type === "success") {

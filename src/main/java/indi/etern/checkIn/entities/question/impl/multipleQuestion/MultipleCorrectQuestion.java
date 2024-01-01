@@ -1,7 +1,6 @@
 package indi.etern.checkIn.entities.question.impl.multipleQuestion;
 
 import indi.etern.checkIn.MVCConfig;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.MultipleCorrect;
@@ -12,10 +11,7 @@ import java.util.*;
 
 @Entity
 @Inheritance(strategy= InheritanceType.SINGLE_TABLE)
-public class MultipleCorrectQuestion extends MultiPartitionableQuestion implements MultipleCorrect {
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id",referencedColumnName = "id")
-    List<Choice> choices;
+public class MultipleCorrectQuestion extends MultipleChoiceQuestion implements MultipleCorrect {
     @Transient
     List<Choice> correctChoices;
     
@@ -53,10 +49,7 @@ public class MultipleCorrectQuestion extends MultiPartitionableQuestion implemen
         }
         return correctChoice;
     }
-    @Override
-    public List<Choice> getChoices() {
-        return choices;
-    }
+    
     @PostLoad
     public void filterCorrectChoices() {
         if (choices == null){

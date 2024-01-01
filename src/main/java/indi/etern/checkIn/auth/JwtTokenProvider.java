@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -76,6 +78,22 @@ public class JwtTokenProvider {
             logger.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: {}", e.getMessage());
+        }
+        return false;
+    }
+    
+    public static boolean currentUserHasPermission(String permissionName){
+        for (GrantedAuthority grantedAuthority : SecurityContextHolder.getContext().getAuthentication().getAuthorities()) {
+            Authority authority = (Authority) grantedAuthority;
+            if (authority.getName().equals(permissionName)/*&&authority.getPermissionType().equals(permissionType)*/){
+                return true;
+            }
+//            final String permissionNamesStr = authority.getName().split(":", 2)[1];
+//            final String[] permissions = permissionNamesStr.split("\\|");
+//            if (authority.getPermissionType().equals(permissionType) &&
+//                    List.of(permissions).contains(permissionName)){
+//                return true;
+//            }
         }
         return false;
     }

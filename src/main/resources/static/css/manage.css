@@ -6,7 +6,7 @@
 
 @media (prefers-color-scheme: light) {
     :root{
-        --menu-background-color: rgba(230,230,230,0.7);
+        --menu-background-color: rgba(250,250,250,0.7);
     }
 }
 
@@ -71,11 +71,9 @@ li[class="context-menu-item context-menu-separator context-menu-not-selectable"]
 #top{
     height: 35px;
     flex: none;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     display: flex;
     flex-direction: row;
-
-    opacity: 0;
 }
 #content{
     height: calc(100% - 80px);
@@ -101,6 +99,8 @@ li[class="context-menu-item context-menu-separator context-menu-not-selectable"]
     color: #aaa;
 }
 #top>button , #menuTop>button{
+    font-size: 20px;
+    margin-right: 8px;
     background: var(--input-background-color);
     width: 35px;
     height: 100%;/*35px*/
@@ -111,9 +111,7 @@ li[class="context-menu-item context-menu-separator context-menu-not-selectable"]
     transition-timing-function: ease-in-out;
     background: var(--input-background-color-hover);
 }
-.selectedMenuButton{
-    background: var(--component-background-color-hover);
-}
+
 #menu{
     height: auto;
     width: 300px;
@@ -143,7 +141,7 @@ li[class="context-menu-item context-menu-separator context-menu-not-selectable"]
     top: 0;
     left: 0;
     background: var(--context-menu-background-color);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
 }
 
 .menuButtons>button{
@@ -177,14 +175,18 @@ li[class="context-menu-item context-menu-separator context-menu-not-selectable"]
     flex-direction: row;
     height: 100%;
 }
+#managePage > div[rounded]{
+    margin-top: 4px;
+}
 div[component_type="tip"]{
+    font-size: 12px;
+    word-wrap: break-word;
     pointer-events: auto;
     width: auto;
     margin: 0;
     box-shadow: 0 5px 15px black;
     min-height: 80px;
     padding: 8px;
-    /*z-index: 8 !important;*/
 }
 #tipsMask{
     pointer-events: none;
@@ -238,4 +240,13 @@ div[component_type="tip"]{
 
 #topMask > div {
     box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+}
+
+.tipCloseButton {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    font-size: 18px;
+    line-height: 14px;
 }

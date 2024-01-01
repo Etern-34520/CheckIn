@@ -77,7 +77,6 @@ public class PartitionService {
         return partitionRepository.findById(id);
     }
     
-    
     public void addQuestionOf(Partition partition, MultiPartitionableQuestion multipleQuestion) {
         transactionTemplate.execute((callback) -> {
             final Optional<Partition> partitionOptional = partitionRepository.findById(partition.getId());

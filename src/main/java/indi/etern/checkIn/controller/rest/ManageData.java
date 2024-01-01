@@ -1,9 +1,9 @@
 package indi.etern.checkIn.controller.rest;
 
 import com.google.gson.Gson;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionBuilder;
+import indi.etern.checkIn.auth.AuthException;
+import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
-import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.traffic.DateTraffic;
 import indi.etern.checkIn.entities.traffic.UserTraffic;
 import indi.etern.checkIn.entities.user.User;
@@ -13,7 +13,6 @@ import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.dao.UserTrafficService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,65 +76,27 @@ public class ManageData {
         return gson.toJson(jsonData);
     }
     
-    @PostMapping(path = "/updateQuestion/{questionMD5}")
+    @PostMapping(path = "/updateQuestion/")
     @ResponseBody
-    public synchronized String updateQuestion(HttpServletRequest httpServletRequest, @PathVariable String questionMD5) {
+    public synchronized String updateQuestion(HttpServletRequest httpServletRequest) {
         try {
-            MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
             final String md5 = httpServletRequest.getParameter("md5");
-            if (md5 != null) {
-                multipleQuestionBuilder.setMD5(md5);
-            }
-            Map<String, String[]> map = httpServletRequest.getParameterMap();
-            
-            //content
-            multipleQuestionBuilder.setQuestionContent(httpServletRequest.getParameter("questionContent"));
-            
-            //image
-            int imageIndex = 0;
-            while (true) {
-                final Part part = httpServletRequest.getPart("image_" + imageIndex);
-                if (part == null) {
-                    break;
+            final MultiPartitionableQuestion oldQuestion = multiPartitionableQuestionService.getByMD5(md5);
+            final String authorQQString = httpServletRequest.getParameter("author");
+            User author;
+            if (authorQQString == null) {
+                if (oldQuestion == null) {
+                    author = (User) httpServletRequest.getAttribute("currentUser");
+                } else {
+                    author = oldQuestion.getAuthor();
                 }
-                multipleQuestionBuilder.addImage(part);
-                imageIndex++;
+            } else {
+                author = userService.findByQQNumber(Long.parseLong(authorQQString)).orElseThrow();
             }
+            final boolean enabled = Boolean.parseBoolean(httpServletRequest.getParameter("enabled"));
+            checkPermission(oldQuestion, (User) httpServletRequest.getAttribute("currentUser"), author, enabled);
             
-            //choices&partition
-            Map<Integer, Object[]> choiceParamMap = new HashMap<>();
-            for (String key : map.keySet()) {
-                if (key.matches("-?\\d+(\\.\\d+)?")) {//为数字
-                    String choiceContent = map.get(key)[0];
-                    choiceParamMap.put(Integer.parseInt(key), new Object[]{choiceContent, false});
-                } else if (key.startsWith("question_partition_") && map.get(key)[0].equals("true")){
-                    int partitionId = Integer.parseInt(key.substring(19));
-//                    multipleQuestionBuilder.addPartition(partitionName);
-                    multipleQuestionBuilder.addPartition(partitionId);
-                }
-            }
-            for (String key : map.keySet()) {
-                if (key.startsWith("correct")) {
-                    final String indexString = key.substring(7);
-                    if (indexString.matches("-?\\d+(\\.\\d+)?")) {
-                        int index = Integer.parseInt(indexString);
-                        choiceParamMap.get(index)[1] = map.get(key)[0].equals("true");
-                    }
-                }
-            }
-            List<Choice> choices = new ArrayList<>();
-            for (Object[] choiceParam : choiceParamMap.values()) {
-                Choice choice = new Choice((String) choiceParam[0], (Boolean) choiceParam[1]);
-                choices.add(choice);
-            }
-            multipleQuestionBuilder.addChoices(choices);
-            
-            User author = userService.findByQQNumber(Long.parseLong(httpServletRequest.getParameter("author"))).orElseThrow();
-            multipleQuestionBuilder.setAuthor(author);
-            
-            multipleQuestionBuilder.setEnable(Boolean.parseBoolean(httpServletRequest.getParameter("enabled")));
-            
-            MultiPartitionableQuestion multiPartitionableQuestion = multipleQuestionBuilder.build();
+            final MultiPartitionableQuestion multiPartitionableQuestion = MultiPartitionableQuestionService.buildQuestionFromRequest(httpServletRequest, md5, author);
             multiPartitionableQuestionService.update(multiPartitionableQuestion);
             
             Map<String, Object> dataMap = new HashMap<>();
@@ -145,10 +106,27 @@ public class ManageData {
 //            multiPartitionableQuestionService.save(multiPartitionableQuestion);
         } catch (Exception e) {
             logger.error(e.getMessage());
-            e.printStackTrace();
-            return "error";
+            if (!(e instanceof AuthException))
+                e.printStackTrace();
+            return "error:" + e.getMessage();
         }
         return "success";
+    }
+    
+    private static void checkPermission(MultiPartitionableQuestion oldQuestion,User currectUser, User author, boolean enabled) {
+        if (oldQuestion != null && !oldQuestion.getAuthor().equals(currectUser) &&
+                !JwtTokenProvider.currentUserHasPermission("edit others question")) {
+            throw new AuthException("permission denied: edit others question");
+        }
+        if ( ( ( oldQuestion != null && !oldQuestion.getAuthor().equals(author) ) || ( oldQuestion == null && !currectUser.equals(author) ))
+                && !JwtTokenProvider.currentUserHasPermission("change author")) {
+            throw new AuthException("permission denied: change author");
+        }
+        if (((oldQuestion != null && enabled != oldQuestion.isEnabled())
+                ||(oldQuestion == null && enabled))
+                && !JwtTokenProvider.currentUserHasPermission("enable and disable question")) {
+            throw new AuthException("permission denied: enable and disable question");
+        }
     }
     
 }

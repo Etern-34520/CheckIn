@@ -16,15 +16,18 @@ public class Choice implements Serializable {
     * else jpa will throw exception
     */
     private String id;
+    
     @Getter
     @Column(name = "CONTENT")
     private String content;
+    
     @Getter
     @Column(name = "IS_CORRECT")
     private Boolean isCorrect;
+    
     @Getter
     @Setter
-    @OneToOne(cascade = {CascadeType.PERSIST,CascadeType.DETACH,CascadeType.REFRESH,CascadeType.REMOVE}, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id",referencedColumnName = "id")
     private MultiPartitionableQuestion question;
     protected Choice() {

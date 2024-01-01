@@ -31,7 +31,6 @@
     min-width: 400px;
     height: fit-content;
     flex: 1;
-    box-shadow: 0 3px 15px 0 rgba(0,0,0,0.2);
 }
 
 #managePage[index="0"][page-type="user"] .userAvatar {
@@ -46,7 +45,7 @@
     flex: 1;
 }
 
-#managePage[index="0"][page-type="user"] .optionButton{
+#managePage[index="0"][page-type="user"] .operationButton{
     padding: 6px;
     margin: 2px;
 }

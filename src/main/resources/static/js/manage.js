@@ -29,29 +29,58 @@ function deleteQuestion(questionMd5) {
 
 function initContextMenu() {
     const animation = {duration: 150, show: 'fadeIn', hide: 'fadeOut'};
-    $.contextMenu({
-        selector: "button.partitionButton[editing='false']",
-        animation: animation,
-        callback: function (key) {
-            switch (key) {
-                case "edit":
-                    editPartitionName.call(this);
-                    break;
-                case "delete":
-                    const messageJson = {
-                        "type": "deletePartition",
-                        "partitionName": $(this).text()
-                    };
-                    sendMessage(messageJson, function (event) {
-                    });
-                    break;
-            }
-        },
-        items: {
-            "edit": {name: "Edit", icon: "edit"},
-            "delete": {name: "Delete", icon: "delete"},
-        }
-    });
+    const partitionMenuItemsObj = {};
+    if (Permission.permission_edit_partition_name)
+        partitionMenuItemsObj.edit = {name: "修改"}
+    if (Permission.permission_delete_partition)
+        partitionMenuItemsObj.delete = {name: "删除"}
+    if (Object.keys(partitionMenuItemsObj).length !== 0)
+        $.contextMenu({
+            selector: "button.partitionButton[editing='false']",
+            animation: animation,
+            callback: function (key) {
+                switch (key) {
+                    case "edit":
+                        editPartitionName.call(this);
+                        break;
+                    case "delete":
+                        const messageJson = {
+                            "type": "deletePartition",
+                            "partitionId": $(this).attr("id").substring(15)
+                        };
+                        sendMessage(messageJson, function (event) {
+                        });
+                        break;
+                }
+            },
+            items: partitionMenuItemsObj
+        });
+
+    const partitionPaneMenuItemsObj = {};
+    if (Permission.permission_delete_partition)
+        partitionPaneMenuItemsObj.delete = {name: "删除"}
+    if (Object.keys(partitionPaneMenuItemsObj).length !== 0)
+        $.contextMenu({
+            selector: ".partitionTop > div",
+            animation: animation,
+            callback: function (key) {
+                switch (key) {
+                    case "delete":
+                        const messageJson = {
+                            "type": "deletePartition",
+                            "partitionId": $(this).parent().parent().attr("id").substring(9)
+                        };
+                        sendMessage(messageJson, function (event) {
+                        });
+                        break;
+                }
+            },
+            items: partitionPaneMenuItemsObj
+        });
+
+    const questionMenuItemsObj = {};
+    questionMenuItemsObj.edit = {name: "修改"}
+    questionMenuItemsObj.delete = {name: "删除"}
     $.contextMenu({
         selector: "div.question",
         animation: animation,
@@ -66,46 +95,57 @@ function initContextMenu() {
                     break;
             }
         },
-        items: {
-            "edit": {name: "Edit", icon: "edit"},
-            "delete": {name: "Delete", icon: "delete"},
-        }
+        items: questionMenuItemsObj
     });
+
     $.contextMenu({
         selector: "div.partitionQuestionsList > div:not(.empty)",
         animation: animation,
         callback: function (key, options, e) {
             let $questionMD5Div = $(this);
+            let questionMD5;
 
             function deleteQuestionDiv(questionMD5) {
                 const messageJson = {
                     "type": "deleteQuestion",
                     "questionMD5": questionMD5
                 };
-                sendMessage(messageJson, function (event) {
-                    console.log(event);//FIXME
-                    $("div.partitionQuestionsList > div.question" + messageJson.questionMD5).remove();
-                    $questionMD5Div.remove();
-                }, function (event) {
-                    $("div.partitionQuestionsList > div." + messageJson.questionMD5).remove();
-                    $questionMD5Div.remove();
+                sendMessage(messageJson, function (message) {
+                    if (JSON.parse(message.data).type === "success") {
+                        // $("div.partitionQuestionsList > div.question" + messageJson.questionMD5).remove();
+                        if ($("#md5").val() === questionMD5)
+                            transitionPage($("#right"), "");
+                        const $questionDivs = $questionMD5Div.parent();
+                        if ($questionDivs.children().length===1) {
+                            const $empty= $("<div rounded style=\"cursor: auto;background: none;\" class=\"empty\">empty</div>");
+                            $empty.css("padding","0");
+                            $empty.css("margin","0");
+                            $empty.css("height","0");
+                            $empty.css("opacity","0");
+                            $questionDivs.append($empty);
+                            $empty.animate({
+                                margin: 6,
+                                padding: 4,
+                                opacity: 1,
+                                height: 20.667
+                            },150,"easeOutCubic");
+                        }
+                        $questionMD5Div.hide(200, "easeOutCubic", function () {
+                            $questionMD5Div.remove();
+                        });
+                    }
                 });
             }
 
             switch (key) {
                 case "delete":
-                    const questionMD5 = $questionMD5Div.attr("class").substring(8).replace(" context-menu-active", "");
-                    if ($("#md5").val() === questionMD5)
-                        transitionPage($("#right"), "", undefined, undefined, function () {
-                            deleteQuestionDiv(questionMD5);
-                        });
-                    else
-                        deleteQuestionDiv(questionMD5);
+                    questionMD5 = $questionMD5Div.attr("class").substring(8).replace(" context-menu-active", "");
+                    deleteQuestionDiv(questionMD5);
                     break;
             }
         },
         items: {
-            "delete": {name: "Delete", icon: "delete"},
+            "delete": {name: "删除", /*icon: "delete"*/},
         }
     });
 }
@@ -115,15 +155,27 @@ $(function () {//页面加载完成后执行
         $.cookie('page', 0);
         $.cookie('pageClass', 'server');
     }
-    switchToPage($.cookie('pageClass'), $.cookie('page'));
+    let over1 = false;
+    let over2 = false;
+
+    function showContent() {
+        if (over1 && over2) {
+            $("#content").animate({
+                opacity: 1
+            }, 300, "easeOutCubic");
+        }
+    }
+
+    switchToPage($.cookie('pageClass'), $.cookie('page'), true, function () {
+        over1 = true;
+        showContent();
+    });
     $("#top").animate({
-        opacity: 1
-    }, 200, "easeInCubic");
-    setTimeout(function () {
-        $("#content").animate({
-            opacity: 1
-        }, 200, "easeInCubic");
-    }, 100);
+        marginTop: 6
+    }, 400, "easeOutCubic", function () {
+        over2 = true;
+        showContent();
+    });
     initContextMenu();
 })
 
@@ -157,6 +209,7 @@ function closeMenu() {
             opacity: 0,
         }, 150, "easeInCubic", function () {
             newUserLock = false;
+            dialogLock = false;
             $topMask.css("display", "none");
         });
     });
@@ -168,8 +221,12 @@ function closeMenu() {
 }
 
 function selectButtonOf(pageClass, index) {
-    $("#menuButtons button").attr("class", "button")
-    $("#" + pageClass + "Menu button").eq(index).attr("class", "selectedMenuButton");
+    const $menuButtons = $("#menuButtons button");
+    $menuButtons.attr("class", "button")
+    $menuButtons.removeAttr("selected");
+    const $selectedButton = $("#" + pageClass + "Menu button").eq(index);
+    $selectedButton.attr("class", "selectedMenuButton");
+    $selectedButton.attr("selected", "selected");
 }
 
 function changePath(path) {
@@ -383,7 +440,7 @@ class Tip {
 ${title}
 </div>
 <div class="blank"></div>
-<button class='tipCloseButton' onclick="closeTipOfButton(this)" style="width: 20px;height: 20px;margin: 0;font-size: 14px">×</button>
+<button class='tipCloseButton' onclick="closeTipOfButton(this)">×</button>
 </div>
 <hr style="opacity: 0.5"/>
 <div class='tipContent' style="font-size: 12px">
@@ -426,8 +483,8 @@ ${content}
             thisObj.mouseEnteredTimes--;
         } else {
             $tip.animate({
-                marginLeft: $tip.width() + 20,
-                marginRight: -$tip.width() - 20,
+                marginLeft: $tip.width() + 40,
+                marginRight: -$tip.width() - 40,
             }, 200, "easeInOutCubic", function () {
                 $tip.animate({
                     maxHeight: 0,
@@ -457,10 +514,16 @@ function closeTipOfButton(tipCloseButton) {
     });
 }
 
+let dialogLock = false;
+
 function popDialog(html, callBack) {
+    if (dialogLock) return;
+    dialogLock = true;
     const $topMask = $("#topMask");
+    // $topMask.stopAnimation(true);
+    $topMask.find("#dialog").remove();
     $topMask.css("display", "flex");
-    let $dialog = $("<div rounded id='dialog'></div>");
+    let $dialog = $("<div rounded id='dialog' style='overflow: auto'></div>");
     $dialog.html(html);
     $dialog.css("opacity", 0);
     $topMask.append($dialog);
@@ -476,11 +539,14 @@ function popDialog(html, callBack) {
     });
     // const previousOnClick = $topMask.on("click");
     $topMask.on("click", function () {
+        $topMask.stop(true, false);
         $topMask.animate({
             opacity: 0,
         }, 200, "easeInCubic", function () {
             $topMask.css("display", "none");
-            // $topMask.on("click", previousOnClick);
+            setTimeout(function () {
+                dialogLock = false;
+            }, 100);
         });
     });
 }
@@ -488,6 +554,9 @@ function popDialog(html, callBack) {
 function logout() {
     closeMenu();
     closeWebSocket();
+    $.removeCookie("token", {path: "/checkIn/manage"});
+    $.removeCookie("qq", {path: "/checkIn"});
+
     $("#content").animate({
         opacity: 0
     }, 200, "easeInCubic");
@@ -495,9 +564,7 @@ function logout() {
         $("#top").animate({
             opacity: 0
         }, 200, "easeInCubic", function () {
-            $.removeCookie("qq", {path: "/checkIn"});
             // $.removeCookie("password", {path: "checkIn"});
-            $.removeCookie("token", {path: "/checkIn"});
             window.location.href = "./../login/"
         });
     }, 100);
@@ -606,10 +673,10 @@ function transitionPage($root, html, pathName, pathBackFunc, callBack) {
     }
     let $subContentRoot = $root.children(".subContentRoot");
     $subContentRoot.animate({
-        marginTop: -100,
-        marginBottom: 100,
+        marginTop: -108,
+        marginBottom: 92,
         opacity: 0,
-    }, 300, "easeInCubic", function () {
+    }, 250, "easeInCubic", function () {
         // changePath("Questions/" + pathName);
         if (pathName instanceof String || pathBackFunc instanceof Function) {
             addPath(pathName, pathBackFunc);
@@ -617,19 +684,23 @@ function transitionPage($root, html, pathName, pathBackFunc, callBack) {
         }
         setTimeout(function () {
             $subContentRoot.html(html);
-            $subContentRoot.css("marginTop", 8);
-            $subContentRoot.css("marginBottom", 8);
-            if (callBack instanceof Function) {
-                callBack();
-            }
+            $subContentRoot.css("marginTop", 108);
+            $subContentRoot.css("marginBottom", -92);
             $subContentRoot.animate({
-                opacity: 1,
-            }, 300, "easeOutCubic");
-            try {
-                $subContentRoot.children()[0].onload(undefined)
-            } catch (ignored) {
-            }
-        }, 200)
+                marginTop: 8,
+                marginBottom: 8,
+                opacity: 1
+            }, 200, "easeOutCubic");
+            setTimeout(function () {
+                try {
+                    $subContentRoot.children()[0].onload(undefined)
+                } catch (ignored) {
+                }
+                if (callBack instanceof Function) {
+                    callBack();
+                }
+            }, 150);
+        }, 200);
     });
     if (pathName instanceof String || pathBackFunc instanceof Function) {
         setTimeout(function () {
@@ -637,4 +708,73 @@ function transitionPage($root, html, pathName, pathBackFunc, callBack) {
         }, 500);
     }
     return "success";
+}
+
+const onlineUserCountMap = new Map;
+
+function userOnline(userQQ) {
+    const $userPane = $("#userDiv" + userQQ);
+    const $userOnlineState = $userPane.find(".userOnLine");
+    let count = onlineUserCountMap.get(userQQ);
+    if (count === undefined) {
+        if ($userOnlineState.css("opacity") !== "1")
+            onlineUserCountMap.set(userQQ, 1);
+        else return;
+    } else {
+        onlineUserCountMap.set(userQQ, count + 1);
+        return;
+    }
+    $userOnlineState.fadeTo(200, 1, "easeInOutCubic");
+    $userPane.find("button").attr("disabled", "disabled");
+    $userPane.find("span[component_type=\"toggleSwitch\"]").attr("disabled", "disabled");
+    if (Permission.permission_force_offline) {
+        const $forceOffLineButton = $("<button highlight=\"\" class=\"optionButton\" onclick=\"offLine(" + userQQ + ")\">强制下线</button>");
+        $forceOffLineButton.css("opacity", "0");
+        $forceOffLineButton.css("marginLeft", -50);
+        $forceOffLineButton.prependTo($userPane.find(".userOperation").children().eq(0));
+        $forceOffLineButton.animate({
+            opacity: 1,
+            marginLeft: 2
+        }, 200, "easeOutCubic");
+    }
+}
+
+function userOffline(userQQ) {
+    const $userPane = $("#userDiv" + userQQ);
+    const $userOnlineState = $userPane.find(".userOnLine");
+    let count = onlineUserCountMap.get(userQQ);
+    if (count === undefined) {
+        if ($userOnlineState.css("opacity") !== "1")
+            return;
+    } else {
+        if (count === 1) {
+            onlineUserCountMap.delete(userQQ);
+        } else {
+            onlineUserCountMap.set(userQQ, count - 1);
+            return;
+        }
+    }
+    $userOnlineState.fadeTo(200, 0, "easeInOutCubic");
+    // noinspection JSUnresolvedReference
+    for (const operationButton of $userPane.find(".operationButton")) {
+        if (Permission["permission_" + $(operationButton).attr("operation_type")])
+            $(operationButton).removeAttr("disabled");
+    }
+    // $userPane.find("button").removeAttr("disabled");
+    // noinspection JSUnresolvedReference
+    if (Permission.permission_change_user_state)
+        $userPane.find("span[component_type=\"toggleSwitch\"]").removeAttr("disabled");
+    // noinspection JSUnresolvedReference
+    if (Permission.permission_force_offline) {
+        const $forceOffLineButton = $userPane.find(".userOperation").children().eq(0).children().eq(0);
+        const width = $forceOffLineButton.width();
+        $forceOffLineButton.animate({
+            opacity: 0,
+            marginLeft: -width
+        }, 200, "easeOutCubic", function () {
+            setTimeout(function () {
+                $forceOffLineButton.remove();
+            }, 50);
+        });
+    }
 }

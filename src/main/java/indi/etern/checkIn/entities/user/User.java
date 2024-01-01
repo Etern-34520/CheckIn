@@ -1,11 +1,15 @@
 package indi.etern.checkIn.entities.user;
 
+import com.google.gson.JsonObject;
+import indi.etern.checkIn.auth.Authority;
+import indi.etern.checkIn.auth.PermissionType;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
@@ -23,13 +27,14 @@ public class User implements UserDetails {
     @Getter
     protected String password;
     @Getter
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "ROLE_TYPE")
 //    @NotFound(action = NotFoundAction.IGNORE)
     protected Role role;
     
     @Getter
     @OneToMany(mappedBy = "author")
+    @Fetch(value = FetchMode.JOIN)
     protected List<MultiPartitionableQuestion> multiPartitionableQuestions;
     
     @Setter
@@ -79,13 +84,22 @@ public class User implements UserDetails {
     }
     
     public Map<String, Object> toDataMap() {
-        Map<String,Object> dataMap = new HashMap<>();
-        dataMap.put("name",name);
-        dataMap.put("QQ",QQNumber);
-        dataMap.put("role",role.getType());
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("name", name);
+        dataMap.put("QQ", QQNumber);
+        dataMap.put("role", role.getType());
 //        dataMap.put("userStatus",enabled?"启用":"禁用");
-        dataMap.put("enabled",enabled);
+        dataMap.put("enabled", enabled);
         return dataMap;
+    }
+    
+    public JsonObject toJsonObject() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("name", name);
+        jsonObject.addProperty("QQ", QQNumber);
+        jsonObject.addProperty("role", role.getType());
+        jsonObject.addProperty("enabled", enabled);
+        return jsonObject;
     }
     
     @Override
@@ -108,9 +122,10 @@ public class User implements UserDetails {
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        
-        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(role.getSimpleGrantedAuthority());
+        List<Authority> authorities = new ArrayList<>();
+        for (Permission permission : role.getPermissions()) {
+            authorities.add(new Authority(permission.getName(), PermissionType.WEB));//FIXME
+        }
         return authorities;
     }
     
@@ -145,5 +160,4 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return enabled;
     }
-    
 }

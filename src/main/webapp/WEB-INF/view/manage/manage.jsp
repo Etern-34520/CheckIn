@@ -21,24 +21,28 @@
     <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery-color/2.1.2/jquery.color.min.js"></script>
+
 <%--    <script src="./../lib/http_cdn.staticfile.org_echarts_4.3.0_echarts.js"></script>--%>
 <%--    <script src="./../lib/http_cdn.staticfile.org_jquery_3.7.1_jquery.js"></script>--%>
-    <script src="./../lib/http_cdn.staticfile.org_jquery-color_2.1.2_jquery.color.js"></script>
+<%--    <script src="./../lib/http_cdn.staticfile.org_jquery-color_2.1.2_jquery.color.js"></script>--%>
 <%--    <script src="./../lib/http_cdn.staticfile.org_jquery-cookie_1.4.1_jquery.cookie.js"></script>--%>
 <%--    <script src="./../lib/http_cdn.staticfile.org_jquery-easing_1.4.1_jquery.easing.js"></script>--%>
+
     <%--    https://cdn.staticfile.org/jquery-contextmenu/2.9.2/font/context-menu-icons.ttf--%>
     <script src="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.contextMenu.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.ui.position.min.js"></script>
 
 <%--    <script src="./../lib/http_connect.qq.com_qc_jssdk.js"></script>--%>
 <%--    <script src="./../lib/http_js.hcaptcha.com_1_api.js"></script>--%>
-<%--    <script src="./../lib/md5.min.js"></script>--%>
+    <script src="./../lib/md5.min.js"></script>
 
     <script src="./../js/webSocket.js"></script>
     <script src="./../js/manage.js"></script>
     <script src="./../js/echart.js"></script>
     <script src="./../js/server_2.js"></script>
     <script src="./../js/user_0.js"></script>
+    <script src="./../js/user_1.js"></script>
     <script src="./../js/user_2.js"></script>
     <script src="./../js/components.js"></script>
     <script src="./../js/question_form_data.js"></script>
@@ -52,11 +56,16 @@
     <link rel="stylesheet" href="./../css/user_2.css">
     <link rel="stylesheet" href="./../css/questions.css">
 </head>
+<script>
+    const Permission = { <c:forEach var="permissionBooleanEntries" items="${requestScope.entrySet()}"><c:if test="${permissionBooleanEntries.key.startsWith(\"permission\")}">
+        ${permissionBooleanEntries.key}: ${permissionBooleanEntries.value},</c:if></c:forEach>
+    }
+</script>
 <body>
 <div id="tipsMask">
 </div>
 <div id="contentRoot">
-    <div id="top" rounded border>
+    <div id="top" rounded border style="margin-top: -50px">
         <button type="button" id="menuButton" class="button" style="font-size: 20px" onclick="showMenu()">=</button>
         <div id="pagePath">
             <div class="path" undeleted>

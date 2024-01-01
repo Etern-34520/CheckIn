@@ -10,12 +10,17 @@
 <%@ attribute name="id" %>
 <%@ attribute name="clazz" %>
 <%@ attribute name="style" %>
+<%@ attribute name="titleMinHeight" type="java.lang.Integer" %>
+<c:set var="titleMinHeight" value="${titleMinHeight == null ? 36 : titleMinHeight}"/>
+<%@ attribute name="titlePadding" %>
+<c:set var="titlePadding" value="${titlePadding == null ? 4 : titlePadding}"/>
 <div
         <c:if test="${id!=null}">id="${id}"</c:if>
         <c:if test="${clazz!=null}">class="${clazz}"</c:if>
-        style="display: flex;flex-direction: column;background: var(--input-background-color);padding: 4px;
-        <c:if test="${style!=null}">${style}</c:if>" rounded>
-    <div style="display: flex;flex-direction: row;align-items: center">
+        <c:if test="${style!=null}">style="${style}"</c:if>
+        component_type="shrinkPane"
+        rounded>
+    <div style="display: flex;flex-direction: row;align-items: center;padding: ${titlePadding}px;min-height: ${titleMinHeight+titlePadding*2}px" ondblclick="switchShrinkPane(this)">
         <c:choose>
             <c:when test="${useLabel}">
                 <label style="line-height: 52px;margin-left: 8px;">${title}</label>
@@ -25,7 +30,7 @@
                 ${title}
             </c:otherwise>
         </c:choose>
-        <components:shrinkButton shrinkFuncName="shrinkDiv" expandFuncName="expandDiv" style="margin: 6px"/>
+        <components:shrinkButton shrinkFuncName="shrinkDiv" expandFuncName="expandDiv" style="margin: ${titlePadding}px" width="${titleMinHeight-titlePadding*2}px" height="${titleMinHeight-titlePadding*2}px"/>
     </div>
     <div style="overflow: hidden;display: none;/*flex-direction: column;align-items: flex-start;*/">
         <div class="line"

@@ -22,14 +22,17 @@
     user-select:none;
 }
 #managePage[index="0"][page-type="server"] #leftBottom{
-    margin-top: 4px;
     flex: 1;
     overflow-y: auto;
 }
+#managePage[index="0"][page-type="server"] #leftTop {
+    margin-top: 4px;
+    margin-bottom: 0;
+}
 #managePage[index="0"][page-type="server"] #right{
-    margin-left: 4px;
+    margin-left: 0;
     flex: 1;
-    margin-top: 6px;
+    margin-top: 4px;
     display: flex;
     flex-direction: column;
 }

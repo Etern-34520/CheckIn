@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+
 @Getter
 @MappedSuperclass
 @Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
@@ -24,7 +26,12 @@ public abstract class Question implements Serializable {
     @NotFound(action = NotFoundAction.IGNORE)
     protected User author = null;// = User.exampleOfName("unknown");
     
+    @Getter
+    @Column(name = "LAST_EDIT_TIME")
+    protected LocalDateTime lastEditTime;
+    
     protected Question() {
+        lastEditTime = LocalDateTime.now();
     }
     
     @Id

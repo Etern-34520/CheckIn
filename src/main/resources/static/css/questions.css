@@ -33,9 +33,9 @@
     padding: 2px;
 }
 
-.question div[rounded]{
+.question div[rounded]:not([component_type="shrinkButton"]){
     margin: 2px;
-    background: var(--input-background-color);
+    background: var(--component-light-background-color);
 }
 
 .questionContent {
@@ -67,9 +67,9 @@
 
 .questionChoice {
     background-color: rgba(0, 0, 0, 0.15);
-    color: rgba(255, 60, 60, 0.7);
+    color: var(--incorrect-choice-fone-color);
 }
 
 .questionChoice[correct] {
-    color: rgba(60, 255, 60, 0.7);
+    color: var(--correct-choice-font-color);
 }

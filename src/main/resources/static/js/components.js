@@ -28,13 +28,15 @@ function rotateShrinkButton(div, shrinkFuncName, expandFuncName) {
     }
 }
 
+// noinspection JSUnusedGlobalSymbols
 function expandDiv(shrinkButton) {
     const $content = $(shrinkButton).parent().parent().children().eq(1);
-    $content.show(200, "easeOutQuad", function (){
-        $content.css("display","block");
+    $content.show(200, "easeOutQuad", function () {
+        $content.css("display", "block");
     });
 }
 
+// noinspection JSUnusedGlobalSymbols
 function shrinkDiv(shrinkButton) {
     $(shrinkButton).parent().parent().children().eq(1).hide(200, "easeOutQuad");
 }
@@ -42,18 +44,37 @@ function shrinkDiv(shrinkButton) {
 function toggleSwitch($toggleSwitch, moveLeft, toggleSwitchOn, toggleSwitchOff) {
     if ($toggleSwitch.attr('disabled') === 'disabled') return;
     const $input = $toggleSwitch.find('input');
-    if ($input.val() === 'false') {
+
+    function switchOn() {
         $toggleSwitch.find('.toggleSwitchDot').animate({left: moveLeft}, 80, 'easeInOutCubic');
         $toggleSwitch.css('background', 'var(--highlight-component-background-color-hover)');
         $input.val('true');
-        if (toggleSwitchOn instanceof Function)
-            toggleSwitchOn();
-    } else {
+    }
+
+    function switchOff() {
         $toggleSwitch.find('.toggleSwitchDot').animate({left: 0}, 80, 'easeInOutCubic');
         $toggleSwitch.css('background', 'var(--context-menu-background-color)');
         $input.val('false');
-        if (toggleSwitchOff instanceof Function)
-            toggleSwitchOff();
+    }
+
+    if ($input.val() === 'false') {
+        if (toggleSwitchOn instanceof Function) {
+            const res = toggleSwitchOn();
+            if (res !== false) {
+                switchOn();
+            }
+        } else {
+            switchOn();
+        }
+    } else {
+        if (toggleSwitchOff instanceof Function) {
+            const res = toggleSwitchOff();
+            if (res !== false) {
+                switchOff();
+            }
+        } else {
+            switchOff();
+        }
     }
     $input.trigger('input');
 }
@@ -72,10 +93,14 @@ function switchOffIgnoreHandler($toggleSwitch) {
     $input.val('false');
 }
 
-function switchToIgnoreHandler($toggleSwitch,status) {
+function switchToIgnoreHandler($toggleSwitch, status) {
     if (status) {
         switchOnIgnoreHandler($toggleSwitch);
     } else {
         switchOffIgnoreHandler($toggleSwitch);
     }
+}
+
+function switchShrinkPane(shrinkPaneTitle) {
+    $(shrinkPaneTitle).find("div[component_type='shrinkButton']").trigger("click");
 }

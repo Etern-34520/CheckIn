@@ -15,14 +15,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+//@EnableGlobalMethodSecurity()
 public class SecurityConfig {
-    public static final PasswordEncoder ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    public static final PasswordEncoder ENCODER = new BCryptPasswordEncoder();
     @Autowired
     UserService userService;
     @Autowired
@@ -35,8 +36,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeHttpRequests ->
                                 authorizeHttpRequests
                                         .requestMatchers("/manage/**").authenticated()
-                                        .requestMatchers("/manage/css/**").authenticated()
-                                        .requestMatchers("/manage/js/**").authenticated()
+//                                        .requestMatchers("/manage/page/").hasAnyAuthority("editing others question")
+//                                        .requestMatchers("/manage/css/**").authenticated()
+//                                        .requestMatchers("/manage/js/**").authenticated()
 //                                        .requestMatchers("/api/websocket/**").authenticated()
                                         .anyRequest().permitAll())
                 .formLogin(AbstractHttpConfigurer::disable)

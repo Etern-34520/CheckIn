@@ -76,6 +76,8 @@ public class UserService implements UserDetailsService {
         }
     }
     
+    
+    
     public void unbindAndDeleteById(long id) {
         template.execute(status -> {
             final Optional<User> optionalUser = findByQQNumber(id);

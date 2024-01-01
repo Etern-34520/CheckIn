@@ -1,4 +1,5 @@
 $(function () {//页面加载完成后执行
+
     setTimeout(function () {
         $("#main").animate({
             opacity: 1
