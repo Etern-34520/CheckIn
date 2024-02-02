@@ -8,6 +8,8 @@ import indi.etern.checkIn.api.webSocket.action.question.AddPartitionAction;
 import indi.etern.checkIn.api.webSocket.action.question.DeletePartitionAction;
 import indi.etern.checkIn.api.webSocket.action.question.DeleteQuestionAction;
 import indi.etern.checkIn.api.webSocket.action.question.EditPartitionNameAction;
+import indi.etern.checkIn.api.webSocket.action.setting.SaveSettingAction;
+import indi.etern.checkIn.api.webSocket.action.traffic.GetTrafficByDateAction;
 import indi.etern.checkIn.api.webSocket.action.user.*;
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.Role;
@@ -184,7 +186,7 @@ public class Connector implements SubProtocolCapable {
                         sendError("user is online");
                         return;
                     }
-                    doAction(new DeleteUserAction(qqInContentMap));
+                    doAction(new DeleteUserAction(qqInContentMap,sessionUser));
                 }
                 case "changeUserName" -> {
                     doAction(new ChangeUserNameAction(qqInContentMap, (String) contentMap.get("newName")));
@@ -213,6 +215,17 @@ public class Connector implements SubProtocolCapable {
                 }
                 case "deleteRole" -> {
                     doAction(new DeleteRoleAction((String) contentMap.get("role")));
+                }
+                case "saveSetting_examSetting" -> {
+                    Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
+                    doAction(new SaveSettingAction(dataMap,"examSetting"));
+                }
+                case "saveSetting_checkingSetting" -> {
+                    Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
+                    doAction(new SaveSettingAction(dataMap,"checkingSetting"));
+                }
+                case "getDateTrafficDetail" -> {
+                    doAction(new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
                 }
             }
         } catch (Exception e) {

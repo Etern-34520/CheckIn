@@ -9,7 +9,7 @@
 <html>
 <head>
     <title>404</title>
-    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="/checkIn/css/global.css">
 </head>
 <body>
 <h1>404</h1>

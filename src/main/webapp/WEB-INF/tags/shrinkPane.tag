@@ -23,7 +23,7 @@
     <div style="display: flex;flex-direction: row;align-items: center;padding: ${titlePadding}px;min-height: ${titleMinHeight+titlePadding*2}px" ondblclick="switchShrinkPane(this)">
         <c:choose>
             <c:when test="${useLabel}">
-                <label style="line-height: 52px;margin-left: 8px;">${title}</label>
+                <label style="margin-left: 8px;">${title}</label>
                 <div class="blank"></div>
             </c:when>
             <c:otherwise>

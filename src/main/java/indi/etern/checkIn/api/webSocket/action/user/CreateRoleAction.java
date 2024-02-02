@@ -1,7 +1,7 @@
 package indi.etern.checkIn.api.webSocket.action.user;
 
 import com.google.gson.JsonObject;
-import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.RoleService;
@@ -9,7 +9,7 @@ import indi.etern.checkIn.service.dao.RoleService;
 import java.util.List;
 import java.util.Optional;
 
-public class CreateRoleAction extends JsonResultAction {
+public class CreateRoleAction extends TransactionalAction {
     Role role;
     List<String> enabledPermissionIdList;
     

@@ -125,4 +125,13 @@ public class MultipleCorrectQuestion extends MultipleChoiceQuestion implements M
         dataMap.put("md5",md5);
         return MVCConfig.getGson().toJson(dataMap);
     }
+    
+    @Transient
+    public List<String> getCorrectChoiceIds() {
+        List<String> correctChoiceIds = new ArrayList<>();
+        for (Choice choice : correctChoices) {
+            correctChoiceIds.add(choice.getId());
+        }
+        return correctChoiceIds;
+    }
 }

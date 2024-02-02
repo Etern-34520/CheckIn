@@ -1,13 +1,14 @@
-package indi.etern.checkIn.api.webSocket.action;
+package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonObject;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.List;
 
-public abstract class PartitionJsonResultAction extends JsonResultAction {
+public abstract class PartitionJsonResultAction extends TransactionalAction {
     protected void sendUpdatePartitionToAll() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("type", "updatePartitionList");

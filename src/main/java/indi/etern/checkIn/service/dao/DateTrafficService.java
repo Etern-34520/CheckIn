@@ -3,6 +3,9 @@ package indi.etern.checkIn.service.dao;
 import indi.etern.checkIn.entities.traffic.DateTraffic;
 import indi.etern.checkIn.repositories.DateTrafficRepository;
 import jakarta.annotation.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -42,6 +45,15 @@ public class DateTrafficService{
             return allByIdWithFill;
         }
     }
+    
+    public Page<DateTraffic> findAll(Pageable pageable) {
+        return dateTrafficRepository.findAll(pageable);
+    }
+
+    public List<DateTraffic> findAll() {
+        return dateTrafficRepository.findAll(Sort.by(Sort.Direction.DESC,"localDate"));
+    }
+    
     private static class DateTrafficComparator implements Comparator<DateTraffic> {
         @Override
         public int compare(DateTraffic o1, DateTraffic o2) {

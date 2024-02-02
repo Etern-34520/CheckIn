@@ -16,7 +16,7 @@
                             <div style="display: flex;flex-direction: row;align-items: center;background: var(--input-background-color)" rounded>
                                 <label for="permission${permission.id}">${permission.name} —— ${permission.description}</label>
                                 <div class="blank"></div>
-                                <components:toggleSwitch toggleSwitchId="permission${permission.id}" toggleSwitchState="${role.permissions.contains(permission)}"/>
+                                <components:toggleSwitch switchID="permission${permission.id}" state="${role.permissions.contains(permission)}"/>
                             </div>
                         </c:forEach>
                     </jsp:attribute>

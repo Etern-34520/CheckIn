@@ -9,8 +9,8 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
-<jsp:useBean id="partitionInfo" scope="request" class="indi.etern.checkIn.beans.PartitionInfo"/>
-<jsp:useBean id="userInfo" scope="request" class="indi.etern.checkIn.beans.UserInfo"/>
+<jsp:useBean id="partitionInfo" scope="request" type="indi.etern.checkIn.beans.PartitionInfo"/>
+<jsp:useBean id="userInfo" scope="request" type="indi.etern.checkIn.beans.UserInfo"/>
 <jsp:useBean id="question" scope="request"
              type="indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion"/>
 <jsp:useBean id="ignorePartitionSelection" scope="request" type="java.lang.Boolean"/>
@@ -86,13 +86,13 @@
                 </div>
                 <div style="display: flex;align-items: center;margin-bottom: 8px">
                     <label style="margin-right: 4px;">启用</label>
-                    <components:toggleSwitch toggleSwitchId="enabled"
-                                             toggleSwitchState="${empty question.enabled?false:question.enabled}"
-                                             toggleSwitchDisabled="${!(canEditQuestion && permission_enable_and_disable_question)}"/>
+                    <components:toggleSwitch switchID="enabled"
+                                             state="${empty question.enabled?false:question.enabled}"
+                                             disabled="${!(canEditQuestion && permission_enable_and_disable_question)}"/>
                 </div>
                 <label text>分区</label>
                 <div rounded style="background: var(--input-background-color);flex: 1;overflow: auto;margin-bottom: 0;"
-                     id="partitionSelectionsDiv">
+                     id="partitionSelectionsDiv" class="selections">
                     <c:forEach var="partition" items="${partitionInfo.partitions}">
                         <c:set var="partitionInclude" value="${question.partitions.contains(partition)}"/>
                         <div rounded clickable

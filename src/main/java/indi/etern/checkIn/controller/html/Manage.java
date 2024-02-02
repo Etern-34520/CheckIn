@@ -7,16 +7,11 @@ import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.User;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
-import indi.etern.checkIn.service.dao.PartitionService;
-import indi.etern.checkIn.service.dao.RoleService;
-import indi.etern.checkIn.service.dao.UserService;
+import indi.etern.checkIn.service.dao.*;
 import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,84 +23,29 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Controller
 public class Manage {
-    Logger logger = LoggerFactory.getLogger(getClass());
-    @Autowired
-    WebSocketService webSocketService;
-    @Autowired
-    UserService userService;
-    @Autowired
-    PartitionService partitionService;
-    @Autowired
-    RoleService roleService;
-    @Autowired
-    MultiPartitionableQuestionService multiPartitionableQuestionService;
+    final WebSocketService webSocketService;
+    final UserService userService;
+    final UserTrafficService userTrafficService;
+    final PartitionService partitionService;
+    final RoleService roleService;
+    final MultiPartitionableQuestionService multiPartitionableQuestionService;
     
-    public Manage() {
+    public Manage(WebSocketService webSocketService, UserService userService, UserTrafficService userTrafficService, PartitionService partitionService, RoleService roleService, MultiPartitionableQuestionService multiPartitionableQuestionService) {
 //        System.out.println("Manage");
-    }
-    
-    @RequestMapping("/manage/")
-    public ModelAndView manage(HttpServletRequest request) {
-        final ModelAndView modelAndView = new ModelAndView();
-        addPermissionsBoolean(modelAndView);
-        if (request.getParameter("page") == null) {
-            modelAndView.setViewName("manage/manage");
-        } else {
-            modelAndView.setViewName("manage/" + request.getParameter("pageClass") + "_" + request.getParameter("page"));//类似于"server_0" "user_0"
-        }
-        return modelAndView;
-    }
-    
-    @RequestMapping("/login/")
-    public ModelAndView login() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("manage/login");
-        return mv;
-    }
-    
-    @RequestMapping(path = "/manage/page/{type}", method = {RequestMethod.GET, RequestMethod.POST})
-    public ModelAndView getPageOf(HttpServletRequest request, @PathVariable String type) throws ServletException, IOException {
-        ModelAndView modelAndView = new ModelAndView("manage/pages/" + type);
-        addPermissionsBoolean(modelAndView);
-        switch (type) {
-            case "partitionQuestion" ->
-                    modelAndView.addObject("partition", partitionService.findById(Integer.valueOf(request.getParameter("id"))).orElseThrow());
-            case "newQuestion" -> newQuestion(request, modelAndView);
-            case "editQuestion" -> editQuestion(request, modelAndView);
-            case "questionFormOfFormData" -> {
-                MultiPartitionableQuestion question = MultiPartitionableQuestionService.buildQuestionFromRequest(request,null , null);
-                modelAndView.addObject("question",question);
-                modelAndView.addObject("ignorePartitionSelection",false);
-                modelAndView.setViewName("manage/pages/editQuestion");
-            }
-            case "userInfo" -> userInfo(request,modelAndView);
-            case "userPane" -> {
-                modelAndView.addObject("webSocketService",webSocketService);
-                modelAndView.addObject("user",userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
-            }
-            case "changeRole" -> modelAndView.addObject("user",userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
-            case "questionOverview" -> modelAndView.addObject("question",multiPartitionableQuestionService.getByMD5(request.getParameter("md5")));
-            case "editingPermission" -> modelAndView.addObject("role",roleService.findByType(request.getParameter("roleType")).orElseThrow());
-            case "shrinkPane" -> {
-                modelAndView.addObject("title",request.getParameter("title"));
-                modelAndView.addObject("content",request.getParameter("content"));
-                modelAndView.addObject("id",request.getParameter("id"));
-                modelAndView.addObject("clazz",request.getParameter("clazz"));
-            }
-        }
-        return modelAndView;
-    }
-    
-    private void addPermissionsBoolean(ModelAndView modelAndView) {
-        for (Permission permission : roleService.findAllPermission()) {
-            modelAndView.addObject("permission_"+permission.getName().replace(' ','_'), JwtTokenProvider.currentUserHasPermission(permission.getName()));
-        }
+        this.webSocketService = webSocketService;
+        this.userService = userService;
+        this.userTrafficService = userTrafficService;
+        this.partitionService = partitionService;
+        this.roleService = roleService;
+        this.multiPartitionableQuestionService = multiPartitionableQuestionService;
     }
     
     private static void newQuestion(HttpServletRequest request, ModelAndView modelAndView) {
@@ -167,14 +107,158 @@ public class Manage {
         modelAndView.setViewName("manage/pages/editQuestion");
     }
     
+    @RequestMapping("/manage/")
+//    @PreAuthorize("jwtTokenProvider.currentUserHasPermission('manage user')")
+    public ModelAndView manage(HttpServletRequest request) {
+        final ModelAndView modelAndView = new ModelAndView();
+        addPermissionsBoolean(modelAndView);
+        if (request.getParameter("page") == null) {
+            modelAndView.setViewName("manage/manage");
+        } else {
+            modelAndView.setViewName("manage/" + request.getParameter("pageClass") + "_" + request.getParameter("page"));//类似于"server_0" "user_0"
+        }
+        return modelAndView;
+    }
+    
+    @RequestMapping("/login/")
+    public ModelAndView login() {
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("manage/login");
+        return mv;
+    }
+    
+    @RequestMapping(path = "/manage/page/{type}", method = {RequestMethod.GET, RequestMethod.POST})
+    public ModelAndView getPageOf(HttpServletRequest request, @PathVariable String type) throws ServletException, IOException {
+        ModelAndView modelAndView = new ModelAndView("manage/pages/" + type);
+        addPermissionsBoolean(modelAndView);
+        switch (type) {
+            case "partitionQuestion" -> partitionQuestion(request, modelAndView);
+            case "newQuestion" -> newQuestion(request, modelAndView);
+            case "editQuestion" -> editQuestion(request, modelAndView);
+            case "questionFormOfFormData" -> {
+                MultiPartitionableQuestion question = MultiPartitionableQuestionService.buildQuestionFromRequest(request, null, null);
+                modelAndView.addObject("question", question);
+                modelAndView.addObject("ignorePartitionSelection", false);
+                modelAndView.setViewName("manage/pages/editQuestion");
+            }
+            case "userInfo" -> userInfo(request, modelAndView);
+            case "userPane" -> {
+                modelAndView.addObject("webSocketService", webSocketService);
+                modelAndView.addObject("user", userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
+            }
+            case "changeRole" ->
+                    modelAndView.addObject("user", userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
+            case "questionOverview" ->
+                    modelAndView.addObject("question", multiPartitionableQuestionService.getByMD5(request.getParameter("md5")));
+            case "editingPermission" ->
+                    modelAndView.addObject("role", roleService.findByType(request.getParameter("roleType")).orElseThrow());
+            case "shrinkPane" -> {
+                modelAndView.addObject("title", request.getParameter("title"));
+                modelAndView.addObject("content", request.getParameter("content"));
+                modelAndView.addObject("id", request.getParameter("id"));
+                modelAndView.addObject("clazz", request.getParameter("clazz"));
+            }
+            case "trafficDetail" -> {
+                modelAndView.addObject("userTraffic", userTrafficService.findById(Integer.parseInt(request.getParameter("id"))).orElseThrow());
+            }
+        }
+        return modelAndView;
+    }
+    
+    private void partitionQuestion(HttpServletRequest request, ModelAndView modelAndView) throws BadRequestException {
+        final String sortBy = request.getParameter("sortBy");
+        final String sortType = request.getParameter("sortType");
+        final Partition partition = partitionService.findById(Integer.valueOf(request.getParameter("id"))).orElseThrow();
+        if (sortBy != null && sortType != null) {
+            Comparator<MultiPartitionableQuestion> comparator;
+            final Comparator<MultiPartitionableQuestion> contentComparator = (o1, o2) -> {
+                int compare = o1.getContent().compareTo(o2.getContent());
+                /*if (compare == 0) {
+                    compare = 1;
+                }*/
+                return compare;
+            };
+            final Comparator<MultiPartitionableQuestion> authorNameComparator = (o1, o2) -> {
+                if (o1.getAuthor() == null) {
+                    if (o2.getAuthor() == null) {
+                        return 0;//0
+                    } else {
+                        return -1;
+                    }
+                } else {
+                    if (o2.getAuthor() == null) {
+                        return 1;
+                    } else {
+                        int compare = o1.getAuthor().getName().compareTo(o2.getAuthor().getName());
+//                        if (compare == 0) {
+//                            compare = 1;
+//                        }
+                        return compare;
+                    }
+                }
+            };
+            final Comparator<MultiPartitionableQuestion> editTimeComparator = (o1, o2) -> {
+                final LocalDateTime o1Time = o1.getLastEditTime();
+                final LocalDateTime o2Time = o2.getLastEditTime();
+                if (o1Time == null) {
+                    if (o2Time == null) {
+                        return 0;//0
+                    } else {
+                        return -1;
+                    }
+                } else {
+                    if (o2Time == null) {
+                        return 1;
+                    } else if (o1Time.isBefore(o2Time)) {
+                        return -1;
+                    } else if (o1Time.isEqual(o2Time)) {
+                        return 0;//0
+                    } else {
+                        return 1;
+                    }
+                }
+            };
+            switch (sortBy) {
+                case "content" -> comparator = contentComparator
+                        .thenComparing(editTimeComparator)
+                        .thenComparing(authorNameComparator)
+                        .thenComparing((o1, o2) -> 1);
+                case "author" -> comparator = authorNameComparator
+                        .thenComparing(contentComparator)
+                        .thenComparing(editTimeComparator)
+                        .thenComparing((o1, o2) -> 1);
+                case "lastEditTime" -> comparator = editTimeComparator
+                        .thenComparing(contentComparator)
+                        .thenComparing(authorNameComparator)
+                        .thenComparing((o1, o2) -> 1);
+                default -> {
+                    throw new BadRequestException("parameter \"sortBy\" must be \"content\",\"author\"or\"lastEditTime\"");
+                }
+            }
+            if (sortType.equalsIgnoreCase("desc")) {
+                comparator = comparator.reversed();
+            } else if (!sortType.equalsIgnoreCase("asc")) {
+                throw new BadRequestException("parameter \"sortType\" must be \"asc\"or\"desc\"");
+            }
+            partition.setSort(comparator);
+        }
+        modelAndView.addObject("partition", partition);
+    }
+    
+    private void addPermissionsBoolean(ModelAndView modelAndView) {
+        for (Permission permission : roleService.findAllPermission()) {
+            modelAndView.addObject("permission_" + permission.getName().replace(' ', '_'), JwtTokenProvider.currentUserHasPermission(permission.getName()));
+        }
+    }
+    
     private void userInfo(HttpServletRequest request, ModelAndView modelAndView) {
         final String qqString = request.getParameter("QQ");
         final long qq = Long.parseLong(qqString);
         Optional<User> optionalUser = userService.findByQQNumber(qq);
         if (optionalUser.isPresent()) {
-            modelAndView.addObject("user1",optionalUser.get());
+            modelAndView.addObject("user1", optionalUser.get());
         } else {
-            throw new NoSuchElementException("user with qq:"+qqString);
+            throw new NoSuchElementException("user with qq:" + qqString);
         }
     }
     

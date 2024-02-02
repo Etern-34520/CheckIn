@@ -1,37 +1,38 @@
 <%@ tag pageEncoding="utf-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<%@ attribute name="toggleSwitchId" required="true" %>
+<%@ attribute name="switchID" required="true" %>
 
-<%@ attribute name="toggleSwitchOn" %>
-<c:set var="toggleSwitchOn" value="${(empty toggleSwitchOn) ? \"undefined\" : toggleSwitchOn}"/>
+<%@ attribute name="onFuncName" %>
+<c:set var="onFuncName" value="${(empty onFuncName) ? \"undefined\" : onFuncName}"/>
 
-<%@ attribute name="toggleSwitchOff" %>
-<c:set var="toggleSwitchOff" value="${(empty toggleSwitchOff) ? \"undefined\" : toggleSwitchOff}"/>
+<%@ attribute name="offFuncName" %>
+<c:set var="offFuncName" value="${(empty offFuncName) ? \"undefined\" : offFuncName}"/>
 
-<%@ attribute name="toggleSwitchState" type="java.lang.Boolean" %>
-<c:set var="toggleSwitchState" value="${(empty toggleSwitchState) ? true : toggleSwitchState}"/>
+<%@ attribute name="state" type="java.lang.Boolean" %>
+<c:set var="state" value="${(empty state) ? true : state}"/>
 
-<%@ attribute name="toggleSwitchWidth" type="java.lang.Double" %>
-<c:set var="toggleSwitchWidth" value="${(empty toggleSwitchWidth) ? 45 : toggleSwitchWidth}"/>
+<%@ attribute name="width" type="java.lang.Double" %>
+<c:set var="width" value="${(empty width) ? 45 : width}"/>
 
-<%@ attribute name="toggleSwitchHeight" type="java.lang.Double" %>
-<c:set var="toggleSwitchHeight" value="${(empty toggleSwitchHeight) ? 24 : toggleSwitchHeight}"/>
+<%@ attribute name="height" type="java.lang.Double" %>
+<c:set var="height" value="${(empty height) ? 24 : height}"/>
 
-<%@ attribute name="toggleSwitchDotMargin" type="java.lang.Double" %>
-<c:set var="toggleSwitchDotMargin" value="${(empty toggleSwitchDotMargin) ? 4 : toggleSwitchDotMargin}"/>
+<%@ attribute name="dotMargin" type="java.lang.Double" %>
+<c:set var="dotMargin" value="${(empty dotMargin) ? 4 : dotMargin}"/>
 
-<%@ attribute name="toggleSwitchDisabled" type="java.lang.Boolean" %>
-<c:set var="toggleSwitchDisabled" value="${(empty toggleSwitchDisabled) ? false : toggleSwitchDisabled}"/>
+<%@ attribute name="disabled" type="java.lang.Boolean" %>
+<c:set var="disabled" value="${(empty disabled) ? false : disabled}"/>
+<%@ attribute name="style" %>
 
-<c:set var="dotSize" value="${toggleSwitchHeight-2*toggleSwitchDotMargin}"/>
-<c:set var="moveLeft" value="${toggleSwitchWidth-dotSize-toggleSwitchDotMargin*2}"/>
-<span border id="${toggleSwitchId}" class="toggleSwitchBasic"
-      style="width: ${toggleSwitchWidth}px;height: ${toggleSwitchHeight}px;
-      <c:if test="${toggleSwitchState}">background: var(--highlight-component-background-color-hover)</c:if> " component_type="toggleSwitch" move_distance="${moveLeft}"
-      <c:if test="${toggleSwitchDisabled}">disabled="disabled"</c:if>
-      onclick="toggleSwitch($(this),${moveLeft},${toggleSwitchOn},${toggleSwitchOff})">
-    <input type="hidden" class="toggleSwitchInput" name="${toggleSwitchId}" id="input_${toggleSwitchId}" value="${empty toggleSwitchState?"true":toggleSwitchState}">
+<c:set var="dotSize" value="${height-2*dotMargin}"/>
+<c:set var="moveLeft" value="${width-dotSize-dotMargin*2}"/>
+<span border id="${switchID}" class="toggleSwitchBasic"
+      style="width: ${width}px;height: ${height}px;align-self: center;flex: none;
+      <c:if test="${state}">background: var(--highlight-component-background-color-hover)</c:if>;${empty style?null:style}" component_type="toggleSwitch" move_distance="${moveLeft}"
+      <c:if test="${disabled}">disabled="disabled"</c:if>
+      onclick="toggleSwitch($(this),${moveLeft},${onFuncName},${offFuncName})">
+    <input type="hidden" class="toggleSwitchInput" name="${switchID}" id="input_${switchID}" value="${empty state?"true":state}">
     <span class="toggleSwitchDot" style="height: ${dotSize}px;width: ${dotSize}px;<c:if
-            test="${toggleSwitchState}">left: ${moveLeft}px</c:if>"></span>
+            test="${state}">left: ${moveLeft}px</c:if>"></span>
 </span>

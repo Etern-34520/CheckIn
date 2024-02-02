@@ -1,14 +1,14 @@
 package indi.etern.checkIn.api.webSocket.action.user;
 
 import com.google.gson.JsonObject;
-import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.Optional;
 
-public class SetUserStateAction extends JsonResultAction {
+public class SetUserStateAction extends TransactionalAction {
     private final long qqNumber;
     private final boolean enabled;
     

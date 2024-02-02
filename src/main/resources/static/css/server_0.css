@@ -1,51 +1,62 @@
-#managePage[index="0"][page-type="server"] #left{
+#managePage[index="0"][page-type="server"] #left {
     width: 450px;
     height: 100%;
     flex: none;
     display: flex;
     flex-direction: column;
 }
-#managePage[index="0"][page-type="server"] #leftTop{
-    height: 70px;
+
+#managePage[index="0"][page-type="server"] #leftTop {
+    /*height: 70px;*/
     flex: none;
     transition: 0.2s;
     transition-timing-function: ease-in-out;
     background: var(--rounded-div-background-color);
     cursor: pointer;
-    user-select:none;
+    user-select: none;
+    -webkit-user-select: none;
 }
-#managePage[index="0"][page-type="server"] #leftTop:hover{
+
+#managePage[index="0"][page-type="server"] #leftTop:hover {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    background: rgba(128,128,128,0.2);
+    background: rgba(128, 128, 128, 0.2);
     cursor: pointer;
-    user-select:none;
+    user-select: none;
+    -webkit-user-select: none;
 }
-#managePage[index="0"][page-type="server"] #leftBottom{
+
+#managePage[index="0"][page-type="server"] #leftBottom {
     flex: 1;
     overflow-y: auto;
 }
+
 #managePage[index="0"][page-type="server"] #leftTop {
     margin-top: 4px;
     margin-bottom: 0;
 }
-#managePage[index="0"][page-type="server"] #right{
+
+#managePage[index="0"][page-type="server"] #right {
     margin-left: 0;
     flex: 1;
     margin-top: 4px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
-#managePage[index="0"][page-type="server"] #chart{
+
+#managePage[index="0"][page-type="server"] #chart {
     width: 100%;
     height: 200px;
 }
-#managePage[index="0"][page-type="server"] .roundedDiv[component_type="userTraffic"]{
+
+#managePage[index="0"][page-type="server"] .roundedDiv[component_type="userTraffic"] {
     width: auto;
     height: 30px;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
 }
-#managePage[index="0"][page-type="server"] .subContentRoot{
+
+#managePage[index="0"][page-type="server"] .subContentRoot {
     display: flex;
     flex-direction: column;
     flex: 1;

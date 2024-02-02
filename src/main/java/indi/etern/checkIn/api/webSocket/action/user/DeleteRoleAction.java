@@ -1,13 +1,13 @@
 package indi.etern.checkIn.api.webSocket.action.user;
 
 import com.google.gson.JsonObject;
-import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.RoleService;
 
 import java.util.Optional;
 
-public class DeleteRoleAction extends JsonResultAction {
+public class DeleteRoleAction extends TransactionalAction {
     String roleType;
     public DeleteRoleAction(String roleType) {
         this.roleType = roleType;

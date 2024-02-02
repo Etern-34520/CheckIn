@@ -15,7 +15,7 @@ import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,18 +31,21 @@ import java.util.Map;
 @RequestMapping(path = "manage/data")
 public class ManageData {
     final Logger logger = LoggerFactory.getLogger(getClass());
-    @Autowired
-    DateTrafficService dateTrafficService;
-    @Autowired
-    UserTrafficService userTrafficService;
-    @Autowired
-    MultiPartitionableQuestionService multiPartitionableQuestionService;
-    @Autowired
-    WebSocketService webSocketService;
-    @Autowired
-    UserService userService;
-    @Autowired
-    Gson gson;
+    final DateTrafficService dateTrafficService;
+    final UserTrafficService userTrafficService;
+    final MultiPartitionableQuestionService multiPartitionableQuestionService;
+    final WebSocketService webSocketService;
+    final UserService userService;
+    final Gson gson;
+    
+    public ManageData(DateTrafficService dateTrafficService, UserTrafficService userTrafficService, MultiPartitionableQuestionService multiPartitionableQuestionService, WebSocketService webSocketService, UserService userService, Gson gson) {
+        this.dateTrafficService = dateTrafficService;
+        this.userTrafficService = userTrafficService;
+        this.multiPartitionableQuestionService = multiPartitionableQuestionService;
+        this.webSocketService = webSocketService;
+        this.userService = userService;
+        this.gson = gson;
+    }
     
     @GetMapping(params = "type=traffic")
     public String getTrafficJsonData() {
@@ -59,18 +62,31 @@ public class ManageData {
     }
     
     @GetMapping(params = {"type=trafficDetail", "pageIndex"})
-    public String getTrafficDetailData(int pageIndex) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "localDate");
+    public String getTrafficItemDataByPage(int pageIndex) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "localDate").and(Sort.by(Sort.Direction.DESC, "localTime"));
         Pageable pageable = PageRequest.of(pageIndex, 20, sort);
-        DateTraffic dateTraffic = dateTrafficService.getByLocalDate(LocalDate.now().minusDays(pageIndex));
+//        DateTraffic dateTraffic = dateTrafficService.getByLocalDate(LocalDate.now().minusDays(pageIndex));
+//        DateTraffic dateTraffic = dateTrafficService.findAll(pageable).getContent().getFirst();
+        Page<UserTraffic> userTrafficPage = userTrafficService.findAll(pageable);
+        return getJson(userTrafficPage);
+    }
+
+    @GetMapping(params = {"type=trafficDetail", "id"})
+    public UserTraffic getTrafficItemData(int id) {
+        return userTrafficService.findById(id).orElseThrow();
+    }
+    
+    private String getJson(Page<UserTraffic> userTrafficPage) {
         List<Map<String, String>> jsonData = new ArrayList<>();
-        for (UserTraffic userTraffic : dateTraffic.getUserTraffics()) {
-            Map<String, String> userTrafficDataMap = userTraffic.getHeaderInfo();
+        for (UserTraffic userTraffic : /*dateTraffic.getUserTraffics()*/ userTrafficPage.getContent()) {
+            Map<String, String> userTrafficDataMap = userTraffic.getHeaderMap();
             userTrafficDataMap.put("ip", userTraffic.getIP());
             userTrafficDataMap.put("qq", String.valueOf(userTraffic.getQQNumber()));
             userTrafficDataMap.put("date", userTraffic.getLocalDate().toString());
             userTrafficDataMap.put("time", userTraffic.getLocalTime().toString());
             userTrafficDataMap.put("dateTime", userTraffic.getLocalDateTime().toString());
+            userTrafficDataMap.put("id", String.valueOf(userTraffic.getId()));
+            userTrafficDataMap.putAll(userTraffic.getAttributesMap());
             jsonData.add(userTrafficDataMap);
         }
         return gson.toJson(jsonData);
@@ -114,11 +130,11 @@ public class ManageData {
     }
     
     private static void checkPermission(MultiPartitionableQuestion oldQuestion,User currectUser, User author, boolean enabled) {
-        if (oldQuestion != null && !oldQuestion.getAuthor().equals(currectUser) &&
+        if (oldQuestion != null && oldQuestion.getAuthor() != null && !oldQuestion.getAuthor().equals(currectUser) &&
                 !JwtTokenProvider.currentUserHasPermission("edit others question")) {
             throw new AuthException("permission denied: edit others question");
         }
-        if ( ( ( oldQuestion != null && !oldQuestion.getAuthor().equals(author) ) || ( oldQuestion == null && !currectUser.equals(author) ))
+        if ( ( ( oldQuestion != null && oldQuestion.getAuthor() != null && !oldQuestion.getAuthor().equals(author) ) || ( oldQuestion == null && !currectUser.equals(author) ))
                 && !JwtTokenProvider.currentUserHasPermission("change author")) {
             throw new AuthException("permission denied: change author");
         }

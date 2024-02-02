@@ -44,6 +44,10 @@
     overflow: hidden;
 }
 
+.questionEnabled {
+    flex: none;
+}
+
 .addButtons {
     display: flex;
     flex-direction: row;
@@ -55,7 +59,9 @@
 }
 
 .addButtons > button {
-    height: 40px;
+    margin: 0 4px;
+    font-size: 28px;
+    height: 70px;
     flex: 1;
 }
 
@@ -67,7 +73,7 @@
 
 .questionChoice {
     background-color: rgba(0, 0, 0, 0.15);
-    color: var(--incorrect-choice-fone-color);
+    color: var(--incorrect-choice-font-color);
 }
 
 .questionChoice[correct] {

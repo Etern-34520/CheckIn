@@ -4,7 +4,6 @@ import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.UserRepository;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,12 +21,12 @@ public class UserService implements UserDetailsService {
     public static UserService singletonInstance;
     @Resource
     private UserRepository userRepository;
-    @Autowired
-    private RoleService roleService;
-    @Autowired
-    private TransactionTemplate template;
-    protected UserService() {
+    private final RoleService roleService;
+    private final TransactionTemplate template;
+    protected UserService(RoleService roleService, TransactionTemplate template) {
         singletonInstance = this;
+        this.roleService = roleService;
+        this.template = template;
     }
     
     public boolean check(long qq, String password) {

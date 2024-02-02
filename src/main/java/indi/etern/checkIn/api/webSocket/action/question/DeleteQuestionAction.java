@@ -25,7 +25,7 @@ public class DeleteQuestionAction extends JsonResultAction {
         } else if (question.getAuthor().equals(currentUser)) {
             return "delete owns question";
         } else {
-            return "delete question";
+            return "delete others question";
         }
     }
     

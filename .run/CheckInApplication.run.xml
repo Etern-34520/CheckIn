@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CheckInApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="checkIn" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="indi.etern.checkIn.CheckInApplication" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="indi.etern.checkIn.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="DeactivateBeforeRunTask">
+        <option name="dataSourceId" value="d4cfdda8-20bf-4192-9cd5-6e74bc2035a5" />
+      </option>
+    </method>
+  </configuration>
+</component>

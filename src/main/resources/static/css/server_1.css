@@ -1,0 +1,44 @@
+#managePage[index="1"][page-type="server"] #left {
+    width: 450px;
+    min-width: 350px;
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+    overflow-y: auto;
+}
+
+#managePage[index="1"][page-type="server"] #right {
+    margin-left: 2px;
+    margin-top: 4px;
+    flex: 12;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+#managePage[index="1"][page-type="server"] .subContentRoot {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: auto;
+}
+
+#dateSelections > div[selected] > div[component_type="selectPointer"] {
+    background: var(--highlight-component-background-color-hover);
+    opacity: 1;
+}
+
+#dateSelections > div > div[component_type="selectPointer"] {
+    height: 4px;
+    margin-top: 2px;
+    margin-bottom: -4px;
+    border-radius: 2px;
+    opacity: 0;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+}
+
+#trafficList > div {
+    margin-bottom: 0;
+}

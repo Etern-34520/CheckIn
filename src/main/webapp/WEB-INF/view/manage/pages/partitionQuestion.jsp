@@ -17,17 +17,13 @@
         ${fn:escapeXml(partition.name)}
     </label>
     <div class="questions" text>
-        <c:forEach var="question" items="${partition.questions}">
+        <c:forEach var="question" items="${partition.sortedQuestion}">
             <components:questionOverview question="${question}"/>
         </c:forEach>
     </div>
     <div class="addButtons" style="margin: 4px">
         <c:if test="${permission_create_and_edit_owns_question}">
-            <button type="button" text style="font-size: 20px"
-                    onclick="addQuestion('${partition.id}')">
-                +
-            </button>
+            <button type="button" text onclick="addQuestion('${partition.id}')">+</button>
         </c:if>
-<%--        <button type="button" text style="font-size: 20px">↑</button>--%>
     </div>
 </div>

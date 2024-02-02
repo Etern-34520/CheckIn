@@ -1,5 +1,6 @@
 package indi.etern.checkIn;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.Getter;
 import org.springframework.context.annotation.Bean;
@@ -36,5 +37,10 @@ public class MVCConfig {
     public Gson gson(){
         gson = new Gson();
         return gson;
+    }
+    
+    @Bean
+    public ObjectMapper objectMapper(){
+        return new ObjectMapper();
     }
 }

@@ -4,12 +4,14 @@
 <%@ taglib prefix="components" tagdir="/WEB-INF/tags" %>
 <%@attribute name="question"
              type="indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion" %>
-<%@attribute name="inUser_2" type="java.lang.Boolean" %>
+<%@attribute name="inUser_2" type="java.lang.Boolean" %><%--if user is in other pages--%>
 <components:shrinkPane id="${question.md5}" clazz="question">
     <jsp:attribute name="title">
         <div style="flex:1">
             <div style="display: flex;flex-direction: row">
-                <div class="questionContent" rounded><c:out value="${fn:escapeXml(question.content)}"/></div>
+                <div class="questionContent" rounded>${fn:escapeXml(question.content)}</div>
+                <div class="blank"></div>
+                <div class="questionEnabled" rounded>${question.enabled?"已启用":"已禁用"}</div>
             </div>
             <div>
                 <div class="questionChoices">

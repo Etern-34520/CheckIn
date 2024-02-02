@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,14 +17,17 @@ import java.util.regex.Pattern;
 @RestController
 public class Login {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
-    @Autowired
-    UserService userService;
-    @Autowired
-    Gson gson;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    final JwtTokenProvider jwtTokenProvider;
+    final UserService userService;
+    final Gson gson;
+    final PasswordEncoder passwordEncoder;
+    
+    public Login(JwtTokenProvider jwtTokenProvider, UserService userService, Gson gson, PasswordEncoder passwordEncoder) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.userService = userService;
+        this.gson = gson;
+        this.passwordEncoder = passwordEncoder;
+    }
     
     public static boolean isNumber(String str) {
         return str != null && NUMBER_PATTERN.matcher(str).matches();
@@ -78,6 +80,6 @@ public class Login {
     }
     
     private boolean checkPassword(User user, String password) {
-        return passwordEncoder.matches(password, user.getPassword());
+        return user.getPassword()==null || passwordEncoder.matches(password, user.getPassword());
     }
 }

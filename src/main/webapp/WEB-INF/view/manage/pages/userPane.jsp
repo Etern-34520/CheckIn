@@ -45,11 +45,11 @@
                 <div style="display:flex;flex-direction: row;align-items: center">
                     <label style="margin-left: 8px;margin-right: 4px;">启用</label>
                     <components:toggleSwitch
-                            toggleSwitchId="switchEnable${user.QQNumber}"
-                            toggleSwitchOn="function() {enableUser(${user.QQNumber},$('#switchEnable${user.QQNumber}'))}"
-                            toggleSwitchOff="function() {disableUser(${user.QQNumber},$('#switchEnable${user.QQNumber}'))}"
-                            toggleSwitchState="${user.enabled}"
-                            toggleSwitchDisabled="${webSocketService.isOnline(user) || !permission_change_user_state}"
+                            switchID="switchEnable${user.QQNumber}"
+                            onFuncName="function() {enableUser(${user.QQNumber},$('#switchEnable${user.QQNumber}'))}"
+                            offFuncName="function() {disableUser(${user.QQNumber},$('#switchEnable${user.QQNumber}'))}"
+                            state="${user.enabled}"
+                            disabled="${webSocketService.isOnline(user) || !permission_change_user_state}"
                     />
                 </div>
             </c:if>

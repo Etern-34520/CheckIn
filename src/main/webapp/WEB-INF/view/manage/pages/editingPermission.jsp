@@ -14,7 +14,7 @@
     <label titleLabel>权限编辑 ${role.type}</label>
     <div style="display:flex;flex-direction: column">
         <label titleLabel>权限列表</label>
-        <%@ include file="permissionGroupList.jspf" %>
+        <%@ include file="permissionGroupList.jsp" %>
     </div>
     <label id="tip"></label>
     <button id="saveButton" highlight rounded onclick="sendEditing('${role.type}')">保存</button>

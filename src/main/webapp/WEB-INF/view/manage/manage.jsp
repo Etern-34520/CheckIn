@@ -8,7 +8,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
-<html>
+<html lang="zh" component_type="text/html;charset=UTF-8">
 <jsp:useBean id="manageMenuItemInfo"
              class="indi.etern.checkIn.beans.ManageMenuItemInfo"
              scope="application"/>
@@ -17,11 +17,25 @@
              scope="application"/>
 <head>
     <title>CheckIn</title>
-    <script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
-    <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-    <script src="https://cdn.staticfile.org/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-    <script src="https://cdn.staticfile.org/jquery-color/2.1.2/jquery.color.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css">
+    <link rel="stylesheet" href="./../css/global.css">
+    <link rel="stylesheet" href="./../css/manage.css">
+    <link rel="stylesheet" href="./../css/server_0.css">
+    <link rel="stylesheet" href="./../css/server_1.css">
+    <link rel="stylesheet" href="./../css/server_2.css">
+    <link rel="stylesheet" href="./../css/server_3.css">
+    <link rel="stylesheet" href="./../css/server_4.css">
+    <link rel="stylesheet" href="./../css/user_0.css">
+    <link rel="stylesheet" href="./../css/user_2.css">
+    <link rel="stylesheet" href="./../css/questions.css">
+    <link rel="stylesheet" href="./../css/components.css">
+
+        <script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-color/2.1.2/jquery.color.min.js"></script>
 
 <%--    <script src="./../lib/http_cdn.staticfile.org_echarts_4.3.0_echarts.js"></script>--%>
 <%--    <script src="./../lib/http_cdn.staticfile.org_jquery_3.7.1_jquery.js"></script>--%>
@@ -33,32 +47,27 @@
     <script src="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.contextMenu.min.js"></script>
     <script src="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.ui.position.min.js"></script>
 
-<%--    <script src="./../lib/http_connect.qq.com_qc_jssdk.js"></script>--%>
-<%--    <script src="./../lib/http_js.hcaptcha.com_1_api.js"></script>--%>
+    <%--    <script src="./../lib/http_connect.qq.com_qc_jssdk.js"></script>--%>
+    <%--    <script src="./../lib/http_js.hcaptcha.com_1_api.js"></script>--%>
     <script src="./../lib/md5.min.js"></script>
 
     <script src="./../js/webSocket.js"></script>
     <script src="./../js/manage.js"></script>
     <script src="./../js/echart.js"></script>
+    <script src="./../js/server_1.js"></script>
     <script src="./../js/server_2.js"></script>
+    <script src="./../js/server_3.js"></script>
     <script src="./../js/user_0.js"></script>
     <script src="./../js/user_1.js"></script>
     <script src="./../js/user_2.js"></script>
     <script src="./../js/components.js"></script>
     <script src="./../js/question_form_data.js"></script>
     <%--    <script src="./js/server_2_editForm.js"></script>--%>
-    <link rel="stylesheet" href="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css">
-    <link rel="stylesheet" href="./../css/global.css">
-    <link rel="stylesheet" href="./../css/manage.css">
-    <link rel="stylesheet" href="./../css/server_0.css">
-    <link rel="stylesheet" href="./../css/server_2.css">
-    <link rel="stylesheet" href="./../css/user_0.css">
-    <link rel="stylesheet" href="./../css/user_2.css">
-    <link rel="stylesheet" href="./../css/questions.css">
 </head>
 <script>
-    const Permission = { <c:forEach var="permissionBooleanEntries" items="${requestScope.entrySet()}"><c:if test="${permissionBooleanEntries.key.startsWith(\"permission\")}">
-        ${permissionBooleanEntries.key}: ${permissionBooleanEntries.value},</c:if></c:forEach>
+    const Permission = {
+    <c:forEach var="permissionBooleanEntries" items="${requestScope.entrySet()}"><c:if test="${permissionBooleanEntries.key.startsWith(\"permission\")}">
+    ${permissionBooleanEntries.key}: ${permissionBooleanEntries.value},</c:if></c:forEach>
     }
 </script>
 <body>
@@ -76,7 +85,8 @@
             <button type="button" id="upload" class="button" style="font-size: 20px"></button>
             <button type="button" id="save" class="button" style="font-size: 20px"></button>
         --%>
-        <div clickable rounded style="display:flex;margin: 0;padding-top: 6px" onclick="switchToPageWithAnimate('user',2)">
+        <div clickable rounded style="display:flex;margin: 0;padding-top: 6px"
+             onclick="switchToPageWithAnimate('user',2)">
             <div class="userAvatar"
                  style="background-image: url('https://q1.qlogo.cn/g?b=qq&nk=${cookie.get('qq').getValue()}&s=640');
                          background-size: 100% 100%;border-radius: 50%;
@@ -102,7 +112,9 @@
                     </div>
                     <c:forEach var="menuString" items="${manageMenuItemInfo.menuItemServerStrings}" varStatus="stat">
                         <button type="button" class="button" blockString="${menuString}"
-                                onclick="switchToPage('server',${stat.index})">${menuString}<span style="color: rgb(127,127,127);margin-left: 8px;font-size: 12px">(Ctrl+Alt+${stat.index+1})</span></button>
+                                onclick="switchToPage('server',${stat.index})">${menuString}<span
+                                style="color: rgb(127,127,127);margin-left: 8px;font-size: 12px">(Ctrl+Alt+${stat.index+1})</span>
+                        </button>
                     </c:forEach>
                 </div>
                 <div id="userMenu" class="menuButtons">
@@ -112,7 +124,9 @@
                     </div>
                     <c:forEach var="menuString" items="${manageMenuItemInfo.menuItemUserStrings}" varStatus="stat">
                         <button type="button" class="button" blockString="${menuString}"
-                                onclick="switchToPage('user',${stat.index})">${menuString}<span style="color: rgb(127,127,127);margin-left: 8px;font-size: 12px">(Ctrl+Alt+${stat.index+manageMenuItemInfo.menuItemServerStrings.size()+1})</span></button>
+                                onclick="switchToPage('user',${stat.index})">${menuString}<span
+                                style="color: rgb(127,127,127);margin-left: 8px;font-size: 12px">(Ctrl+Alt+${stat.index+manageMenuItemInfo.menuItemServerStrings.size()+1})</span>
+                        </button>
                     </c:forEach>
                 </div>
             </div>

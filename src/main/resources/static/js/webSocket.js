@@ -32,7 +32,7 @@ function initWebSocket(button) {
         }
     }
 
-    if (button!==undefined) {
+    if (button !== undefined) {
         connectWebSocket(button);
     } else {
         connectWebSocket();
@@ -88,6 +88,9 @@ function initWebSocket(button) {
                 else
                     userOffline(message.qq);
                 break;
+            case "trafficLog":
+                updateTrafficLog(message.traffic);
+                break;
         }
     }
 
@@ -99,6 +102,7 @@ function initWebSocket(button) {
         closeWebSocket();
     }
 }
+
 function closeWebSocket() {
     websocket.onclose = undefined;
     websocket.close();

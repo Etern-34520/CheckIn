@@ -1,4 +1,5 @@
 let md5ToQuestionFormDataMap = new Map();
+let newQuestionMd5s = [];
 
 function addQuestion(partitionId) {
     editQuestion("", partitionId);
@@ -29,7 +30,7 @@ function editQuestion(questionMD5, partitionId, transitionLeft = true) {
             },
             url: "page/partitionQuestionLeft", method: "post", data: "", success: function (res) {
                 ajax1Over = true;
-                transitionPage($left, res);
+                transitionPage($left, res, undefined, undefined, undefined, "Right","Left");
             },
         });
     $.ajax({
@@ -44,8 +45,7 @@ function editQuestion(questionMD5, partitionId, transitionLeft = true) {
                 // removePathContainsAfter("Edit Question")
                 removePathAfter("题库", false, false);
                 // $right.html(res);
-                transitionPage($right, res, pathBlock, function () {
-                });
+                transitionPage($right, res, pathBlock, function () {}, undefined,"Left","Right");
             } else {
                 transitionPage($right, res);
             }
@@ -62,7 +62,7 @@ function selectQuestionPartition(partitionDiv) {
 
 function switchToQuestion(questionMD5, element) {
     const questionFormData = md5ToQuestionFormDataMap.get(questionMD5);
-    if (questionFormData === null || questionFormData === undefined || $(element).find(".pointer").css("opacity") !== "1") {
+    if (questionFormData === null || questionFormData === undefined || ($(element).find(".pointer").css("opacity") !== "1" && !$(element).children().eq(1).text() === "")) {
         editQuestion(questionMD5, undefined, false);
         return;
     }
@@ -173,9 +173,10 @@ function initQuestionForm() {
             }
         }
         if (newQ) {
-            questionFormData.originalFormData = new FormData(/*document.getElementById("questionEditForm")*/);
-            // const authorQQ = $("#author").val();
-            // questionFormData.originalFormData.append("author", authorQQ);
+            questionFormData.originalFormData = new FormData(document.getElementById("questionEditForm"));
+            const authorQQ = $("#author").val();
+            questionFormData.originalFormData.append("author", authorQQ);
+            questionFormData.formData.append("author",authorQQ);
             md5ToQuestionFormDataMap.set(questionFormData.get("md5"), questionFormData);
             questionFormData.updateDataAndCheckChange();
         }

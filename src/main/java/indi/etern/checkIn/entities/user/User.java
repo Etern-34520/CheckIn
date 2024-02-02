@@ -1,6 +1,7 @@
 package indi.etern.checkIn.entities.user;
 
 import com.google.gson.JsonObject;
+import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.auth.Authority;
 import indi.etern.checkIn.auth.PermissionType;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 
@@ -43,7 +45,8 @@ public class User implements UserDetails {
     public User(String name, long QQNumber, String password) {
         this.name = name;
         this.QQNumber = QQNumber;
-        this.password = password;
+        PasswordEncoder encoder = CheckInApplication.applicationContext.getBean(PasswordEncoder.class);
+        this.password = password==null?null:encoder.encode(password);
         role = Role.getInstance("user");
     }
     

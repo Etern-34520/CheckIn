@@ -7,7 +7,6 @@ import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileInputStream;
@@ -18,13 +17,16 @@ import java.util.*;
 
 @RestController
 @RequestMapping(path = "question/")
-public class QuestionDataReadController {
-    @Autowired
-    MultiPartitionableQuestionService multiPartitionableQuestionService;
-    @Autowired
-    PartitionService partitionService;
-    @Autowired
-    Gson gson;
+public class QuestionDataRead {
+    final MultiPartitionableQuestionService multiPartitionableQuestionService;
+    final PartitionService partitionService;
+    final Gson gson;
+    
+    public QuestionDataRead(MultiPartitionableQuestionService multiPartitionableQuestionService, PartitionService partitionService, Gson gson) {
+        this.multiPartitionableQuestionService = multiPartitionableQuestionService;
+        this.partitionService = partitionService;
+        this.gson = gson;
+    }
     
     @GetMapping(path = "image/count/{questionMD5}")
     public String getImageQuantity(@PathVariable String questionMD5) {

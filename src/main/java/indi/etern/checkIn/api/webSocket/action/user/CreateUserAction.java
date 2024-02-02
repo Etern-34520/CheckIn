@@ -1,16 +1,17 @@
 package indi.etern.checkIn.api.webSocket.action.user;
 
 import com.google.gson.JsonObject;
-import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.web.WebSocketService;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CreateUserAction extends JsonResultAction {
+public class CreateUserAction extends TransactionalAction {
     
     private final String roleName;
     private final long qqNumber;
@@ -25,7 +26,7 @@ public class CreateUserAction extends JsonResultAction {
     
     @Override
     public String requiredPermissionName() {
-        return "create user";
+        return "create user" + (Objects.equals(roleName, "user") ? "" : ",change role,change role " + roleName);
     }
     
     @Override

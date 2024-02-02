@@ -1,4 +1,56 @@
 let editing = false;
+let selectedOption = "content";
+function selectSortOption(/**HTMLElement*/optionDiv) {
+    if (transferring) {
+        return;
+    }
+    const $selections = $(optionDiv.parentElement);
+    let haveSelected = false;
+    const $optionDiv = $(optionDiv);
+    if ($optionDiv.attr("selected") === "selected") haveSelected = true;
+    $selections.children().removeAttr("selected");
+    $optionDiv.attr("selected", "selected");
+    if (!haveSelected)
+        selectedOption = $optionDiv.attr("type");
+        sortQuestion();
+}
+
+let sortType = "asc";
+
+function sortQuestion() {
+    const $selectedPartitionButton = $("#partitionButtons .partitionButton[selected='selected']");
+    if (transferring || $selectedPartitionButton.length === 0) {
+        return;
+    }
+    const $right = $("#right");
+    const partitionID = $selectedPartitionButton.attr("id").substring(15);
+    $.ajax({
+        url: "./page/partitionQuestion",
+        data: {
+            id: partitionID,
+            sortType: sortType,
+            sortBy: selectedOption
+        },
+        success: function (res) {
+            transferring = true;
+            transitionPage($right, res, undefined, undefined, function () {
+                transferring = false;
+            });
+        }
+    });
+}
+
+// noinspection JSUnusedGlobalSymbols
+function sortQuestionAsc() {
+    sortType = "asc";
+    sortQuestion();
+}
+
+// noinspection JSUnusedGlobalSymbols
+function sortQuestionDesc() {
+    sortType = "desc";
+    sortQuestion();
+}
 
 function editPartitionName() {
     editing = true;
@@ -79,8 +131,8 @@ function initQuestionViewImages() {
 function initQuestionViewImage(questionMD5) {
     $.ajax({
         url: "./../question/image/" + questionMD5 + "/", method: "get",
-        xhrFields:{
-            withCredentials:true
+        xhrFields: {
+            withCredentials: true
         },
         success: function (res) {
             let originalImageCount = res.count;
@@ -110,18 +162,18 @@ function initQuestionViewImage(questionMD5) {
             const width = (img.width / (img.height / (100)));
             let $imageDiv = $(`
 <div id="${imageNameAndSize}" class="imageDiv" style="border-radius:8px;background-image: url('${reader.result}');width: ${width + 'px'}"></div>`);
-/*
-            $imageDiv.css({
-                marginLeft: -5, opacity: 0
-            });
-*/
-            $questionDiv.attr("rounded","");
+            /*
+                        $imageDiv.css({
+                            marginLeft: -5, opacity: 0
+                        });
+            */
+            $questionDiv.attr("rounded", "");
             $questionDiv.append($imageDiv);
-/*
-            $imageDiv.animate({
-                marginLeft: 0, opacity: 1
-            }, 300, 'easeInOutCubic');
-*/
+            /*
+                        $imageDiv.animate({
+                            marginLeft: 0, opacity: 1
+                        }, 300, 'easeInOutCubic');
+            */
         }.bind(this);
     }.bind(this);
 }
@@ -217,10 +269,10 @@ function switchToPartition(button) {
     let $right = $("#right");
     removePathAfter("题库", false, false);
     $.ajax({
-        url: "page/partitionQuestion",
+        url: "./page/partitionQuestion",
         method: "post",
-        xhrFields:{
-            withCredentials:true
+        xhrFields: {
+            withCredentials: true
         },
         data: {
             "id": partitionID
@@ -228,9 +280,9 @@ function switchToPartition(button) {
         success: function (res) {
             const leftHtml = $("#left .subContentRoot").html();
             transitionPage($right, res, partitionName, function () {
-                transitionPage($right, res);
+                // transitionPage($right, res);
                 transitionPage($("#left"), leftHtml);
-            },function () {
+            }, function () {
                 transferring = false;
             });
         },
@@ -280,11 +332,15 @@ function updatePartition(partitionIdNameMap) {
     for (const partitionId of differenceMap.get("added").keys()) {
         const partitionName = differenceMap.get("added").get(partitionId);
         if (inEditingPage) {
+            let addButtonHtml = "";
+            if (Permission.permission_create_and_edit_owns_question) {
+                addButtonHtml = `<button style="min-width: 20px;margin: 0 0 0 2px;font-size: 18px" onclick="newQuestionOf('${partitionId}')">+</button>`;
+            }
             const partitionDivHtml = `
 <div style="background:var(--input-background-color);margin: 0 0 8px;" rounded="" clickable="" id="partition${partitionId}" class="partitionDiv">
 <div style="display: flex;flex-direction: row" class="partitionTop">
 <div style="margin: 0;flex: 1" rounded="" clickable="" onclick="togglePartition(this)">${partitionName}</div>
-<button style="width: 20px;margin: 0 0 0 2px;font-size: 18px" onclick="newQuestionOf('${partitionId}')">+</button>
+${addButtonHtml}
 </div>
 <div style="display: none" class="partitionQuestionsList">
 <div rounded="" style="cursor: auto;background: none;" class="empty">empty</div>
@@ -300,9 +356,9 @@ function updatePartition(partitionIdNameMap) {
 </div>
 * */
             const $partition = $(partitionDivHtml);
-            $partition.hide(0);
+            $partition.slideUp(0);
             $("#partitionDivs").append($partition);
-            $partition.show(200, "easeOutCubic");
+            $partition.slideDown(200, "easeOutCubic");
 
             const partitionSelectHtml = `
 <div rounded clickable onclick="selectQuestionPartition(this)" id="partition_select_${partitionId}">
@@ -311,17 +367,17 @@ function updatePartition(partitionIdNameMap) {
 </div>
 `;
             const $partitionSelect = $(partitionSelectHtml);
-            $partitionSelect.hide(0);
+            $partitionSelect.slideUp(0);
             $("#partitionSelectionsDiv").append($partitionSelect);
-            $partitionSelect.show(200, "easeOutCubic");
+            $partitionSelect.slideDown(200, "easeOutCubic");
         } else {
             const partitionButtonHtml = `
 <button id="partitionButton${partitionId}" class="partitionButton" onclick="switchToPartition(this)" preText editing="false">${partitionName}</button>
 `;
             const $partitionButton = $(partitionButtonHtml);
-            $partitionButton.hide(0);
+            $partitionButton.slideUp(0);
             $("#addPartitionButton").before($partitionButton);
-            $partitionButton.show(200, "easeOutCubic");
+            $partitionButton.slideDown(200, "easeOutCubic");
 
         }
     }
@@ -500,18 +556,6 @@ function updateQuestionDiv(questionJsonData) {
                 }, 200, "easeOutQuad");
             }
         });
-        /*const questionHtml = generateQuestionHtml(questionObject);
-        showTip("info", "New question added:" + questionObject.md5);
-        const $questionDiv = $(questionHtml);
-        $questionDiv.css({
-            maxHeight: 0,
-            opacity: 0
-        });
-        $questionsDiv.append($questionDiv);
-        $questionDiv.animate({
-            maxHeight: 1000,
-            opacity: 1
-        }, 200, "easeOutQuad");*/
     } else {
         let deletedFromCurrentPartition = true;
         const $questionDiv = $questionDivs.eq(0);

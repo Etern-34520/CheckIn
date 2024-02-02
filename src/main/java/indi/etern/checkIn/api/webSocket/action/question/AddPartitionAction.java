@@ -1,7 +1,6 @@
 package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonObject;
-import indi.etern.checkIn.api.webSocket.action.PartitionJsonResultAction;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
 

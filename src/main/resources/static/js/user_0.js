@@ -1,11 +1,13 @@
-function userPaneShrink(div) {
-    const $userOperation = $(div).parent().parent().parent().find('.userOperation');
-    $userOperation.hide(200, 'easeOutQuad');
-}
-
-function userPaneExpand(div) {
-    const $userOperation = $(div).parent().parent().parent().find('.userOperation');
-    $userOperation.show(200, 'easeOutQuad');
+function debounce(fn, delay) {
+    let timer = null;
+    return function () {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            fn.apply(context, args);
+        }, delay);
+    };
 }
 
 function deleteUser(userQQ) {//TODO webSocket
@@ -18,7 +20,7 @@ function offLine(userQQ) {
 
 function removeUserDiv(QQ) {
     const $userDiv = $("#userDiv" + QQ);
-    $userDiv.hide(200, "easeInCubic", function () {
+    $userDiv.slideUp(200, "easeInCubic", function () {
         $userDiv.remove()
     });
 }
@@ -48,14 +50,22 @@ function addUserDiv(user) {//TODO
         success: function (res) {
             const $userDiv = $(res);
             $userDiv.hide();
-            const $userDivs = $(".userDivs");
-            const $userDivs0 = $($userDivs[0]);
-            const $userDivs1 = $($userDivs[1]);
-            if ($userDivs0.children().length <= $userDivs1.children().length) {
-                $userDivs0.append($userDiv);
-            } else {
-                $userDivs1.append($userDiv);
+            const $userDivs = $(".waterfallColumn");
+            let $usersDiv;
+            {
+                let childrenCount = null;
+                for (const userDiv of $userDivs) {
+                    const size = $(userDiv).children().length;
+                    if (childrenCount === null || size < childrenCount) {
+                        $usersDiv = $(userDiv);
+                        childrenCount = size;
+                    }
+                }
             }
+            if ($usersDiv === undefined) {
+                $usersDiv = $userDivs.children().eq(0);
+            }
+            $usersDiv.append($userDiv);
             $userDiv.show(200, "easeOutCubic");
         }
     })
@@ -110,7 +120,7 @@ function sendNewUser() {
         $okButton.removeAttr("disabled");
         const dataObj = JSON.parse(res.data);
         if (dataObj.type === "error") {
-            let reason = dataObj.data;
+            let reason = dataObj.message;
             if (reason === "user already exists") reason = "用户已存在";
             tip(reason);
         } else {
@@ -243,4 +253,46 @@ function changeRole(QQ) {
             });
         }
     });
+}
+
+let isSearching = false;
+let display = "flex";
+
+function searchUser() {
+    const $userSearch = $("#userSearch");
+    const $userDivs = $(".userDiv");
+    $userDivs.css("display", display);
+    display = $userDivs.css("display");
+    const value = $userSearch.val();
+    if (value === "") {
+        isSearching = false;
+    } else {
+        isSearching = true;
+        if (!isNaN(Number(value))) { //是数字
+            $userDivs.css("display", "none");
+            for (const userDiv of $userDivs) {
+                const $userDiv = $(userDiv);
+                if ($userDiv.find(".userQQ").text().includes(value)) {
+                    $userDiv.css("display", display);
+                } else if ($userDiv.find(".userName").text().includes(value)) {
+                    $userDiv.css("display", display);
+                }
+            }
+        } else {
+            $userDivs.css("display", "none");
+            for (const userDiv of $userDivs) {
+                const $userDiv = $(userDiv);
+                if ($userDiv.find(".userName").text().includes(value)) {
+                    $userDiv.css("display", display);
+                } else if ($userDiv.find(".userRole").text().includes(value)) {
+                    $userDiv.css("display", display);
+                } else {
+                    const userOnline = $userDiv.find(".userOnline");
+                    if (userOnline.text().includes(value)&&userOnline.css("opacity")!=0) {
+                        $userDiv.css("display", display);
+                    }
+                }
+            }
+        }
+    }
 }

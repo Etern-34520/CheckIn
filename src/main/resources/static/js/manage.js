@@ -116,19 +116,19 @@ function initContextMenu() {
                         if ($("#md5").val() === questionMD5)
                             transitionPage($("#right"), "");
                         const $questionDivs = $questionMD5Div.parent();
-                        if ($questionDivs.children().length===1) {
-                            const $empty= $("<div rounded style=\"cursor: auto;background: none;\" class=\"empty\">empty</div>");
-                            $empty.css("padding","0");
-                            $empty.css("margin","0");
-                            $empty.css("height","0");
-                            $empty.css("opacity","0");
+                        if ($questionDivs.children().length === 1) {
+                            const $empty = $("<div rounded style=\"cursor: auto;background: none;\" class=\"empty\">empty</div>");
+                            $empty.css("padding", "0");
+                            $empty.css("margin", "0");
+                            $empty.css("height", "0");
+                            $empty.css("opacity", "0");
                             $questionDivs.append($empty);
                             $empty.animate({
                                 margin: 6,
                                 padding: 4,
                                 opacity: 1,
                                 height: 20.667
-                            },150,"easeOutCubic");
+                            }, 150, "easeOutCubic");
                         }
                         $questionMD5Div.hide(200, "easeOutCubic", function () {
                             $questionMD5Div.remove();
@@ -169,7 +169,7 @@ $(function () {//页面加载完成后执行
     switchToPage($.cookie('pageClass'), $.cookie('page'), true, function () {
         over1 = true;
         showContent();
-    });
+    },false);
     $("#top").animate({
         marginTop: 6
     }, 400, "easeOutCubic", function () {
@@ -364,7 +364,13 @@ function switchToPageWithAnimate(pageClass, index, clearPathBool = true, callbac
     });
 }
 
-function switchToPage(pageClass, index, clearPathBool = true, callback) {
+function switchToPage(pageClass, index, clearPathBool = true, callback, isCloseMenu = true) {
+    try {
+        document.getElementById("managePage").onclose(undefined);
+    } catch (ignored) {
+    }
+    const $content = $('#content');
+    // $content.html("");
     $.ajax({
         url: location.href,
         type: 'get',
@@ -373,12 +379,10 @@ function switchToPage(pageClass, index, clearPathBool = true, callback) {
             withCredentials: true
         },
         success: function (res) {
-            const $content = $('#content');
             $content.html(res);
             try {
                 document.getElementById("managePage").onload(undefined);
-            } catch (e) {
-                //ignored
+            } catch (ignored) {
             }
             if ($.cookie('page') !== index) {
                 $.cookie('page', index);
@@ -392,7 +396,8 @@ function switchToPage(pageClass, index, clearPathBool = true, callback) {
                 });
             }
             selectButtonOf(pageClass, index);
-            closeMenu();
+            if (isCloseMenu)
+                closeMenu();
             if (callback instanceof Function)
                 callback();
         },
@@ -436,9 +441,9 @@ class Tip {
         this.tipHtml = `
 <div component_type="tip" rounded>
 <div class="tipTop">
-<div class='tipTitle'>
+<label class="tipTitle">
 ${title}
-</div>
+</label>
 <div class="blank"></div>
 <button class='tipCloseButton' onclick="closeTipOfButton(this)">×</button>
 </div>
@@ -505,8 +510,8 @@ ${content}
 function closeTipOfButton(tipCloseButton) {
     const $tip = $(tipCloseButton).parent().parent();
     $tip.animate({
-        marginLeft: $tip.width() + 20,
-        marginRight: -$tip.width() - 20,
+        marginLeft: $tip.width() + 40,
+        marginRight: -$tip.width() - 40,
     }, 200, "easeInOutCubic", function () {
         $tip.slideUp(200, "easeInOutCubic", function () {
             $tip.remove();
@@ -570,7 +575,9 @@ function logout() {
     }, 100);
 }
 
-var trafficPageIndex = 0;
+let trafficPageIndex = 0;
+let counts = [];
+let trafficChart;
 
 function initChart() {
     $.ajax({
@@ -581,20 +588,19 @@ function initChart() {
             withCredentials: true
         },
         success: function (res) {
-            var myChart = echarts.init(document.getElementById('chart'), "walden");
-            var dates = [];
-            var counts = [];
+            trafficChart = echarts.init(document.getElementById('chart'), "walden");
+            const dates = [];
             const trafficObj = JSON.parse(res);
-            for (var i = 0; i <= 6; i++) {
-                var trafficObjKey = trafficObj[i];
+            for (let i = 0; i <= 6; i++) {
+                const trafficObjKey = trafficObj[i];
                 dates[i] = trafficObjKey.date;
-                counts[i] = trafficObjKey.count;
+                counts[i] = Number(trafficObjKey.count);
             }
             // 指定图表的配置项和数据
-            var option = {
+            const option = {
                 tooltip: {},
                 legend: {
-                    data: ['流量'],
+                    data: ['访问次数'],
                     textStyle: {
                         color: '#d3d3d3'
                     }
@@ -619,20 +625,20 @@ function initChart() {
                     name: '访问次数',
                     type: 'line',
                     data: counts,
-
                 }]
             };
 
             // 使用刚指定的配置项和数据显示图表。
-            myChart.setOption(option);
+            trafficChart.setOption(option);
         },
         error: function (res) {
             showTip("error", res.data);
             console.error(res);
         }
     });
+
     $.ajax({
-        url: 'data',
+        url: './data',
         type: 'get',
         data: 'type=trafficDetail&pageIndex=' + trafficPageIndex,
         xhrFields: {
@@ -640,20 +646,25 @@ function initChart() {
         },
         success: function (res) {
             const trafficObj = JSON.parse(res);
-            $todayTrafficsDiv = $("#todayTraffics");
+            let $todayTrafficsDiv = $("#todayTraffics");
+            let $userTrafficDiv;
             for (const trafficObjElement of trafficObj) {
                 let ip = trafficObjElement.ip;
                 let qq = trafficObjElement.qq;
                 let time = trafficObjElement.time;
                 let date = trafficObjElement.date;
-                var userTrafficDivHtml = `
-<div rounded component_type="userTraffic" clickable>
+                let id = trafficObjElement.id;
+                const userTrafficDivHtml = `
+<div rounded component_type="userTraffic" clickable class="userTraffic${id}">
 <label>${date} ${time}</label>
 <label>IP：${ip}</label>
 <label>QQ：${qq}</label>
 </div>
 `;
                 $userTrafficDiv = $(userTrafficDivHtml);
+                $userTrafficDiv.on("click", function () {
+                    onClickTraffic(id, date);
+                })
                 $userTrafficDiv.appendTo($todayTrafficsDiv);
             }
         },
@@ -666,31 +677,69 @@ function initChart() {
 
 pathLock = false;
 
-function transitionPage($root, html, pathName, pathBackFunc, callBack) {
+const offset = 100;
+
+function transitionPage($root, html, pathName = undefined, pathBackFunc = undefined, callBack = undefined, outDirection = "Top", inDirection = "Bottom", offset = 200) {
     if (pathName instanceof String || pathBackFunc instanceof Function) {
         if (pathLock) return "pathLock";
         pathLock = true;
     }
     let $subContentRoot = $root.children(".subContentRoot");
-    $subContentRoot.animate({
-        marginTop: -108,
-        marginBottom: 92,
-        opacity: 0,
-    }, 250, "easeInCubic", function () {
+    const outTo = "margin" + outDirection;
+    const inTo = "margin" + inDirection;
+    let outFrom;
+    let inFrom;
+    const margin = 8;
+    switch (outDirection) {
+        case "Top":
+            outFrom = "marginBottom";
+            break;
+        case "Bottom":
+            outFrom = "marginTop";
+            break;
+        case "Left":
+            outFrom = "marginRight";
+            break;
+        case "Right":
+            outFrom = "marginLeft";
+            break;
+    }
+    switch (inDirection) {
+        case "Top":
+            inFrom = "marginBottom";
+            break;
+        case "Bottom":
+            inFrom = "marginTop";
+            break;
+        case "Left":
+            inFrom = "marginRight";
+            break;
+        case "Right":
+            inFrom = "marginLeft";
+            break;
+    }
+    const outProp = {"opacity": 0};
+    outProp[outTo] = -offset - margin;
+    outProp[outFrom] = offset - margin;
+    $subContentRoot.animate(outProp, 250, "easeInQuart", function () {
         // changePath("Questions/" + pathName);
         if (pathName instanceof String || pathBackFunc instanceof Function) {
             addPath(pathName, pathBackFunc);
             pathLock = false;
         }
+        try {
+            $subContentRoot.children()[0].onclose(undefined)
+        } catch (ignored) {
+        }
         setTimeout(function () {
             $subContentRoot.html(html);
-            $subContentRoot.css("marginTop", 108);
-            $subContentRoot.css("marginBottom", -92);
+            $subContentRoot.css(inFrom, offset + margin);
+            $subContentRoot.css(inTo, -offset + margin);
+            // $subContentRoot.css("margin", 8);
             $subContentRoot.animate({
-                marginTop: 8,
-                marginBottom: 8,
+                margin: margin,
                 opacity: 1
-            }, 200, "easeOutCubic");
+            }, 200, "easeOutQuart");
             setTimeout(function () {
                 try {
                     $subContentRoot.children()[0].onload(undefined)
@@ -778,3 +827,65 @@ function userOffline(userQQ) {
         });
     }
 }
+
+function updateTrafficLog(trafficObj) {
+    let pageIndex = $("#managePage").attr("index");
+    let ip = trafficObj.ip;
+    let qq = trafficObj.qqnumber;
+    let time = trafficObj.localTime;
+    let date = trafficObj.localDate;
+    let id = trafficObj.id;
+    if (pageIndex == 0) {
+        let $todayTrafficsDiv = $("#todayTraffics");
+        let $userTrafficDiv;
+        const userTrafficDivHtml = `
+<div rounded component_type="userTraffic" clickable class="userTraffic${id}" style="overflow: hidden">
+<label>${date} ${time}</label>
+<label>IP：${ip}</label>
+<label>QQ：${qq}</label>
+</div>
+`;
+        counts[counts.length - 1] = ++counts[counts.length - 1];
+        trafficChart.setOption({series: [{data: counts}]});
+        $userTrafficDiv = $(userTrafficDivHtml);
+        $userTrafficDiv.on("click", function () {
+            onClickTraffic(id, date);
+        });
+        $userTrafficDiv.prependTo($todayTrafficsDiv);
+        $userTrafficDiv.slideUp(0);
+        $userTrafficDiv.slideDown(200, "easeOutQuad");
+        let children = $todayTrafficsDiv.children();
+        if (children.length >= 20) {
+            let $lastChildren = children.last();
+            $lastChildren.slideUp(200, "easeOutQuad", function () {
+                $lastChildren.remove();
+            })
+        }
+    } else if (pageIndex == 1) {
+        let $dateTrafficDetail = $(".dateTrafficDetail");
+        if ($dateTrafficDetail.attr("id") === date) {
+            const userTrafficDivHtml = `<div component_type="userTraffic" clickable rounded onclick="selectTrafficDetail(${id})">${time} ${ip} ${qq}</div>`;
+            let $userTrafficDiv = $(userTrafficDivHtml);
+            $userTrafficDiv.prependTo($dateTrafficDetail.children().eq(1));
+            $userTrafficDiv.slideUp(0);
+            $userTrafficDiv.slideDown(200, "easeOutQuad");
+        }
+    }
+}
+
+let onClickTraffic = function (id, date) {
+    $.ajax({
+        url: "./page/trafficDetail",
+        data: {
+            id: id
+        },
+        type: "get",
+        success: function (res) {
+            switchToPageWithAnimate("server", 1, true, function () {
+                $(`#${date}`).trigger("click");
+                transitionPage($("#right"), res);
+            });
+        }
+    })
+};
+

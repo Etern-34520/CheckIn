@@ -17,7 +17,7 @@ public class ChangeUserRoleAction extends UserJsonResultAction{
     
     @Override
     public String requiredPermissionName() {
-        return "change role";
+        return "change role,change role " + roleName;
     }
     
     @Override

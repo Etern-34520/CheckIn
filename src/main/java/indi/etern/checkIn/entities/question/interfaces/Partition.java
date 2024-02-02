@@ -1,5 +1,6 @@
 package indi.etern.checkIn.entities.question.interfaces;
 
+import indi.etern.checkIn.entities.question.Question;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -32,10 +33,14 @@ public class Partition implements Serializable {
     @NotFound(action = NotFoundAction.IGNORE)
     Set<MultiPartitionableQuestion> questions;
     
+    @Transient
+    private Set<MultiPartitionableQuestion> sortedQuestion;
+    
     @Id
 //    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "partitions_SEQ")
 //    @SequenceGenerator(name = "partitions_SEQ", sequenceName = "partitions_SEQ", allocationSize = 1)
     private int id;
+    
     
     protected Partition() {
     }
@@ -103,10 +108,29 @@ public class Partition implements Serializable {
     public String toString() {
         return name;
     }
-    
     //    @Override
+    
     public String getStaticHash() {
         return name;
     }
     
+    public void setSort(Comparator<MultiPartitionableQuestion> sortedSet) {
+        sortedQuestion = new TreeSet<>(sortedSet);
+        sortedQuestion.addAll(questions);
+    }
+    
+    @PostLoad
+    public void initSort() {
+        setSort(Comparator.comparing(Question::getContent));
+    }
+    
+    public Set<MultiPartitionableQuestion> getEnabledQuestions() {
+        Set<MultiPartitionableQuestion> questionSet = new HashSet<>();
+        for (MultiPartitionableQuestion question : questions) {
+            if (question.isEnabled()) {
+                questionSet.add(question);
+            }
+        }
+        return questionSet;
+    }
 }

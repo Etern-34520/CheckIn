@@ -4,25 +4,27 @@ import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestio
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.repositories.PartitionRepository;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class PartitionService {
     public static PartitionService singletonInstance;
-    @Autowired
+    final
     TransactionTemplate transactionTemplate;
     @Resource
     private PartitionRepository partitionRepository;
     
-    protected PartitionService() {
+    protected PartitionService(TransactionTemplate transactionTemplate) {
         singletonInstance = this;
+        this.transactionTemplate = transactionTemplate;
     }
     
     public void save(Partition partition) {
@@ -86,5 +88,67 @@ public class PartitionService {
             partitionRepository.saveAndFlush(partition1);
             return Boolean.TRUE;
         });
+    }
+    
+    public List<MultiPartitionableQuestion> generateExam(List<Integer> partitionIds, Random random) throws BadRequestException {
+        List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
+        int questionCount = Integer.parseInt(SettingService.singletonInstance.get("exam.questionCount"));
+        int partitionCountMin = Integer.parseInt(SettingService.singletonInstance.get("exam.partitionCountMin"));
+        int partitionCountMax = Integer.parseInt(SettingService.singletonInstance.get("exam.partitionCountMax"));
+        if (partitionCountMin > partitionIds.size()) {
+            throw new BadRequestException("partition count cannot smaller than min count(" + partitionCountMin + ")");
+        } else if (partitionIds.size() > partitionCountMax) {
+            throw new BadRequestException("partition count cannot greater than max count(" + partitionCountMax + ")");
+        }
+        /*transactionTemplate.execute((callback) -> {
+            partitionIds.forEach(partitionName -> {
+                final Partition partition = findByName(partitionName);
+                final List<MultiPartitionableQuestion> questions = new ArrayList<>();
+                Random random = new Random();
+                int quantity = Math.min(questionCount+1, partition.getQuestions().size());
+                while (questions.size() < quantity) {
+                    final MultiPartitionableQuestion question = partition.getQuestions().stream().toList().get(random.nextInt(partition.getQuestions().size()));
+                    if (!questions.contains(question)) {
+                        questions.add(question);
+                    }
+                }
+                multiPartitionableQuestions.addAll(questions);
+            });
+            return Boolean.TRUE;
+        });*/
+//        Random random = new Random();
+        AtomicReference<Optional<BadRequestException>> exception = new AtomicReference<>();
+        transactionTemplate.execute((callback) -> {
+            List<Partition> partitions = new ArrayList<>();
+            AtomicInteger questionQuantity = new AtomicInteger();
+            partitionIds.forEach(partitionId -> {
+                final Optional<Partition> partitionOptional = findById(partitionId);
+                if (partitionOptional.isEmpty()) {
+                    exception.set(Optional.of(new BadRequestException("partition with Id " + partitionId + " not found")));
+                    return;
+                }
+                Partition partition = partitionOptional.get();
+                partitions.add(partition);
+                questionQuantity.addAndGet(partition.getEnabledQuestions().size());
+            });
+            while (multiPartitionableQuestions.size() < Math.min(questionCount, questionQuantity.get())) {
+                Partition partition = partitions.get(random.nextInt(partitions.size()));
+                final Set<MultiPartitionableQuestion> enabledQuestions = partition.getEnabledQuestions();
+                final int partitionQuestionCount = enabledQuestions.size();
+                if (partitionQuestionCount == 0) {
+                    continue;
+                }
+                List<MultiPartitionableQuestion> list = enabledQuestions.stream().toList();
+                final MultiPartitionableQuestion question = list.get(random.nextInt(partitionQuestionCount));
+                if (!multiPartitionableQuestions.contains(question)) {
+                    multiPartitionableQuestions.add(question);
+                }
+            }
+            return Boolean.TRUE;
+        });
+        if (exception.get() != null && exception.get().isPresent()) {
+            throw exception.get().get();
+        }
+        return multiPartitionableQuestions;
     }
 }

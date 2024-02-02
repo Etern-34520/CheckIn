@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <jsp:useBean id="roleInfo" type="indi.etern.checkIn.beans.RoleInfo" scope="request"/>
+<jsp:useBean id="permission_change_role" type="java.lang.Boolean" scope="request"/>
 <div id="newUserPage" style="display: flex;flex-direction: column;width: 650px;height: 300px">
     <label text titleLabel>添加用户</label>
     <div class="subContentRoot" style="margin: 12px;display: flex;flex-direction: row">
@@ -18,9 +19,10 @@
                     </div>
                     <div style="display:flex;flex-direction: column;width: 100px">
                         <label for="userRoleSelection">用户组</label>
-                        <select id="userRoleSelection">
+                        <select id="userRoleSelection" ${permission_change_role?"":"disabled"}>
                             <c:forEach var="role" items="${roleInfo.roles}">
-                                <option>${role.type}</option>
+                                <c:set var="permission_change_role_type" value="permission_change_role_${role.type.replace(' ','_')}"/>
+                                <option ${role.type eq "user"?"selected":""} ${requestScope.get(permission_change_role_type) == true?"":"disabled"}>${role.type}</option>
                             </c:forEach>
                         </select>
                     </div>

@@ -1,0 +1,276 @@
+:root {
+    --font-color: white;
+}
+
+body {
+    overflow: hidden;
+    background: #0C0C0C;
+    color: white;
+}
+
+#background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#content {
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    /*height: max-content;*/
+    top: 0;
+    left: 0;
+}
+
+#content > div.page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+}
+
+#background {
+    /*overflow: hidden;*/
+    filter: blur(255px);
+}
+
+#background > div {
+    /*width: 100px;*/
+    /*height: 100px;*/
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transition-timing-function: ease-out;
+    transition: 3s;
+    /*transform: translate(-50%, -50%);*/
+}
+
+#background > div[state="1"] {
+    transform: translate(-50%, 50%) !important;
+}
+
+#background > div[state="2"] {
+    transform: translate(calc(-50% + 300px), 50%) !important;
+}
+
+#background > div[state="3"] {
+    transform: translate(calc(-50% - 300px), 50%) !important;
+}
+
+#background > div[state="4"] {
+    transform: translate(-50%, 10%) !important;
+}
+
+/*
+
+#background > div[state="10"] {
+    transform: translate(50%, calc(-50% - 300px)) !important;
+}
+
+#background > div[state="11"] {
+    transform: translate(50%, calc(-50% - 300px)) !important;
+}
+
+#background > div[state="12"] {
+    transform: translate(50%, calc(-50% + 300px)) !important;
+}
+
+#background > div[state="13"] {
+    transform: translate(50%, calc(-50% + 300px)) !important;
+}
+*/
+
+#content > div.page > * {
+    align-self: center;
+}
+
+#title {
+    opacity: 0
+}
+
+#title > label {
+    font-family: Futura, system-ui;
+    font-size: 100px;
+    color: white;
+}
+
+* {
+    font-family: Futura, system-ui;
+    color: white;
+    font-size: 24px;
+    /*color: white;*/
+}
+
+div.down > div {
+    position: absolute;
+    background: white;
+    width: 10px;
+    height: 2px;
+    border-radius: 1px;
+}
+
+div.down > div:first-child {
+    transform: translate(-2px, -1px) rotate(-45deg);
+}
+
+div.down > div:last-child {
+    transform: translate(-8px, -1px) rotate(45deg);
+}
+
+#selectPartitionTitle {
+    font-size: 36px;
+}
+
+*[rounded] {
+    padding: 12px;
+    backdrop-filter: blur(12px);
+}
+
+div[selected="selected"] {
+    background: var(--input-background-color-hover);
+}
+
+#partitions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+
+    max-width: 90%;
+}
+
+input {
+    text-align: center;
+}
+
+.selector {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    border-radius: 50%;
+    margin: 4px;
+    line-height: 40px;
+    text-align: center;
+    font-size: 16px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    cursor: pointer;
+}
+
+.selector[selected],
+.choice[selected] {
+    background: var(--input-background-color-hover);
+}
+
+#questionDiv {
+    flex: 1;
+    width: 90%;
+    max-height: calc(90% - 100px);
+}
+
+#questionMain {
+    display: flex;
+    @media (max-width: 800px) {
+        flex-direction: column-reverse;
+    }
+    @media (min-width: 800px) {
+        flex-direction: row;
+    }
+    /*margin-top: 2%;*/
+    max-height: 100%
+}
+
+#imagesDiv {
+    @media (max-width: 800px) {
+        flex-direction: row;
+        overflow-y: hidden;
+        overflow-x: auto;
+    };
+    @media (min-width: 800px) {
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+    };
+    display: flex;
+    border-radius: 8px
+}
+
+#imagesDiv > img {
+    @media (max-width: 800px) {
+        height: 400px;
+    };
+    @media (min-width: 800px) {
+        width: 400px;
+    };
+    /*aspect-ratio: 1;*/
+    margin: 4px;
+    border-radius: 16px;
+}
+
+.choice {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+    margin: 1px;
+    width: calc(100% - 32px);
+}
+
+.choice > div:first-of-type {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(146, 206, 255, 0.6);
+    margin-right: 10px
+}
+
+.choice > label {
+    color: #aaaaaa;
+    text-decoration: underline;
+    font-size: 16px;
+    margin: 0 8px;
+    flex: none;
+}
+
+.choice > div:last-of-type {
+    font-size: 20px;
+    flex: 1;
+}
+
+.choices {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
+    width: 100%;
+    margin: 16px;
+}
+
+#selectors {
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+#questionIndexPointers {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

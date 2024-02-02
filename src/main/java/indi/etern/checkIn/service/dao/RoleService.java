@@ -6,7 +6,6 @@ import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.repositories.PermissionGroupRepository;
 import indi.etern.checkIn.repositories.PermissionRepository;
 import indi.etern.checkIn.repositories.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,14 +14,14 @@ import java.util.Optional;
 @Service
 public class RoleService {
     public static RoleService singletonInstance;
-    @Autowired
-    RoleRepository roleRepository;
-    @Autowired
-    PermissionRepository permissionRepository;
-    @Autowired
-    PermissionGroupRepository permissionGroupRepository;
-    public RoleService() {
+    final RoleRepository roleRepository;
+    final PermissionRepository permissionRepository;
+    final PermissionGroupRepository permissionGroupRepository;
+    public RoleService(RoleRepository roleRepository, PermissionRepository permissionRepository, PermissionGroupRepository permissionGroupRepository) {
         singletonInstance = this;
+        this.roleRepository = roleRepository;
+        this.permissionRepository = permissionRepository;
+        this.permissionGroupRepository = permissionGroupRepository;
     }
     public List<Role> findAll() {
         return roleRepository.findAll();
@@ -30,6 +29,14 @@ public class RoleService {
     
     public void save(Role role) {
         roleRepository.save(role);
+        final String name = "change role " + role.getType();
+        if (!permissionRepository.existsByName(name)) {
+            final Permission permission = new Permission(name);
+            permission.setDescription("修改用户所属组组到：" + role.getType());
+            PermissionGroup rolePermissionGroup = permissionGroupRepository.findById("role").orElseThrow();
+            rolePermissionGroup.getPermissions().add(permission);
+            permissionGroupRepository.save(rolePermissionGroup);
+        }
     }
     
     public Optional<Role> findByType(String role) {
@@ -65,6 +72,7 @@ public class RoleService {
     }
     
     public void delete(Role role) {
+        permissionRepository.deleteByName("change role "+role.getType());
         roleRepository.delete(role);
     }
 }

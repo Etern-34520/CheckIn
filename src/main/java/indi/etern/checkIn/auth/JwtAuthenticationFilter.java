@@ -10,7 +10,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.util.StringUtils;
 
@@ -54,7 +53,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                     userDetails.getAuthorities()
             );
             
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            authenticationToken.setDetails(userDetails);
             request.setAttribute("currentUser",userDetails);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }

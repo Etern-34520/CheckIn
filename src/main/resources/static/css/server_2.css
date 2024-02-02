@@ -62,6 +62,7 @@
     margin: 0;
     padding: 0;
     background: rgb(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     color:rgba(200, 200, 200);
 }
@@ -77,6 +78,7 @@ label.fileUpload {
     transition-timing-function: ease-in-out;
     background: rgba(128, 128, 128, 0.1);
     cursor: pointer;
+    -webkit-user-select: none;
     user-select: none;
     display: flex;
     align-items: center;
@@ -94,17 +96,18 @@ input[type="file"] {
     display: none;
 }
 
-#managePage[index="2"][page-type="server"] #partitionSelectionsDiv div {
+.selections div {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
     border: solid 2px rgba(0, 0, 0, 0);
 }
 
-#managePage[index="2"][page-type="server"] #partitionSelectionsDiv div[selected = "selected"] {
+.selections div[selected = "selected"],
+.selections div[selected] {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
     /*border: solid 2px;*/
-    border-color: rgba(0, 0, 0, 0) var(--highlight-color);
+    border-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) var(--highlight-color);
     background: var(--component-background-color-hover);
 }
 

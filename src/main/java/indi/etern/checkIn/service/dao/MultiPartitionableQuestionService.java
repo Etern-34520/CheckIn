@@ -13,7 +13,7 @@ import jakarta.servlet.http.Part;
 import org.apache.commons.io.file.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionCallback;
@@ -24,23 +24,24 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 
 
 @Service
 public class MultiPartitionableQuestionService {
     public static MultiPartitionableQuestionService singletonInstance;
-    @Autowired
-    TransactionTemplate transactionTemplate;
-    @Autowired
-    PartitionService partitionService;
+    final TransactionTemplate transactionTemplate;
+    final PartitionService partitionService;
     final Logger logger = LoggerFactory.getLogger(getClass());
     @Resource
     private MultiplePartitionableQuestionRepository multiplePartitionableQuestionRepository;
     private volatile boolean update = false;
     
-    public MultiPartitionableQuestionService() {
+    protected MultiPartitionableQuestionService(TransactionTemplate transactionTemplate, PartitionService partitionService) {
         singletonInstance = this;
+        this.transactionTemplate = transactionTemplate;
+        this.partitionService = partitionService;
     }
     
     public static MultiPartitionableQuestion buildQuestionFromRequest(HttpServletRequest httpServletRequest, String originalMd5, User author) throws IOException, ServletException {
@@ -247,6 +248,31 @@ public class MultiPartitionableQuestionService {
             update = false;
             return Boolean.FALSE;
         });
+    }
+    
+    public List<MultiPartitionableQuestion> findAllById(List<String> questionIds) {
+        return multiplePartitionableQuestionRepository.findAllById(questionIds);
+    }
+    
+    public long count() {
+        return multiplePartitionableQuestionRepository.count();
+    }
+    
+    public Map<String, MultiPartitionableQuestion> mapAllById(List<String> questionIds) {
+        Map<String, MultiPartitionableQuestion> map = new HashMap<>();
+        List<MultiPartitionableQuestion> questions = findAllById(questionIds);
+        for (MultiPartitionableQuestion question : questions) {
+            map.put(question.getMd5(), question);
+        }
+        return map;
+    }
+
+    public List<MultiPartitionableQuestion> findEditedInLastDays(int dayCount) {
+        return multiplePartitionableQuestionRepository.findAllByLastEditTimeBefore(LocalDateTime.now().minusDays(dayCount), Sort.by(Sort.Direction.DESC,"lastEditTime"));
+    }
+
+    public boolean existsById(String questionId) {
+        return multiplePartitionableQuestionRepository.existsById(questionId);
     }
 }
 

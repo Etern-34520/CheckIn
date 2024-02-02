@@ -21,26 +21,29 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-//@EnableGlobalMethodSecurity()
+//@EnableMethodSecurity
 public class SecurityConfig {
     public static final PasswordEncoder ENCODER = new BCryptPasswordEncoder();
-    @Autowired
-    UserService userService;
-    @Autowired
-    LogoutHandler logoutHandler;
+    final UserService userService;
+    final LogoutHandler logoutHandler;
     AuthenticationManager authenticationManager;
+    
+    public SecurityConfig(UserService userService, LogoutHandler logoutHandler) {
+        this.userService = userService;
+        this.logoutHandler = logoutHandler;
+    }
     
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeHttpRequests ->
-                                authorizeHttpRequests
-                                        .requestMatchers("/manage/**").authenticated()
+                        authorizeHttpRequests
+                                .requestMatchers("/manage/**").authenticated()
 //                                        .requestMatchers("/manage/page/").hasAnyAuthority("editing others question")
 //                                        .requestMatchers("/manage/css/**").authenticated()
 //                                        .requestMatchers("/manage/js/**").authenticated()
 //                                        .requestMatchers("/api/websocket/**").authenticated()
-                                        .anyRequest().permitAll())
+                                .anyRequest().permitAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -56,7 +59,7 @@ public class SecurityConfig {
         return http.build();
     }
     
-//    @Bean
+    //    @Bean
     public AuthenticationManager authenticationManager(
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
@@ -91,18 +94,5 @@ public class SecurityConfig {
             authenticationManager = authenticationManager(userDetailsService(), passwordEncoder());
         }
         return new JwtAuthenticationFilter(authenticationManager);
-    }
-    
-    public static class MPasswordEncoder implements PasswordEncoder {
-        @Override
-        public String encode(CharSequence charSequence) {
-            return ENCODER.encode(charSequence);
-        }
-        
-        //密码匹配，看输入的密码经过加密与数据库中存放的是否一样
-        @Override
-        public boolean matches(CharSequence charSequence, String s) {
-            return ENCODER.matches(charSequence, s);
-        }
     }
 }

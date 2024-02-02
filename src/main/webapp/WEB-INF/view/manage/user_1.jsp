@@ -14,7 +14,7 @@
 <jsp:useBean id="permission_delete_role" type="java.lang.Boolean" scope="request"/>
 <jsp:useBean id="permission_edit_permission" type="java.lang.Boolean" scope="request"/>
 <jsp:useBean id="permission_create_role" type="java.lang.Boolean" scope="request"/>
-<div id="managePage" index="0" page-type="user">
+<div id="managePage" index="0" page-type="user" onload="initWaterfall()" onclose="destroyWaterfall()">
     <div class="forScroll" rounded style="display: flex;flex: 1;flex-direction: column" border>
         <div id="roles">
             <c:forEach var="role" items="${roleInfo.roles}">
@@ -30,13 +30,12 @@
                         </c:if>
                     </jsp:attribute>
                     <jsp:attribute name="content">
-                        <div style="display: flex;flex-direction: row">
-                            <div style="display: flex;flex-direction: row;overflow: auto;flex-wrap: wrap">
-                                <c:forEach var="user" items="${role.users}">
-                                    <%@ include file="pages/userPane.jsp" %>
-                                </c:forEach>
-                            </div>
+                        <div class="waterfallInfo" id="userInfo_${role.type}" style="display: none">
+                            <c:forEach var="user" items="${role.users}">
+                                <%@ include file="pages/userPane.jsp" %>
+                            </c:forEach>
                         </div>
+                        <div class="waterfallBasic" id="userDivBasic_${role.type}" style="display: flex;flex-direction: row"></div>
                     </jsp:attribute>
                 </components:shrinkPane>
             </c:forEach>
