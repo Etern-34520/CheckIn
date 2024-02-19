@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="https://www.thymeleaf.org">
+<!--/*@thymesVar id="currentUser" type="indi.etern.checkIn.entities.user.User"*/-->
+<div id="managePage" index="2" page-type="user" onload="initUserDetailPage()">
+    <div rounded style="display: flex;flex: 1;flex-direction: column;padding: 16px;overflow: auto;" border>
+        <div style="flex: 1;padding: 16px">
+            <label titleLabel text>账户设置</label>
+            <div style="display: flex;flex-direction: row;padding: 16px;background: var(--shrinkPane-background-color);box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.2);"
+                 rounded>
+                <div class="userAvatar"
+                     th:style="'background-image: url(&quot;https://q1.qlogo.cn/g?b=qq&nk='+${currentUser.getQQNumber()}+'&s=640&quot;)'"></div>
+                <div style="display: flex;flex-direction: column">
+                    <label class="currentUserName" style="margin-left: 16px;font-size: 28px"
+                           th:text="${currentUser.getName()}"></label>
+                    <label class="currentUserQQ" style="margin-left: 16px;font-size: 20px"
+                           th:text="${currentUser.getQQNumber()}"></label>
+                    <label class="currentUserRole"
+                           style="margin-left: 16px;font-size: 20px;color: var(--highlight-component-background-color-hover)"
+                           th:text="${currentUser.getRole().getType()}"></label>
+                </div>
+            </div>
+            <div class="shrinkPane" title="我的题目" rounded>
+                <div content>
+                    <div class="questions">
+                        <th:block th:each="question:${currentUser.getMultiPartitionableQuestions()}">
+                            <div th:replace="manage/pages/questionOverview::questionOverview(${question},${true})"></div>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <label titleLabel text>操作</label>
+            <div class="shrinkPane" title="用户名" rounded>
+                <div content>
+                    <div style="display: flex;flex-direction: row;overflow: hidden">
+                        <label for="newUserNameInput" style="margin-left: 8px;line-height: 48px">新用户名</label>
+                        <input style="flex:1" id="newUserNameInput" type="text"
+                               th:value="${currentUser.getName()}">
+                        <button id="changeUserNameButton" highlight rounded style="margin: 4px;padding: 8px">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="shrinkPane" title="密码" rounded>
+                <div content>
+                    <div style="display: flex;flex-direction: row">
+                        <label for="currentPassword" style="line-height: 48px">当前密码</label>
+                        <input id="currentPassword" style="flex:1" name="currentPassword" type="password"
+                               preText="当前密码"/>
+                        <label for="newPassword" style="line-height: 48px">新密码</label>
+                        <input id="newPassword" style="flex:1" name="newPassword" type="password" preText="新密码"/>
+                        <label for="repeat" style="line-height: 48px">重复新密码</label>
+                        <input id="repeat" style="flex:1" name="repeat" type="password" preText="重复新密码"/>
+                        <button id="changePasswordButton" rounded highlight
+                                style="margin: 4px;padding: 8px">确定
+                        </button>
+                        <label id="tip"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="shrinkPane" title="其他操作" rounded>
+                <div content>
+                    <div style="display: flex;flex-direction: row;overflow: hidden">
+                        <button rounded highlight style="margin: 4px;padding: 8px" onclick="logout()">退出登录</button>
+                        <button rounded highlight style="margin: 4px;padding: 8px"
+                                th:onclick="deleteUser([[${currentUser.QQNumber}]]);logout()">删除账户
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>initShrinkPane($(".shrinkPane"))</script>
+    </div>
+</div>
+</html>

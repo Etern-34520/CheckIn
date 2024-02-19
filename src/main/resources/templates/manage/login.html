@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="cn" style="width: 100%;height: 100%">
+<head>
+    <title>login</title>
+    <link rel="stylesheet" href="./../css/login.css">
+    <link rel="stylesheet" href="./../css/global.css">
+    <meta charset="UTF-8">
+    <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <!--    <%&#45;&#45;        <script src="./../lib/http_cdn.staticfile.org_jquery_3.7.1_jquery.js"></script>&#45;&#45;%>-->
+    <!--    <%&#45;&#45;        <script src="./../lib/http_cdn.staticfile.org_jquery-cookie_1.4.1_jquery.cookie.js"></script>&#45;&#45;%>-->
+    <!--    <%&#45;&#45;        <script src="./../lib/http_cdn.staticfile.org_jquery-easing_1.4.1_jquery.easing.js"></script>&#45;&#45;%>-->
+    <!--    <%&#45;&#45;    <script src="./../lib/http_connect.qq.com_qc_jssdk.js"></script>&#45;&#45;%>-->
+    <!--    <%&#45;&#45;    <script src="./../lib/http_js.hcaptcha.com_1_api.js"></script>&#45;&#45;%>-->
+    <!--    <%&#45;&#45;    <script src="./../lib/http_cdn.staticfile.org_jquery-color_2.1.2_jquery.color.js"></script>&#45;&#45;%>-->
+    <script src="./../js/login.js"></script>
+</head>
+<body style="width: 100%;height: 100%">
+<div id="root">
+    <div class="blank">
+    </div>
+    <div id="main" rounded>
+        <div class="title">
+            <label text style="font-size: 20px">
+                CheckIn管理页
+            </label>
+        </div>
+        <div id="loginFormDiv">
+            <form id="loginForm" method="post">
+                <div class="input">
+                    <label for="usernameOrQQ"></label>
+                    <input type="text" id="usernameOrQQ" name="usernameOrQQ" placeholder="用户名/QQ" required>
+                </div>
+                <div class="input">
+                    <label for="password"></label>
+                    <input type="password" id="password" name="password" placeholder="密码"
+                           autocomplete="current_password" required>
+                </div>
+                <input class="input" id="loginButton" type="button" onclick="login()" value="登录">
+                <div id="tip" text></div>
+            </form>
+        </div>
+    </div>
+    <div class="blank">
+    </div>
+</div>
+</body>
+
+</html>

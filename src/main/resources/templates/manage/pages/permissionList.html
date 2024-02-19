@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="https://www.thymeleaf.org">
+<div rounded id="permissions" th:fragment="permissionList(role)">
+    <th:block th:each="permissionGroup:${@permissionInfo.getPermissionGroups()}">
+        <div class="shrinkPane" rounded>
+            <div title style="display: flex;flex-direction: row;flex: 1;align-items: center;margin-left: 8px">
+                <label th:for="'permission'+${permissionGroup.getName()}" th:inline="text">[[${permissionGroup.getName()}]]
+                    —— [[${permissionGroup.getDescription()}]]</label>
+                <div class="blank"></div>
+            </div>
+            <div content style="display:flex;flex-direction: column">
+                <th:block th:each="permission:${permissionGroup.getPermissions()}">
+                    <div style="display: flex;flex-direction: row;align-items: center;background: var(--input-background-color);margin-bottom: 0"
+                         rounded>
+                        <label th:for="'permission'+${permission.id}" th:inline="text">[[${permission.getName()}]] ——
+                            [[${permission.getDescription()}]]</label>
+                        <div class="blank"></div>
+                        <span class="toggleSwitch" th:id="'permission'+${permission.getId()}"
+                              th:state="${role!=null&&role.getPermissions().contains(permission)}"></span>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+    </th:block>
+    <script>initShrinkPane($(".shrinkPane"));
+    initSwitch($(".toggleSwitch"))</script>
+</div>
+</html>

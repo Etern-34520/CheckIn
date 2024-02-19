@@ -16,7 +16,7 @@ public class PermissionGroup {
     @Setter
     public String description;
     
-    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH})
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE})
     @JoinColumn(name = "group_name", referencedColumnName = "name")
     private List<Permission> permissions;
     

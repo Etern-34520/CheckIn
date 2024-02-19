@@ -30,7 +30,7 @@ public class PartitionInfo {
         return partitions;
     }
     
-    public List<Partition> getPartitionNotEmpty() {
+    public List<Partition> getPartitionsNotEmpty() {
         getPartitions();
         partitionNotEmpty = new ArrayList<>();
         for (Partition partition : partitions) {

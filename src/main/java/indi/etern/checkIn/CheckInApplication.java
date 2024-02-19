@@ -12,5 +12,4 @@ public class CheckInApplication {
 	public static void main(String[] args) {
         CheckInApplication.applicationContext = SpringApplication.run(CheckInApplication.class, args);
 	}
-
 }

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="http://www.thymeleaf.org">
+<!--/*@thymesVar id="userTraffic" type="indi.etern.checkIn.entities.traffic.UserTraffic"*/-->
+<div style="display: flex;flex-direction: column">
+    <div style="display: flex;flex-direction: row" th:with="passed=${userTraffic.getAttributesMap().get('passed')}">
+        <div th:if="${userTraffic.getQQNumber() >= 10000}" style="
+                    width: 100px;
+                    aspect-ratio: 1;
+                    max-width: 90%;
+                    border-radius: 50%;
+                    background-size: 100% 100%;
+                    background-image: url('https://q1.qlogo.cn/g?b=qq&nk=${userTraffic.QQNumber}&s=640');"></div>
+        <div style="display: flex;flex-direction: column">
+            <label titleLabel th:text="${userTraffic.getQQNumber()}"></label>
+            <label titleLabel th:text="${userTraffic.IP}"></label>
+            <label th:text="${userTraffic.localDateTime}"></label>
+        </div>
+        <label th:if="${passed!=null&&passed.equals('true')}"
+               titleLabel style="color: var(--correct-choice-font-color)">已通过</label>
+        <label th:if="${passed!=null&&passed.equals('false')}"
+               titleLabel style="color: var(--incorrect-choice-font-color)">未通过</label>
+    </div>
+    <div rounded title="Attributes" class="attributes">
+        <div>
+            <div th:each="entry:${userTraffic.getAttributesMap().entrySet()}" class="KeyValueItem"
+                 style="display: flex;flex-direction: row">
+                <div style="margin-right: 4px;" rounded th:text="${entry.getKey()}"></div>
+                <div rounded th:text="${entry.getValue()}"></div>
+            </div>
+        </div>
+    </div>
+    <script>initShrinkPane($(".attributes"))</script>
+
+    <div rounded title="Headers" class="headers">
+        <div>
+            <div th:each="entry:${userTraffic.getHeaderMap().entrySet()}" class="keyValueItem"
+                 style="display: flex;flex-direction: row">
+                <div style="margin-right: 4px;" rounded th:text="${entry.getKey()}"></div>
+                <div rounded th:text="${entry.getValue()}"></div>
+            </div>
+        </div>
+    </div>
+    <script>initShrinkPane($(".headers"))</script>
+    <th:block
+            th:if="${userTraffic.getAttributesMap().get('action')!=null&&(userTraffic.getAttributesMap().get('action').equals('submitExam')||userTraffic.getAttributesMap().get('action').equals('generateExam'))}">
+        <div rounded title="试题" class="examQuestions">
+            <div>
+                <th:block
+                        th:with="questionIdsString=${@objectMapper.readTree(userTraffic.getAttributesMap().get('examQuestionIds'))}">
+                    <th:block th:each="examQuestionId:${questionIdsString}">
+                        <th:block
+                                th:with="optionalQuestion=${@multiPartitionableQuestionService.findById(examQuestionId)}">
+                            <th:block th:if="${optionalQuestion.isPresent()}">
+                                <div th:replace="pages/questionOverview::questionOverview(${optionalQuestion.get()},${true})"></div>
+                            </th:block>
+                        </th:block>
+                    </th:block>
+                </th:block>
+            </div>
+        </div>
+
+        <script>initShrinkPane($(".examQuestions"))</script>
+    </th:block>
+    <div></div>
+</div>
+</html>

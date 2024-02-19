@@ -1,6 +1,6 @@
 function editingPermissionOf(roleType) {
     $.ajax({
-        url: "./page/editingPermission",
+        url: "./page/editPermission",
         type: "get",
         data: {
             roleType: roleType

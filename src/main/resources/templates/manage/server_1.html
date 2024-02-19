@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="https://www.thymeleaf.org">
+<div id="managePage" index="1" page-type="server" onload="initTraffic()">
+    <div id="left" rounded border style="overflow-x: hidden">
+        <div style="display: flex;flex-direction: row;max-height: 100%">
+            <div class="noScrollBar" id="dateSelections" component_type="dateSelector"
+                 style="overflow: auto;flex: none">
+<!--                <c:forEach items="${trafficInfo.dateTraffics}" var="dateTraffic">-->
+                    <div th:each="dateTraffic:${@trafficInfo.getDateTraffics()}" style="width: 20px;writing-mode: vertical-rl;transform: rotate(180deg);display: flex;flex-direction: row-reverse"
+                         rounded clickable border id="${dateTraffic.localDate}">
+                        <div component_type="selectPointer"></div>
+                        <label th:text="${dateTraffic.getLocalDate()}"></label>
+                    </div>
+<!--                </c:forEach>-->
+            </div>
+            <div id="userTraffics" style="flex: 1">
+                <div class="subContentRoot" style="max-height: calc(100% - 16px);"></div>
+            </div>
+        </div>
+    </div>
+    <div id="right" rounded border>
+        <div class="subContentRoot"></div>
+    </div>
+</div>
+</html>

@@ -24,10 +24,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 public class Manage {
@@ -150,7 +147,7 @@ public class Manage {
                     modelAndView.addObject("user", userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
             case "questionOverview" ->
                     modelAndView.addObject("question", multiPartitionableQuestionService.getByMD5(request.getParameter("md5")));
-            case "editingPermission" ->
+            case "editPermission" ->
                     modelAndView.addObject("role", roleService.findByType(request.getParameter("roleType")).orElseThrow());
             case "shrinkPane" -> {
                 modelAndView.addObject("title", request.getParameter("title"));
@@ -246,9 +243,12 @@ public class Manage {
     }
     
     private void addPermissionsBoolean(ModelAndView modelAndView) {
+        Map<String,Boolean> permissionMap = new HashMap<>();
         for (Permission permission : roleService.findAllPermission()) {
-            modelAndView.addObject("permission_" + permission.getName().replace(' ', '_'), JwtTokenProvider.currentUserHasPermission(permission.getName()));
+            permissionMap.put("permission_" + permission.getName().replace(' ', '_'),JwtTokenProvider.currentUserHasPermission(permission.getName()));
+//            modelAndView.addObject("permission_" + permission.getName().replace(' ', '_'), JwtTokenProvider.currentUserHasPermission(permission.getName()));
         }
+        modelAndView.addObject("permissionMap",permissionMap);
     }
     
     private void userInfo(HttpServletRequest request, ModelAndView modelAndView) {

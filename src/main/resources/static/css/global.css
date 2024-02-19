@@ -299,10 +299,12 @@ input[type="checkbox"] {
 }
 
 .toggleSwitchBasic {
+    align-self: center;
     cursor: pointer;
     border-radius: 15px;
     background: var(--context-menu-background-color);
     display: flex;
+    flex: none!important;
     transition: 0.2s;
     transition-timing-function: ease-in-out;
 }
@@ -337,7 +339,7 @@ div[component_type="shrinkButtonPointer"] > div:first-child {
     width: 10px;
     height: 2px;
     border-radius: 1px;
-    transform: translate(-2px, -1px) rotate(-45deg)
+    transform: translate(-3px, -1px) rotate(-45deg)
 }
 
 div[component_type="shrinkButtonPointer"] > div:last-child {
@@ -346,7 +348,7 @@ div[component_type="shrinkButtonPointer"] > div:last-child {
     width: 10px;
     height: 2px;
     border-radius: 1px;
-    transform: translate(-8px, -1px) rotate(45deg)
+    transform: translate(-9px, -1px) rotate(45deg)
 }
 
 div[component_type="shrinkPane"] {

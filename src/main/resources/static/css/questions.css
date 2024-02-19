@@ -76,6 +76,6 @@
     color: var(--incorrect-choice-font-color);
 }
 
-.questionChoice[correct] {
+.questionChoice[correct="true"] {
     color: var(--correct-choice-font-color);
 }

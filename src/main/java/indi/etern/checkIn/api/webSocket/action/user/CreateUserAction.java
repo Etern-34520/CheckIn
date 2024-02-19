@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.web.WebSocketService;
 
@@ -38,7 +39,7 @@ public class CreateUserAction extends TransactionalAction {
             UserService.singletonInstance.unbindAndDeleteById(qqNumber);
             final String initPassword = UUID.randomUUID().toString();
             User newUser = new User(name, qqNumber, initPassword);
-            newUser.setRole(Role.getInstance(roleName));
+            newUser.setRole(RoleService.singletonInstance.findById(roleName).orElse(Role.getInstance(roleName)));
             UserService.singletonInstance.save(newUser);
             this.newUser = newUser;
             {

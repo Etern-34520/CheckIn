@@ -28,7 +28,6 @@
 }
 
 #loginFormDiv > form > div > input {
-    width: 100%;
     margin: 0;
 }
 
@@ -78,4 +77,9 @@ div.title > label {
     top: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
+}
+
+div.input {
+    display: flex;
+    flex-direction: column;
 }

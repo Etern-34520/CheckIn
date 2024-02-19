@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="https://www.thymeleaf.org">
+<!--TODO-->
+<div id="managePage" index="3" page-type="server" style="display: flex;flex-direction: column">
+    <div id="settingRoot" class="forScroll" rounded style="display: flex;flex: 1;flex-direction: column" border>
+        <!--        <components:shrinkPane title="抽题设置" useLabelTitle="true">-->
+        <!--            <jsp:attribute name="content">-->
+        <div class="shrinkPane" rounded title="抽题设置">
+            <div id="examSettingBase" class="settingBase">
+                <form name="examSetting">
+                    <div id="examSetting" class="settingDiv">
+                        <div><label for="examTitle">测试标题</label><input id="examTitle" name="exam.title"
+                                                                           type="text"
+                                                                           th:value="${@settingInfo.getTitle()}"></div>
+                        <div textareaInput><label for="examDescription">测试描述</label><textarea
+                                id="examDescription"
+                                name="exam.description" th:text="${@settingInfo.getDescription()}"></textarea>
+                        </div>
+                        <div><label>测试题量</label>
+                            <div class="slider"
+                                 min-value="0"
+                                 th:max-value="${@partitionInfo.getQuestionCount()}"
+                                 name="exam.questionCount"
+                                 th:value="${@settingInfo.getQuestionCount}"></div>
+                        </div>
+                        <div><label>选择分区数</label>
+                            <div class="slider" useDoubleSlider="true"
+                                 min-value="1"
+                                 th:max-value="${@partitionInfo.getPartitionsNotEmpty().size()}"
+                                 th:value="${@settingInfo.getPartitionCountMin()}"
+                                 th:value1="${@settingInfo.getPartitionCountMax}"
+                                 name="exam.partitionCountMin"
+                                 name1="exam.partitionCountMax"></div>
+                        </div>
+                    </div>
+                </form>
+                <button highlight rounded onclick="saveSetting(this)">保存</button>
+            </div>
+        </div>
+        <!--            </jsp:attribute>-->
+        <!--        </components:shrinkPane>-->
+        <div class="shrinkPane" title="校对设置">
+            <!--            <jsp:attribute name="content">-->
+            <div id="checkSettingBase" class="settingBase">
+                <form name="checkingSetting">
+                    <div id="checkSetting" class="settingDiv">
+                        <div><label>及格线</label>
+                            <div class="slider"
+                                 min-value="0"
+                                 max-value="100"
+                                 th:value="${@settingInfo.getPassScore()}"
+                                 name="checking.passScore">
+                            </div>
+                        </div>
+                        <div textareaInput>
+                            <label for="passMessage">通过消息</label>
+                            <textarea id="passMessage"
+                                      name="checking.passMessage"
+                                      th:text="${@settingInfo.getPassMessage()}"></textarea>
+                        </div>
+                        <div textareaInput>
+                            <label for="notPassMessage">未通过消息</label>
+                            <textarea id="notPassMessage"
+                                      name="checking.notPassMessage" th:text="${@settingInfo.getNotPassMessage()}"></textarea>
+                        </div>
+                        <div>
+                            <label>启用入群申请后自动添加用户</label>
+                            <span class="switch" id="checking.enableAutoCreateUser"
+                                  th:state="${@settingInfo.getEnableAutoCreateUser()}"></span>
+                            <div class="blank"></div>
+                        </div>
+                    </div>
+                </form>
+                <button highlight rounded onclick="saveSetting(this)">保存</button>
+            </div>
+            <!--            </jsp:attribute>-->
+        </div>
+    </div>
+</div>
+<script>
+    initShrinkPane($(".shrinkPane"));
+    initSlider($("div[class='slider']"));
+    initSwitch($(".switch"))
+</script>
+</html>

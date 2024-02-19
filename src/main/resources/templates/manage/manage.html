@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="http://www.thymeleaf.org" style="width: 100%;height: 100%;">
+<head>
+    <title>CheckIn</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css">
+    <link rel="stylesheet" href="./../css/global.css">
+    <link rel="stylesheet" href="./../css/manage.css">
+    <link rel="stylesheet" href="./../css/server_0.css">
+    <link rel="stylesheet" href="./../css/server_1.css">
+    <link rel="stylesheet" href="./../css/server_2.css">
+    <link rel="stylesheet" href="./../css/server_3.css">
+    <link rel="stylesheet" href="./../css/server_4.css">
+    <link rel="stylesheet" href="./../css/user_0.css">
+    <link rel="stylesheet" href="./../css/user_2.css">
+    <link rel="stylesheet" href="./../css/questions.css">
+    <link rel="stylesheet" href="./../css/components.css">
+
+        <script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-color/2.1.2/jquery.color.min.js"></script>
+
+<!--    <script src="./../lib/http_cdn.staticfile.org_echarts_4.3.0_echarts.js"></script>-->
+<!--    <script src="./../lib/http_cdn.staticfile.org_jquery_3.7.1_jquery.js"></script>-->
+<!--    <script src="./../lib/http_cdn.staticfile.org_jquery-color_2.1.2_jquery.color.js"></script>-->
+<!--    <script src="./../lib/http_cdn.staticfile.org_jquery-cookie_1.4.1_jquery.cookie.js"></script>-->
+<!--    <script src="./../lib/http_cdn.staticfile.org_jquery-easing_1.4.1_jquery.easing.js"></script>-->
+
+<!--        <%&#45;&#45;    https://cdn.staticfile.org/jquery-contextmenu/2.9.2/font/context-menu-icons.ttf&#45;&#45;%>-->
+        <script src="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.contextMenu.min.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-contextmenu/2.9.2/jquery.ui.position.min.js"></script>
+
+    <!--    <%&#45;&#45;    <script src="./../lib/http_connect.qq.com_qc_jssdk.js"></script>&#45;&#45;%>-->
+    <!--    <%&#45;&#45;    <script src="./../lib/http_js.hcaptcha.com_1_api.js"></script>&#45;&#45;%>-->
+    <script src="./../lib/md5.min.js"></script>
+
+    <script src="./../js/webSocket.js"></script>
+    <script src="./../js/manage.js"></script>
+    <script src="./../js/echart.js"></script>
+    <script src="./../js/server_1.js"></script>
+    <script src="./../js/server_2.js"></script>
+    <script src="./../js/server_3.js"></script>
+    <script src="./../js/user_0.js"></script>
+    <script src="./../js/user_1.js"></script>
+    <script src="./../js/user_2.js"></script>
+    <script src="./../js/components.js"></script>
+    <script src="./../js/question_form_data.js"></script>
+</head>
+<script>
+    const Permission = {};
+</script>
+<script th:inline="javascript" th:each="entry:${permissionMap.entrySet()}">
+    Permission[ [[${entry.getKey()}]] ] = [[${entry.getValue()}]]
+</script>
+<body>
+<div id="tipsMask">
+</div>
+<div id="contentRoot">
+    <div id="top" rounded border style="margin-top: -50px">
+        <button type="button" id="menuButton" class="button" style="font-size: 20px" onclick="showMenu()">=</button>
+        <div id="pagePath">
+            <div class="path" undeleted>
+                CheckIn
+            </div>
+        </div>
+        <div clickable rounded style="display:flex;margin: 0;padding-top: 6px"
+             onclick="switchToPageWithAnimate('user',2)">
+            <!--/*@thymesVar id="currentUser" type="indi.etern.checkIn.entities.user.User"*/-->
+            <div class="userAvatar"
+                 th:style="'background-image: url(\'https://q1.qlogo.cn/g?b=qq&nk='+${currentUser.getQQNumber()}+'&s=640\');'+
+                         'background-size: 100% 100%;border-radius: 50%;'+
+                         'margin-top: -4px;margin-left: -2px;width: 31px;height: 31px;'"></div>
+            <div class="currentUserName" style="margin-left: 4px;" th:text="${currentUser.getName()}"></div>
+            <div class="currentUserQQ" style="margin-left: 4px;" th:text="${currentUser.getQQNumber()}"></div>
+        </div>
+    </div>
+    <div id="content"></div>
+</div>
+<div id="topMask" onclick="closeMenu()">
+    <div id="menu" rounded>
+        <div id="menuTop">
+            <button type="button" id="menuInsideButton" class="button" style="font-size: 20px" onclick="closeMenu()"><
+            </button>
+        </div>
+        <div class="forScroll" style="flex: auto">
+            <div id="menuButtons">
+                <div id="serverMenu" class="menuButtons">
+                    <div style="display:flex;flex-direction: column">
+                        <label style="margin: 4px">服务器</label>
+                        <div style="min-height:2px;height: 2px;flex:1;background: rgba(128,128,128,0.7);margin: 0 4px 0 4px"></div>
+                    </div>
+                    <button type="button" class="button"
+                            th:each="menuString,stat:${@manageMenuItemInfo.getMenuItemServerStrings()}"
+                            th:blockString="${menuString}"
+                            th:onclick="'switchToPage(\'server\','+${stat.index}+')'">
+                        <span th:text="${menuString}"></span>
+                        <span style="color: rgb(127,127,127);margin-left: 8px;font-size: 10px"
+                              th:text="'(Ctrl+Alt+'+${stat.index+1}+')'"></span>
+                    </button>
+                </div>
+                <div id="userMenu" class="menuButtons">
+                    <div style="display:flex;flex-direction: column">
+                        <label style="margin: 4px">用户</label>
+                        <div style="min-height:2px;height: 2px;flex:1;background: rgba(128,128,128,0.7);margin: 0 4px 0 4px;"></div>
+                    </div>
+                    <button type="button" class="button" th:blockString="${menuString}"
+                            th:each="menuString,stat:${@manageMenuItemInfo.getMenuItemUserStrings()}"
+                            th:onclick="'switchToPage(\'user\','+${stat.index}+')'">
+                        <span th:text="${menuString}"></span>
+                        <span style="color: rgb(127,127,127);margin-left: 8px;font-size: 12px"
+                              th:text="'(Ctrl+Alt+'+${stat.index+1+@manageMenuItemInfo.getMenuItemServerStrings().size()}+')'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="blank"></div>
+        <div id="menuBottom">
+            <div id="userPanel" rounded clickable onclick="switchToPage('user',2)">
+                <!--/*@thymesVar id="currentUser" type="indi.etern.checkIn.entities.user.User"*/-->
+                <div class="userAvatar"
+                     th:style="'background-image: url(\'https://q1.qlogo.cn/g?b=qq&nk='+${currentUser.getQQNumber()}+'&s=640\');border-radius: 50%;width: 52px;height: 52px;background-size: 100% 100%;'"></div>
+                <div style="margin-left: 10px;display: flex;flex-direction: column;">
+                    <div class="currentUserName" th:text="${currentUser.name}"></div>
+                    <div class="currentUserQQ" th:text="${currentUser.getQQNumber()}"></div>
+                </div>
+            </div>
+            <button type="button" id="logoutButton" class="button" onclick="logout()">退出</button>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>

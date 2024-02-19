@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="https://www.thymeleaf.org">
+<!--TODO-->
+<!--/*@thymesVar id="currentUser" type="indi.etern.checkIn.entities.user.User"*/-->
+<!--/*@thymesVar id="question" type="indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion"*/-->
+<form id="questionEditForm" onload="initQuestionForm()"
+      th:with="canEditQuestion=${permissionMap.get('permission_edit_others_question') || question.getAuthor().equals(currentUser)&&permissionMap.get('permission_create_and_edit_owns_question')}">
+    <div id="formBox">
+        <div id="formDiv" style="display: flex;flex-direction: row">
+            <input type="hidden" id="questionEdit" name="questionEdit" value="true">
+            <input type="hidden" id="md5" name="md5" th:value="${question.getMd5()}">
+            <div style="display: flex;flex-direction: column;resize: vertical;flex: 1">
+                <label for="questionContent" text>内容</label>
+                <textarea id="questionContent" name="questionContent" th:disabled="${!canEditQuestion}"
+                          style="height: 300px;resize: none" text th:text="${question.getContent()}"></textarea>
+                <label text>图片</label>
+                <div rounded style="display: flex;flex-direction: row;background: var(--input-background-color)">
+                    <th:block th:if="${canEditQuestion}">
+                        <label class="fileUpload" for="imageInput" style="font-size: 24px" text>+</label>
+                        <input id="imageInput" type="file" onchange="addImages(this)" multiple
+                               accept="image/jpeg,image/png,image/gif">
+                    </th:block>
+                    <div id="imagesDiv">
+                    </div>
+                </div>
+                <label text>选项</label>
+                <div style="display: flex;flex-direction: column;flex: 1">
+                    <div id="optionsDiv">
+                        <div th:each="choice,stat:${question.getChoices()}" class="optionDiv">
+                            <label th:for="'correct'+${stat.index+1}" style="display:none;"></label>
+                            <input type="checkbox" th:name="'correct'+${stat.index+1}" th:id="'correct'+${stat.index+1}"
+                                   value="true" th:checked="${choice.getIsCorrect()}" th:disabled="${!canEditQuestion}">
+                            <label th:for="'choice'+${stat.index+1}" style="display:none;"></label>
+                            <input type="text" style="margin-left: 8px" th:name="${stat.index+1}"
+                                   th:id="'choice'+${stat.index+1}"
+                                   th:value="${choice.getContent()}" th:disabled="${!canEditQuestion}">
+                            <button th:if="${canEditQuestion}" th:id="'delete'+${stat.index+1}"
+                                    class="deleteOptionButton" type="button"
+                                    style="height: 32px;width: 32px;margin: 4px;font-size: 24px"
+                                    onclick="deleteChoice(this)">-
+                            </button>
+                        </div>
+                    </div>
+                    <button th:if="${canEditQuestion}" type="button"
+                            style="height:40px;margin-top: 8px;margin-left: 36px;font-size: 24px"
+                            onclick="addNewChoice()">+
+                    </button>
+                </div>
+            </div>
+            <div style="display: flex;flex-direction: column;width: 200px;padding-right: 4px">
+                <div style="display: flex;flex-direction: column;width: 100%;flex: 0">
+                    <label for="author" text>作者</label>
+                    <select id="author" name="author"
+                            th:disabled="${!(canEditQuestion && permissionMap.get('permission_change_author'))}">
+                        <th:block th:each="user:${@userInfo.getUsers()}">
+                            <option th:id="'userSelect'+${user.QQNumber}"
+                                    th:value="${user.getQQNumber()}"
+                                    th:selected="${question.author.equals(user)||(question.author==null&&user.equals(currentUser))}"
+                                    th:text="${user.name}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <div style="display: flex;align-items: center;margin-bottom: 8px">
+                    <label style="margin-right: 4px;">启用</label>
+                    <span id="enabled"
+                          th:state="${question.isEnabled()==null?false:question.isEnabled()}"
+                          th:disabled="${!(canEditQuestion && permissionMap.get('permission_enable_and_disable_question'))}"></span>
+                    <script>initSwitch($("#enabled"))</script>
+                </div>
+                <label text>分区</label>
+                <div rounded style="background: var(--input-background-color);flex: 1;overflow: auto;margin-bottom: 0;"
+                     id="partitionSelectionsDiv" class="selections">
+<!--                    <c:forEach var="partition" items="${partitionInfo.partitions}">-->
+<!--                        <c:set var="partitionInclude" value="${question.partitions.contains(partition)}"/>-->
+                    <th:block th:each="partition:${@partitionInfo.getPartitions()}">
+
+                        <div rounded clickable
+                            th:disabled = "${!canEditQuestion}"
+                        onclick="selectQuestionPartition(this)"
+                             th:selected="${!ignorePartitionSelection && question.getPartitionIds().contains(partition.getId())?'pre':false}"
+                        th:id="'partition_select_'+${partition.id}" >
+                        <input type="hidden" th:id="'question_partition_'+${partition.id}"
+                               th:name="'question_partition_'+${partition.id}" value="false">
+                        <label th:text="${partition.getName()}"></label>
+                </div>
+                </th:block>
+<!--                </c:forEach>-->
+            </div>
+        </div>
+
+    </div>
+    </div>
+</form>
+</html>

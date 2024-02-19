@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="https://www.thymeleaf.org">
+<!--TODO-->
+<div style="display: flex;flex-direction: column;" onload="initQuestionViewImages()">
+    <label id="partitionLabel${partition.id}" titleLabel text th:text="${partition.getName()}"></label>
+    <!--/*@thymesVar id="partition" type="indi.etern.checkIn.entities.question.interfaces.Partition"*/-->
+    <div class="questions" text>
+        <th:block th:each="question:${partition.getSortedQuestion()}">
+            <div th:replace="~{manage/pages/questionOverview::questionOverview(${question},${false})}"></div>
+        </th:block>
+    </div>
+    <div class="addButtons" style="margin: 4px">
+            <!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
+            <button th:if="${permissionMap.get('permission_create_and_edit_owns_question')}" type="button" text th:onclick="'addQuestion(&quot;'+${partition.getId()}+'&quot;)'">+</button>
+    </div>
+</div>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="https://www.thymeleaf.org">
+<!--TODO-->
+<div id="partitionDivs">
+    <div th:each="partition:${@partitionInfo.getPartitions()}"
+         style="background:var(--input-background-color);margin: 0 0 8px;" rounded clickable
+         th:id="'partition'+${partition.id}" class="partitionDiv">
+        <div style="display: flex;flex-direction: row" class="partitionTop">
+            <div style="margin: 0;flex: 1" rounded clickable onclick="togglePartition(this)" th:text="${partition.getName()}"></div>
+            <!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
+            <button th:if="${permissionMap.get('permission_create_and_edit_owns_question')}"
+                    style="min-width: 20px;margin: 0 0 0 2px;font-size: 18px"
+                    th:onclick="'newQuestionOf(&quot;'+${partition.id}+'&quot;)'">+
+            </button>
+        </div>
+        <div style="display: none" class="partitionQuestionsList">
+            <div th:if="${partition.getQuestions().isEmpty()}" rounded style="cursor: auto;background: none;"
+                 class="empty">empty</div>
+            <th:block th:unless="${partition.getQuestions().isEmpty()}" th:each="question:${partition.getQuestions()}">
+                <div rounded clickable th:class="'question'+${question.getMd5()}"
+                     style="height: 21px;overflow: hidden;display: flex;flex-direction: row"
+                     th:onclick="switchToQuestion([[${question.md5}]],this)">
+                    <div class="pointer">•</div>
+                    <div class="questionContentOverview" th:text="${question.getContent()}"></div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+</div>
+<button style="height: 30px;margin: 0" highlight onclick="updateAllQuestions()">全部更新</button>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="cn" xmlns:th="https://www.thymeleaf.org">
+<!--<jsp:useBean id="roleInfo" scope="request" type="indi.etern.checkIn.beans.RoleInfo"/>-->
+<!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
+<div id="managePage" index="0" page-type="user" onload="initWaterfall();initShrinkPane($('.shrinkPane'));" onclose="destroyWaterfall()">
+    <div class="forScroll" rounded style="display: flex;flex: 1;flex-direction: column" border>
+        <div id="roles">
+            <th:block th:each="role:${@roleInfo.getRoles()}">
+                <div class="shrinkPane" th:id="'role_'+${role.getType().replace(' ','_')}" rounded>
+                    <div title style="display: flex;flex-direction: row;flex: 1">
+                        <div style="margin: 8px" th:text="${role.getType()}"></div>
+                        <div class="blank"></div>
+                        <button highlight rounded th:if="${permissionMap.get('permission_delete_role')}" th:onclick="deleteRole([[${role.getType()}]])">删除</button>
+                        <button highlight rounded style="margin-right: 16px" th:if="${permissionMap.get('permission_edit_permission')}" th:onclick="editingPermissionOf([[${role.getType()}]])">修改权限</button>
+                    </div>
+                    <div content>
+                        <div class="waterfallInfo" th:id="'userInfo_'+${role.type}" style="display: none">
+                            <th:block th:each="user:${role.getUsers()}">
+                                <div th:replace="~{manage/pages/userPane::userPane(${user})}"></div>
+                            </th:block>
+                        </div>
+                        <div class="waterfallBasic" th:id="'userDivBasic_'+${role.type}" style="display: flex;flex-direction: row"></div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+        <button rounded style="margin: 6px;font-size: 28px" onclick="createRole()" th:if="${permissionMap.get('permission_create_role')}" id="createRoleButton">+</button>
+    </div>
+</div>
+</html>

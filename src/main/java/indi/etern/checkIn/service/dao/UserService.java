@@ -38,7 +38,8 @@ public class UserService implements UserDetailsService {
     }
     
     public void save(User user) {
-        userRepository.save(user);
+        roleService.save(user.getRole());
+//        userRepository.save(user);
     }
     
     public List<User> findAllByName(String name) {

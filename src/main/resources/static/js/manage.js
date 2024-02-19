@@ -221,7 +221,7 @@ function closeMenu() {
 }
 
 function selectButtonOf(pageClass, index) {
-    const $menuButtons = $("#menuButtons button");
+    const $menuButtons = $(`#menuButtons button`);
     $menuButtons.attr("class", "button")
     $menuButtons.removeAttr("selected");
     const $selectedButton = $("#" + pageClass + "Menu button").eq(index);

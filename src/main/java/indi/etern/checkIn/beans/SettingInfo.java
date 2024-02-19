@@ -51,13 +51,15 @@ public class SettingInfo {
     }
     
     public Integer getPartitionCountMin() {
+        if (settingService.get("exam.partitionCountMin").isEmpty()) settingService.set("exam.partitionCountMin","1");
         partitionCountMin = Integer.parseInt(settingService.get("exam.partitionCountMin"));
-        return Math.min(partitionCountMin, partitionInfo.getPartitionNotEmpty().size());
+        return Math.min(partitionCountMin, partitionInfo.getPartitionsNotEmpty().size());
     }
     
     public Integer getPartitionCountMax() {
+        if (settingService.get("exam.partitionCountMax").isEmpty()) settingService.set("exam.partitionCountMax","1");
         partitionCountMax = Integer.parseInt(settingService.get("exam.partitionCountMax"));
-        return Math.min(partitionCountMax, partitionInfo.getPartitionNotEmpty().size());
+        return Math.min(partitionCountMax, partitionInfo.getPartitionsNotEmpty().size());
     }
     
     public Integer getPassScore() {
