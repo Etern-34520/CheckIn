@@ -133,7 +133,7 @@ public class Connector implements SubProtocolCapable {
         CONNECTORS.remove(this);
         subOnlineCount();
         logger.info("sid_" + sid + ":close");
-        releaseResource();
+//        releaseResource();
         if (sessionUser != null) {
             Map<String, String> dataMap = new HashMap<>();
             dataMap.put("type", "userOffline");
@@ -142,13 +142,9 @@ public class Connector implements SubProtocolCapable {
         }
     }
     
-    private void releaseResource() {
-    }
-    
     @OnMessage
     public void onMessage(String message, Session session) {
         try {
-            logger.info("sid_" + sid + ":" + message);
             Map<String, Object> contentMap = gson.fromJson(message, HashMap.class);
             if (checkToken(contentMap)) return;//TODO TIP
             /*if (!JwtTokenProvider.currentUserHasPermission((String) contentMap.get("type"), PermissionType.WEB_SOCKET)) {
@@ -162,71 +158,75 @@ public class Connector implements SubProtocolCapable {
                 qqStr = (String) qqObject;
                 qqInContentMap = Long.parseLong(qqStr);
             }
+            boolean logging = true;
             switch ((String) contentMap.get("type")) {
                 case "addPartition" -> {
                     final String partitionName = (String) contentMap.get("partitionName");
-                    doAction(new AddPartitionAction(partitionName));
+                    logging = doAction(new AddPartitionAction(partitionName));
                 }
                 case "deletePartition" -> {
                     final int partitionId = Integer.parseInt((String) contentMap.get("partitionId"));
-                    doAction(new DeletePartitionAction(partitionId));
+                    logging = doAction(new DeletePartitionAction(partitionId));
                 }
                 case "deleteQuestion" -> {
                     final String questionMD5 = (String) contentMap.get("questionMD5");
-                    doAction(new DeleteQuestionAction(questionMD5));
+                    logging = doAction(new DeleteQuestionAction(questionMD5));
                 }
                 case "editPartition" -> {
-                    doAction(new EditPartitionNameAction(Integer.parseInt((String) contentMap.get("partitionId")),(String) contentMap.get("partitionName")));
+                    logging = doAction(new EditPartitionNameAction(Integer.parseInt((String) contentMap.get("partitionId")),(String) contentMap.get("partitionName")));
                 }
                 case "newUser" -> {
-                    doAction(new CreateUserAction(qqInContentMap, (String) contentMap.get("name"), (String) contentMap.get("role")));
+                    logging = doAction(new CreateUserAction(qqInContentMap, (String) contentMap.get("name"), (String) contentMap.get("role")));
                 }
                 case "deleteUser" -> {
                     if (qqInContentMap != sessionUser.getQQNumber() && webSocketService.isOnline(String.valueOf(qqInContentMap))) {
                         sendError("user is online");
                         return;
                     }
-                    doAction(new DeleteUserAction(qqInContentMap,sessionUser));
+                    logging = doAction(new DeleteUserAction(qqInContentMap,sessionUser));
                 }
                 case "changeUserName" -> {
-                    doAction(new ChangeUserNameAction(qqInContentMap, (String) contentMap.get("newName")));
+                    logging = doAction(new ChangeUserNameAction(qqInContentMap, (String) contentMap.get("newName")));
                 }
                 case "changePassword" -> {
-                    doAction(new ChangeUserPasswordAction(qqInContentMap,(String) contentMap.get("oldPassword"), (String) contentMap.get("newPassword")));
+                    logging = doAction(new ChangeUserPasswordAction(qqInContentMap,(String) contentMap.get("oldPassword"), (String) contentMap.get("newPassword")));
                 }
                 case "enableUser" -> {
-                    doAction(new SetUserStateAction(qqInContentMap,true));
+                    logging = doAction(new SetUserStateAction(qqInContentMap,true));
                 }
                 case "disableUser" -> {
-                    doAction(new SetUserStateAction(qqInContentMap,false));
+                    logging = doAction(new SetUserStateAction(qqInContentMap,false));
                 }
                 case "offLine" -> {
-                    doAction(new ForceOfflineAction(qqInContentMap));
+                    logging = doAction(new ForceOfflineAction(qqInContentMap));
                 }
                 case "changeRole" -> {
-                    doAction(new ChangeUserRoleAction(qqInContentMap, (String) contentMap.get("role")));
+                    logging = doAction(new ChangeUserRoleAction(qqInContentMap, (String) contentMap.get("role")));
                 }
                 case "savePermission" -> {
                     Role role = roleService.findById((String) contentMap.get("role")).orElseThrow();
-                    doAction(new SavePermissionAction(role,(List<String>)contentMap.get("enable")));
+                    logging = doAction(new SavePermissionAction(role,(List<String>)contentMap.get("enable")));
                 }
                 case "createRole" -> {
-                    doAction(new CreateRoleAction((String) contentMap.get("role"),(List<String>)contentMap.get("enable")));
+                    logging = doAction(new CreateRoleAction((String) contentMap.get("role"),(List<String>)contentMap.get("enable")));
                 }
                 case "deleteRole" -> {
-                    doAction(new DeleteRoleAction((String) contentMap.get("role")));
+                    logging = doAction(new DeleteRoleAction((String) contentMap.get("role")));
                 }
                 case "saveSetting_examSetting" -> {
                     Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
-                    doAction(new SaveSettingAction(dataMap,"examSetting"));
+                    logging = doAction(new SaveSettingAction(dataMap,"examSetting"));
                 }
                 case "saveSetting_checkingSetting" -> {
                     Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
-                    doAction(new SaveSettingAction(dataMap,"checkingSetting"));
+                    logging = doAction(new SaveSettingAction(dataMap,"checkingSetting"));
                 }
                 case "getDateTrafficDetail" -> {
-                    doAction(new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
+                    logging = doAction(new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
                 }
+            }
+            if (logging) {
+                logger.info("sid_" + sid + ":" + message);
             }
         } catch (Exception e) {
             try {
@@ -326,7 +326,7 @@ public class Connector implements SubProtocolCapable {
         return session.isOpen();
     }
     
-    private void doAction(JsonResultAction jsonResultAction) throws Exception {
+    private boolean doAction(JsonResultAction jsonResultAction) throws Exception {
         Optional<JsonObject> optionalResult = jsonResultAction.call();
         if (optionalResult.isPresent()) {
             final JsonObject jsonObject = optionalResult.get();
@@ -335,5 +335,6 @@ public class Connector implements SubProtocolCapable {
                 jsonResultAction.afterAction();
             }
         }
+        return jsonResultAction.shouldLogging();
     }
 }

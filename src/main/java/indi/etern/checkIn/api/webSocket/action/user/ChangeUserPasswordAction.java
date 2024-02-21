@@ -19,6 +19,7 @@ public class ChangeUserPasswordAction extends UserJsonResultAction {
         this.qqNumber = qqNumber;
         this.oldPassword = oldPassword;
         this.password = password;
+        this.logging = false;
     }
 
     @Override

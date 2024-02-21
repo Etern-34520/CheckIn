@@ -3,7 +3,7 @@
 <body>
 <!--use as th:replace="~{manage/pages/questionOverview::questionOverview(${question},${false})}"-->
 <!--/*@thymesVar id="question" type="indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion"*/-->
-<div th:fragment="questionOverview(question,jumpBool)">
+<th:block th:fragment="questionOverview(question,jumpBool)">
     <div th:id="${question.getMd5()}" class="question" rounded>
         <div style="flex:1" title>
             <div style="display: flex;flex-direction: row">
@@ -41,10 +41,10 @@
                 </button>
             </div>
         </div>
+        <script>
+            initShrinkPane($(".question"));
+        </script>
     </div>
-    <script>
-        initShrinkPane($(".question"));
-    </script>
-</div>
+</th:block>
 </body>
 </html>

@@ -28,8 +28,7 @@ import java.util.Map;
 @Table(name = "USER_TRAFFICS")
 public class UserTraffic {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_traffics_SEQ")
-    @SequenceGenerator(name = "user_traffics_SEQ", sequenceName = "user_traffics_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private int id;
 
@@ -52,10 +51,10 @@ public class UserTraffic {
     LocalTime localTime;
     @Column(name = "IP")
     String ipString;
-    @Column(name = "HEADER")
+    @Column(name = "HEADER", columnDefinition = "text")
     @JsonIgnore
     String deviceInfo;
-    @Column(name = "ATTRIBUTES")
+    @Column(name = "ATTRIBUTES", columnDefinition = "text")
     @JsonIgnore
     String attributes;
     @Transient

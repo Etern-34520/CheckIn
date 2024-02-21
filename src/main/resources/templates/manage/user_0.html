@@ -13,7 +13,6 @@
                 <button rounded style="font-size: 26px;width: 60px;height: auto;line-height: 24px;margin: 0 0 0 4px" onclick="newUser()" th:if="${permissionMap.get('permission_create_user')}">+</button>
             </div>
         </div>
-<!--        <div style="width: 2px;margin: 4px;border-radius: 1px;background: rgba(128,128,128,0.2)"></div>-->
         <div class="waterfallInfo" style="display: none">
             <th:block th:each="user:${@userInfo.getUsers()}">
                 <div th:replace="~{manage/pages/userPane::userPane(${user})}"></div>

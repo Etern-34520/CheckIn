@@ -37,7 +37,7 @@ public class Partition implements Serializable {
     private Set<MultiPartitionableQuestion> sortedQuestion;
     
     @Id
-//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "partitions_SEQ")
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    @SequenceGenerator(name = "partitions_SEQ", sequenceName = "partitions_SEQ", allocationSize = 1)
     private int id;
     

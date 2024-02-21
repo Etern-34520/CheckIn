@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public abstract class JsonResultAction implements Callable<Optional<JsonObject>> {
+    protected boolean logging = true;
+
     protected JsonResultAction() {
     }
 
@@ -42,5 +44,9 @@ public abstract class JsonResultAction implements Callable<Optional<JsonObject>>
     abstract protected Optional<JsonObject> doAction() throws Exception;
 
     public void afterAction() {
+    }
+
+    public boolean shouldLogging() {
+        return logging;
     }
 }
