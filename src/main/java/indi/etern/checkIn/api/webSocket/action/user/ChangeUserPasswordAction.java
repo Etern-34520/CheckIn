@@ -14,6 +14,7 @@ public class ChangeUserPasswordAction extends UserJsonResultAction {
     private final long qqNumber;
     private final String password;
     private final String oldPassword;
+    private User user;
 
     public ChangeUserPasswordAction(long qqNumber, String oldPassword, String password) {
         this.qqNumber = qqNumber;
@@ -31,7 +32,7 @@ public class ChangeUserPasswordAction extends UserJsonResultAction {
     protected Optional<JsonObject> doAction() throws Exception {
         final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
         User user = optionalUser.orElseThrow();
-        if (!(user.getPassword()==null||user.getPassword().isEmpty())&& !SecurityConfig.ENCODER.matches(oldPassword, user.getPassword())) {
+        if (!(user.getPassword() == null || user.getPassword().isEmpty()) && !SecurityConfig.ENCODER.matches(oldPassword, user.getPassword())) {
             throw new AuthException("wrong password");
         }
         user.setPassword(CheckInApplication.applicationContext.getBean(PasswordEncoder.class).encode(password));
@@ -39,8 +40,13 @@ public class ChangeUserPasswordAction extends UserJsonResultAction {
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("type", "success");
-        sendUpdateUserToAll(user);
+        this.user = user;
+        return Optional.of(jsonObject);
+    }
 
-        return Optional.empty();
+    @Override
+    public void afterAction() {
+        if (user != null)
+            sendUpdateUserToAll(user);
     }
 }

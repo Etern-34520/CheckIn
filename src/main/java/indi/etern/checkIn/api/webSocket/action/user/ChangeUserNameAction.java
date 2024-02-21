@@ -9,26 +9,33 @@ import java.util.Optional;
 public class ChangeUserNameAction extends UserJsonResultAction {
     private final long qqNumber;
     private final String name;
-    
+    private User user;
+
     public ChangeUserNameAction(long qqNumber, String name) {
         this.qqNumber = qqNumber;
         this.name = name;
     }
-    
+
     @Override
     public String requiredPermissionName() {
         return null;
     }
-    
+
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
         final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
         User user = optionalUser.orElseThrow();
         user.setName(name);
         UserService.singletonInstance.save(user);
-        {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "success");
+        this.user = user;
+        return Optional.of(jsonObject);
+    }
+
+    @Override
+    public void afterAction() {
+        if (user != null)
             sendUpdateUserToAll(user);
-        }
-        return Optional.empty();
     }
 }

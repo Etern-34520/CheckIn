@@ -44,6 +44,9 @@ function selectTrafficDetail(id) {
         type: "get",
         success: function (res) {
             transitionPage($("#right"), res);
+        },
+        error: function (res) {
+            showTip('error', '加载页面时发生错误:' + res.status);
         }
     })
 }

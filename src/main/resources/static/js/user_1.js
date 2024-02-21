@@ -8,8 +8,8 @@ function editingPermissionOf(roleType) {
         success: function (res) {
             popDialog(res);
         },
-        error: function (data) {
-            showTip("error", "加载页面时发生错误" + data);
+        error: function (res) {
+            showTip('error', '加载页面时发生错误:' + res.status);
         }
     });
 }

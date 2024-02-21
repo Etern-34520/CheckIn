@@ -22,7 +22,7 @@
     </div>
     <div rounded title="Attributes" class="attributes">
         <div>
-            <div th:each="entry:${userTraffic.getAttributesMap().entrySet()}" class="KeyValueItem"
+            <div th:each="entry:${userTraffic.getAttributesMap().entrySet()}" class="keyValueItem"
                  style="display: flex;flex-direction: row">
                 <div style="margin-right: 4px;" rounded th:text="${entry.getKey()}"></div>
                 <div rounded th:text="${entry.getValue()}"></div>
@@ -48,17 +48,15 @@
                 <th:block
                         th:with="questionIdsString=${@objectMapper.readTree(userTraffic.getAttributesMap().get('examQuestionIds'))}">
                     <th:block th:each="examQuestionId:${questionIdsString}">
-                        <th:block
-                                th:with="optionalQuestion=${@multiPartitionableQuestionService.findById(examQuestionId)}">
+                        <th:block th:with="optionalQuestion=${@multiPartitionableQuestionService.findById(examQuestionId.toString().replace('&quot;',''))}">
                             <th:block th:if="${optionalQuestion.isPresent()}">
-                                <div th:replace="pages/questionOverview::questionOverview(${optionalQuestion.get()},${true})"></div>
+                                <div th:replace="manage/pages/questionOverview::questionOverview(${optionalQuestion.get()},${true})"></div>
                             </th:block>
                         </th:block>
                     </th:block>
                 </th:block>
             </div>
         </div>
-
         <script>initShrinkPane($(".examQuestions"))</script>
     </th:block>
     <div></div>
