@@ -32,6 +32,7 @@ function tip(content) {
 }
 
 function login() {
+    $("#loginButton").attr("disabled","disabled");
     const usernameOrQQ = $("input[name=usernameOrQQ]").val();
     const password = $("input[name=password]").val();
     $.removeCookie("qq", {path: "/checkIn"});
@@ -57,12 +58,15 @@ function login() {
                 // $.cookie("password", password, {expires: 7, path: "/checkIn"});
                 $.cookie('page', 0, {path: "/checkIn/manage"});
                 $.cookie('pageClass', 'server', {path: "/checkIn/manage"});
-                $("#main").animate({
+                let $main = $("#main");
+                $main.css("scale",1);
+                $main.animate({
                     opacity: 0,
                     height: 0,
                     maxHeight: 0,
                     minHeight: 0,
                     border: 0,
+                    scale: 0.8
                 }, 300, "easeOutCubic", function () {
                     // window.location.href = "./../manage/";
                     const map = new Map();
@@ -70,6 +74,7 @@ function login() {
                     window.location.href = "./../manage/";
                 });
             } else {
+                $("#loginButton").removeAttr("disabled");
                 if (dataObject.reason !== undefined) {
                     tip(dataObject.reason);
                 } else {
@@ -78,6 +83,7 @@ function login() {
             }
         },
         error: function (res) {
+            $("#loginButton").removeAttr("disabled");
             tip(res);
         }
     });

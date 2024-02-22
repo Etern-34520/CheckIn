@@ -160,6 +160,7 @@ function onresize() {
     let index = 0;
     for (const waterfallBasicElement of $(".waterfallBasic")) {
         const $waterfallBasic = $(waterfallBasicElement);
+        if ($waterfallBasic.is(':hidden')) continue;
         const width = $waterfallBasic.width();
         const elementWidth = 420;
         let columnCount = Math.floor(width / elementWidth);

@@ -10,7 +10,7 @@
                     <div title style="display: flex;flex-direction: row;flex: 1">
                         <div style="margin: 8px" th:text="${role.getType()}"></div>
                         <div class="blank"></div>
-                        <button highlight rounded th:if="${permissionMap.get('permission_delete_role')}" th:onclick="deleteRole([[${role.getType()}]])">删除</button>
+                        <button highlight rounded th:if="${permissionMap.get('permission_delete_role')}" th:onclick="confirmAction(function (){deleteRole([[${role.getType()}]])},$(this))">删除</button>
                         <button highlight rounded style="margin-right: 16px" th:if="${permissionMap.get('permission_edit_permission')}" th:onclick="editingPermissionOf([[${role.getType()}]])">修改权限</button>
                     </div>
                     <div content>

@@ -221,6 +221,12 @@ textarea {
     border-color: rgba(0, 0, 0, 0);
 }
 
+button[confirm] {
+    transition: 0.2s;
+    transition-timing-function: ease-in-out;
+    background: rgba(255,0,0,0.3)!important;
+}
+
 input[disabled],
 textarea[disabled],
 button[disabled] {

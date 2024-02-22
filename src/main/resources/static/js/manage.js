@@ -160,22 +160,34 @@ $(function () {//页面加载完成后执行
 
     function showContent() {
         if (over1 && over2) {
-            $("#content").animate({
-                opacity: 1
+            let $content = $("#content");
+            $content.css("scale",0.96);
+            $content.animate({
+                opacity: 1,
+                scale: 1,
             }, 300, "easeOutCubic");
         }
     }
 
+    let $top = $("#top");
+    $top.css("scale",0.8);
     switchToPage($.cookie('pageClass'), $.cookie('page'), true, function () {
         over1 = true;
         showContent();
     },false);
-    $("#top").animate({
-        marginTop: 6
+    $top.animate({
+        marginTop: 6,
     }, 400, "easeOutCubic", function () {
         over2 = true;
         showContent();
     });
+    $top.animate({
+        scale: 1
+    }, {
+        duration: 500,
+        easing: "easeInOutCubic",
+        queue: false
+    })
     initContextMenu();
 })
 
@@ -352,13 +364,19 @@ function removePathAfter(pathName, contains = false, doCallBackFunc = false) {
 }
 
 function switchToPageWithAnimate(pageClass, index, clearPathBool = true, callback) {
-    $("#content").fadeTo(200, 0, "easeInCubic", function () {
+    $("#content").animate({
+        opacity: 0,
+        scale: 0.97
+    }, 200, "easeInCubic", function () {
         switchToPage(pageClass, index, clearPathBool, function () {
             if (callback instanceof Function) {
                 callback();
             }
             setTimeout(function () {
-                $("#content").fadeTo(200, 1, "easeInCubic");
+                $("#content").animate({
+                    opacity: 1,
+                    scale: 1
+                },200 , "easeInCubic");
             }, 200);
         });
     });
@@ -531,12 +549,14 @@ function popDialog(html, callBack) {
     let $dialog = $("<div rounded id='dialog' style='overflow: auto'></div>");
     $dialog.html(html);
     $dialog.css("opacity", 0);
+    $dialog.css("scale", 0.94);
     $topMask.append($dialog);
     $topMask.animate({opacity: 1}, 200, "easeOutCubic", function () {
         if (callBack instanceof Function)
             callBack();
         $dialog.animate({
             opacity: 1,
+            scale: 1
         }, 200, "easeOutCubic");
     });
     $dialog.on("click", function (e) {
@@ -545,6 +565,9 @@ function popDialog(html, callBack) {
     // const previousOnClick = $topMask.on("click");
     $topMask.on("click", function () {
         $topMask.stop(true, false);
+        $dialog.animate({
+            scale:0.94
+        }, 200, "easeInCubic");
         $topMask.animate({
             opacity: 0,
         }, 200, "easeInCubic", function () {
@@ -889,3 +912,19 @@ let onClickTraffic = function (id, date) {
     })
 };
 
+// noinspection JSUnusedGlobalSymbols
+function confirmAction(action,$button) {
+    if ($button.attr("confirm")!==undefined) action();
+    else {
+        $button.attr("confirm",$button.text());
+        $button.text("确定");
+        $button.on({
+            blur: function() {
+                $button.text($button.attr("confirm"));
+                $button.removeAttr("confirm");
+                $button.off("blur");
+                // $button.off("click");
+            }
+        });
+    }
+}

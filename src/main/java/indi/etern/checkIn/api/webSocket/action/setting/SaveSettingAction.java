@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SaveSettingAction extends TransactionalAction {
-    private String type;
-    private Map<String, Object> dataMap;
+    private final String type;
+    private final Map<String, Object> dataMap;
     
     public SaveSettingAction(Map<String, Object> dataMap, String type) {
         this.dataMap = dataMap;
@@ -24,6 +24,8 @@ public class SaveSettingAction extends TransactionalAction {
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
         SettingService.singletonInstance.setAll(dataMap);
-        return Optional.empty();
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "success");
+        return Optional.of(jsonObject);
     }
 }

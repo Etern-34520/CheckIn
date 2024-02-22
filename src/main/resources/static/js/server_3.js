@@ -8,5 +8,9 @@ function saveSetting(saveButton) {
     sendMessage({
         type: "saveSetting_"+$form.attr("name"),
         data: formDataObj,
+    },function (event) {
+        if (JSON.parse(event.data).type === "success") {
+            showTip("success","保存成功");
+        }
     });
 }

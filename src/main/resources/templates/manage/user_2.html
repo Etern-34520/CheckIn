@@ -23,7 +23,7 @@
                 <div content>
                     <div class="questions">
                         <th:block th:each="question:${currentUser.getMultiPartitionableQuestions()}">
-                            <div th:replace="manage/pages/questionOverview::questionOverview(${question},${true})"></div>
+                            <div th:replace="~{manage/pages/questionOverview::questionOverview(${question},${true})}"></div>
                         </th:block>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                     <div style="display: flex;flex-direction: row;overflow: hidden">
                         <button rounded highlight style="margin: 4px;padding: 8px" onclick="logout()">退出登录</button>
                         <button rounded highlight style="margin: 4px;padding: 8px"
-                                th:onclick="deleteUser([[${currentUser.QQNumber}]]);logout()">删除账户
+                                th:onclick="confirmAction(function (){deleteUser([[${currentUser.getQQNumber()}]]);logout()},$(this))">删除账户
                         </button>
                     </div>
                 </div>

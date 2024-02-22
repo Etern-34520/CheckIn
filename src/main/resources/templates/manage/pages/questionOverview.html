@@ -37,7 +37,7 @@
                 </button>
                 <!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
                 <button rounded highlight style="padding: 4px 6px;margin: 2px" th:if="${permissionMap.get('permission_delete_others_question')}"
-                        th:onclick="deleteQuestion([[${question.md5}]])">删除
+                        th:onclick="confirmAction(function (){deleteQuestion([[${question.md5}]]);},$(this))">删除
                 </button>
             </div>
         </div>

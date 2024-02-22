@@ -40,7 +40,7 @@
                         修改用户组
                     </button>
                     <button highlight class="operationButton" th:if="${permissionMap.get('permission_delete_user')}"
-                            th:onclick="deleteUser([[${user.QQNumber}]])" th:disabled="${isOnline}"
+                            th:onclick="confirmAction(function (){deleteUser([[${user.QQNumber}]])}, $(this))" th:disabled="${isOnline}"
                             operation_type="delete_user">
                         删除
                     </button>
@@ -56,7 +56,7 @@
                 </th:block>
                 <th:block th:if="${user.equals(currentUser)}">
                     <button highlight class="operationButton" onclick="changePassword()">修改密码</button>
-                    <button highlight class="operationButton" th:onclick="deleteUser([[${user.QQNumber}]]);logout()">删除
+                    <button highlight class="operationButton" th:onclick="confirmAction(function (){deleteUser([[${user.QQNumber}]]);logout()},$(this))">删除
                     </button>
                 </th:block>
             </div>
