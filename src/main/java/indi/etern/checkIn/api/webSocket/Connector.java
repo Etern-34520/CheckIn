@@ -221,6 +221,10 @@ public class Connector implements SubProtocolCapable {
                     Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
                     logging = doAction(new SaveSettingAction(dataMap,"checkingSetting"));
                 }
+                case "saveSetting_otherSetting" -> {
+                    Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
+                    logging = doAction(new SaveSettingAction(dataMap,"otherSetting"));
+                }
                 case "getDateTrafficDetail" -> {
                     logging = doAction(new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
                 }

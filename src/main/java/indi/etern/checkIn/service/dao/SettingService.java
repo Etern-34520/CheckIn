@@ -20,7 +20,7 @@ public class SettingService {
         return settingRepository.findById(key).orElse(SettingItem.EMPTY).getValue();
     }
     
-    public void set(String key, String value) {
+    public String set(String key, String value) {
         Optional<SettingItem> optionalSettingItem = settingRepository.findById(key);
         if (optionalSettingItem.isPresent()) {
             SettingItem settingItem = optionalSettingItem.get();
@@ -29,6 +29,7 @@ public class SettingService {
         } else {
             settingRepository.save(new SettingItem(key, value));
         }
+        return value;
     }
     
     public SettingItem getItem(String key) {

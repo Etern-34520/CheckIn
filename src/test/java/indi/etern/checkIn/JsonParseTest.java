@@ -36,7 +36,7 @@ public class JsonParseTest {
             MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
             String questionContent = (String) questionMap.get("question_content");
             questionContent = questionContent.replace(" [单选题]","");
-            multipleQuestionBuilder.setQuestionContent(questionContent.split("\\.")[1]);
+            multipleQuestionBuilder.setQuestionContent(questionContent.split("\\.",2)[1]);
             List<Double> correctIndex = (List<Double>) questionMap.get("correct_options");
             int index = 0;
             for (String choiceStr : (List<String>)questionMap.get("options")) {

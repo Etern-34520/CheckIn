@@ -4,6 +4,8 @@ import indi.etern.checkIn.service.dao.SettingService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 @Getter
 public class SettingInfo {
@@ -15,6 +17,8 @@ public class SettingInfo {
     private String passMessage;
     private String notPassMessage;
     private String enableAutoCreateUser;
+    private String robotToken;
+    private String defaultPartitionName;
 
     public SettingInfo(SettingService settingService, PartitionInfo partitionInfo) {
         this.settingService = settingService;
@@ -87,23 +91,15 @@ public class SettingInfo {
         return enableAutoCreateUser;
     }
     
-    /*public void setPartitionCountMin(int partitionCountMin) {
-        this.partitionCountMin = partitionCountMin;
-        if (partitionCountMin > partitionInfo.getPartitions().size()) {
-            partitionCountMin = partitionInfo.getPartitions().size();
-        } else if (partitionCountMin < 1) {
-            partitionCountMin = 1;
-        }
-        settingService.set("exam.partitionCountMin", String.valueOf(partitionCountMin));
-    }*/
-    
-    /*public void setPartitionCountMax(int partitionCountMax) {
-        this.partitionCountMax = partitionCountMax;
-        if (partitionCountMax > partitionInfo.getPartitions().size()) {
-            partitionCountMax = partitionInfo.getPartitions().size();
-        } else if (partitionCountMax < 1) {
-            partitionCountMax = 1;
-        }
-        settingService.set("exam.partitionCountMax", String.valueOf(partitionCountMax));
-    }*/
+    public String getRobotToken() {
+        robotToken = settingService.get("other.robotToken");
+        if (robotToken.isEmpty()) robotToken = settingService.set("other.robotToken", UUID.randomUUID().toString());
+        return robotToken;
+    }
+
+    public String getDefaultPartitionName() {
+        defaultPartitionName = settingService.get("other.defaultPartitionName");
+        if (defaultPartitionName.isEmpty()) defaultPartitionName = settingService.set("other.defaultPartitionName", "undefined");
+        return defaultPartitionName;
+    }
 }

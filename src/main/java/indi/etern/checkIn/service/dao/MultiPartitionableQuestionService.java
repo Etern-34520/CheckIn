@@ -37,13 +37,13 @@ public class MultiPartitionableQuestionService {
     @Resource
     private MultiplePartitionableQuestionRepository multiplePartitionableQuestionRepository;
     private volatile boolean update = false;
-    
+
     protected MultiPartitionableQuestionService(TransactionTemplate transactionTemplate, PartitionService partitionService) {
         singletonInstance = this;
         this.transactionTemplate = transactionTemplate;
         this.partitionService = partitionService;
     }
-    
+
     public static MultiPartitionableQuestion buildQuestionFromRequest(HttpServletRequest httpServletRequest, String originalMd5, User author) throws IOException, ServletException {
         Map<String, String[]> map = httpServletRequest.getParameterMap();
         MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
@@ -58,10 +58,10 @@ public class MultiPartitionableQuestionService {
         if (author == null) {
             author = UserService.singletonInstance.findByQQNumber(Long.parseLong(httpServletRequest.getParameter("author"))).orElseThrow();
         }
-        
+
         //content
         multipleQuestionBuilder.setQuestionContent(httpServletRequest.getParameter("questionContent"));
-        
+
         //image
         int imageIndex = 0;
         while (true) {
@@ -72,7 +72,7 @@ public class MultiPartitionableQuestionService {
             multipleQuestionBuilder.addImage(part);
             imageIndex++;
         }
-        
+
         //choices&partition
         Map<Integer, Object[]> choiceParamMap = new HashMap<>();
         for (String key : map.keySet()) {
@@ -100,34 +100,34 @@ public class MultiPartitionableQuestionService {
             choices.add(choice);
         }
         multipleQuestionBuilder.addChoices(choices);
-        
+
         multipleQuestionBuilder.setAuthor(author);
-        
+
         multipleQuestionBuilder.setEnable(Boolean.parseBoolean(httpServletRequest.getParameter("enabled")));
-        
+
         return multipleQuestionBuilder.build();
     }
-    
+
     public void save(MultiPartitionableQuestion multiPartitionableQuestion) {
         multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
     }
-    
+
     public List<MultiPartitionableQuestion> findAll() {
         return multiplePartitionableQuestionRepository.findAll();
     }
-    
+
     public MultiPartitionableQuestion getByMD5(String md5) {
         return multiplePartitionableQuestionRepository.findById(md5).orElse(null);
     }
-    
+
     public void saveAndFlush(MultiPartitionableQuestion multiPartitionableQuestion) {
         multiplePartitionableQuestionRepository.saveAndFlush(multiPartitionableQuestion);
     }
-    
+
     public Optional<MultiPartitionableQuestion> findById(String id) {
         return multiplePartitionableQuestionRepository.findById(id);
     }
-    
+
     public void deleteAll() {
         multiplePartitionableQuestionRepository.deleteAll();
         Path path = Paths.get("data/images/");
@@ -137,7 +137,7 @@ public class MultiPartitionableQuestionService {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void unbindAndDeleteById(String questionMD5) {
         transactionTemplate.execute((TransactionCallback<Object>) result -> {
             MultiPartitionableQuestion multiPartitionableQuestion = getByMD5(questionMD5);
@@ -150,7 +150,7 @@ public class MultiPartitionableQuestionService {
         });
         deleteById(questionMD5);
     }
-    
+
     public void deleteById(String id) {
         transactionTemplate.execute((TransactionCallback<Object>) status -> {
             final Optional<MultiPartitionableQuestion> optionalMultiPartitionableQuestion;
@@ -194,7 +194,7 @@ public class MultiPartitionableQuestionService {
             return Boolean.TRUE;
         });
     }
-    
+
     public void update(MultiPartitionableQuestion multiPartitionableQuestion) {
         update = true;
         transactionTemplate.execute((TransactionCallback<Object>) status -> {
@@ -249,15 +249,15 @@ public class MultiPartitionableQuestionService {
             return Boolean.FALSE;
         });
     }
-    
+
     public List<MultiPartitionableQuestion> findAllById(List<String> questionIds) {
         return multiplePartitionableQuestionRepository.findAllById(questionIds);
     }
-    
+
     public long count() {
         return multiplePartitionableQuestionRepository.count();
     }
-    
+
     public Map<String, MultiPartitionableQuestion> mapAllById(List<String> questionIds) {
         Map<String, MultiPartitionableQuestion> map = new HashMap<>();
         List<MultiPartitionableQuestion> questions = findAllById(questionIds);
@@ -273,6 +273,10 @@ public class MultiPartitionableQuestionService {
 
     public boolean existsById(String questionId) {
         return multiplePartitionableQuestionRepository.existsById(questionId);
+    }
+
+    public void saveAll(Collection<MultiPartitionableQuestion> multiPartitionableQuestions) {
+        multiplePartitionableQuestionRepository.saveAll(multiPartitionableQuestions);
     }
 }
 

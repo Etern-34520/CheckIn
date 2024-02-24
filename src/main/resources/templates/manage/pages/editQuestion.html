@@ -55,7 +55,7 @@
                         <th:block th:each="user:${@userInfo.getUsers()}">
                             <option th:id="'userSelect'+${user.QQNumber}"
                                     th:value="${user.getQQNumber()}"
-                                    th:selected="${question.author.equals(user)||(question.author==null&&user.equals(currentUser))}"
+                                    th:selected="${(question.author!=null&&question.author.equals(user))||(question.author==null&&user.equals(currentUser))}"
                                     th:text="${user.name}"></option>
                         </th:block>
                     </select>

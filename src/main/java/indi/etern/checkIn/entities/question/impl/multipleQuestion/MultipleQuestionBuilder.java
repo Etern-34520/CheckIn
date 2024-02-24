@@ -6,6 +6,7 @@ import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.PartitionService;
+import indi.etern.checkIn.service.dao.SettingService;
 import jakarta.servlet.http.Part;
 import org.apache.commons.io.file.PathUtils;
 
@@ -27,55 +28,55 @@ public class MultipleQuestionBuilder {
     String questionContent;
     final Set<Partition> partitions = new HashSet<>();
     final List<Part> imageParts = new ArrayList<>();
-    
+
     User author;
     boolean enable = false;
-    
+
     public MultipleQuestionBuilder addChoice(Choice choice) {
         choices.add(choice);
         return this;
     }
-    
+
     public MultipleQuestionBuilder addChoices(List<Choice> choices) {
         this.choices.addAll(choices);
         return this;
     }
-    
+
     public MultipleQuestionBuilder addChoices(Choice... choices) {
         Collections.addAll(this.choices, choices);
         return this;
     }
-    
+
     public MultipleQuestionBuilder setQuestionContent(String content) {
         questionContent = content;
         return this;
     }
-    
+
     public MultipleQuestionBuilder addImage(Part part) {
         imageParts.add(part);
         return this;
     }
-    
+
     public MultipleQuestionBuilder addPartition(String partitionString) {
         partitions.add(Partition.getInstance(partitionString));
         return this;
     }
-    
+
     public MultipleQuestionBuilder addPartition(Partition partition) {
         partitions.add(partition);
         return this;
     }
-    
+
     public MultipleQuestionBuilder setAuthor(User author) {
         this.author = author;
         return this;
     }
-    
+
     public MultipleQuestionBuilder setEnable(boolean enable) {
         this.enable = enable;
         return this;
     }
-    
+
     public MultiPartitionableQuestion build() {
         boolean singleCorrect = false;
         boolean multipleCorrect = false;
@@ -87,7 +88,7 @@ public class MultipleQuestionBuilder {
                 singleCorrect = false;
             }
         }
-        
+
         if (!singleCorrect && !multipleCorrect) {
             throw new MultipleQuestionBuilderException("No correct choice found");
         }
@@ -97,9 +98,11 @@ public class MultipleQuestionBuilder {
         if (choices.size() < 2) {
             throw new QuestionException("Less than two choices");
         }
-        
+
         if (partitions.isEmpty()) {
-            partitions.add(Partition.getInstance("undefined"));
+            String string = SettingService.singletonInstance.get("other.defaultPartitionName");
+            if (string == null) string = "undefined";
+            partitions.add(Partition.getInstance(string));
         }
         if (singleCorrect) {
             if (imageParts.isEmpty())
@@ -127,7 +130,7 @@ public class MultipleQuestionBuilder {
         if (!questionContent.isEmpty()) {//非模板题目
             for (Partition partition : partitions) {
 //                final PartitionService partitionService = (PartitionService) CheckInApplication.applicationContext.getBean("partitionService");
-                PartitionService.singletonInstance.addQuestionOf(partition,multipleQuestion);
+                PartitionService.singletonInstance.addQuestionOf(partition, multipleQuestion);
 //                partition.addQuestion(multipleQuestion);
             }
         }
@@ -189,12 +192,12 @@ public class MultipleQuestionBuilder {
         }
         return multipleQuestion;
     }
-    
+
     public MultipleQuestionBuilder setMD5(String md5) {
         this.md5 = md5;
         return this;
     }
-    
+
     public MultipleQuestionBuilder addPartition(int partitionId) {
         Partition partition = Partition.getInstance(partitionId);
         if (partition == null) {

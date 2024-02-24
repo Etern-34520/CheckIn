@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="cn" xmlns:th="https://www.thymeleaf.org">
-<!--TODO-->
+<!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
 <div id="managePage" index="3" page-type="server" style="display: flex;flex-direction: column">
     <div id="settingRoot" class="forScroll" rounded style="display: flex;flex: 1;flex-direction: column" border>
-        <!--        <components:shrinkPane title="抽题设置" useLabelTitle="true">-->
-        <!--            <jsp:attribute name="content">-->
         <div class="shrinkPane" rounded title="抽题设置">
             <div id="examSettingBase" class="settingBase">
                 <form name="examSetting">
@@ -34,13 +32,10 @@
                         </div>
                     </div>
                 </form>
-                <button highlight rounded onclick="saveSetting(this)">保存</button>
+                <button th:disabled="${!permissionMap.get('permission_save_setting_examSetting')}" highlight rounded onclick="saveSetting(this)">保存</button>
             </div>
         </div>
-        <!--            </jsp:attribute>-->
-        <!--        </components:shrinkPane>-->
         <div class="shrinkPane" title="校对设置">
-            <!--            <jsp:attribute name="content">-->
             <div id="checkSettingBase" class="settingBase">
                 <form name="checkingSetting">
                     <div id="checkSetting" class="settingDiv">
@@ -71,9 +66,23 @@
                         </div>
                     </div>
                 </form>
-                <button highlight rounded onclick="saveSetting(this)">保存</button>
+                <button th:disabled="${!permissionMap.get('permission_save_setting_checkingSetting')}" highlight rounded onclick="saveSetting(this)">保存</button>
             </div>
-            <!--            </jsp:attribute>-->
+        </div>
+        <div class="shrinkPane" title="杂项设置">
+            <div id="otherSettingBase" class="settingBase">
+                <form name="otherSetting">
+                    <div id="defaultPartitionSetting" class="settingDiv">
+                        <div><label for="defaultPartitionName">无分区时默认分区名</label>
+                            <input type="text" id="defaultPartitionName" name="other.defaultPartitionName" th:value="${@settingInfo.getDefaultPartitionName()}">
+                        </div>
+                        <div><label for="robotToken">机器人rest api Token</label>
+                            <input type="text" id="robotToken" name="other.robotToken" th:value="${permissionMap.get('permission_save_setting_otherSetting')?@settingInfo.getRobotToken():'[hidden]'}">
+                        </div>
+                    </div>
+                </form>
+                <button th:disabled="${!permissionMap.get('permission_save_setting_otherSetting')}" highlight rounded onclick="saveSetting(this)">保存</button>
+            </div>
         </div>
     </div>
 </div>
