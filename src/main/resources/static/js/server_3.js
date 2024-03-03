@@ -6,11 +6,12 @@ function saveSetting(saveButton) {
         formDataObj[key] = value;
     }
     sendMessage({
-        type: "saveSetting_"+$form.attr("name"),
+        type: "saveSetting",
         data: formDataObj,
-    },function (event) {
+        settingName: $form.attr("name")
+    }, function (event) {
         if (JSON.parse(event.data).type === "success") {
-            showTip("success","保存成功");
+            showTip("success", "保存成功");
         }
     });
 }

@@ -64,19 +64,19 @@
     background: rgb(0, 0, 0, 0.6);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-    color:rgba(200, 200, 200);
+    color: rgba(200, 200, 200);
 }
 
 label.fileUpload {
     border-radius: 6px;
-    border: 0;
+    border: solid 1px rgba(128,128,128,0.1);
     transition: 0.2s;
     margin: 4px;
     padding: 4px;
     min-width: 40px;
     color: var(--font-color);
     transition-timing-function: ease-in-out;
-    background: rgba(128, 128, 128, 0.1);
+    background: rgba(0,0,0,0);
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;
@@ -111,7 +111,7 @@ input[type="file"] {
     background: var(--component-background-color-hover);
 }
 
-#managePage[index="2"][page-type="server"] #partitionButtons {
+#managePage[index="2"][page-type="server"] .partitionButtons {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -144,11 +144,11 @@ input[type="file"] {
 }
 
 #managePage[index="2"][page-type="server"] .optionDiv > .deleteOptionButton {
-    flex: 0;
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
+    height: 48px;
+    width: 48px;
+    margin: 4px;
+    font-size: 30px;
+    flex: 0 0 auto;
 }
 
 #managePage[index="2"][page-type="server"] #formDiv button {
@@ -159,11 +159,14 @@ input[type="file"] {
     background: var(--input-background-color-hover)
 }
 
-#partitionDivs div.pointer {
-    width: 10px;
+div.pointer {
+    width: 6px;
+    height: 6px;
+    margin: 0 4px 0 0;
+    border-radius: 50%;
     flex: none;
     font-size: 16px;
-    color: var(--highlight-component-background-color-hover);
+    background-color: var(--highlight-component-background-color-hover);
     opacity: 0;
 }
 
@@ -171,4 +174,28 @@ input[type="file"] {
     flex: 1;
     line-height: 21px;
     white-space: nowrap;
+}
+
+#partitionDivs > * {
+    margin: 4px 0 0 0;
+}
+
+#partitionDivs:first-child {
+    margin: 0;
+}
+
+.questionContentItem {
+    height: 21px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.partitionSelectItem[selected] {
+    background: var(--input-background-color);
+}
+
+.partitionSelectItem[selected]:hover {
+    background: var(--input-background-color-hover) !important;
 }

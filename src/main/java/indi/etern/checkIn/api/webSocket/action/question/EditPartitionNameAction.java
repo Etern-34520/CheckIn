@@ -24,7 +24,7 @@ public class EditPartitionNameAction extends PartitionJsonResultAction {
     protected Optional<JsonObject> doAction() throws Exception {
         Partition partition = PartitionService.singletonInstance.findById(partitionId).orElseThrow();
         partition.setName(newName);
-        PartitionService.singletonInstance.saveAndFlush(partition);
+        PartitionService.singletonInstance.save(partition);
         
         sendUpdatePartitionToAll();
         return Optional.empty();

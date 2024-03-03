@@ -263,7 +263,7 @@ function searchUser() {
     const $userDivs = $(".userDiv");
     $userDivs.css("display", display);
     display = $userDivs.css("display");
-    const value = $userSearch.val();
+    const value = $userSearch.val().toLowerCase();
     if (value === "") {
         isSearching = false;
     } else {
@@ -272,9 +272,9 @@ function searchUser() {
             $userDivs.css("display", "none");
             for (const userDiv of $userDivs) {
                 const $userDiv = $(userDiv);
-                if ($userDiv.find(".userQQ").text().includes(value)) {
+                if ($userDiv.find(".userQQ").text().toLowerCase().includes(value)) {
                     $userDiv.css("display", display);
-                } else if ($userDiv.find(".userName").text().includes(value)) {
+                } else if ($userDiv.find(".userName").text().toLowerCase().includes(value)) {
                     $userDiv.css("display", display);
                 }
             }
@@ -282,13 +282,13 @@ function searchUser() {
             $userDivs.css("display", "none");
             for (const userDiv of $userDivs) {
                 const $userDiv = $(userDiv);
-                if ($userDiv.find(".userName").text().includes(value)) {
+                if ($userDiv.find(".userName").text().toLowerCase().includes(value)) {
                     $userDiv.css("display", display);
-                } else if ($userDiv.find(".userRole").text().includes(value)) {
+                } else if ($userDiv.find(".userRole").text().toLowerCase().includes(value)) {
                     $userDiv.css("display", display);
                 } else {
                     const userOnline = $userDiv.find(".userOnline");
-                    if (userOnline.text().includes(value)&&userOnline.css("opacity")!=0) {
+                    if (userOnline.text().toLowerCase().includes(value)&&userOnline.css("opacity")!=0) {
                         $userDiv.css("display", display);
                     }
                 }

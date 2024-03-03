@@ -153,7 +153,7 @@ public class QuestionTest {
     public void getPartition(){
         insertQuestion();
         testGetAnswerAndContent();
-        Partition partition = partitionService.findByName("undefined");
+        Partition partition = partitionService.findByName("undefined").orElseThrow();
         assert partition.getQuestions().contains(question1);
         assert partition.getQuestions().contains(question2);
     }

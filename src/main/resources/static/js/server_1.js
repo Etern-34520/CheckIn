@@ -17,6 +17,7 @@ function initTraffic() {
                     setTimeout(function () {
                         transiting = false;
                     }, 500);
+                    searchTraffic();
                 }, "Left", "Right");
             })
         });
@@ -26,7 +27,7 @@ function initTraffic() {
 function generateDateTrafficHtml(date, trafficData) {
     let traffics = "";
     for (const trafficElement of trafficData.traffics) {
-        traffics += `<div component_type="userTraffic" clickable rounded onclick="selectTrafficDetail(${trafficElement.id})">${trafficElement.localTime} ${trafficElement.ip} ${trafficElement.qqNumber}</div>`;
+        traffics += `<div component_type="userTraffic" class="dateTrafficItem" clickable rounded onclick="selectTrafficDetail(${trafficElement.id})">${trafficElement.localTime} ${trafficElement.ip} ${trafficElement.qqNumber}</div>`;
     }
     return `
 <div id="${date}" class="dateTrafficDetail">
@@ -50,3 +51,33 @@ function selectTrafficDetail(id) {
         }
     })
 }
+
+function searchTraffic() {
+    let $dateTrafficDetails = $(".dateTrafficItem");
+    let searchString = $("#searchInput").val().toLowerCase();
+    if (searchString === "") {
+        for (const dateTrafficDetail of $dateTrafficDetails) {
+            $(dateTrafficDetail).stop();
+            $(dateTrafficDetail).slideDown(200,"easeOutQuint");
+        }
+        return;
+    }
+    let words = searchString.split(" ");
+    for (const dateTrafficDetail of $dateTrafficDetails) {
+        const $dateTrafficDetail = $(dateTrafficDetail);
+        let show = false;
+        for (const word of words) {
+            if (word === "" || word === " ") continue;
+            if ($dateTrafficDetail.text().toLowerCase().includes(word)) {
+                show = true;
+                break;
+            }
+        }
+        if (show) {
+            $dateTrafficDetail.css("display", "block");
+        } else {
+            $dateTrafficDetail.css("display", "none");
+        }
+    }
+}
+

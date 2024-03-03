@@ -30,16 +30,46 @@ function rotateShrinkButton(div, shrinkFuncName, expandFuncName) {
 
 // noinspection JSUnusedGlobalSymbols
 function expandDiv(shrinkButton) {
-    const $content = $(shrinkButton).parent().parent().children().eq(1);
-    $content.slideDown(200, "easeOutQuad", function () {
+    let /*jquery*/ $shrinkPane = $(shrinkButton).parent().parent();
+    setTimeout(function () {
+        $shrinkPane.children().eq(0).css("border-radius", "8px 8px 0 0");
+    }, 100);
+    const $content = $shrinkPane.children().eq(1);
+    let $mainContent = $content.children().eq(0);
+    $mainContent.css("margin-top", "-100%");
+    $mainContent.css("margin-bottom", "100%");
+    $content.slideDown(200, "easeOutCubic", function () {
         $content.css("display", "block");
+    });
+    $mainContent.animate({
+        marginTop: "0%",
+        marginBottom: "0%"
+    }, {
+        duration: 300,
+        easing: "easeOutCubic",
+        queue: false
     });
 }
 
 // noinspection JSUnusedGlobalSymbols
 function shrinkDiv(shrinkButton) {
-    const $content = $(shrinkButton).parent().parent().children().eq(1);
-    $content.slideUp(200, "easeOutQuad");
+    let /*jquery*/ $shrinkPane = $(shrinkButton).parent().parent();
+    setTimeout(function () {
+        $shrinkPane.children().eq(0).css("border-radius", "8px");
+    }, 100);
+    const $content = $shrinkPane.children().eq(1);
+    let $mainContent = $content.children().eq(0);
+    $mainContent.animate({
+        marginTop: "-100%",
+        marginBottom: "100%"
+    }, {
+        duration: 200,
+        easing: "easeInCubic",
+        queue: false
+    });
+    setTimeout(function () {
+        $content.slideUp(200, "easeOutQuad");
+    }, 100);
 }
 
 function toggleSwitch($toggleSwitch, moveLeft, toggleSwitchOn, toggleSwitchOff) {
@@ -509,7 +539,7 @@ function initShrinkPane($divs) {
         let $title;
         let $content = $(`
 <div style="overflow: hidden;display: none;">
-    <div class="line"</div>
+<!--    <div class="line"</div>-->
 </div>`);
         let title = $div;
 

@@ -1,5 +1,4 @@
-create table role_permission_mapping
-(
+create table role_permission_mapping (
     role_type     varchar(255) not null,
     permission_id varchar(255) not null,
     primary key (role_type, permission_id)

@@ -8,6 +8,7 @@ import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.SettingService;
 import jakarta.servlet.http.Part;
+import lombok.Getter;
 import org.apache.commons.io.file.PathUtils;
 
 import java.io.BufferedOutputStream;
@@ -23,14 +24,31 @@ import java.util.stream.Stream;
 
 public class MultipleQuestionBuilder {
     MultiPartitionableQuestion multipleQuestion;
+    @Getter
     final List<Choice> choices = new ArrayList<>();
     String md5;
     String questionContent;
+    @Getter
     final Set<Partition> partitions = new HashSet<>();
+    @Getter
     final List<Part> imageParts = new ArrayList<>();
 
     User author;
     boolean enable = false;
+
+    public static MultipleQuestionBuilder from(MultipleChoiceQuestion multiPartitionableQuestion) {
+        return new MultipleQuestionBuilder().setQuestionContent(multiPartitionableQuestion.getContent())
+                .addChoices(multiPartitionableQuestion.getChoices())
+                .addPartitions(multiPartitionableQuestion.getPartitions())
+                .setAuthor(multiPartitionableQuestion.getAuthor())
+                .setEnable(multiPartitionableQuestion.isEnabled())
+                .setMD5(multiPartitionableQuestion.getMd5());
+    }
+
+    private MultipleQuestionBuilder addPartitions(Collection<Partition> partitions) {
+        this.partitions.addAll(partitions);
+        return this;
+    }
 
     public MultipleQuestionBuilder addChoice(Choice choice) {
         choices.add(choice);
@@ -204,6 +222,13 @@ public class MultipleQuestionBuilder {
             partition = Partition.getInstance("undefined");
         }
         partitions.add(partition);
+        return this;
+    }
+
+    public MultipleQuestionBuilder addPartitionsById(List<Integer> partitionId) {
+        for (Integer id : partitionId) {
+            partitions.add(Partition.getInstance(id));
+        }
         return this;
     }
 }

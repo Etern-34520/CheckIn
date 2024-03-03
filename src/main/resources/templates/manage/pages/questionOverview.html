@@ -15,28 +15,27 @@
                 <div class="questionChoices">
                     <div th:each="choice:${question.getChoices()}" class="questionChoice"
                          th:correct="${choice.getIsCorrect()}" rounded th:text="${choice.getContent()}"></div>
-                    <!--                </div>-->
                 </div>
             </div>
         </div>
         <div content>
-            <div class="questionOverviewImages" style="flex-wrap: wrap;display: flex;flex-direction: row"></div>
-            <div style="display: flex;flex-direction: row;flex-wrap: wrap">
+            <div class="questionOverviewImages"></div>
+            <div class="questionActions">
                 <div class="questionMD5" rounded th:text="${question.getMd5()}"></div>
                 <div class="questionType" rounded th:text="${question.getClass().getSimpleName()}"></div>
                 <div class="questionAuthor" rounded
                      th:text="${question.getAuthor()!=null?question.getAuthor().getName()+'('+question.getAuthor().getQQNumber()+')':'unknown'}"></div>
                 <div class="questionEditTime" rounded style="flex: none"
-                     th:text="${question.getLastEditTime()==null?'修改时间未知':question.getLastEditTime().toString()}"></div>
-                <button th:if="${jumpBool}" rounded highlight style="padding: 4px 6px;margin: 2px"
+                     th:text="${question.getLastEditTime()==null?'修改时间未知':question.getLastEditTimeString()}"></div>
+                <button class="questionOverviewButton" th:if="${jumpBool}" rounded highlight style="padding: 4px 6px;margin: 2px"
                         th:onclick="switchToPageWithAnimate('server',2,false,function () {md5ToQuestionFormDataMap = new Map();editQuestion([[${question.getMd5()}]])})">
-                    编辑
+                    编辑...
                 </button>
-                <button th:unless="${jumpBool}" rounded highlight style="padding: 4px 6px;margin: 2px"
-                        th:onclick="md5ToQuestionFormDataMap = new Map();editQuestion([[${question.getMd5()}]])">编辑
+                <button class="questionOverviewButton" th:unless="${jumpBool}" rounded highlight style="padding: 4px 6px;margin: 2px"
+                        th:onclick="md5ToQuestionFormDataMap = new Map();editQuestion([[${question.getMd5()}]])">编辑...
                 </button>
                 <!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
-                <button rounded highlight style="padding: 4px 6px;margin: 2px" th:if="${permissionMap.get('permission_delete_others_question')}"
+                <button class="questionOverviewButton" rounded highlight style="padding: 4px 6px;margin: 2px" th:if="${permissionMap.get('permission_delete_others_question')}"
                         th:onclick="confirmAction(function (){deleteQuestion([[${question.md5}]]);},$(this))">删除
                 </button>
             </div>

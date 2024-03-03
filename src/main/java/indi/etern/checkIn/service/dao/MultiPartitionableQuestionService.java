@@ -55,9 +55,11 @@ public class MultiPartitionableQuestionService {
                 multipleQuestionBuilder.setMD5(originalMd5);
             }
         }
+/*
         if (author == null) {
             author = UserService.singletonInstance.findByQQNumber(Long.parseLong(httpServletRequest.getParameter("author"))).orElseThrow();
         }
+*/
 
         //content
         multipleQuestionBuilder.setQuestionContent(httpServletRequest.getParameter("questionContent"));
@@ -108,8 +110,8 @@ public class MultiPartitionableQuestionService {
         return multipleQuestionBuilder.build();
     }
 
-    public void save(MultiPartitionableQuestion multiPartitionableQuestion) {
-        multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
+    public MultiPartitionableQuestion save(MultiPartitionableQuestion multiPartitionableQuestion) {
+        return multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
     }
 
     public List<MultiPartitionableQuestion> findAll() {
@@ -144,7 +146,7 @@ public class MultiPartitionableQuestionService {
             Set<Partition> partitions = multiPartitionableQuestion.getPartitions();
             for (Partition partition : partitions) {
                 partition.getQuestions().remove(multiPartitionableQuestion);
-                partitionService.saveAndFlush(partition);
+                partitionService.save(partition);
             }
             return Boolean.TRUE;
         });
@@ -171,7 +173,7 @@ public class MultiPartitionableQuestionService {
                     Set<MultiPartitionableQuestion> questions;
                     questions = partition.getQuestions();
                     questions.remove(multiPartitionableQuestion);
-                    partitionService.saveAndFlush(partition);
+                    partitionService.save(partition);
                 }
                 try {
                     partitionSetField.set(multiPartitionableQuestion, new HashSet<>());
@@ -179,9 +181,9 @@ public class MultiPartitionableQuestionService {
                     throw new RuntimeException(e);
                 }
                 multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
-                multiplePartitionableQuestionRepository.flush();
+//                multiplePartitionableQuestionRepository.flush();
                 multiplePartitionableQuestionRepository.deleteById(id);
-                multiplePartitionableQuestionRepository.flush();
+//                multiplePartitionableQuestionRepository.flush();
                 if (!update)
                     try {
                         Path path = Paths.get("data/images/" + id + "/");
@@ -199,34 +201,21 @@ public class MultiPartitionableQuestionService {
         update = true;
         transactionTemplate.execute((TransactionCallback<Object>) status -> {
             try {
-                final String md5 = multiPartitionableQuestion.getMd5();
-                if (multiplePartitionableQuestionRepository.existsById(md5)) {
-                    MultiPartitionableQuestion oldMultiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
-                    oldMultiPartitionableQuestion.getPartitions().forEach(partition -> {
-                        partition.getQuestions().remove(oldMultiPartitionableQuestion);
-                        partitionService.saveAndFlush(partition);
-                    });
-                    deleteById(md5);
-                    multiPartitionableQuestion.getPartitions().forEach(partition -> {
-                        partition.getQuestions().remove(multiPartitionableQuestion);
-                        partitionService.saveAndFlush(partition);
-                    });
-                    status.flush();
-                }
-                return Boolean.TRUE;
-            } catch (Exception e) {
-                status.setRollbackOnly();
-                logger.error(e.getMessage());
-                logger.debug("trace:");
-                e.printStackTrace();
-                update = false;
-            }
-            return Boolean.FALSE;
-        });
-        transactionTemplate.execute((TransactionCallback<Object>) status -> {
-            try {
+//                final String md5 = multiPartitionableQuestion.getMd5();
+//                if (multiplePartitionableQuestionRepository.existsById(md5)) {
+//                    MultiPartitionableQuestion oldMultiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
+//                    oldMultiPartitionableQuestion.getPartitions().forEach(partition -> {
+//                        partition.getQuestions().remove(oldMultiPartitionableQuestion);
+//                        partitionService.save(partition);
+//                    });
+//                    deleteById(md5);
+//                    multiPartitionableQuestion.getPartitions().forEach(partition -> {
+//                        partition.getQuestions().remove(multiPartitionableQuestion);
+//                        partitionService.save(partition);
+//                    });
+////                    status.flush();
+//                }
                 multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
-                status.flush();
                 return Boolean.TRUE;
             } catch (JpaObjectRetrievalFailureException jpaObjectRetrievalFailureException) {
                 String errorId = jpaObjectRetrievalFailureException.getMessage().split("with id ")[1];
@@ -268,7 +257,7 @@ public class MultiPartitionableQuestionService {
     }
 
     public List<MultiPartitionableQuestion> findEditedInLastDays(int dayCount) {
-        return multiplePartitionableQuestionRepository.findAllByLastEditTimeBefore(LocalDateTime.now().minusDays(dayCount), Sort.by(Sort.Direction.DESC,"lastEditTime"));
+        return multiplePartitionableQuestionRepository.findAllByLastEditTimeBefore(LocalDateTime.now().minusDays(dayCount), Sort.by(Sort.Direction.DESC, "lastEditTime"));
     }
 
     public boolean existsById(String questionId) {
@@ -277,6 +266,38 @@ public class MultiPartitionableQuestionService {
 
     public void saveAll(Collection<MultiPartitionableQuestion> multiPartitionableQuestions) {
         multiplePartitionableQuestionRepository.saveAll(multiPartitionableQuestions);
+    }
+
+    public void deleteAllById(Collection<String> md5s) {
+        for (String md5 : md5s) {
+            deleteById(md5);
+        }
+    }
+
+    public long countEnabled() {
+        return multiplePartitionableQuestionRepository.countByEnabledIsTrue();
+    }
+
+    public List<MultiPartitionableQuestion> enableAllById(Collection<String> md5s) {
+        List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
+        for (String md5 : md5s) {
+            MultiPartitionableQuestion multiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
+            multiPartitionableQuestion.setEnabled(true);
+            multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
+            multiPartitionableQuestions.add(multiPartitionableQuestion);
+        }
+        return multiPartitionableQuestions;
+    }
+
+    public List<MultiPartitionableQuestion> disableAllById(Collection<String> md5s) {
+        List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
+        for (String md5 : md5s) {
+            MultiPartitionableQuestion multiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
+            multiPartitionableQuestion.setEnabled(false);
+            multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
+            multiPartitionableQuestions.add(multiPartitionableQuestion);
+        }
+        return multiPartitionableQuestions;
     }
 }
 

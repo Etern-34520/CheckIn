@@ -3,18 +3,15 @@
 <div id="managePage" index="2" page-type="server">
     <div id="left" rounded border>
         <div class="subContentRoot">
-<!--            <component:shrinkPane titlePadding="2" titleMinHeight="30" style="margin:0">-->
-<!--                <jsp:attribute name="title">-->
-            <div rounded class="sortOption">
+            <div rounded class="sortOption" style="margin: 0">
                 <div title style="flex: 1;display: flex;flex-direction: row">
-                    <label style="margin-left: 4px">排序</label>
+                    <label style="margin-left: 4px">排序和搜索</label>
                     <div class="blank"></div>
                 </div>
                 <div content>
                     <div style="display: flex;flex-direction: row">
                         <div class="blank"></div>
                         <label>降序</label>
-<!--                        <component:toggleSwitch switchID="sortTypeSwitch" style="margin: 0 6px" onFuncName="sortQuestionAsc" offFuncName="sortQuestionDesc"/>-->
                         <span id="sortTypeSwitch" style="margin: 0 6px" onSwitchOn="sortQuestionAsc" onSwitchOff="sortQuestionDesc"></span>
                         <script>
                             initSwitch($("#sortTypeSwitch"));
@@ -27,17 +24,20 @@
                         <div rounded clickable type="lastEditTime" onclick="selectSortOption(this)">修改时间</div>
                         <div rounded clickable type="author" onclick="selectSortOption(this)">作者</div>
                     </div>
+                    <div style="display: flex;flex-direction: column">
+                        <label for="searchQuestionInput" style="margin-left: 4px">搜索</label>
+                        <input id="searchQuestionInput" style="height: 30px" type="text" oninput="searchQuestion()">
+                    </div>
                 </div>
             </div>
             <script>initShrinkPane($(".sortOption"))</script>
             <label titleLabel text>分区</label>
-            <div id="partitionButtons">
+            <div class="partitionButtons">
                     <button th:each="partition:${@partitionInfo.getPartitions()}" type="button" th:id="'partitionButton'+${partition.getId()}" class="partitionButton"
                             onclick="switchToPartition(this)" preText
                             editing="false" th:text="${partition.getName()}"></button>
                 <!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
-                    <button th:if="${permissionMap.get('permission_create_partition')}" type="button" id="addPartitionButton" style="font-size: 20px" onclick="newPartition()">+
-                    </button>
+                    <button th:if="${permissionMap.get('permission_create_partition')}" type="button" id="addPartitionButton" style="font-size: 20px" onclick="newPartition()">+</button>
             </div>
         </div>
     </div>

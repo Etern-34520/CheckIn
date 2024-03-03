@@ -66,6 +66,15 @@ function initWebSocket(button) {
             case "updateQuestion":
                 updateQuestionDiv(message.question);
                 break;
+            case "updateQuestions":
+                let animation = true;
+                if (message.questions.length > 20) {
+                    animation = false;
+                }
+                for (let question of message.questions) {
+                    updateQuestionDiv(question, animation);
+                }
+                break;
             case "deleteUser":
                 removeUserDiv(message.QQ);
                 break;

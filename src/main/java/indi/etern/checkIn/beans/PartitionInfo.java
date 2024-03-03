@@ -51,11 +51,7 @@ public class PartitionInfo {
     }
     
     public long getQuestionCount() {
-        return multiPartitionableQuestionService.count();
-    }
-    
-    public Partition getGetByName(String name) {
-        return partitionService.findByName(name);
+        return multiPartitionableQuestionService.countEnabled();
     }
     
 }

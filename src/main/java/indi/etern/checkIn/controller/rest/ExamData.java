@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-public class QuestionData {
+public class ExamData {
     private final UserTrafficService userTrafficService;
     private final PartitionService partitionService;
     private final MultiPartitionableQuestionService multiPartitionableQuestionService;
     private final ObjectMapper objectMapper;
     private final ExamCheckService checkService;
     
-    public QuestionData(UserTrafficService userTrafficService, PartitionService partitionService, MultiPartitionableQuestionService multiPartitionableQuestionService, ObjectMapper objectMapper, ExamCheckService checkService) {
+    public ExamData(UserTrafficService userTrafficService, PartitionService partitionService, MultiPartitionableQuestionService multiPartitionableQuestionService, ObjectMapper objectMapper, ExamCheckService checkService) {
         this.userTrafficService = userTrafficService;
         this.partitionService = partitionService;
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
@@ -32,7 +32,7 @@ public class QuestionData {
     }
     
     @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, path = "/data/reload/")
-    public String generateExam(@RequestParam String qq, @RequestParam List<Integer> partitionIds, HttpServletRequest request) throws JsonProcessingException, BadRequestException {
+    public String generateExam(@RequestParam String qq, @RequestParam List<Integer> partitionIds, HttpServletRequest request) throws Exception {
         final long qqNumber = Long.parseLong(qq);
         int examCount = userTrafficService.count(qqNumber);
         final long seed = Long.parseLong(qq + "00" + examCount);

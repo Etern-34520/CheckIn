@@ -1,5 +1,4 @@
-create table partitions
-(
+create table partitions (
     id   int          not null
         primary key,
     name varchar(191) not null,

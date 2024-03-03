@@ -25,9 +25,7 @@ public class ChangeUserRoleAction extends UserJsonResultAction{
         Optional<JsonObject> optionalJsonObject = Optional.empty();
         if (UserService.singletonInstance.existsByQQNumber(qqNumber)) {
             User user = UserService.singletonInstance.changeRoleById(qqNumber, roleName);
-            final JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("type", "success");
-            optionalJsonObject = Optional.of(jsonObject);
+            optionalJsonObject = successOptionalJsonObject;
             sendUpdateUserToAll(user);
         } else {
             optionalJsonObject = getOptionalErrorJsonObject("user not found");

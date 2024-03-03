@@ -24,8 +24,6 @@ public class DeleteRoleAction extends TransactionalAction {
             return getOptionalErrorJsonObject("用户组非空");
         }
         RoleService.singletonInstance.delete(role);
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "success");
-        return Optional.of(jsonObject);
+        return successOptionalJsonObject;
     }
 }

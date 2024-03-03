@@ -59,7 +59,7 @@ public class Partition implements Serializable {
     
     public static Partition getInstance(String string) {
         if (partitionMap.get(string) == null) {
-            final Optional<Partition> optionalPartition = PartitionService.singletonInstance.tryFindByName(string);
+            final Optional<Partition> optionalPartition = PartitionService.singletonInstance.findByName(string);
             if (optionalPartition.isPresent()) {
                 partitionMap.put(string, optionalPartition.get());
                 partitionIdMap.put(optionalPartition.get().getId(), optionalPartition.get());

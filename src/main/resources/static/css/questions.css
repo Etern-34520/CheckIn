@@ -1,12 +1,57 @@
 .questions {
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
 }
 
 .question {
     display: flex;
     flex-direction: row;
     margin-bottom: 8px;
+}
+
+.question[clickable] {
+    cursor: pointer;
+    background: rgba(0,0,0,0) !important;
+}
+
+.question[clickable] > div:nth-of-type(2) {
+    background: rgba(0,0,0,0);
+}
+
+.question[clickable] > div:first-of-type,
+.question[clickable] > div:nth-of-type(2) > div {
+    background: var(--shrinkPane-background-color);
+    transition: background-color 200ms;
+    transition-timing-function: ease-in-out;
+}
+
+.question[clickable]:hover > div:first-of-type,
+.question[clickable]:hover > div:nth-of-type(2) > div {
+    background: var(--shrinkPane-background-color-hover);
+}
+
+.question[selected] {
+    cursor: pointer;
+    background: rgba(0,0,0,0) !important;
+}
+
+.question[selected] > div:nth-of-type(2) {
+    background: rgba(0,0,0,0);
+}
+
+.question[selected] > div:first-of-type,
+.question[selected] > div:nth-of-type(2) > div{
+    background: var(--selected-question-background-color) !important;
+    transition: background-color 200ms;
+    transition-timing-function: ease-in-out;
+}
+
+.question[selected]:hover > div:first-of-type,
+.question[selected]:hover > div:nth-of-type(2) > div{
+    background: var(--selected-question-background-color-hover) !important;
 }
 
 .question > .l1 {
@@ -29,11 +74,24 @@
     flex-direction: row;
 }
 
-.question > div{
-    padding: 2px;
+.question > div {
+    padding: 0;
 }
 
-.question div[rounded]:not([component_type="shrinkButton"]){
+.questionActions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 4px;
+}
+
+.questionOverviewImages {
+    flex-wrap: wrap;
+    display: flex;
+    flex-direction: row
+}
+
+.question div[rounded]:not([component_type="shrinkButton"]) {
     margin: 2px;
     background: var(--component-light-background-color);
 }
@@ -48,21 +106,8 @@
     flex: none;
 }
 
-.addButtons {
-    display: flex;
-    flex-direction: row;
-    margin-top: 8px;
-}
-
 .questionType {
     flex: 0;
-}
-
-.addButtons > button {
-    margin: 0 4px;
-    font-size: 28px;
-    height: 70px;
-    flex: 1;
 }
 
 .questionChoices {

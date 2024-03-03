@@ -183,7 +183,7 @@ function initQuestionForm() {
         if ($("#optionsDiv").children().length <= 2) {
             let $deleteOptionButton = $(".deleteOptionButton");
             $deleteOptionButton.attr("disabled", "disabled");
-            $deleteOptionButton.fadeOut(200, "easeInOutCubic");
+            $deleteOptionButton.hide(200, "easeInOutCubic");
         }
         let $questionEditForm = $("#questionEditForm");
         $questionEditForm.find("input").on("input", function () {
@@ -405,7 +405,7 @@ class QuestionFormData {
 <div class="optionDiv" style="display: none">
 <input type="checkbox" name="correct` + (index + 1) + `" id="correct` + (index + 1) + `" value="true">
 <input type="text" style="margin-left: 8px" name="` + (index + 1) + `"  id="` + (index + 1) + `" value="">
-<button class="deleteOptionButton" type="button" style="height: 32px;width: 32px;margin: 4px;font-size: 24px" onclick="deleteChoice(this)">-</button>
+<button class="deleteOptionButton" type="button" onclick="deleteChoice(this)">-</button>
 </div>
 `;
         let $optionDiv = $(divHtml);
@@ -421,9 +421,9 @@ class QuestionFormData {
         }.bind(this));
         let $deleteOptionButton = $(".deleteOptionButton");
         if ($optionsDiv.children().length <= 2) {
-            $deleteOptionButton.fadeOut(200, "easeInOutCubic");
+            $deleteOptionButton.hide(200, "easeInOutCubic");
         } else {
-            $deleteOptionButton.fadeIn(200, "easeInOutCubic");
+            $deleteOptionButton.show(200, "easeInOutCubic");
             $deleteOptionButton.removeAttr("disabled");
         }
         if (animate) {
@@ -440,7 +440,7 @@ class QuestionFormData {
             if (children.length <= 2) {
                 let $deleteOptionButton = $(".deleteOptionButton");
                 $deleteOptionButton.attr("disabled", "disabled");
-                $deleteOptionButton.fadeOut(200, "easeInOutCubic");
+                $deleteOptionButton.hide(200, "easeInOutCubic");
             }
             this.updateDataAndCheckChange();
         }.bind(this));
@@ -542,8 +542,8 @@ onmouseout="hideDeleteDiv(this);">-
             } else {
                 let $firstChild = $questionsOfPartitions.children().eq(0);
                 let $partitionDiv = $(`
-<div rounded clickable class="question${questionMd5}" style="height: 21px;overflow: hidden;display: flex;flex-direction: row" onclick="switchToQuestion('${questionMd5}',this)">
-<div class="pointer" style="width: 10px">•</div>
+<div rounded clickable class="questionContentItem question${questionMd5}" onclick="switchToQuestion('${questionMd5}',this)">
+<div class="pointer"></div>
 <div style="flex: 1">
 ${$questionContent.val()}
 </div>
@@ -618,7 +618,7 @@ ${$questionContent.val()}
 //following functions for current questionFormData
 function togglePartition(titleDiv) {
     const $titleDiv = $(titleDiv);
-    $titleDiv.parent().parent().children().eq(1).toggle(200, function () {
+    $titleDiv.parent().parent().children().eq(1).slideToggle(200, function () {
         if ($titleDiv.attr('selected') === 'selected') {
             $titleDiv.removeAttr('selected');
         } else {

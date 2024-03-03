@@ -40,5 +40,14 @@
 }
 
 #trafficList > div {
-    margin-bottom: 0;
+    margin: 2px 0 0;
+    overflow: hidden;
+}
+
+#trafficUserAvatar {
+    width: 100px;
+    aspect-ratio: 1;
+    max-width: 90%;
+    border-radius: 50%;
+    background-size: 100% 100%;
 }

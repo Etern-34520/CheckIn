@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="cn" xmlns:th="https://www.thymeleaf.org">
-<!--TODO-->
 <!--/*@thymesVar id="currentUser" type="indi.etern.checkIn.entities.user.User"*/-->
 <!--/*@thymesVar id="question" type="indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion"*/-->
 <form id="questionEditForm" onload="initQuestionForm()"
-      th:with="canEditQuestion=${permissionMap.get('permission_edit_others_question') || question.getAuthor().equals(currentUser)&&permissionMap.get('permission_create_and_edit_owns_question')}">
+      th:with="canEditQuestion=${permissionMap.get('permission_edit_others_question') || question.getAuthor()!=null&&question.getAuthor().equals(currentUser)&&permissionMap.get('permission_create_and_edit_owns_question')}">
     <div id="formBox">
         <div id="formDiv" style="display: flex;flex-direction: row">
             <input type="hidden" id="questionEdit" name="questionEdit" value="true">
@@ -36,13 +35,13 @@
                                    th:value="${choice.getContent()}" th:disabled="${!canEditQuestion}">
                             <button th:if="${canEditQuestion}" th:id="'delete'+${stat.index+1}"
                                     class="deleteOptionButton" type="button"
-                                    style="height: 32px;width: 32px;margin: 4px;font-size: 24px"
+                                    style="height: 48px;width: 48px;margin: 4px;font-size: 30px;flex: none"
                                     onclick="deleteChoice(this)">-
                             </button>
                         </div>
                     </div>
                     <button th:if="${canEditQuestion}" type="button"
-                            style="height:40px;margin-top: 8px;margin-left: 36px;font-size: 24px"
+                            style="height:40px;margin-top: 8px;margin-left: 36px;margin-right: 4px;font-size: 24px"
                             onclick="addNewChoice()">+
                     </button>
                 </div>
@@ -55,9 +54,10 @@
                         <th:block th:each="user:${@userInfo.getUsers()}">
                             <option th:id="'userSelect'+${user.QQNumber}"
                                     th:value="${user.getQQNumber()}"
-                                    th:selected="${(question.author!=null&&question.author.equals(user))||(question.author==null&&user.equals(currentUser))}"
+                                    th:selected="${(question.getAuthor()!=null&&question.getAuthor().equals(user))}"
                                     th:text="${user.name}"></option>
                         </th:block>
+                        <option th:if="${question.getAuthor()==null}" id="userSelect0" value="0" selected>unknown</option>
                     </select>
                 </div>
                 <div style="display: flex;align-items: center;margin-bottom: 8px">
@@ -70,25 +70,20 @@
                 <label text>分区</label>
                 <div rounded style="background: var(--input-background-color);flex: 1;overflow: auto;margin-bottom: 0;"
                      id="partitionSelectionsDiv" class="selections">
-<!--                    <c:forEach var="partition" items="${partitionInfo.partitions}">-->
-<!--                        <c:set var="partitionInclude" value="${question.partitions.contains(partition)}"/>-->
                     <th:block th:each="partition:${@partitionInfo.getPartitions()}">
-
                         <div rounded clickable
-                            th:disabled = "${!canEditQuestion}"
-                        onclick="selectQuestionPartition(this)"
+                             th:disabled="${!canEditQuestion}"
+                             onclick="selectQuestionPartition(this)"
                              th:selected="${!ignorePartitionSelection && question.getPartitionIds().contains(partition.getId())?'pre':false}"
-                        th:id="'partition_select_'+${partition.id}" >
-                        <input type="hidden" th:id="'question_partition_'+${partition.id}"
-                               th:name="'question_partition_'+${partition.id}" value="false">
-                        <label th:text="${partition.getName()}"></label>
+                             th:id="'partition_select_'+${partition.id}">
+                            <input type="hidden" th:id="'question_partition_'+${partition.id}"
+                                   th:name="'question_partition_'+${partition.id}" value="false">
+                            <label th:text="${partition.getName()}"></label>
+                        </div>
+                    </th:block>
                 </div>
-                </th:block>
-<!--                </c:forEach>-->
             </div>
         </div>
-
-    </div>
     </div>
 </form>
 </html>

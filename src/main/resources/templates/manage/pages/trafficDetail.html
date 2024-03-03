@@ -3,13 +3,7 @@
 <!--/*@thymesVar id="userTraffic" type="indi.etern.checkIn.entities.traffic.UserTraffic"*/-->
 <div style="display: flex;flex-direction: column">
     <div style="display: flex;flex-direction: row" th:with="passed=${userTraffic.getAttributesMap().get('passed')}">
-        <div th:if="${userTraffic.getQQNumber() >= 10000}" style="
-                    width: 100px;
-                    aspect-ratio: 1;
-                    max-width: 90%;
-                    border-radius: 50%;
-                    background-size: 100% 100%;
-                    background-image: url('https://q1.qlogo.cn/g?b=qq&nk=${userTraffic.QQNumber}&s=640');"></div>
+        <div id="trafficUserAvatar" th:if="${userTraffic.getQQNumber() >= 10000}" th:style="'background-image: url(&quot;https://q1.qlogo.cn/g?b=qq&nk='+${userTraffic.QQNumber}+'&s=640&quot;);'"></div>
         <div style="display: flex;flex-direction: column">
             <label titleLabel th:text="${userTraffic.getQQNumber()}"></label>
             <label titleLabel th:text="${userTraffic.IP}"></label>

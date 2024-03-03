@@ -107,13 +107,13 @@ public class ManageData {
                     author = oldQuestion.getAuthor();
                 }
             } else {
-                author = userService.findByQQNumber(Long.parseLong(authorQQString)).orElseThrow();
+                author = userService.findByQQNumber(Long.parseLong(authorQQString)).orElse(null);
             }
             final boolean enabled = Boolean.parseBoolean(httpServletRequest.getParameter("enabled"));
             checkPermission(oldQuestion, (User) httpServletRequest.getAttribute("currentUser"), author, enabled);
             
             final MultiPartitionableQuestion multiPartitionableQuestion = MultiPartitionableQuestionService.buildQuestionFromRequest(httpServletRequest, md5, author);
-            multiPartitionableQuestionService.update(multiPartitionableQuestion);
+            multiPartitionableQuestionService.save(multiPartitionableQuestion);
             
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("type", "updateQuestion");

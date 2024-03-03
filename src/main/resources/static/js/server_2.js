@@ -1,5 +1,6 @@
 let editing = false;
 let selectedOption = "content";
+
 function selectSortOption(/**HTMLElement*/optionDiv) {
     if (transferring) {
         return;
@@ -12,7 +13,7 @@ function selectSortOption(/**HTMLElement*/optionDiv) {
     $optionDiv.attr("selected", "selected");
     if (!haveSelected)
         selectedOption = $optionDiv.attr("type");
-        sortQuestion();
+    sortQuestion();
 }
 
 let sortType = "asc";
@@ -120,12 +121,25 @@ function saveEditing($editingInput, $partitionButton, previousName) {
     });
 }
 
-function initQuestionViewImages() {
-    for (const questionDiv of $(".questions").children()) {
-        const $questionDiv = $(questionDiv);
-        const questionMD5 = $questionDiv.attr("id");
-        initQuestionViewImage(questionMD5);
-    }
+function initQuestionViewImages(partitionId) {
+    // for (const questionDiv of $(".questions").children()) {
+    //     const $questionDiv = $(questionDiv);
+    //     const questionMD5 = $questionDiv.attr("id");
+    //     initQuestionViewImage(questionMD5);
+    // }
+    $.ajax({
+        url:"./../question/withImages/ofPartition/"+partitionId,
+        xhrFields: {
+            withCredentials: true
+        },
+        success: function (res) {
+            if (res instanceof Array&&res.length>0) {
+                for (const questionId of res) {
+                    initQuestionViewImage(questionId);
+                }
+            }
+        }
+    })
 }
 
 function initQuestionViewImage(questionMD5) {
@@ -280,8 +294,6 @@ function switchToPartition(button) {
         success: function (res) {
             const leftHtml = $("#left .subContentRoot").html();
             transitionPage($right, res, partitionName, function () {
-                // transitionPage($right, res);
-                transitionPage($("#left"), leftHtml);
             }, function () {
                 transferring = false;
             });
@@ -418,7 +430,7 @@ ${addButtonHtml}
     const removed = new Map();
     const changed = new Map();
     differenceMap.set("editingQuestion", false);
-    let $partitionButtons = $("#partitionButtons > .partitionButton");
+    let $partitionButtons = $(".partitionButtons > .partitionButton");
     if ($partitionButtons.length !== 0) {//if it is not editing question
         for (const partitionButton of $partitionButtons) {
             const $partitionButton = $(partitionButton);
@@ -465,16 +477,21 @@ function removeQuestionDiv(questionMD5) {
         if ($questionMD5Div.text() === questionMD5) {
             let $questionDiv = $("#" + questionMD5);
             $questionDiv.animate({
-                height: 0,
-                opacity: 0,
-                marginTop: 0,
-                marginBottom: 0,
-                paddingTop: 0,
-                paddingBottom: 0,
-            }, 200, "easeOutQuad", function () {
-                setTimeout(function () {
-                    $questionDiv.remove();
-                }, 100);
+                marginLeft: "150%",
+                marginRight: "-150%"
+            }, 200, "easeInQuad", function () {
+                $questionDiv.animate({
+                    height: 0,
+                    opacity: 0,
+                    marginTop: 0,
+                    marginBottom: 0,
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                }, 200, "easeOutQuad", function () {
+                    setTimeout(function () {
+                        $questionDiv.remove();
+                    }, 100);
+                });
             });
             break;
         }
@@ -522,7 +539,28 @@ function generateQuestionHtml(questionObject) {
     `;
 }
 
-function updateQuestionDiv(questionJsonData) {
+function loadQuestion(questionObject, $questionsDiv) {
+    $.ajax({
+        url: "./page/questionOverview",
+        data: {
+            md5: questionObject.md5
+        },
+        success: function (res) {
+            const $questionDiv = $(res);
+            $questionDiv.css({
+                maxHeight: 0,
+                opacity: 0
+            });
+            $questionsDiv.append($questionDiv);
+            $questionDiv.animate({
+                maxHeight: 1000,
+                opacity: 1
+            }, 200, "easeOutQuad");
+        }
+    });
+}
+
+function updateQuestionDiv(questionJsonData, animation = true) {
     let questionObject = JSON.parse(questionJsonData);
 
     const $questionDivs = $("#" + questionObject.md5);
@@ -538,24 +576,7 @@ function updateQuestionDiv(questionJsonData) {
         if (!containedInCurrentPartition) {
             return;
         }
-        $.ajax({
-            url: "./page/questionOverview",
-            data: {
-                md5: questionObject.md5
-            },
-            success: function (res) {
-                const $questionDiv = $(res);
-                $questionDiv.css({
-                    maxHeight: 0,
-                    opacity: 0
-                });
-                $questionsDiv.append($questionDiv);
-                $questionDiv.animate({
-                    maxHeight: 1000,
-                    opacity: 1
-                }, 200, "easeOutQuad");
-            }
-        });
+        loadQuestion(questionObject, $questionsDiv);
     } else {
         let deletedFromCurrentPartition = true;
         const $questionDiv = $questionDivs.eq(0);
@@ -565,33 +586,37 @@ function updateQuestionDiv(questionJsonData) {
             }
         }
         if (deletedFromCurrentPartition) {
-            $questionDiv.animate({
-                height: 0,
-                opacity: 0
-            }, 200, "easeOutQuad", function () {
-                setTimeout(function () {
-                    $questionDiv.remove();
-                }, 100);
-            });
+            if (animation)
+                $questionDiv.animate({
+                    height: 0,
+                    opacity: 0
+                }, 200, "easeOutQuad", function () {
+                    setTimeout(function () {
+                        $questionDiv.remove();
+                    }, 100);
+                });
+            else $questionDiv.remove();
         }
         const $questionContentDiv = $questionDiv.find(".questionContent");
         const $questionTypeDiv = $questionDiv.find(".questionType");
         const $questionChoicesDiv = $questionDiv.find(".questionChoices");
+        const $questionEnabledDiv = $questionDiv.find(".questionEnabled");
+        const $questionAuthorDiv = $questionDiv.find(".questionAuthor");
         $questionDiv.find(".imageDiv").remove();
         initQuestionViewImage(questionObject.md5);
 
-        if ($questionsDiv.length > 0) {
-            showTip("info", "Question updated:" + questionObject.md5);
-        }
+        /*
+                if ($questionsDiv.length > 0) {
+                    showTip("info", "Question updated:" + questionObject.md5);
+                }
+        */
         $questionContentDiv.text(questionObject.content);
         $questionTypeDiv.text(questionObject.type);
+        $questionEnabledDiv.text(questionObject.enabled ? "已启用" : "已禁用");
+        $questionAuthorDiv.text(questionObject.author.name + "(" + questionObject.author.qq + ")");
         $questionChoicesDiv.empty();
         for (const choice of questionObject.choices) {
-            let correctTextBlock = '';
-            if (choice.correct === "true") {
-                correctTextBlock = 'correct';
-            }
-            $questionChoicesDiv.append(`<div class="questionChoice" ${correctTextBlock} rounded >${choice.content}</div>`);
+            $questionChoicesDiv.append(`<div class="questionChoice" correct="${choice.correct}" rounded >${choice.content}</div>`);
         }
     }
 
@@ -609,12 +634,15 @@ ${questionObject.content}
             const $questions = $("#partition" + partitionId).children().eq(1);
             $questions.append($partitionDiv);
             if ($questions.children().eq(0).attr("class") === "empty") {
-                $questions.children().eq(0).animate({
-                    opacity: 0,
-                    height: 0
-                }, 200, "easeInOutCubic", function () {
+                if (animation)
+                    $questions.children().eq(0).animate({
+                        opacity: 0,
+                        height: 0
+                    }, 200, "easeInOutCubic", function () {
+                        $questions.children().eq(0).remove();
+                    });
+                else
                     $questions.children().eq(0).remove();
-                });
             }
             $partitionDiv.show(200, "easeInOutCubic");
         } else {
@@ -625,26 +653,295 @@ ${questionObject.content}
 
 function newQuestionOf(partitionId) {
     editQuestion("", partitionId, false);
-    /*let $button = $(button);
-    let $partitionDiv = $button.parent().parent();
-    let $questionsDiv = $partitionDiv.children().eq(1);
-    let questionMd5 = md5(new Date().getTime().toString()+Math.random().toString());
-    let $newQuestionDiv = $(`
-<div rounded clickable initPartition="${$partitionDiv.attr('id').substring(9)}" class="question${questionMd5}" style="height: 21px;overflow: hidden;display: flex;flex-direction: row" onclick="switchToQuestion('${questionMd5}',this)">
-<div class="pointer" style="width: 10px">•</div>
-<div style="flex: 1;line-height: 21px"></div>
-</div>`);
-    if ($questionsDiv.children().eq(0).attr("class") === "empty") {
-        $questionsDiv.children().eq(0).animate({
-            opacity: 0,
-            height: 0
-        }, 200, "easeInOutCubic", function () {
-            $questionsDiv.children().eq(0).remove();
-        });
+}
+
+function searchQuestion() {
+    const $searchInput = $("#searchQuestionInput");
+    const searchText = $searchInput.val().toLowerCase();
+    let $questions = $(".question");
+    if (searchText === "") {
+        $questions.css("display", "flex");
+        return;
     }
-    $newQuestionDiv.css("maxHeight",0);
-    $questionsDiv.append($newQuestionDiv);
-    $newQuestionDiv.animate({
-        maxHeight:100
-    },100,"easeOutCubic");*/
+    const searchWords = searchText.split(" ");
+    for (const question of $questions) {
+        const $question = $(question);
+        let content = $question.find(".questionContent").text().toLowerCase();
+        let type = $question.find(".questionType").text().toLowerCase();
+        let authorNameAndQQ = $question.find(".questionAuthor").text().toLowerCase();
+        let id = $question.find(".questionMD5").text().toLowerCase();
+        let editTime = $question.find(".questionEditTime").text().toLowerCase();
+        let choices = "";
+        for (const choice of $question.find(".questionChoice")) {
+            choices = choices + $(choice).text();
+        }
+        choices = choices.toLowerCase();
+        let match = false;
+        for (const searchWord of searchWords) {
+            if (searchWord === "" || searchWord === " ") continue;
+            if (content.includes(searchWord) ||
+                type.includes(searchWord) ||
+                choices.includes(searchWord) ||
+                authorNameAndQQ.includes(searchWord) ||
+                id.includes(searchWord) ||
+                editTime.includes(searchWord)) {
+                match = true;
+                break;
+            }
+        }
+        if (match) {
+            $question.css("display", "flex");
+            // $question.hide(200, "easeInOutCubic");
+        } else {
+            $question.css("display", "none");
+            // $question.show(200, "easeInOutCubic");
+        }
+    }
+}
+
+function toggleBatchAction() {
+    const $batchActionButton = $("#batchActionButton");
+    let $questionOverviewButton = $(".questionOverviewButton");
+    let $questionDivs = $(".question");
+    if ($batchActionButton.attr("confirm") !== "confirm") {
+        $batchActionButton.attr("confirm", "confirm");
+        $batchActionButton.text("取消");
+        let $actions = $(`
+<div id="batchActions" style="display: flex;flex-direction: row;overflow: hidden">
+</div>
+        `);
+        $actions.append($(`<button id="selectAll" onclick="selectOrCancelSelectAll(this)" style="margin-left: 0" rounded highlight>全选</button>`));
+        $actions.append($(`<button onclick="reverseSelect()" style="margin-left: 0" rounded highlight>反选</button>`));
+        if (Permission["permission_delete_others_question"]) {
+            $actions.append($(`<button onclick="confirmAction(function() {deleteSelectedQuestions()},$(this))" class="batch" disabled rounded highlight>删除</button>`));
+        }
+        if (Permission["permission_batch_move_or_copy_question"]) {
+            $actions.append($(`<button onclick="moveSelectedQuestions()" class="batch" style="margin-left: 0" disabled rounded highlight>移动或复制到...</button>`));
+        }
+        if (Permission["permission_batch_enable_or_disable_question"]) {
+            $actions.append($(`<button onclick="enableSelectedQuestions()" class="batch" style="margin-left: 0" disabled rounded highlight>启用</button>`));
+            $actions.append($(`<button onclick="disableSelectedQuestions()" class="batch" style="margin-left: 0" disabled rounded highlight>禁用</button>`));
+        }
+        $actions.css("display", "none");
+        $batchActionButton.parent().append($actions);
+        $actions.show(200, "easeOutCubic");
+        $questionOverviewButton.fadeOut(200, "easeOutCubic", function () {
+            $questionOverviewButton.css("opacity", 0);
+        });
+        $questionDivs.attr("clickable", "clickable");
+        $questionDivs.on("click", function (e) {
+            if (e.originalEvent === undefined || $(e.originalEvent.target).attr("component_type") === "shrinkButton") return;
+            let $questionDiv = $(this);
+            if ($questionDiv.attr("selected") === "selected") {
+                $questionDiv.removeAttr("selected");
+            } else {
+                $questionDiv.attr("selected", "selected");
+            }
+            checkBatchSelect();
+        });
+    } else {
+        $batchActionButton.removeAttr("confirm");
+        $batchActionButton.text("批量操作");
+        let $batchActions = $("#batchActions");
+        $batchActions.hide(200, "easeInCubic", function () {
+            $batchActions.remove();
+        });
+        $questionOverviewButton.css("display", "");
+        $questionOverviewButton.fadeTo(1, 200, "easeInCubic");
+        $questionDivs.removeAttr("clickable");
+        $questionDivs.removeAttr("selected");
+        $questionDivs.off("click");
+    }
+}
+
+function selectOrCancelSelectAll(button) {
+    const $button = $(button);
+    let $questions = $(".question");
+    if ($questions.length === 0) return;
+    if ($button.text() === "全选") {
+        $questions.attr("selected", "selected");
+        $button.text("取消全选");
+        $("#batchActions").find("button.batch").removeAttr("disabled");
+    } else {
+        $questions.removeAttr("selected");
+        $button.text("全选");
+        $("#batchActions").find("button.batch").attr("disabled", "disabled");
+    }
+}
+
+function reverseSelect() {
+    let $questions = $(".question");
+    if ($questions.length === 0) return;
+    for (let question of $questions) {
+        let $question = $(question);
+        if ($question.attr("selected") === "selected") {
+            $question.removeAttr("selected");
+        } else {
+            $question.attr("selected", "selected");
+        }
+    }
+    checkBatchSelect();
+}
+
+function getSelectedQuestionsMd5s() {
+    let md5s = [];
+    $(".question[selected='selected']").each(function () {
+        let $question = $(this);
+        let md5 = $question.find(".questionMD5").text();
+        md5s.push(md5);
+    });
+    return md5s;
+}
+
+function deleteSelectedQuestions() {
+    let md5s = getSelectedQuestionsMd5s();
+    if (md5s.length === 0) {
+        showTip("error", "没有选择题目");
+        return;
+    }
+    sendMessage({
+        "type": "batchDeleteQuestions",
+        "md5s": md5s
+    }, function (e) {
+        let message = JSON.parse(e.data);
+        if (message.type === "success") {
+            for (let md5 of md5s) {
+                removeQuestionDiv(md5);
+            }
+            showTip("info", "题目已删除");
+            $("button.batch").attr("disabled", "disabled");
+        }
+    });
+}
+
+function toggleBatchActionPartition(partitionDivButton) {
+    let $partitionDivButton = $(partitionDivButton);
+    if ($partitionDivButton.attr("selected") === "selected") {
+        $partitionDivButton.removeAttr("selected");
+        $partitionDivButton.find("input").val("false");
+    } else {
+        $partitionDivButton.attr("selected", "selected");
+        $partitionDivButton.find("input").val("true");
+    }
+}
+
+function moveSelectedQuestions() {
+    let partitionIdNameMap = new Map();
+    let partitionDivString = "";
+    for (let partition of $(".partitionButton")) {
+        partitionIdNameMap.set(partition.id.substring(15), partition.innerText);
+        partitionDivString = partitionDivString + `
+<div class="partitionSelectItem" style="display: flex;flex-direction: row;align-items: center" onclick="toggleBatchActionPartition(this)" 
+id="partition_select_${partition.id.substring(15)}" clickable rounded>
+${partition.innerText}
+</div>`;
+    }
+    popDialog(`
+<div style="padding: 8px">
+    <label title>移动或复制到</label>
+    <div id="partitionSelections" rounded style="background: var(--shrinkPane-background-color)">
+        ${partitionDivString}
+    </div>
+    <div style="display: flex;flex-direction: row;padding: 4px;align-items: center">
+        <div style="display: flex;flex-direction: column">
+            <div style="display: flex;flex-direction: row;align-items: center">
+                <input id="move" type="radio" name="actionType" value="move" checked>
+                <label for="move">移动 (不保留原所在分区)</label>
+            </div>
+            <div style="display: flex;flex-direction: row;align-items: center">
+                <input id="copy" type="radio" name="actionType" value="copy">
+                <label for="copy">复制 (保留原所在分区)</label>
+            </div>
+        </div>
+        <div class="blank"></div>
+        <button id="moveOrCopyButton" highlight rounded onclick="sendMoveOrCopy()">确定</button>
+    </div>
+</div>
+    `);
+}
+
+function sendMoveOrCopy() {
+    let md5s = getSelectedQuestionsMd5s();
+    if (md5s.length === 0) {
+        showTip("error", "没有选择题目");
+        return;
+    }
+    let $moveOrCopyButton = $("#moveOrCopyButton");
+    $moveOrCopyButton.attr("disabled","disabled");
+    let partitionIds = [];
+    for (let partition of $(".partitionSelectItem")) {
+        let $partition = $(partition);
+        if ($partition.attr("selected") === "selected") {
+            partitionIds.push($partition.attr("id").substring(17));
+        }
+    }
+    let actionType = $("input[name='actionType']:checked").val();
+    sendMessage({
+        type: "batchMoveOrCopyQuestions",
+        md5s: md5s,
+        partitionIds: partitionIds,
+        actionType: actionType,
+    }, function (e) {
+        let message = JSON.parse(e.data);
+        if (message.type === "success") {
+            showTip("info", "题目已" + (actionType === "move" ? "移动" : "复制"));
+            closeMenu();
+            setTimeout(function () {
+                checkBatchSelect();
+            }, 200);
+        }
+    }, function () {
+        $moveOrCopyButton.removeAttr("disabled");
+    });
+}
+
+function disableSelectedQuestions() {
+    let md5s = getSelectedQuestionsMd5s();
+    if (md5s.length === 0) {
+        showTip("error", "没有选择题目");
+        return;
+    }
+    sendMessage({
+        "type": "batchDisableQuestions",
+        "md5s": md5s
+    }, function (e) {
+        let message = JSON.parse(e.data);
+        if (message.type === "success") {
+            showTip("info", "题目已禁用");
+        }
+    });
+}
+
+function enableSelectedQuestions() {
+    let md5s = getSelectedQuestionsMd5s();
+    if (md5s.length === 0) {
+        showTip("error", "没有选择题目");
+        return;
+    }
+    sendMessage({
+        "type": "batchEnableQuestions",
+        "md5s": md5s
+    }, function (e) {
+        let message = JSON.parse(e.data);
+        if (message.type === "success") {
+            showTip("info", "题目已启用");
+        }
+    });
+}
+
+function checkBatchSelect() {
+    let $batchButtons = $("#batchActions");
+    let $actionButtons = $batchButtons.find("button.batch");
+    let $questions = $(".question");
+    let $selectedQuestion = $questions.filter("[selected='selected']");
+    if ($selectedQuestion.length === 0) {
+        $actionButtons.attr("disabled", "disabled");
+    } else {
+        $actionButtons.removeAttr("disabled");
+    }
+    if ($selectedQuestion.length === $questions.length) {
+        $batchButtons.find("button#selectAll").text("取消全选");
+    } else {
+        $batchButtons.find("button#selectAll").text("全选");
+    }
 }

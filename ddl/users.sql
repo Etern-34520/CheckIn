@@ -1,5 +1,4 @@
-create table users
-(
+create table users (
     qqnumber  bigint       not null
         primary key,
     enabled   bit          not null,

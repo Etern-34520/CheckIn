@@ -247,7 +247,7 @@ function changePath(path) {
         pathBlock = "> " + pathBlock;
         clearPath();
         let pathHtml = `
-<div class="path" preText rounded clickable onclick="doBackFunc('${pathBlock}')">${pathBlock}</div>
+<div class="path" preText rounded onclick="doBackFunc('${pathBlock}')">${pathBlock}</div>
 `
         let $path = $(
             pathHtml
@@ -275,7 +275,7 @@ function addPath(pathName, backFunc) {
     nameToFuncMap.set(pathName, backFunc);
     pathName = escapeHTML(pathName);
     let pathHtml = `
-<div class="path" preText rounded clickable onclick="doBackFunc('${pathName}')"></div>
+<div class="path" preText rounded onclick="doBackFunc('${pathName}')"></div>
 `
     let $path = $(
         pathHtml
@@ -286,7 +286,7 @@ function addPath(pathName, backFunc) {
     $path.css("marginRight", 20);
     $path.appendTo($("#pagePath"));
     $path.animate({
-        opacity: 1,
+        opacity: 0.75,
         marginLeft: 3,
         marginRight: 3
     }, 200, "easeInCubic");
@@ -768,10 +768,10 @@ function transitionPage($root, html, pathName = undefined, pathBackFunc = undefi
                     $subContentRoot.children()[0].onload(undefined)
                 } catch (ignored) {
                 }
-                if (callBack instanceof Function) {
-                    callBack();
-                }
             }, 150);
+            if (callBack instanceof Function) {
+                callBack();
+            }
         }, 200);
     });
     if (pathName instanceof String || pathBackFunc instanceof Function) {
@@ -914,17 +914,20 @@ let onClickTraffic = function (id, date) {
 
 // noinspection JSUnusedGlobalSymbols
 function confirmAction(action,$button) {
-    if ($button.attr("confirm")!==undefined) action();
+    const restore = function() {
+        $button.text($button.attr("confirm"));
+        $button.removeAttr("confirm");
+        $button.off("blur");
+    };
+    if ($button.attr("confirm")!==undefined) {
+        restore();
+        action();
+    }
     else {
         $button.attr("confirm",$button.text());
         $button.text("确定");
         $button.on({
-            blur: function() {
-                $button.text($button.attr("confirm"));
-                $button.removeAttr("confirm");
-                $button.off("blur");
-                // $button.off("click");
-            }
+            blur: restore
         });
     }
 }
