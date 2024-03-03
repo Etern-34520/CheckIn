@@ -1,5 +1,4 @@
-create table role
-(
+create table role (
     type varchar(255) not null
         primary key
 );

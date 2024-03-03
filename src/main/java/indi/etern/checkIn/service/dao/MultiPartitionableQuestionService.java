@@ -55,9 +55,11 @@ public class MultiPartitionableQuestionService {
                 multipleQuestionBuilder.setMD5(originalMd5);
             }
         }
+/*
         if (author == null) {
             author = UserService.singletonInstance.findByQQNumber(Long.parseLong(httpServletRequest.getParameter("author"))).orElseThrow();
         }
+*/
 
         //content
         multipleQuestionBuilder.setQuestionContent(httpServletRequest.getParameter("questionContent"));
@@ -108,8 +110,8 @@ public class MultiPartitionableQuestionService {
         return multipleQuestionBuilder.build();
     }
 
-    public void save(MultiPartitionableQuestion multiPartitionableQuestion) {
-        multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
+    public MultiPartitionableQuestion save(MultiPartitionableQuestion multiPartitionableQuestion) {
+        return multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
     }
 
     public List<MultiPartitionableQuestion> findAll() {
@@ -277,6 +279,38 @@ public class MultiPartitionableQuestionService {
 
     public void saveAll(Collection<MultiPartitionableQuestion> multiPartitionableQuestions) {
         multiplePartitionableQuestionRepository.saveAll(multiPartitionableQuestions);
+    }
+
+    public void deleteAllById(Collection<String> md5s) {
+        for (String md5 : md5s) {
+            deleteById(md5);
+        }
+    }
+
+    public long countEnabled() {
+        return multiplePartitionableQuestionRepository.countByEnabledIsTrue();
+    }
+
+    public List<MultiPartitionableQuestion> enableAllById(Collection<String> md5s) {
+        List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
+        for (String md5 : md5s) {
+            MultiPartitionableQuestion multiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
+            multiPartitionableQuestion.setEnabled(true);
+            multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
+            multiPartitionableQuestions.add(multiPartitionableQuestion);
+        }
+        return multiPartitionableQuestions;
+    }
+
+    public List<MultiPartitionableQuestion> disableAllById(Collection<String> md5s) {
+        List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
+        for (String md5 : md5s) {
+            MultiPartitionableQuestion multiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
+            multiPartitionableQuestion.setEnabled(false);
+            multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
+            multiPartitionableQuestions.add(multiPartitionableQuestion);
+        }
+        return multiPartitionableQuestions;
     }
 }
 

@@ -107,7 +107,7 @@ public class ManageData {
                     author = oldQuestion.getAuthor();
                 }
             } else {
-                author = userService.findByQQNumber(Long.parseLong(authorQQString)).orElseThrow();
+                author = userService.findByQQNumber(Long.parseLong(authorQQString)).orElse(null);
             }
             final boolean enabled = Boolean.parseBoolean(httpServletRequest.getParameter("enabled"));
             checkPermission(oldQuestion, (User) httpServletRequest.getAttribute("currentUser"), author, enabled);

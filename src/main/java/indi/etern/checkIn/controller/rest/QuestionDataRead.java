@@ -1,12 +1,15 @@
 package indi.etern.checkIn.controller.rest;
 
 import com.google.gson.Gson;
+import indi.etern.checkIn.entities.question.Question;
 import indi.etern.checkIn.entities.question.interfaces.ImagesWith;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
+import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
+import org.apache.coyote.BadRequestException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileInputStream;
@@ -37,10 +40,16 @@ public class QuestionDataRead {
             return "0";
         }
     }
+
+    @GetMapping(path = "/withImages/ofPartition/{partitionId}")
+    public List<String> getQuestionWithImageIds(@PathVariable int partitionId) throws BadRequestException {
+        Partition partition = partitionService.findById(partitionId).orElseThrow(() -> new BadRequestException("partitions not exist"));
+        return partition.getQuestions().stream().filter((question) -> question instanceof ImagesWith).map(Question::getMd5).toList();
+    }
     
     @GetMapping(path = "image/{questionMD5}/", produces = "application/json;charset=UTF-8")
     @ResponseBody
-    public String getAllImageJsonData(@PathVariable String questionMD5) {
+    public String getAllImageJsonData(@PathVariable String questionMD5) {//TODO 优化 当前用时6647ms
         MultiPartitionableQuestion question = multiPartitionableQuestionService.getByMD5(questionMD5);
         if (question instanceof ImagesWith questionWithImages) {
             Map<String, Object> dataMap = new HashMap<>();

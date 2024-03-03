@@ -108,7 +108,7 @@ public class MultipleCorrectQuestion extends MultipleChoiceQuestion implements M
             choiceMap.put("content",choice.getContent());
             choiceMap.put("correct",String.valueOf(choice.isCorrect()));
             choices.add(choiceMap);
-            if(choice.isCorrect()){
+            if (choice.isCorrect()){
                 correctChoices.add(choiceMap);
             }
         }
@@ -123,6 +123,16 @@ public class MultipleCorrectQuestion extends MultipleChoiceQuestion implements M
         dataMap.put("partitions", partitionNames);
         dataMap.put("partitionIds",partitionIds);
         dataMap.put("md5",md5);
+        HashMap<String, Object> value = new HashMap<>();
+        if (author!=null) {
+            value.put("name",author.getUsername());
+            value.put("qq",author.getQQNumber());
+        } else {
+            value.put("name", "unknown");
+            value.put("qq", "");
+        }
+        dataMap.put("author", value);
+        dataMap.put("enabled",enabled);
         return MVCConfig.getGson().toJson(dataMap);
     }
     

@@ -1,5 +1,4 @@
-create table server_setting_items
-(
+create table server_setting_items (
     setting_key   varchar(255) not null
         primary key,
     setting_value varchar(255) null

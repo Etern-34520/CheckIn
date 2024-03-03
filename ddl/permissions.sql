@@ -1,5 +1,4 @@
-create table permissions
-(
+create table permissions (
     id          varchar(255) not null
         primary key,
     description varchar(255) null,

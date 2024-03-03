@@ -31,8 +31,6 @@ public class CreateRoleAction extends TransactionalAction {
                 role.getPermissions().add(permission);
         }
         RoleService.singletonInstance.save(role);
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "success");
-        return Optional.of(jsonObject);
+        return successOptionalJsonObject;
     }
 }

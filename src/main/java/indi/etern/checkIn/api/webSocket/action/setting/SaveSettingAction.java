@@ -24,8 +24,6 @@ public class SaveSettingAction extends TransactionalAction {
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
         SettingService.singletonInstance.setAll(dataMap);
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "success");
-        return Optional.of(jsonObject);
+        return successOptionalJsonObject;
     }
 }

@@ -2,6 +2,7 @@ package indi.etern.checkIn.entities.question.interfaces;
 
 import indi.etern.checkIn.entities.question.Question;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -19,8 +20,9 @@ public class MultiPartitionableQuestion extends Question implements MultiPartiti
             joinColumns  = @JoinColumn(name = "question_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "partition_id",referencedColumnName = "id"))
     protected Set<Partition> partitions;
+    @Getter
     @Setter
-    private boolean enabled = false;
+    protected boolean enabled = false;
     
     @Override
     public Set<Partition> getPartitions() {
@@ -40,9 +42,5 @@ public class MultiPartitionableQuestion extends Question implements MultiPartiti
     public String toJsonData(){
         throw new UnsupportedOperationException("Not supported yet");
     }
-    
-    public boolean isEnabled() {
-        return enabled;
-    }
-    
+
 }

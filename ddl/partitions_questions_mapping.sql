@@ -1,5 +1,4 @@
-create table partitions_questions_mapping
-(
+create table partitions_questions_mapping (
     question_id  varchar(255) not null,
     partition_id int          not null,
     primary key (question_id, partition_id)

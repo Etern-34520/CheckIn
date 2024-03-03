@@ -1,5 +1,4 @@
-create table user_traffics
-(
+create table user_traffics (
     id         int auto_increment
         primary key,
     attributes text         null,

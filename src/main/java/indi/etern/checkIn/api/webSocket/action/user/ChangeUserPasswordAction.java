@@ -38,10 +38,8 @@ public class ChangeUserPasswordAction extends UserJsonResultAction {
         user.setPassword(CheckInApplication.applicationContext.getBean(PasswordEncoder.class).encode(password));
         UserService.singletonInstance.save(user);
 
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "success");
         this.user = user;
-        return Optional.of(jsonObject);
+        return successOptionalJsonObject;
     }
 
     @Override

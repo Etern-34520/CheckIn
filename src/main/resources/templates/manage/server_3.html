@@ -19,14 +19,14 @@
                                  min-value="0"
                                  th:max-value="${@partitionInfo.getQuestionCount()}"
                                  name="exam.questionCount"
-                                 th:value="${@settingInfo.getQuestionCount}"></div>
+                                 th:value="${@settingInfo.getQuestionCount()}"></div>
                         </div>
                         <div><label>选择分区数</label>
                             <div class="slider" useDoubleSlider="true"
                                  min-value="1"
                                  th:max-value="${@partitionInfo.getPartitionsNotEmpty().size()}"
                                  th:value="${@settingInfo.getPartitionCountMin()}"
-                                 th:value1="${@settingInfo.getPartitionCountMax}"
+                                 th:value1="${@settingInfo.getPartitionCountMax()}"
                                  name="exam.partitionCountMin"
                                  name1="exam.partitionCountMax"></div>
                         </div>

@@ -1,5 +1,4 @@
-create table permission_groups
-(
+create table permission_groups (
     name        varchar(255) not null
         primary key,
     description varchar(255) null

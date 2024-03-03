@@ -11,11 +11,13 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @MappedSuperclass
 @Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
 public abstract class Question implements Serializable {
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
     @Column(name = "content")
     protected String content;
     
@@ -29,7 +31,7 @@ public abstract class Question implements Serializable {
     @Getter
     @Column(name = "LAST_EDIT_TIME")
     protected LocalDateTime lastEditTime;
-    
+
     protected Question() {
         lastEditTime = LocalDateTime.now();
     }
@@ -70,4 +72,9 @@ public abstract class Question implements Serializable {
     }
     
     abstract public String toJsonData();
+
+    @SuppressWarnings("unused")
+    public String getLastEditTimeString() {
+        return dateTimeFormatter.format(lastEditTime);
+    }
 }

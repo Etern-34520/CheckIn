@@ -27,10 +27,8 @@ public class ChangeUserNameAction extends UserJsonResultAction {
         User user = optionalUser.orElseThrow();
         user.setName(name);
         UserService.singletonInstance.save(user);
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "success");
         this.user = user;
-        return Optional.of(jsonObject);
+        return successOptionalJsonObject;
     }
 
     @Override

@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -17,44 +18,45 @@ import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
-    
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
-    
-    @Value("${app.jwt-secret}")
+
+    @Value("${jwt-secret}")
     private String jwtSecret;
-    
-    @Value("${app-jwt-expiration-milliseconds}")
+
+    @Value("${jwt-expiration-milliseconds}")
     private long jwtExpirationDate;
-    
+
     private final UserService userService;
-    
+
     public JwtTokenProvider(UserService userService) {
         this.userService = userService;
     }
 
     // 生成 JWT token
-    public String generateToken(User user){
-        
+    public String generateToken(User user) {
+
         Date currentDate = new Date();
-        
+
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
-        
-        return Jwts.builder()
-                .setSubject(user.getName()+":"+user.getQQNumber())
+
+        String token = Jwts.builder()
+                .setSubject(user.getName() + ":" + user.getQQNumber())
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
                 .signWith(key())
                 .compact();
+        return token;
     }
-    
-    private Key key(){
+
+    private Key key() {
         return Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(jwtSecret)
         );
     }
-    
-    // 从 Jwt token 获取用户名
-    public User getUser(String token){
+
+    // 从 Jwt token 获取用户
+    @Cacheable(value = "token", key = "#token")
+    public User getUser(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key())
                 .build()
@@ -63,10 +65,10 @@ public class JwtTokenProvider {
         String usernameAndQQ = claims.getSubject();
         return userService.findByQQNumber(Long.parseLong(usernameAndQQ.split(":")[1])).orElseThrow();
     }
-    
+
     // 验证 Jwt token
-    public boolean validateToken(String token){
-        try{
+    public boolean validateToken(String token) {
+        try {
             Jwts.parserBuilder()
                     .setSigningKey(key())
                     .build()
@@ -83,11 +85,11 @@ public class JwtTokenProvider {
         }
         return false;
     }
-    
-    public static boolean currentUserHasPermission(String permissionName){
+
+    public static boolean currentUserHasPermission(String permissionName) {
         for (GrantedAuthority grantedAuthority : SecurityContextHolder.getContext().getAuthentication().getAuthorities()) {
             Authority authority = (Authority) grantedAuthority;
-            if (authority.getName().equals(permissionName)/*&&authority.getPermissionType().equals(permissionType)*/){
+            if (authority.getName().equals(permissionName)/*&&authority.getPermissionType().equals(permissionType)*/) {
                 return true;
             }
 //            final String permissionNamesStr = authority.getName().split(":", 2)[1];

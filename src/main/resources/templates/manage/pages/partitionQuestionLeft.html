@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="cn" xmlns:th="https://www.thymeleaf.org">
-<!--TODO-->
-<div id="partitionDivs">
+<div id="partitionDivs" style="max-height: calc(100% - 40px);overflow: auto">
     <div th:each="partition:${@partitionInfo.getPartitions()}"
-         style="background:var(--input-background-color);margin: 0 0 8px;" rounded clickable
+         style="background:var(--input-background-color)" rounded clickable
          th:id="'partition'+${partition.id}" class="partitionDiv">
         <div style="display: flex;flex-direction: row" class="partitionTop">
             <div style="margin: 0;flex: 1" rounded clickable onclick="togglePartition(this)" th:text="${partition.getName()}"></div>
@@ -17,15 +16,13 @@
             <div th:if="${partition.getQuestions().isEmpty()}" rounded style="cursor: auto;background: none;"
                  class="empty">empty</div>
             <th:block th:unless="${partition.getQuestions().isEmpty()}" th:each="question:${partition.getQuestions()}">
-                <div rounded clickable th:class="'question'+${question.getMd5()}"
-                     style="height: 21px;overflow: hidden;display: flex;flex-direction: row"
-                     th:onclick="switchToQuestion([[${question.md5}]],this)">
-                    <div class="pointer">•</div>
+                <div rounded clickable th:class="'questionContentItem question'+${question.getMd5()}" th:onclick="switchToQuestion([[${question.md5}]],this)">
+                    <div class="pointer"></div>
                     <div class="questionContentOverview" th:text="${question.getContent()}"></div>
                 </div>
             </th:block>
         </div>
     </div>
 </div>
-<button style="height: 30px;margin: 0" highlight onclick="updateAllQuestions()">全部更新</button>
+<button style="height: 30px;margin: 8px 0 0;" highlight onclick="updateAllQuestions()">全部更新</button>
 </html>

@@ -8,6 +8,15 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public abstract class JsonResultAction implements Callable<Optional<JsonObject>> {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    protected static final Optional<JsonObject> successOptionalJsonObject;
+
+    static {
+        JsonObject successJsonObject = new JsonObject();
+        successJsonObject.addProperty("type", "success");
+        successOptionalJsonObject = Optional.of(successJsonObject);
+    }
+
     protected boolean logging = true;
 
     protected JsonResultAction() {
@@ -48,5 +57,11 @@ public abstract class JsonResultAction implements Callable<Optional<JsonObject>>
 
     public boolean shouldLogging() {
         return logging;
+    }
+
+    protected JsonObject getSuccessJsonObject() {
+        JsonObject successJsonObject = new JsonObject();
+        successJsonObject.addProperty("type", "success");
+        return successJsonObject;
     }
 }

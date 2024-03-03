@@ -4,10 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.api.webSocket.action.*;
-import indi.etern.checkIn.api.webSocket.action.question.AddPartitionAction;
-import indi.etern.checkIn.api.webSocket.action.question.DeletePartitionAction;
-import indi.etern.checkIn.api.webSocket.action.question.DeleteQuestionAction;
-import indi.etern.checkIn.api.webSocket.action.question.EditPartitionNameAction;
+import indi.etern.checkIn.api.webSocket.action.question.*;
 import indi.etern.checkIn.api.webSocket.action.setting.SaveSettingAction;
 import indi.etern.checkIn.api.webSocket.action.traffic.GetTrafficByDateAction;
 import indi.etern.checkIn.api.webSocket.action.user.*;
@@ -142,6 +139,7 @@ public class Connector implements SubProtocolCapable {
         }
     }
     
+    @SuppressWarnings("unchecked")
     @OnMessage
     public void onMessage(String message, Session session) {
         try {
@@ -213,20 +211,35 @@ public class Connector implements SubProtocolCapable {
                 case "deleteRole" -> {
                     logging = doAction(new DeleteRoleAction((String) contentMap.get("role")));
                 }
-                case "saveSetting_examSetting" -> {
+                case "saveSetting" -> {
                     Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
-                    logging = doAction(new SaveSettingAction(dataMap,"examSetting"));
-                }
-                case "saveSetting_checkingSetting" -> {
-                    Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
-                    logging = doAction(new SaveSettingAction(dataMap,"checkingSetting"));
-                }
-                case "saveSetting_otherSetting" -> {
-                    Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
-                    logging = doAction(new SaveSettingAction(dataMap,"otherSetting"));
+                    logging = doAction(new SaveSettingAction(dataMap,(String) contentMap.get("settingName")));
                 }
                 case "getDateTrafficDetail" -> {
                     logging = doAction(new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
+                }
+                case "batchDeleteQuestions" -> {
+                    logging = doAction(new BatchDeleteQuestionsAction((List<String>) contentMap.get("md5s"), sessionUser));
+                }
+                case "batchEnableQuestions" -> {
+                    logging = doAction(new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("md5s"), sessionUser, true));
+                }
+                case "batchDisableQuestions" -> {
+                    logging = doAction(new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("md5s"), sessionUser, false));
+                }
+                case "batchMoveOrCopyQuestions" -> {
+                    List<String> partitionIdStrings = (List<String>) contentMap.get("partitionIds");
+                    List<Integer> partitionIds = new ArrayList<>();
+                    for (String partitionIdString : partitionIdStrings) {
+                        partitionIds.add(Integer.parseInt(partitionIdString));
+                    }
+                    if (contentMap.get("actionType").equals("move")){
+                        logging = doAction(new BatchMoveAction((List<String>) contentMap.get("md5s"), partitionIds));
+                    } else if (contentMap.get("actionType").equals("copy")){
+                        logging = doAction(new BatchCopyAction((List<String>) contentMap.get("md5s"), partitionIds));
+                    } else {
+                        sendError("actionType is invalid, must be 'move' or 'copy'");
+                    }
                 }
             }
             if (logging) {
@@ -234,6 +247,7 @@ public class Connector implements SubProtocolCapable {
             }
         } catch (Exception e) {
             try {
+                logger.info("sid_" + sid + ":" + message);
                 logger.error(e.getClass().getName() + ":" + e.getMessage());
                 sendError(e.getClass().getSimpleName() + ":" + e.getMessage());
             } catch (IOException exception) {

@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface MultiplePartitionableQuestionRepository extends JpaRepository<MultiPartitionableQuestion, String> {
     List<MultiPartitionableQuestion> findAllByLastEditTimeBefore(LocalDateTime lastEditTime, Sort sort);
+
+    long countByEnabledIsTrue();
 }

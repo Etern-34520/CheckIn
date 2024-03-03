@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="cn" xmlns:th="http://www.thymeleaf.org">
-
 <div id="managePage" index="0" page-type="server" onload="initChart()">
     <div id="left">
         <div id="leftTop" rounded border onclick="switchToPageWithAnimate('server',1)">
@@ -12,10 +11,8 @@
     </div>
     <div id="right" rounded border>
         <label titleLabel>新增题目</label>
-<!--        <c:forEach var="question" items="${questionInfo.getNewQuestionInDays(14)}">-->
-            <th:block th:each="question:${@questionInfo.getNewQuestionInDays(14)}">
-                <div th:replace="pages/questionOverview::questionOverview(${question},${true})"></div>
-            </th:block>
-<!--        </c:forEach>-->
+        <th:block th:each="question:${@questionInfo.getNewQuestionInDays(14)}">
+            <div th:replace="pages/questionOverview::questionOverview(${question},${true})"></div>
+        </th:block>
     </div>
 </div>

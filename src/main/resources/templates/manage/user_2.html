@@ -5,7 +5,7 @@
     <div rounded style="display: flex;flex: 1;flex-direction: column;padding: 16px;overflow: auto;" border>
         <div style="flex: 1;padding: 16px">
             <label titleLabel text>账户设置</label>
-            <div style="display: flex;flex-direction: row;padding: 16px;background: var(--shrinkPane-background-color);box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.2);"
+            <div style="display: flex;flex-direction: row;padding: 16px;background: var(--shrinkPane-background-color);"
                  rounded>
                 <div class="userAvatar"
                      th:style="'background-image: url(&quot;https://q1.qlogo.cn/g?b=qq&nk='+${currentUser.getQQNumber()}+'&s=640&quot;)'"></div>
@@ -32,7 +32,7 @@
             <label titleLabel text>操作</label>
             <div class="shrinkPane" title="用户名" rounded>
                 <div content>
-                    <div style="display: flex;flex-direction: row;overflow: hidden">
+                    <div style="display: flex;flex-direction: row;overflow: hidden;padding: 4px">
                         <label for="newUserNameInput" style="margin-left: 8px;line-height: 48px">新用户名</label>
                         <input style="flex:1" id="newUserNameInput" type="text"
                                th:value="${currentUser.getName()}">
@@ -43,7 +43,7 @@
             </div>
             <div class="shrinkPane" title="密码" rounded>
                 <div content>
-                    <div style="display: flex;flex-direction: row">
+                    <div style="display: flex;flex-direction: row;padding: 4px">
                         <label for="currentPassword" style="line-height: 48px">当前密码</label>
                         <input id="currentPassword" style="flex:1" name="currentPassword" type="password"
                                preText="当前密码"/>
@@ -60,7 +60,7 @@
             </div>
             <div class="shrinkPane" title="其他操作" rounded>
                 <div content>
-                    <div style="display: flex;flex-direction: row;overflow: hidden">
+                    <div style="display: flex;flex-direction: row;overflow: hidden;padding: 4px">
                         <button rounded highlight style="margin: 4px;padding: 8px" onclick="logout()">退出登录</button>
                         <button rounded highlight style="margin: 4px;padding: 8px"
                                 th:onclick="confirmAction(function (){deleteUser([[${currentUser.getQQNumber()}]]);logout()},$(this))">删除账户

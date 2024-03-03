@@ -5,6 +5,8 @@ import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.repositories.PartitionRepository;
 import jakarta.annotation.Resource;
 import org.apache.coyote.BadRequestException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
@@ -21,35 +23,26 @@ public class PartitionService {
     TransactionTemplate transactionTemplate;
     @Resource
     private PartitionRepository partitionRepository;
-    
+
     protected PartitionService(TransactionTemplate transactionTemplate) {
         singletonInstance = this;
         this.transactionTemplate = transactionTemplate;
     }
-    
+
+    @CacheEvict(value = "partition", key = "#partition.id")
     public void save(Partition partition) {
         partitionRepository.save(partition);
     }
-    
+
     public List<Partition> findAll() {
         return partitionRepository.findAll();
     }
-    
+    @CacheEvict(value = "partition", key = "#partition.id")
     public void saveAndFlush(Partition partition) {
         partitionRepository.saveAndFlush(partition);
     }
-    
-    //    @Transactional(readOnly = true)
-    public Partition findByName(String name) {
-        Partition examplePartition = Partition.getExample(name);
-        ExampleMatcher exampleMatcher = ExampleMatcher
-                .matching()
-                .withIgnorePaths("id");
-        Example<Partition> example = Example.of(examplePartition, exampleMatcher);
-        return partitionRepository.findOne(example).orElseThrow();
-    }
-    
-    public Optional<Partition> tryFindByName(String name) {
+
+    public Optional<Partition> findByName(String name) {
         Partition examplePartition = Partition.getExample(name);
         ExampleMatcher exampleMatcher = ExampleMatcher
                 .matching()
@@ -57,40 +50,43 @@ public class PartitionService {
         Example<Partition> example = Example.of(examplePartition, exampleMatcher);
         return partitionRepository.findOne(example);
     }
-    
+
+    @CacheEvict(value = "partition", allEntries = true)
     public void deleteAll() {
         partitionRepository.deleteAll();
     }
-    
+
     public void deleteByName(String partitionName) {
-        Partition partition = findByName(partitionName);
-        partitionRepository.deleteById(partition.getId());
+        Optional<Partition> optionalPartition = findByName(partitionName);
+        optionalPartition.ifPresent(partition -> partitionRepository.deleteById(partition.getId()));
     }
-    
+
+    @CacheEvict(value = "partition", key = "#partition.id")
     public void delete(Partition partition) {
         partitionRepository.delete(partition);
     }
-    
+
     public boolean existsById(int id) {
         return partitionRepository.existsById(id);
     }
-    
+
+    @Cacheable(value = "partition", key = "#id")
     public Optional<Partition> findById(Integer id) {
         return partitionRepository.findById(id);
     }
-    
+
+    @CacheEvict(value = "partition", key = "#partition.id")
     public void addQuestionOf(Partition partition, MultiPartitionableQuestion multipleQuestion) {
         transactionTemplate.execute((callback) -> {
             final Optional<Partition> partitionOptional = partitionRepository.findById(partition.getId());
-            Partition partition1;
-            partition1 = partitionOptional.orElse(partition);
+            Partition partition1 = partitionOptional.orElse(partition);
             partition1.getQuestions().add(multipleQuestion);
             partitionRepository.saveAndFlush(partition1);
             return Boolean.TRUE;
         });
     }
-    
-    public List<MultiPartitionableQuestion> generateExam(List<Integer> partitionIds, Random random) throws BadRequestException {
+
+    public List<MultiPartitionableQuestion> generateExam(List<Integer> partitionIds, Random random) throws Exception {
         List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
         int questionCount = Integer.parseInt(SettingService.singletonInstance.get("exam.questionCount"));
         int partitionCountMin = Integer.parseInt(SettingService.singletonInstance.get("exam.partitionCountMin"));
@@ -117,38 +113,47 @@ public class PartitionService {
             return Boolean.TRUE;
         });*/
 //        Random random = new Random();
-        AtomicReference<Optional<BadRequestException>> exception = new AtomicReference<>();
+        AtomicReference<Optional<Exception>> exception = new AtomicReference<>();
         transactionTemplate.execute((callback) -> {
-            List<Partition> partitions = new ArrayList<>();
-            AtomicInteger questionQuantity = new AtomicInteger();
-            partitionIds.forEach(partitionId -> {
-                final Optional<Partition> partitionOptional = findById(partitionId);
-                if (partitionOptional.isEmpty()) {
-                    exception.set(Optional.of(new BadRequestException("partition with Id " + partitionId + " not found")));
-                    return;
+            try {
+                List<Partition> partitions = new ArrayList<>();
+                AtomicInteger questionQuantity = new AtomicInteger();
+                partitionIds.forEach(partitionId -> {
+                    final Optional<Partition> partitionOptional = findById(partitionId);
+                    if (partitionOptional.isEmpty()) {
+                        exception.set(Optional.of(new BadRequestException("partition with Id " + partitionId + " not found")));
+                        return;
+                    }
+                    Partition partition = partitionOptional.get();
+                    partitions.add(partition);
+                    questionQuantity.addAndGet(partition.getEnabledQuestions().size());
+                });
+                while (multiPartitionableQuestions.size() < Math.min(questionCount, questionQuantity.get())) {
+                    Partition partition = partitions.get(random.nextInt(partitions.size()));
+                    final Set<MultiPartitionableQuestion> enabledQuestions = partition.getEnabledQuestions();
+                    final int partitionQuestionCount = enabledQuestions.size();
+                    if (partitionQuestionCount == 0) {
+                        continue;
+                    }
+                    List<MultiPartitionableQuestion> list = enabledQuestions.stream().toList();
+                    final MultiPartitionableQuestion question = list.get(random.nextInt(partitionQuestionCount));
+                    if (!multiPartitionableQuestions.contains(question)) {
+                        multiPartitionableQuestions.add(question);
+                    }
                 }
-                Partition partition = partitionOptional.get();
-                partitions.add(partition);
-                questionQuantity.addAndGet(partition.getEnabledQuestions().size());
-            });
-            while (multiPartitionableQuestions.size() < Math.min(questionCount, questionQuantity.get())) {
-                Partition partition = partitions.get(random.nextInt(partitions.size()));
-                final Set<MultiPartitionableQuestion> enabledQuestions = partition.getEnabledQuestions();
-                final int partitionQuestionCount = enabledQuestions.size();
-                if (partitionQuestionCount == 0) {
-                    continue;
-                }
-                List<MultiPartitionableQuestion> list = enabledQuestions.stream().toList();
-                final MultiPartitionableQuestion question = list.get(random.nextInt(partitionQuestionCount));
-                if (!multiPartitionableQuestions.contains(question)) {
-                    multiPartitionableQuestions.add(question);
-                }
+                return Boolean.TRUE;
+            } catch (Exception e) {
+                exception.set(Optional.of(e));
+                return Boolean.FALSE;
             }
-            return Boolean.TRUE;
         });
         if (exception.get() != null && exception.get().isPresent()) {
             throw exception.get().get();
         }
         return multiPartitionableQuestions;
+    }
+
+    public Collection<? extends Partition> findAllById(Collection<Integer> partitionId) {
+        return partitionRepository.findAllById(partitionId);
     }
 }

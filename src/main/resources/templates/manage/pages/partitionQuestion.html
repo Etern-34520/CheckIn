@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html lang="cn" xmlns:th="https://www.thymeleaf.org">
-<!--TODO-->
-<div style="display: flex;flex-direction: column;" onload="initQuestionViewImages()">
-    <label id="partitionLabel${partition.id}" titleLabel text th:text="${partition.getName()}"></label>
-    <!--/*@thymesVar id="partition" type="indi.etern.checkIn.entities.question.interfaces.Partition"*/-->
+<!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
+<!--/*@thymesVar id="partition" type="indi.etern.checkIn.entities.question.interfaces.Partition"*/-->
+<div style="display: flex;flex-direction: column;max-height: 100%;" th:onload="initQuestionViewImages([[${partition.getId()}]])">
+    <div style="display: flex;flex-direction: row">
+        <label th:id="'partitionLabel'+${partition.id}" titleLabel text th:text="${partition.getName()}"></label>
+        <label style="line-height:43px;color: rgb(127,127,127);font-size: 14px;margin-left: 8px">(</label>
+        <label id="partitionId" style="line-height:43px;color: rgb(127,127,127);font-size: 14px" th:text="${partition.getId()}"></label>
+        <label style="line-height:43px;color: rgb(127,127,127);font-size: 14px">)</label>
+        <div class="blank"></div>
+        <button style="width: 60px;font-size: 24px;line-height: 19px" rounded th:if="${permissionMap.get('permission_create_and_edit_owns_question')}" type="button" text th:onclick="'addQuestion(&quot;'+${partition.getId()}+'&quot;)'">+</button>
+        <button id="batchActionButton" rounded onclick="toggleBatchAction()"
+            th:if="${
+            permissionMap.get('permission_delete_others_question')||
+            permissionMap.get('permission_batch_move_or_copy_question')||
+            permissionMap.get('permission_batch_enable_or_disable_question')
+            }">批量操作</button>
+    </div>
     <div class="questions" text>
         <th:block th:each="question:${partition.getSortedQuestion()}">
             <div th:replace="~{manage/pages/questionOverview::questionOverview(${question},${false})}"></div>
         </th:block>
-    </div>
-    <div class="addButtons" style="margin: 4px">
-            <!--/*@thymesVar id="permissionMap" type="java.util.Map"*/-->
-            <button th:if="${permissionMap.get('permission_create_and_edit_owns_question')}" type="button" text th:onclick="'addQuestion(&quot;'+${partition.getId()}+'&quot;)'">+</button>
     </div>
 </div>
 </html>

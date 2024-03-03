@@ -48,7 +48,11 @@
 </div>
 <div id="contentRoot">
     <div id="top" rounded border style="margin-top: -50px">
-        <button type="button" id="menuButton" class="button" style="font-size: 20px" onclick="showMenu()">=</button>
+        <div id="menuButton" clickable onclick="showMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
         <div id="pagePath">
             <div class="path" undeleted>
                 CheckIn
@@ -70,8 +74,15 @@
 <div id="topMask" onclick="closeMenu()">
     <div id="menu" rounded>
         <div id="menuTop">
-            <button type="button" id="menuInsideButton" class="button" style="font-size: 20px" onclick="closeMenu()"><
-            </button>
+            <div id="menuInsideButton" rounded component_type="shrinkButton" clickable
+                 onclick="closeMenu()">
+                <div style="rotate: 90deg;" component_type="shrinkButtonPointer">
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <!--<button type="button" id="menuInsideButton" class="button" style="font-size: 20px" onclick="closeMenu()"><
+            </button>-->
         </div>
         <div class="forScroll" style="flex: auto">
             <div id="menuButtons">
