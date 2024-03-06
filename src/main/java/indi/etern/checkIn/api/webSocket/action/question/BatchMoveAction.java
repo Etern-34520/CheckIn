@@ -1,9 +1,11 @@
 package indi.etern.checkIn.api.webSocket.action.question;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +15,13 @@ public class BatchMoveAction extends QuestionAction {
     private final List<String> questionIds;
     private final List<Integer> targetPartitionsId;
     private final List<MultiPartitionableQuestion> questions;
+    private final int sourcePartitionId;
 
-    public BatchMoveAction(List<String> questionIds, List<Integer> targetPartitionsId) {
+    public BatchMoveAction(List<String> questionIds, List<Integer> targetPartitionsId, int sourcePartitionId) {
         this.questionIds = questionIds;
         this.targetPartitionsId = targetPartitionsId;
         this.questions = new ArrayList<>(questionIds.size());
+        this.sourcePartitionId = sourcePartitionId;
     }
 
     @Override
@@ -41,6 +45,19 @@ public class BatchMoveAction extends QuestionAction {
 
     @Override
     public void afterAction() {
-        sendUpdateQuestionsToAll(questions);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "batchMove");
+        jsonObject.addProperty("sourcePartitionId", sourcePartitionId);
+        JsonArray jsonArray = new JsonArray();
+        for (int targetPartitionId : targetPartitionsId) {
+            jsonArray.add(targetPartitionId);
+        }
+        jsonObject.add("partitionIds", jsonArray);
+        JsonArray jsonArray1 = new JsonArray();
+        for (MultiPartitionableQuestion question:questions) {
+            jsonArray1.add(question.getMd5());
+        }
+        jsonObject.add("questionIds", jsonArray1);
+        WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
     }
 }

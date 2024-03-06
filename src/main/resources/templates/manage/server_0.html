@@ -9,10 +9,10 @@
             <div id="todayTraffics"></div>
         </div>
     </div>
-    <div id="right" rounded border>
+    <div id="right" class="questions" rounded border style="overflow-y: auto">
         <label titleLabel>新增题目</label>
-        <th:block th:each="question:${@questionInfo.getNewQuestionInDays(14)}">
-            <div th:replace="pages/questionOverview::questionOverview(${question},${true})"></div>
+        <th:block th:each="question:${@questionInfo.getNewQuestionInDays(14,30)}">
+            <div th:replace="~{manage/pages/questionOverview::questionOverview(${question},${true})}"></div>
         </th:block>
     </div>
 </div>

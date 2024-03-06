@@ -13,7 +13,7 @@
                 <textarea id="questionContent" name="questionContent" th:disabled="${!canEditQuestion}"
                           style="height: 300px;resize: none" text th:text="${question.getContent()}"></textarea>
                 <label text>图片</label>
-                <div rounded style="display: flex;flex-direction: row;background: var(--input-background-color)">
+                <div rounded border style="display: flex;flex-direction: row;background: var(--input-background-color)">
                     <th:block th:if="${canEditQuestion}">
                         <label class="fileUpload" for="imageInput" style="font-size: 24px" text>+</label>
                         <input id="imageInput" type="file" onchange="addImages(this)" multiple
@@ -35,12 +35,11 @@
                                    th:value="${choice.getContent()}" th:disabled="${!canEditQuestion}">
                             <button th:if="${canEditQuestion}" th:id="'delete'+${stat.index+1}"
                                     class="deleteOptionButton" type="button"
-                                    style="height: 48px;width: 48px;margin: 4px;font-size: 30px;flex: none"
                                     onclick="deleteChoice(this)">-
                             </button>
                         </div>
                     </div>
-                    <button th:if="${canEditQuestion}" type="button"
+                    <button th:if="${canEditQuestion}" type="button" border
                             style="height:40px;margin-top: 8px;margin-left: 36px;margin-right: 4px;font-size: 24px"
                             onclick="addNewChoice()">+
                     </button>
@@ -68,7 +67,7 @@
                     <script>initSwitch($("#enabled"))</script>
                 </div>
                 <label text>分区</label>
-                <div rounded style="background: var(--input-background-color);flex: 1;overflow: auto;margin-bottom: 0;"
+                <div rounded style="background: var(--input-background-color);flex: 1;overflow: auto;margin-bottom: 0;" border
                      id="partitionSelectionsDiv" class="selections">
                     <th:block th:each="partition:${@partitionInfo.getPartitions()}">
                         <div rounded clickable

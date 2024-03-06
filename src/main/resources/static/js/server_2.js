@@ -19,7 +19,7 @@ function selectSortOption(/**HTMLElement*/optionDiv) {
 let sortType = "asc";
 
 function sortQuestion() {
-    const $selectedPartitionButton = $("#partitionButtons .partitionButton[selected='selected']");
+    const $selectedPartitionButton = $(".partitionButtons .partitionButton[selected='selected']");
     if (transferring || $selectedPartitionButton.length === 0) {
         return;
     }
@@ -128,12 +128,12 @@ function initQuestionViewImages(partitionId) {
     //     initQuestionViewImage(questionMD5);
     // }
     $.ajax({
-        url:"./../question/withImages/ofPartition/"+partitionId,
+        url: "./../question/withImages/ofPartition/" + partitionId,
         xhrFields: {
             withCredentials: true
         },
         success: function (res) {
-            if (res instanceof Array&&res.length>0) {
+            if (res instanceof Array && res.length > 0) {
                 for (const questionId of res) {
                     initQuestionViewImage(questionId);
                 }
@@ -539,11 +539,11 @@ function generateQuestionHtml(questionObject) {
     `;
 }
 
-function loadQuestion(questionObject, $questionsDiv) {
+function loadQuestion(md5, $questionsDiv) {
     $.ajax({
         url: "./page/questionOverview",
         data: {
-            md5: questionObject.md5
+            md5: md5
         },
         success: function (res) {
             const $questionDiv = $(res);
@@ -576,7 +576,7 @@ function updateQuestionDiv(questionJsonData, animation = true) {
         if (!containedInCurrentPartition) {
             return;
         }
-        loadQuestion(questionObject, $questionsDiv);
+        loadQuestion(questionObject.md5, $questionsDiv);
     } else {
         let deletedFromCurrentPartition = true;
         const $questionDiv = $questionDivs.eq(0);
@@ -867,7 +867,7 @@ function sendMoveOrCopy() {
         return;
     }
     let $moveOrCopyButton = $("#moveOrCopyButton");
-    $moveOrCopyButton.attr("disabled","disabled");
+    $moveOrCopyButton.attr("disabled", "disabled");
     let partitionIds = [];
     for (let partition of $(".partitionSelectItem")) {
         let $partition = $(partition);
@@ -881,6 +881,7 @@ function sendMoveOrCopy() {
         md5s: md5s,
         partitionIds: partitionIds,
         actionType: actionType,
+        sourcePartitionId: $(".partitionButton[selected]").attr("id").substring(15)
     }, function (e) {
         let message = JSON.parse(e.data);
         if (message.type === "success") {
@@ -943,5 +944,38 @@ function checkBatchSelect() {
         $batchButtons.find("button#selectAll").text("取消全选");
     } else {
         $batchButtons.find("button#selectAll").text("全选");
+    }
+}
+
+function updateBatchCopy(questionIds, partitionIds) {
+    let $partitionButton = $(".partitionButton[selected]");
+    if ($partitionButton.length === 0) return;
+    if (partitionIds.includes(Number($partitionButton.attr("id").substring(15)))) {
+        for (const questionId of questionIds) {
+            if ($("#" + questionId).length === 0)
+                loadQuestion(questionId, $(".questions"));
+        }
+    }
+}
+
+function updateBatchMove(questionIds, partitionIds, sourcePartitionId) {
+    let $partitionButton = $(".partitionButton[selected]");
+    if ($partitionButton.length === 0) return;
+    let currentPartitionId = Number($partitionButton.attr("id").substring(15));
+    if (!partitionIds.includes(sourcePartitionId) && sourcePartitionId === currentPartitionId) {
+        let elements = [];
+        for (const questionId of questionIds) {
+            elements.push(document.getElementById(questionId));
+        }
+        $(elements).fadeOut(200,"easeInCubic",function () {
+            $(this).slideUp(200,"easeInOutCubic",function () {
+                $(this).remove();
+            });
+        });
+    } else if (partitionIds.includes(currentPartitionId)) {
+        for (const questionId of questionIds) {
+            if ($("#" + questionId).length === 0)
+                loadQuestion(questionId, $(".questions"));
+        }
     }
 }

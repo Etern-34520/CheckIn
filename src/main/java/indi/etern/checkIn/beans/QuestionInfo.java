@@ -14,7 +14,7 @@ public class QuestionInfo {
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
     }
 
-    public List<MultiPartitionableQuestion> getNewQuestionInDays(int dayCount) {
-        return multiPartitionableQuestionService.findEditedInLastDays(dayCount);
+    public List<MultiPartitionableQuestion> getNewQuestionInDays(int dayCount, int count) {
+        return multiPartitionableQuestionService.findEditedInLastDays(dayCount, count);
     }
 }

@@ -54,9 +54,7 @@
             <div></div>
         </div>
         <div id="pagePath">
-            <div class="path" undeleted>
-                CheckIn
-            </div>
+            <div class="path" undeleted onclick="switchToPageWithAnimate('server',0)">CheckIn</div>
         </div>
         <div clickable rounded style="display:flex;margin: 0;padding-top: 6px"
              onclick="switchToPageWithAnimate('user',2)">
@@ -74,15 +72,13 @@
 <div id="topMask" onclick="closeMenu()">
     <div id="menu" rounded>
         <div id="menuTop">
-            <div id="menuInsideButton" rounded component_type="shrinkButton" clickable
+            <div id="menuInsideButton" rounded clickable
                  onclick="closeMenu()">
                 <div style="rotate: 90deg;" component_type="shrinkButtonPointer">
                     <div></div>
                     <div></div>
                 </div>
             </div>
-            <!--<button type="button" id="menuInsideButton" class="button" style="font-size: 20px" onclick="closeMenu()"><
-            </button>-->
         </div>
         <div class="forScroll" style="flex: auto">
             <div id="menuButtons">

@@ -100,6 +100,12 @@ function initWebSocket(button) {
             case "trafficLog":
                 updateTrafficLog(message.traffic);
                 break;
+            case "batchCopy":
+                updateBatchCopy(message.questionIds, message.partitionIds);
+                break;
+            case "batchMove":
+                updateBatchMove(message.questionIds, message.partitionIds, message.sourcePartitionId);
+                break;
         }
     }
 

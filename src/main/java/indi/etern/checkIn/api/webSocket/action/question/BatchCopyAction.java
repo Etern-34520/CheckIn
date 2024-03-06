@@ -1,9 +1,11 @@
 package indi.etern.checkIn.api.webSocket.action.question;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,19 @@ public class BatchCopyAction extends QuestionAction {
 
     @Override
     public void afterAction() {
-        sendUpdateQuestionsToAll(questions);
+//        sendUpdateQuestionsToAll(questions);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "batchCopy");
+        JsonArray jsonArray = new JsonArray();
+        for (int targetPartitionId : targetPartitionsId) {
+            jsonArray.add(targetPartitionId);
+        }
+        jsonObject.add("partitionIds", jsonArray);
+        JsonArray jsonArray1 = new JsonArray();
+        for (MultiPartitionableQuestion question:questions) {
+            jsonArray1.add(question.getMd5());
+        }
+        jsonObject.add("questionIds", jsonArray1);
+        WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
     }
 }

@@ -234,7 +234,7 @@ public class Connector implements SubProtocolCapable {
                         partitionIds.add(Integer.parseInt(partitionIdString));
                     }
                     if (contentMap.get("actionType").equals("move")){
-                        logging = doAction(new BatchMoveAction((List<String>) contentMap.get("md5s"), partitionIds));
+                        logging = doAction(new BatchMoveAction((List<String>) contentMap.get("md5s"), partitionIds, Integer.parseInt((String) contentMap.get("sourcePartitionId"))));
                     } else if (contentMap.get("actionType").equals("copy")){
                         logging = doAction(new BatchCopyAction((List<String>) contentMap.get("md5s"), partitionIds));
                     } else {

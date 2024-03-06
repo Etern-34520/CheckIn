@@ -20,6 +20,7 @@ public class MultiPartitionableQuestion extends Question implements MultiPartiti
             joinColumns  = @JoinColumn(name = "question_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "partition_id",referencedColumnName = "id"))
     protected Set<Partition> partitions;
+
     @Getter
     @Setter
     protected boolean enabled = false;

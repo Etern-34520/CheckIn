@@ -21,7 +21,7 @@ public class DeletePartitionAction extends PartitionJsonResultAction {
     
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
-        Partition partition = PartitionService.singletonInstance.findById(partitionId).orElseThrow();
+        Partition partition = PartitionService.singletonInstance.findById(partitionId).orElseThrow();//FIXME
         if (partition.getQuestions().isEmpty()) {
             PartitionService.singletonInstance.delete(partition);
         } else {

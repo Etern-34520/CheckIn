@@ -96,15 +96,6 @@ public class Partition implements Serializable {
     }
     
     @Override
-    public boolean equals(Object object) {
-        if (object instanceof Partition) {
-            return ((Partition) object).name.equals(this.name);
-        } else {
-            return false;
-        }
-    }
-    
-    @Override
     public String toString() {
         return name;
     }
@@ -132,5 +123,19 @@ public class Partition implements Serializable {
             }
         }
         return questionSet;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof Partition partition) {
+            return partition.name.equals(this.name);
+        } else {
+            return false;
+        }
     }
 }

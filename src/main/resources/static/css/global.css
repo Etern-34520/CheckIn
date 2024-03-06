@@ -113,7 +113,9 @@ button[rounded] {
 button[selected="selected"] {
     transition: 0.2s;
     transition-timing-function: ease-in-out;
-    border-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) var(--highlight-color);
+    border-width: 1px;
+    border-left-width: 4px;
+    border-color: rgba(128,128,128,0.2) rgba(128,128,128,0.2) rgba(128,128,128,0.2) var(--highlight-color);
     background: var(--component-background-color-hover);
 }
 

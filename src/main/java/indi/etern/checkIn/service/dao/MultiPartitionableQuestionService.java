@@ -13,6 +13,8 @@ import jakarta.servlet.http.Part;
 import org.apache.commons.io.file.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.stereotype.Service;
@@ -256,8 +258,9 @@ public class MultiPartitionableQuestionService {
         return map;
     }
 
-    public List<MultiPartitionableQuestion> findEditedInLastDays(int dayCount) {
-        return multiplePartitionableQuestionRepository.findAllByLastEditTimeBefore(LocalDateTime.now().minusDays(dayCount), Sort.by(Sort.Direction.DESC, "lastEditTime"));
+    public List<MultiPartitionableQuestion> findEditedInLastDays(int dayCount, int count) {
+        Pageable pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "lastEditTime"));
+        return multiplePartitionableQuestionRepository.findAllByLastEditTimeAfter(LocalDateTime.now().minusDays(dayCount),pageable);
     }
 
     public boolean existsById(String questionId) {
@@ -298,6 +301,10 @@ public class MultiPartitionableQuestionService {
             multiPartitionableQuestions.add(multiPartitionableQuestion);
         }
         return multiPartitionableQuestions;
+    }
+
+    public List<MultiPartitionableQuestion> findAllByAuthor(User author) {
+        return multiplePartitionableQuestionRepository.findAllByAuthor(author);
     }
 }
 

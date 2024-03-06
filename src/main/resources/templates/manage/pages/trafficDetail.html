@@ -2,7 +2,7 @@
 <html lang="cn" xmlns:th="http://www.thymeleaf.org">
 <!--/*@thymesVar id="userTraffic" type="indi.etern.checkIn.entities.traffic.UserTraffic"*/-->
 <div style="display: flex;flex-direction: column">
-    <div style="display: flex;flex-direction: row" th:with="passed=${userTraffic.getAttributesMap().get('passed')}">
+    <div style="display: flex;flex-direction: row;background: var(--shrinkPane-background-color)" th:with="passed=${userTraffic.getAttributesMap().get('passed')}" rounded>
         <div id="trafficUserAvatar" th:if="${userTraffic.getQQNumber() >= 10000}" th:style="'background-image: url(&quot;https://q1.qlogo.cn/g?b=qq&nk='+${userTraffic.QQNumber}+'&s=640&quot;);'"></div>
         <div style="display: flex;flex-direction: column">
             <label titleLabel th:text="${userTraffic.getQQNumber()}"></label>

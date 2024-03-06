@@ -7,7 +7,7 @@
                 <label for="searchInput" style="margin: 4px;line-height: 48px;">搜索</label>
                 <input id="searchInput" type="text" style="flex: 1" oninput="searchTraffic()">
             </div>
-            <div style="display: flex;flex: 1;flex-direction: row">
+            <div style="display: flex;flex: 1;flex-direction: row;min-height: 0;">
                 <div class="noScrollBar" id="dateSelections" component_type="dateSelector"
                      style="overflow: auto;flex: none">
                     <div th:each="dateTraffic:${@trafficInfo.getDateTraffics()}" style="width: 20px;writing-mode: vertical-rl;transform: rotate(180deg);display: flex;flex-direction: row-reverse"

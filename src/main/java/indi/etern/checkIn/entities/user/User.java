@@ -4,12 +4,9 @@ import com.google.gson.JsonObject;
 import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.auth.Authority;
 import indi.etern.checkIn.auth.PermissionType;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,12 +30,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "ROLE_TYPE")
 //    @NotFound(action = NotFoundAction.IGNORE)
     protected Role role;
-    
-    @Getter
-    @OneToMany(mappedBy = "author")
-    @Fetch(value = FetchMode.JOIN)
-    protected List<MultiPartitionableQuestion> multiPartitionableQuestions;
-    
+
     @Setter
     protected boolean enabled = true;
     

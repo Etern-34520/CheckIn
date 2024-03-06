@@ -241,21 +241,6 @@ function selectButtonOf(pageClass, index) {
     $selectedButton.attr("selected", "selected");
 }
 
-function changePath(path) {
-    let pathBlocks = path.split("/");
-    for (let pathBlock of pathBlocks) {
-        pathBlock = "> " + pathBlock;
-        clearPath();
-        let pathHtml = `
-<div class="path" preText rounded onclick="doBackFunc('${pathBlock}')">${pathBlock}</div>
-`
-        let $path = $(
-            pathHtml
-        );
-        $path.appendTo($("#pagePath"));
-    }
-}
-
 function escapeHTML(string) {
     string = "" + string;
     return string.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, "").replace(/'/g, "'");
@@ -266,29 +251,30 @@ function clearPath() {
     $path1.not($("[undeleted]")).remove();
 }
 
-// let pagePathMap = new Map();
-// let breakBool = true;
 let nameToFuncMap = new Map();
 
 function addPath(pathName, backFunc) {
-    // breakBool = true;
     nameToFuncMap.set(pathName, backFunc);
     pathName = escapeHTML(pathName);
     let pathHtml = `
-<div class="path" preText rounded onclick="doBackFunc('${pathName}')"></div>
-`
+<div class="path" preText rounded onclick="doBackFunc('${pathName}')" id="path_${pathName}">
+    <div component_type="shrinkButtonPointer">
+            <div></div>
+            <div></div>
+    </div>
+    <label>${pathName}</label>
+</div>`
     let $path = $(
         pathHtml
     );
-    $path.text("> " + pathName);
     $path.css("opacity", 0);
-    $path.css("marginLeft", -20);
-    $path.css("marginRight", 20);
+    $path.css("marginLeft", -10);
+    $path.css("marginRight", 10);
     $path.appendTo($("#pagePath"));
     $path.animate({
-        opacity: 0.75,
-        marginLeft: 3,
-        marginRight: 3
+        opacity: 1,
+        marginLeft: 4,
+        marginRight: 4
     }, 200, "easeInCubic");
 }
 
@@ -298,57 +284,23 @@ function doBackFunc(pathName) {
 }
 
 function containsPath(pathName) {
-    let $pagePath = $("#pagePath");
-    let $paths = $pagePath.children(".path");
-    for (const $path of $paths) {
-        if ($path.innerText === "> " + pathName) {
-            return true;
-        }
-    }
-    return false;
+    return $("#path_" + pathName).length !== 0;
 }
 
 let pathLock;
-
-function removePath(pathName) {
-    if (pathLock) return "pathLock";
-    pathLock = true;
-    let $pagePath = $("#pagePath");
-    let $paths = $pagePath.children(".path");
-    for (const $path of $paths) {
-        if ($path.innerText === "> " + pathName) {
-            $path.animate({
-                opacity: 0,
-                marginLeft: -20,
-                marginRight: 20,
-            }, 200, "easeInCubic", function () {
-                setTimeout(function () {
-                    $path.remove();
-                }, 100);
-            });
-            break;
-        }
-    }
-}
 
 function removePathAfter(pathName, contains = false, doCallBackFunc = false) {
     if (pathLock) return "pathLock";
     pathLock = true;
     let $pagePath = $("#pagePath");
     let $paths = $pagePath.children(".path");
-    let indexOfPathName = -1;
-    for (const $path of $paths) {
-        if ($path.innerText === "> " + pathName) {
-            indexOfPathName = $paths.index($path);
-            break;
-        }
-    }
+    let indexOfPathName = $paths.index($("#path_" + pathName));
     if (indexOfPathName !== -1) {
         for (let i = indexOfPathName + (contains ? 0 : 1); i < $paths.length; i++) {
             $paths.eq(i).animate({
                 opacity: 0,
-                marginLeft: -20,
-                marginRight: 20,
+                marginLeft: -10,
+                marginRight: 10,
             }, 200, "easeInOutCubic", function () {
                 setTimeout(function () {
                     $paths.eq(i).remove();
