@@ -17,10 +17,10 @@ $(document).keyup(function (event) {
     }
 });
 
-function deleteQuestion(questionMd5) {
+function deleteQuestion(questionId) {
     const messageJson = {
         "type": "deleteQuestion",
-        "questionMD5": questionMd5
+        "questionID": questionId
     };
     sendMessage(messageJson, function (event) {
         console.log(event);
@@ -85,13 +85,13 @@ function initContextMenu() {
         selector: "div.question",
         animation: animation,
         callback: function (key, options, e) {
-            let $questionMD5Div = $(this).find("div.questionMD5");
+            let $questionIDDiv = $(this).find("div.questionID");
             switch (key) {
                 case "edit":
-                    editQuestion($questionMD5Div.text());
+                    editQuestion($questionIDDiv.text());
                     break;
                 case "delete":
-                    deleteQuestion($questionMD5Div.text());
+                    deleteQuestion($questionIDDiv.text());
                     break;
             }
         },
@@ -102,20 +102,20 @@ function initContextMenu() {
         selector: "div.partitionQuestionsList > div:not(.empty)",
         animation: animation,
         callback: function (key, options, e) {
-            let $questionMD5Div = $(this);
-            let questionMD5;
+            let $questionIDDiv = $(this);
+            let questionID;
 
-            function deleteQuestionDiv(questionMD5) {
+            function deleteQuestionDiv(questionID) {
                 const messageJson = {
                     "type": "deleteQuestion",
-                    "questionMD5": questionMD5
+                    "questionID": questionID
                 };
                 sendMessage(messageJson, function (message) {
                     if (JSON.parse(message.data).type === "success") {
-                        // $("div.partitionQuestionsList > div.question" + messageJson.questionMD5).remove();
-                        if ($("#md5").val() === questionMD5)
+                        // $("div.partitionQuestionsList > div.question" + messageJson.questionID).remove();
+                        if ($("#id").val() === questionID)
                             transitionPage($("#right"), "");
-                        const $questionDivs = $questionMD5Div.parent();
+                        const $questionDivs = $questionIDDiv.parent();
                         if ($questionDivs.children().length === 1) {
                             const $empty = $("<div rounded style=\"cursor: auto;background: none;\" class=\"empty\">empty</div>");
                             $empty.css("padding", "0");
@@ -130,8 +130,8 @@ function initContextMenu() {
                                 height: 20.667
                             }, 150, "easeOutCubic");
                         }
-                        $questionMD5Div.hide(200, "easeOutCubic", function () {
-                            $questionMD5Div.remove();
+                        $questionIDDiv.hide(200, "easeOutCubic", function () {
+                            $questionIDDiv.remove();
                         });
                     }
                 });
@@ -139,8 +139,8 @@ function initContextMenu() {
 
             switch (key) {
                 case "delete":
-                    questionMD5 = $questionMD5Div.attr("class").substring(8).replace(" context-menu-active", "");
-                    deleteQuestionDiv(questionMD5);
+                    questionID = $questionIDDiv.attr("questionId");
+                    deleteQuestionDiv(questionID);
                     break;
             }
         },

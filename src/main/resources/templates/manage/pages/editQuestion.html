@@ -7,7 +7,7 @@
     <div id="formBox">
         <div id="formDiv" style="display: flex;flex-direction: row">
             <input type="hidden" id="questionEdit" name="questionEdit" value="true">
-            <input type="hidden" id="md5" name="md5" th:value="${question.getMd5()}">
+            <input type="hidden" id="id" name="id" th:value="${question.getId()}">
             <div style="display: flex;flex-direction: column;resize: vertical;flex: 1">
                 <label for="questionContent" text>内容</label>
                 <textarea id="questionContent" name="questionContent" th:disabled="${!canEditQuestion}"

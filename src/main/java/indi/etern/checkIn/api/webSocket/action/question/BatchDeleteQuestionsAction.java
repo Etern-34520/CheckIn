@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class BatchDeleteQuestionsAction extends QuestionAction {
-    List<String> md5s;
+    List<String> ids;
     User currentUser;
 
-    public BatchDeleteQuestionsAction(List<String> md5s, User currentUser) {
-        this.md5s = md5s;
+    public BatchDeleteQuestionsAction(List<String> ids, User currentUser) {
+        this.ids = ids;
         this.currentUser = currentUser;
     }
 
@@ -23,14 +23,14 @@ public class BatchDeleteQuestionsAction extends QuestionAction {
 
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
-        MultiPartitionableQuestionService.singletonInstance.deleteAllById(md5s);
+        MultiPartitionableQuestionService.singletonInstance.deleteAllById(ids);
         return successOptionalJsonObject;
     }
 
     @Override
     public void afterAction() {
-        for (String md5 : md5s) {
-            sendDeleteQuestionToAll(md5);
+        for (String id : ids) {
+            sendDeleteQuestionToAll(id);
         }
     }
 }

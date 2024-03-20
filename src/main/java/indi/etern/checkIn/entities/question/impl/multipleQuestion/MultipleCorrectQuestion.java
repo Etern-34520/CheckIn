@@ -122,7 +122,7 @@ public class MultipleCorrectQuestion extends MultipleChoiceQuestion implements M
         }
         dataMap.put("partitions", partitionNames);
         dataMap.put("partitionIds",partitionIds);
-        dataMap.put("md5",md5);
+        dataMap.put("id", id);
         HashMap<String, Object> value = new HashMap<>();
         if (author!=null) {
             value.put("name",author.getUsername());

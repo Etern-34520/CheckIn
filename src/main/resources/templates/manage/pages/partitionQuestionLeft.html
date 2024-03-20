@@ -16,7 +16,7 @@
             <div th:if="${partition.getQuestions().isEmpty()}" rounded style="cursor: auto;background: none;"
                  class="empty">empty</div>
             <th:block th:unless="${partition.getQuestions().isEmpty()}" th:each="question:${partition.getQuestions()}">
-                <div rounded clickable th:class="'questionContentItem question'+${question.getMd5()}" th:onclick="switchToQuestion([[${question.md5}]],this)">
+                <div rounded clickable class="questionContentItem" th:questionId="${question.getId()}" th:onclick="switchToQuestion([[${question.id}]],this)">
                     <div class="pointer"></div>
                     <div class="questionContentOverview" th:text="${question.getContent()}"></div>
                 </div>

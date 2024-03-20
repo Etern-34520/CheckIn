@@ -339,14 +339,14 @@ input[type="checkbox"] {
     background: var(--context-menu-background-color);
     display: flex;
     flex: none !important;
-    transition: 0.2s;
+    transition: 0.1s;
     transition-timing-function: ease-in-out;
 }
 
 .toggleSwitchBasic[disabled] {
     opacity: 0.5;
     cursor: not-allowed;
-    transition: 0.2s;
+    transition: 0.1s;
     transition-timing-function: ease-in-out;
 }
 

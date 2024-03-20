@@ -9,13 +9,13 @@ import indi.etern.checkIn.service.web.WebSocketService;
 import java.util.List;
 
 public abstract class QuestionAction extends JsonResultAction {
-    protected void sendDeleteQuestionToAll(String questionMD5) {
+    protected void sendDeleteQuestionToAll(String questionID) {
         JsonObject jsonObject = new JsonObject();
 //        Map<String, Object> dataMap = new HashMap<>();
         jsonObject.addProperty("type", "deleteQuestion");
-        jsonObject.addProperty("questionMD5", questionMD5);
+        jsonObject.addProperty("questionID", questionID);
 //        dataMap.put("type", "deleteQuestion");
-//        dataMap.put("questionMD5", questionMD5);
+//        dataMap.put("questionID", questionID);
         WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
     }
 

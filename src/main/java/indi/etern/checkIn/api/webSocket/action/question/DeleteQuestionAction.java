@@ -12,7 +12,7 @@ public class DeleteQuestionAction extends QuestionAction {
     private MultiPartitionableQuestion question;
     
     public DeleteQuestionAction(String questionID) {
-        this.question = MultiPartitionableQuestionService.singletonInstance.getByMD5(questionID);
+        this.question = MultiPartitionableQuestionService.singletonInstance.getById(questionID);
     }
 
     protected DeleteQuestionAction() {}
@@ -32,7 +32,7 @@ public class DeleteQuestionAction extends QuestionAction {
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
         if (question != null) {
-            MultiPartitionableQuestionService.singletonInstance.unbindAndDeleteById(question.getMd5());
+            MultiPartitionableQuestionService.singletonInstance.unbindAndDeleteById(question.getId());
         }
         return successOptionalJsonObject;
     }
@@ -40,7 +40,7 @@ public class DeleteQuestionAction extends QuestionAction {
     @Override
     public void afterAction() {
         if (question != null)
-            sendDeleteQuestionToAll(question.getMd5());
+            sendDeleteQuestionToAll(question.getId());
     }
 
 }

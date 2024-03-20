@@ -31,9 +31,9 @@ public class QuestionDataRead {
         this.gson = gson;
     }
     
-    @GetMapping(path = "image/count/{questionMD5}")
-    public String getImageQuantity(@PathVariable String questionMD5) {
-        MultiPartitionableQuestion question = multiPartitionableQuestionService.getByMD5(questionMD5);
+    @GetMapping(path = "image/count/{questionID}")
+    public String getImageQuantity(@PathVariable String questionID) {
+        MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
         if (question instanceof ImagesWith questionWithImages) {
             return String.valueOf(questionWithImages.getImagePathStrings().size());
         } else {
@@ -44,13 +44,13 @@ public class QuestionDataRead {
     @GetMapping(path = "/withImages/ofPartition/{partitionId}")
     public List<String> getQuestionWithImageIds(@PathVariable int partitionId) throws BadRequestException {
         Partition partition = partitionService.findById(partitionId).orElseThrow(() -> new BadRequestException("partitions not exist"));
-        return partition.getQuestions().stream().filter((question) -> question instanceof ImagesWith).map(Question::getMd5).toList();
+        return partition.getQuestions().stream().filter((question) -> question instanceof ImagesWith).map(Question::getId).toList();
     }
     
-    @GetMapping(path = "image/{questionMD5}/", produces = "application/json;charset=UTF-8")
+    @GetMapping(path = "image/{questionID}/", produces = "application/json;charset=UTF-8")
     @ResponseBody
-    public String getAllImageJsonData(@PathVariable String questionMD5) {//TODO 优化 当前用时6647ms
-        MultiPartitionableQuestion question = multiPartitionableQuestionService.getByMD5(questionMD5);
+    public String getAllImageJsonData(@PathVariable String questionID) {//TODO 优化 当前用时6647ms
+        MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
         if (question instanceof ImagesWith questionWithImages) {
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("count", questionWithImages.getImagePathStrings().size());
@@ -93,9 +93,9 @@ public class QuestionDataRead {
         }
     }
     
-    @GetMapping(path = "image/{questionMD5}/{imageIndex}")
-    public void getImage(HttpServletResponse httpServletResponse, @PathVariable String questionMD5, @PathVariable int imageIndex) {
-        MultiPartitionableQuestion question = multiPartitionableQuestionService.getByMD5(questionMD5);
+    @GetMapping(path = "image/{questionID}/{imageIndex}")
+    public void getImage(HttpServletResponse httpServletResponse, @PathVariable String questionID, @PathVariable int imageIndex) {
+        MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
         if (question != null) {
             //TODO 后缀
             httpServletResponse.setContentType("image/png");

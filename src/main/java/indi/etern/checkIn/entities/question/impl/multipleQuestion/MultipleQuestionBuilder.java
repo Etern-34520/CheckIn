@@ -26,7 +26,7 @@ public class MultipleQuestionBuilder {
     MultiPartitionableQuestion multipleQuestion;
     @Getter
     final List<Choice> choices = new ArrayList<>();
-    String md5;
+    String id;
     String questionContent;
     @Getter
     final Set<Partition> partitions = new HashSet<>();
@@ -42,7 +42,7 @@ public class MultipleQuestionBuilder {
                 .addPartitions(multiPartitionableQuestion.getPartitions())
                 .setAuthor(multiPartitionableQuestion.getAuthor())
                 .setEnable(multiPartitionableQuestion.isEnabled())
-                .setMD5(multiPartitionableQuestion.getMd5());
+                .setId(multiPartitionableQuestion.getId());
     }
 
     private MultipleQuestionBuilder addPartitions(Collection<Partition> partitions) {
@@ -134,16 +134,16 @@ public class MultipleQuestionBuilder {
                 multipleQuestion = new MultipleCorrectQuestionWithImages(questionContent, choices, partitions, author);
         }
         multipleQuestion.setEnabled(enable);
-        if (md5 != null) {
+        if (id != null) {
             try {
-                final Field md5Field = Question.class.getDeclaredField("md5");
-                md5Field.setAccessible(true);
-                md5Field.set(multipleQuestion, md5);
+                final Field idField = Question.class.getDeclaredField("id");
+                idField.setAccessible(true);
+                idField.set(multipleQuestion, id);
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new MultipleQuestionBuilderException("editing md5");
+                throw new MultipleQuestionBuilderException("editing id");
             }
         } else {
-            multipleQuestion.initMD5();
+            multipleQuestion.initId();
         }
         if (!questionContent.isEmpty()) {//非模板题目
             for (Partition partition : partitions) {
@@ -153,7 +153,7 @@ public class MultipleQuestionBuilder {
             }
         }
         List<String> imagePathStrings = new ArrayList<>();
-        final Path imagesPath = Path.of("data/images/" + multipleQuestion.getMd5() + "/");
+        final Path imagesPath = Path.of("data/images/" + multipleQuestion.getId() + "/");
         if (!imageParts.isEmpty()) {
             if (!Files.exists(imagesPath)) {
                 try {
@@ -164,7 +164,7 @@ public class MultipleQuestionBuilder {
             }
             try {
                 for (Part imagePart : imageParts) {
-                    final String pathString = "data/images/" + multipleQuestion.getMd5() + "/" + imagePart.getSubmittedFileName();
+                    final String pathString = "data/images/" + multipleQuestion.getId() + "/" + imagePart.getSubmittedFileName();
                     final Path path = Path.of(pathString);
                     if (!Files.exists(path)) {
                         Files.createFile(path);
@@ -211,8 +211,8 @@ public class MultipleQuestionBuilder {
         return multipleQuestion;
     }
 
-    public MultipleQuestionBuilder setMD5(String md5) {
-        this.md5 = md5;
+    public MultipleQuestionBuilder setId(String id) {
+        this.id = id;
         return this;
     }
 

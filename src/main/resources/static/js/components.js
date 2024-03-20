@@ -78,13 +78,17 @@ function toggleSwitch($toggleSwitch, moveLeft, toggleSwitchOn, toggleSwitchOff) 
 
     function switchOn() {
         $toggleSwitch.find('.toggleSwitchDot').animate({left: moveLeft}, 80, 'easeInOutCubic');
-        $toggleSwitch.css('background', 'var(--highlight-component-background-color-hover)');
+        setTimeout(function () {
+            $toggleSwitch.css('background', 'var(--highlight-component-background-color-hover)');
+        }, 100);
         $input.val('true');
     }
 
     function switchOff() {
         $toggleSwitch.find('.toggleSwitchDot').animate({left: 0}, 80, 'easeInOutCubic');
-        $toggleSwitch.css('background', 'var(--context-menu-background-color)');
+        setTimeout(function () {
+            $toggleSwitch.css('background', 'var(--context-menu-background-color)');
+        }, 100);
         $input.val('false');
     }
 
@@ -380,22 +384,22 @@ class Slider {
 function initSlider($sliders) {
     for (const slider of $sliders) {
         let $slider = $(slider);
-        if ($slider.attr("component_type")===undefined) {
-            $slider.attr("component_type","slider")
+        if ($slider.attr("component_type") === undefined) {
+            $slider.attr("component_type", "slider")
 
             let minValue = $slider.attr("min-value");
-            if (minValue===undefined) minValue = 0;
+            if (minValue === undefined) minValue = 0;
             else minValue = Number(minValue);
 
             let maxValue = $slider.attr("max-value");
-            if (maxValue===undefined) maxValue = 100;
+            if (maxValue === undefined) maxValue = 100;
             else {
                 maxValue = Number(maxValue);
-                if (maxValue<minValue) maxValue = minValue;
+                if (maxValue < minValue) maxValue = minValue;
             }
 
             let value = $slider.attr("value");
-            if (value===undefined) value = minValue;
+            if (value === undefined) value = minValue;
             else {
                 value = Number(value);
                 if (value < minValue) value = minValue;
@@ -403,7 +407,7 @@ function initSlider($sliders) {
             }
 
             let value1 = $slider.attr("value1");
-            if (value1===undefined) value1 = minValue;
+            if (value1 === undefined) value1 = minValue;
             else {
                 value1 = Number(value1);
                 if (value1 < minValue) value1 = minValue;
@@ -414,8 +418,8 @@ function initSlider($sliders) {
             let name1 = $slider.attr("name1");
 
             //TODO
-            let useDoubleSlider = $slider.attr("useDoubleSlider")==="true"||$slider.attr("useDoubleSlider")==="";
-            if (useDoubleSlider){
+            let useDoubleSlider = $slider.attr("useDoubleSlider") === "true" || $slider.attr("useDoubleSlider") === "";
+            if (useDoubleSlider) {
                 $slider.append($(`
 <label>
     <input style="width: 60px" class="sliderMinValue" name="${name}" type="number" value="${value}" max_value="${maxValue}">
@@ -425,10 +429,10 @@ function initSlider($sliders) {
             $slider.append($sliderBase)
             if (useDoubleSlider) {
                 $sliderBase.append($(`
-<span component_type="sliderLine" style="width: ${100*(value-minValue)/(maxValue-minValue)}%"></span>
-<div component_type="sliderPoint" value="${(value-minValue)/(maxValue-minValue)}">
+<span component_type="sliderLine" style="width: ${100 * (value - minValue) / (maxValue - minValue)}%"></span>
+<div component_type="sliderPoint" value="${(value - minValue) / (maxValue - minValue)}">
     <div></div>
-    <input type="hidden" value="${(value-minValue)/(maxValue-minValue)}"/>
+    <input type="hidden" value="${(value - minValue) / (maxValue - minValue)}"/>
 </div>`));
             } else {
                 // let v = value;

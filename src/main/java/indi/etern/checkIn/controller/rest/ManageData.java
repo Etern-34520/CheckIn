@@ -96,8 +96,8 @@ public class ManageData {
     @ResponseBody
     public synchronized String updateQuestion(HttpServletRequest httpServletRequest) {
         try {
-            final String md5 = httpServletRequest.getParameter("md5");
-            final MultiPartitionableQuestion oldQuestion = multiPartitionableQuestionService.getByMD5(md5);
+            final String id = httpServletRequest.getParameter("id");
+            final MultiPartitionableQuestion oldQuestion = multiPartitionableQuestionService.getById(id);
             final String authorQQString = httpServletRequest.getParameter("author");
             User author;
             if (authorQQString == null) {
@@ -112,7 +112,7 @@ public class ManageData {
             final boolean enabled = Boolean.parseBoolean(httpServletRequest.getParameter("enabled"));
             checkPermission(oldQuestion, (User) httpServletRequest.getAttribute("currentUser"), author, enabled);
             
-            final MultiPartitionableQuestion multiPartitionableQuestion = MultiPartitionableQuestionService.buildQuestionFromRequest(httpServletRequest, md5, author);
+            final MultiPartitionableQuestion multiPartitionableQuestion = MultiPartitionableQuestionService.buildQuestionFromRequest(httpServletRequest, id, author);
             multiPartitionableQuestionService.save(multiPartitionableQuestion);
             
             Map<String, Object> dataMap = new HashMap<>();

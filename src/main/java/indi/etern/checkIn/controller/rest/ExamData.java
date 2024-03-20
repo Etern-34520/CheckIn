@@ -41,7 +41,7 @@ public class ExamData {
         Collections.shuffle(multiPartitionableQuestions, random);
         List<String> examQuestionIds = new ArrayList<>();
         for (MultiPartitionableQuestion multiPartitionableQuestion : multiPartitionableQuestions) {
-            examQuestionIds.add(multiPartitionableQuestion.getMd5());
+            examQuestionIds.add(multiPartitionableQuestion.getId());
         }
         request.setAttribute("action", "generateExam");
         request.setAttribute("randomSeed", String.valueOf(seed));

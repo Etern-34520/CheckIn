@@ -55,7 +55,7 @@ public class BatchMoveAction extends QuestionAction {
         jsonObject.add("partitionIds", jsonArray);
         JsonArray jsonArray1 = new JsonArray();
         for (MultiPartitionableQuestion question:questions) {
-            jsonArray1.add(question.getMd5());
+            jsonArray1.add(question.getId());
         }
         jsonObject.add("questionIds", jsonArray1);
         WebSocketService.singletonInstance.sendMessageToAll(jsonObject);

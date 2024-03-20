@@ -9,16 +9,16 @@ import java.util.List;
 import java.util.Optional;
 
 public class BatchEnableOrDisableQuestionsAction extends QuestionAction {
-    private final List<String> md5s;
+    private final List<String> ids;
     private final User currentUser;
     private final boolean enable;
     private List<MultiPartitionableQuestion> multiPartitionableQuestions;
 
-    public BatchEnableOrDisableQuestionsAction(List<String> md5s, User currentUser, boolean enable) {
-        this.md5s = md5s;
+    public BatchEnableOrDisableQuestionsAction(List<String> ids, User currentUser, boolean enable) {
+        this.ids = ids;
         this.currentUser = currentUser;
         this.enable = enable;
-        this.multiPartitionableQuestions = MultiPartitionableQuestionService.singletonInstance.findAllById(md5s);
+        this.multiPartitionableQuestions = MultiPartitionableQuestionService.singletonInstance.findAllById(ids);
     }
 
     @Override
@@ -35,9 +35,9 @@ public class BatchEnableOrDisableQuestionsAction extends QuestionAction {
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
         if (enable) {
-            multiPartitionableQuestions = MultiPartitionableQuestionService.singletonInstance.enableAllById(md5s);
+            multiPartitionableQuestions = MultiPartitionableQuestionService.singletonInstance.enableAllById(ids);
         } else {
-            multiPartitionableQuestions = MultiPartitionableQuestionService.singletonInstance.disableAllById(md5s);
+            multiPartitionableQuestions = MultiPartitionableQuestionService.singletonInstance.disableAllById(ids);
         }
         return successOptionalJsonObject;
     }

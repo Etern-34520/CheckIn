@@ -61,7 +61,7 @@ function initWebSocket(button) {
                 updatePartition(new Map(Object.entries(message.partitionIdNameMap)));
                 break;
             case "deleteQuestion":
-                removeQuestionDiv(message.questionMD5);
+                removeQuestionDiv(message.questionID);
                 break;
             case "updateQuestion":
                 updateQuestionDiv(message.question);

@@ -18,7 +18,7 @@ public class ExamQuestionSerializer extends StdSerializer<MultipleChoiceQuestion
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("content", multipleChoiceQuestion.getContent());
         jsonGenerator.writeStringField("type", multipleChoiceQuestion.getClass().getSimpleName());
-        jsonGenerator.writeStringField("id", multipleChoiceQuestion.getMd5());
+        jsonGenerator.writeStringField("id", multipleChoiceQuestion.getId());
         jsonGenerator.writeObjectFieldStart("choices");
         multipleChoiceQuestion.getChoices().forEach(choice -> {
             try {

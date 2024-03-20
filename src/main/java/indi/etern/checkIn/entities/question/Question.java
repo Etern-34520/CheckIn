@@ -7,11 +7,9 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @Getter
 @MappedSuperclass
@@ -38,34 +36,16 @@ public abstract class Question implements Serializable {
     
     @Id
     @Column(name = "id")
-    protected String md5;
+    protected String id;
     
-    public void initMD5(){
-//        hashcode = super.hashCode();
-        String input = toString();
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            md5.update(input.getBytes());
-            byte[] byteArray = md5.digest();
-            
-            BigInteger bigInt = new BigInteger(1, byteArray);
-            // 参数16表示16进制
-            StringBuilder result = new StringBuilder(bigInt.toString(16));
-            // 不足32位高位补零
-            while (result.length() < 32) {
-                result.insert(0, "0");
-            }
-            this.md5 = result.toString();
-//            this.hashcode = Integer.parseInt(new BigInteger(result.toString(),16).toString().substring(0,9));
-        } catch (NoSuchAlgorithmException e) {
-            // impossible
-        }
+    public void initId(){
+        id = UUID.randomUUID().toString();
     }
     
     @Override
     public boolean equals(Object object) {
         if (object instanceof Question question) {
-            return question.md5.equals(md5);
+            return question.id.equals(id);
         } else {
             return false;
         }
@@ -73,7 +53,7 @@ public abstract class Question implements Serializable {
 
     @Override
     public int hashCode() {
-        return md5.hashCode();
+        return id.hashCode();
     }
     
     abstract public String toJsonData();

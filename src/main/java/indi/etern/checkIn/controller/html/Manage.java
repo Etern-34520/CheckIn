@@ -19,10 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -46,25 +42,6 @@ public class Manage {
     }
     
     private static void newQuestion(HttpServletRequest request, ModelAndView modelAndView) {
-        
-        //生成时间戳md5
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-        String timeStamp = df.format(new Date());
-        MessageDigest md5Digest = null;
-        try {
-            md5Digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException ignored) {
-        }
-        assert md5Digest != null;
-        md5Digest.update(timeStamp.getBytes());
-        byte[] byteArray = md5Digest.digest();
-        
-        BigInteger bigInt = new BigInteger(1, byteArray);
-        StringBuilder result = new StringBuilder(bigInt.toString(16));
-        while (result.length() < 32) {
-            result.insert(0, "0");
-        }
-        
         //构建样本题目
         MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
         final String partitionIdString = request.getParameter("partitionId");
@@ -94,7 +71,7 @@ public class Manage {
                         .addChoice(new Choice("", true))
                         .addChoice(new Choice("", false))
                         .addPartition(partition)
-                        .setMD5(result.toString())
+                        .setId(UUID.randomUUID().toString())
                         .setAuthor(user)
                         .setEnable(false)
 //                        .setEnable(Boolean.parseBoolean(request.getParameter("enabled")))
@@ -146,7 +123,7 @@ public class Manage {
             case "changeRole" ->
                     modelAndView.addObject("user", userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
             case "questionOverview" ->
-                    modelAndView.addObject("question", multiPartitionableQuestionService.getByMD5(request.getParameter("md5")));
+                    modelAndView.addObject("question", multiPartitionableQuestionService.getById(request.getParameter("id")));
             case "editPermission" ->
                     modelAndView.addObject("role", roleService.findByType(request.getParameter("roleType")).orElseThrow());
             case "shrinkPane" -> {
@@ -263,7 +240,7 @@ public class Manage {
     }
     
     private void editQuestion(HttpServletRequest request, ModelAndView modelAndView) {
-        MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getByMD5(request.getParameter("md5"));
+        MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getById(request.getParameter("id"));
         modelAndView.addObject("newQuestion", Boolean.FALSE);
         if (multiPartitionableQuestion != null) {
             modelAndView.addObject("question", multiPartitionableQuestion);
@@ -296,7 +273,7 @@ public class Manage {
                             .addChoice(new Choice("", true))
                             .addChoice(new Choice("", false))
                             .addPartition(partition)
-                            .setMD5(request.getParameter("md5"))
+                            .setId(request.getParameter("id"))
                             .setAuthor(user)
                             .build();
 //                    request.setAttribute("question", multiPartitionableQuestion);

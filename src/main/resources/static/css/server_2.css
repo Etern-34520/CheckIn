@@ -157,8 +157,8 @@ input[type="file"] {
 }
 
 #managePage[index="2"][page-type="server"] .optionDiv > .deleteOptionButton {
-    height: 48px;
-    width: 48px;
+    height: 46px;
+    width: 46px;
     margin: 4px;
     font-size: 30px;
     flex: 0 0 auto;

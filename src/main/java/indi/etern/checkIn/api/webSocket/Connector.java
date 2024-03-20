@@ -167,8 +167,8 @@ public class Connector implements SubProtocolCapable {
                     logging = doAction(new DeletePartitionAction(partitionId));
                 }
                 case "deleteQuestion" -> {
-                    final String questionMD5 = (String) contentMap.get("questionMD5");
-                    logging = doAction(new DeleteQuestionAction(questionMD5));
+                    final String questionID = (String) contentMap.get("questionID");
+                    logging = doAction(new DeleteQuestionAction(questionID));
                 }
                 case "editPartition" -> {
                     logging = doAction(new EditPartitionNameAction(Integer.parseInt((String) contentMap.get("partitionId")),(String) contentMap.get("partitionName")));
@@ -219,13 +219,13 @@ public class Connector implements SubProtocolCapable {
                     logging = doAction(new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
                 }
                 case "batchDeleteQuestions" -> {
-                    logging = doAction(new BatchDeleteQuestionsAction((List<String>) contentMap.get("md5s"), sessionUser));
+                    logging = doAction(new BatchDeleteQuestionsAction((List<String>) contentMap.get("ids"), sessionUser));
                 }
                 case "batchEnableQuestions" -> {
-                    logging = doAction(new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("md5s"), sessionUser, true));
+                    logging = doAction(new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("ids"), sessionUser, true));
                 }
                 case "batchDisableQuestions" -> {
-                    logging = doAction(new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("md5s"), sessionUser, false));
+                    logging = doAction(new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("ids"), sessionUser, false));
                 }
                 case "batchMoveOrCopyQuestions" -> {
                     List<String> partitionIdStrings = (List<String>) contentMap.get("partitionIds");
@@ -234,9 +234,9 @@ public class Connector implements SubProtocolCapable {
                         partitionIds.add(Integer.parseInt(partitionIdString));
                     }
                     if (contentMap.get("actionType").equals("move")){
-                        logging = doAction(new BatchMoveAction((List<String>) contentMap.get("md5s"), partitionIds, Integer.parseInt((String) contentMap.get("sourcePartitionId"))));
+                        logging = doAction(new BatchMoveAction((List<String>) contentMap.get("ids"), partitionIds, Integer.parseInt((String) contentMap.get("sourcePartitionId"))));
                     } else if (contentMap.get("actionType").equals("copy")){
-                        logging = doAction(new BatchCopyAction((List<String>) contentMap.get("md5s"), partitionIds));
+                        logging = doAction(new BatchCopyAction((List<String>) contentMap.get("ids"), partitionIds));
                     } else {
                         sendError("actionType is invalid, must be 'move' or 'copy'");
                     }

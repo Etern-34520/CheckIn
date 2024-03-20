@@ -124,8 +124,8 @@ function saveEditing($editingInput, $partitionButton, previousName) {
 function initQuestionViewImages(partitionId) {
     // for (const questionDiv of $(".questions").children()) {
     //     const $questionDiv = $(questionDiv);
-    //     const questionMD5 = $questionDiv.attr("id");
-    //     initQuestionViewImage(questionMD5);
+    //     const questionID = $questionDiv.attr("id");
+    //     initQuestionViewImage(questionID);
     // }
     $.ajax({
         url: "./../question/withImages/ofPartition/" + partitionId,
@@ -142,9 +142,9 @@ function initQuestionViewImages(partitionId) {
     })
 }
 
-function initQuestionViewImage(questionMD5) {
+function initQuestionViewImage(questionID) {
     $.ajax({
-        url: "./../question/image/" + questionMD5 + "/", method: "get",
+        url: "./../question/image/" + questionID + "/", method: "get",
         xhrFields: {
             withCredentials: true
         },
@@ -154,7 +154,7 @@ function initQuestionViewImage(questionMD5) {
                 for (let i = 0; i < originalImageCount; i++) {
                     let imageName = res.names[i];
                     let imageData = dataURLtoFile(res.imagesBase64[imageName], imageName);
-                    addImageData(imageData, questionMD5);
+                    addImageData(imageData, questionID);
                 }
             }
         }.bind(this),
@@ -164,7 +164,7 @@ function initQuestionViewImage(questionMD5) {
     });
 }
 
-/**void*/ function addImageData(/**Blob*/image, /**string*/ questionMD5) {
+/**void*/ function addImageData(/**Blob*/image, /**string*/ questionID) {
     let imageNameAndSize = image.name + image.size;
     const reader = new FileReader();
     reader.readAsDataURL(image);
@@ -172,7 +172,7 @@ function initQuestionViewImage(questionMD5) {
         const img = new Image();
         img.src = reader.result;
         img.onload = function () {
-            const $questionDiv = $("#" + questionMD5 + " .questionOverviewImages");
+            const $questionDiv = $("#" + questionID + " .questionOverviewImages");
             const width = (img.width / (img.height / (100)));
             let $imageDiv = $(`
 <div id="${imageNameAndSize}" class="imageDiv" style="border-radius:8px;background-image: url('${reader.result}');width: ${width + 'px'}"></div>`);
@@ -470,12 +470,12 @@ ${addButtonHtml}
     return differenceMap;
 }
 
-function removeQuestionDiv(questionMD5) {
-    let $questionMD5Divs = $("div.questions > div.question div.questionMD5");
-    for (const questionMD5Div of $questionMD5Divs) {
-        let $questionMD5Div = $(questionMD5Div);
-        if ($questionMD5Div.text() === questionMD5) {
-            let $questionDiv = $("#" + questionMD5);
+function removeQuestionDiv(questionID) {
+    let $questionIDDivs = $("div.questions > div.question div.questionID");
+    for (const questionIDDiv of $questionIDDivs) {
+        let $questionIDDiv = $(questionIDDiv);
+        if ($questionIDDiv.text() === questionID) {
+            let $questionDiv = $("#" + questionID);
             $questionDiv.animate({
                 marginLeft: "150%",
                 marginRight: "-150%"
@@ -497,9 +497,9 @@ function removeQuestionDiv(questionMD5) {
         }
     }
 
-    let $question = $(".question" + questionMD5);
+    let $question = $(".question" + questionID);
     if ($question.length > 0) {
-        if ($("#md5").val() !== questionMD5 && $question.find(".pointer").css("opacity") !== 0) {
+        if ($("#id").val() !== questionID && $question.find(".pointer").css("opacity") !== 0) {
             $question.hide(200, "easeInOutCubic");
             $question.remove();
         } else {
@@ -519,14 +519,14 @@ function generateQuestionHtml(questionObject) {
         choicesHTML = choicesHTML + `<div class="questionChoice" ${correctTextBlock} rounded >${choice.content}</div>`;
     }
     return `
-<div class="question" id="${questionObject.md5}" rounded clickable
- onclick="md5ToQuestionFormDataMap = new Map();editQuestion('${questionObject.md5}')">
+<div class="question" id="${questionObject.id}" rounded clickable
+ onclick="idToQuestionFormDataMap = new Map();editQuestion('${questionObject.id}')">
 <div class="l1">
     <div class="t1">
         <div class="questionContent" rounded>${questionObject.content}</div>
     </div>
     <div class="t2">
-        <div class="questionMD5" rounded>${questionObject.md5}</div>
+        <div class="questionID" rounded>${questionObject.id}</div>
         <div class="questionType" rounded>${questionObject.type}</div>
     </div>
     <div class="t3">
@@ -539,11 +539,11 @@ function generateQuestionHtml(questionObject) {
     `;
 }
 
-function loadQuestion(md5, $questionsDiv) {
+function loadQuestion(id, $questionsDiv) {
     $.ajax({
         url: "./page/questionOverview",
         data: {
-            md5: md5
+            id: id
         },
         success: function (res) {
             const $questionDiv = $(res);
@@ -563,7 +563,7 @@ function loadQuestion(md5, $questionsDiv) {
 function updateQuestionDiv(questionJsonData, animation = true) {
     let questionObject = JSON.parse(questionJsonData);
 
-    const $questionDivs = $("#" + questionObject.md5);
+    const $questionDivs = $("#" + questionObject.id);
     const $questionsDiv = $("div.questions");
     if ($questionDivs.length === 0 && $questionsDiv.length > 0) {
         let containedInCurrentPartition = false;
@@ -576,7 +576,7 @@ function updateQuestionDiv(questionJsonData, animation = true) {
         if (!containedInCurrentPartition) {
             return;
         }
-        loadQuestion(questionObject.md5, $questionsDiv);
+        loadQuestion(questionObject.id, $questionsDiv);
     } else {
         let deletedFromCurrentPartition = true;
         const $questionDiv = $questionDivs.eq(0);
@@ -603,11 +603,11 @@ function updateQuestionDiv(questionJsonData, animation = true) {
         const $questionEnabledDiv = $questionDiv.find(".questionEnabled");
         const $questionAuthorDiv = $questionDiv.find(".questionAuthor");
         $questionDiv.find(".imageDiv").remove();
-        initQuestionViewImage(questionObject.md5);
+        initQuestionViewImage(questionObject.id);
 
         /*
                 if ($questionsDiv.length > 0) {
-                    showTip("info", "Question updated:" + questionObject.md5);
+                    showTip("info", "Question updated:" + questionObject.id);
                 }
         */
         $questionContentDiv.text(questionObject.content);
@@ -621,10 +621,10 @@ function updateQuestionDiv(questionJsonData, animation = true) {
     }
 
     for (let partitionId of questionObject.partitionIds) {
-        const $question = $("div#partition" + partitionId + " .question" + questionObject.md5);
+        const $question = $("div#partition" + partitionId + " div[questionId='" + questionObject.id + "']");
         if ($question.length === 0) {
             const $partitionDiv = $(`
-<div rounded clickable class="question${questionObject.md5}" style="height: 21px;overflow: hidden;display: flex;flex-direction: row" onclick="switchToQuestion('${questionObject.md5}',this)">
+<div rounded clickable questionId="${questionObject.id}" style="height: 21px;overflow: hidden;display: flex;flex-direction: row" onclick="switchToQuestion('${questionObject.id}',this)">
 <div class="pointer" style="width: 10px">•</div>
 <div style="flex: 1;line-height: 21px">
 ${questionObject.content}
@@ -669,7 +669,7 @@ function searchQuestion() {
         let content = $question.find(".questionContent").text().toLowerCase();
         let type = $question.find(".questionType").text().toLowerCase();
         let authorNameAndQQ = $question.find(".questionAuthor").text().toLowerCase();
-        let id = $question.find(".questionMD5").text().toLowerCase();
+        let id = $question.find(".questionID").text().toLowerCase();
         let editTime = $question.find(".questionEditTime").text().toLowerCase();
         let choices = "";
         for (const choice of $question.find(".questionChoice")) {
@@ -783,30 +783,30 @@ function reverseSelect() {
     checkBatchSelect();
 }
 
-function getSelectedQuestionsMd5s() {
-    let md5s = [];
+function getSelectedQuestionsIds() {
+    let ids = [];
     $(".question[selected='selected']").each(function () {
         let $question = $(this);
-        let md5 = $question.find(".questionMD5").text();
-        md5s.push(md5);
+        let id = $question.find(".questionID").text();
+        ids.push(id);
     });
-    return md5s;
+    return ids;
 }
 
 function deleteSelectedQuestions() {
-    let md5s = getSelectedQuestionsMd5s();
-    if (md5s.length === 0) {
+    let ids = getSelectedQuestionsIds();
+    if (ids.length === 0) {
         showTip("error", "没有选择题目");
         return;
     }
     sendMessage({
         "type": "batchDeleteQuestions",
-        "md5s": md5s
+        "ids": ids
     }, function (e) {
         let message = JSON.parse(e.data);
         if (message.type === "success") {
-            for (let md5 of md5s) {
-                removeQuestionDiv(md5);
+            for (let id of ids) {
+                removeQuestionDiv(id);
             }
             showTip("info", "题目已删除");
             $("button.batch").attr("disabled", "disabled");
@@ -861,8 +861,8 @@ ${partition.innerText}
 }
 
 function sendMoveOrCopy() {
-    let md5s = getSelectedQuestionsMd5s();
-    if (md5s.length === 0) {
+    let ids = getSelectedQuestionsIds();
+    if (ids.length === 0) {
         showTip("error", "没有选择题目");
         return;
     }
@@ -878,7 +878,7 @@ function sendMoveOrCopy() {
     let actionType = $("input[name='actionType']:checked").val();
     sendMessage({
         type: "batchMoveOrCopyQuestions",
-        md5s: md5s,
+        ids: ids,
         partitionIds: partitionIds,
         actionType: actionType,
         sourcePartitionId: $(".partitionButton[selected]").attr("id").substring(15)
@@ -897,14 +897,14 @@ function sendMoveOrCopy() {
 }
 
 function disableSelectedQuestions() {
-    let md5s = getSelectedQuestionsMd5s();
-    if (md5s.length === 0) {
+    let ids = getSelectedQuestionsIds();
+    if (ids.length === 0) {
         showTip("error", "没有选择题目");
         return;
     }
     sendMessage({
         "type": "batchDisableQuestions",
-        "md5s": md5s
+        "ids": ids
     }, function (e) {
         let message = JSON.parse(e.data);
         if (message.type === "success") {
@@ -914,14 +914,14 @@ function disableSelectedQuestions() {
 }
 
 function enableSelectedQuestions() {
-    let md5s = getSelectedQuestionsMd5s();
-    if (md5s.length === 0) {
+    let ids = getSelectedQuestionsIds();
+    if (ids.length === 0) {
         showTip("error", "没有选择题目");
         return;
     }
     sendMessage({
         "type": "batchEnableQuestions",
-        "md5s": md5s
+        "ids": ids
     }, function (e) {
         let message = JSON.parse(e.data);
         if (message.type === "success") {

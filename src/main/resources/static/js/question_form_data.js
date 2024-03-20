@@ -1,17 +1,17 @@
-let md5ToQuestionFormDataMap = new Map();
-let newQuestionMd5s = [];
+let idToQuestionFormDataMap = new Map();
 
+// noinspection JSUnusedGlobalSymbols
 function addQuestion(partitionId) {
     editQuestion("", partitionId);
 }
 
-function editQuestion(questionMD5, partitionId, transitionLeft = true) {
-    let data = "md5=" + questionMD5;
-    if (questionMD5 === undefined) {
-        questionMD5 = "";
+function editQuestion(questionId, partitionId, transitionLeft = true) {
+    let data = "id=" + questionId;
+    if (questionId === undefined) {
+        questionId = "";
     }
     let url = "page/editQuestion";
-    if (questionMD5 === "") {//new question
+    if (questionId === "") {//new question
         data = data + "new=true";
         url = "page/newQuestion";
         if (partitionId !== undefined) {
@@ -57,13 +57,13 @@ function editQuestion(questionMD5, partitionId, transitionLeft = true) {
 }
 
 function selectQuestionPartition(partitionDiv) {
-    md5ToQuestionFormDataMap.get($("#md5").val()).selectQuestionPartition(partitionDiv);
+    idToQuestionFormDataMap.get($("#id").val()).selectQuestionPartition(partitionDiv);
 }
 
-function switchToQuestion(questionMD5, element) {
-    const questionFormData = md5ToQuestionFormDataMap.get(questionMD5);
+function switchToQuestion(questionID, element) {
+    const questionFormData = idToQuestionFormDataMap.get(questionID);
     if (questionFormData === null || questionFormData === undefined || ($(element).find(".pointer").css("opacity") !== "1" && !$(element).children().eq(1).text() === "")) {
-        editQuestion(questionMD5, undefined, false);
+        editQuestion(questionID, undefined, false);
         return;
     }
     let formData = questionFormData.toUploadFormData();
@@ -84,80 +84,17 @@ function switchToQuestion(questionMD5, element) {
             console.error(res)
         }
     })
-
-
-    // let data = "new=true";
-    // let url = "page/newQuestion";
-    /*let currentQuestionFormData = md5ToQuestionFormDataMap.get(questionMD5);*/
-    // const partitionId = $(element).attr("initPartition");
-    /*$(element).removeAttr("initPartition");*/
-    // if (currentQuestionFormData === undefined) {
-    //     url = "page/editQuestion";
-    //     data = "md5=" + questionMD5;
-    //     if (partitionId !== undefined) {
-    //         data = data + "&partitionId=" + partitionId + "&ignorePartitionSelection=true";
-    //     }
-    // }
-
-    /*$.ajax({
-        xhrFields: {
-            withCredentials: true
-        },
-        url: "./page/editQuestion", method: "post", data: {md5:questionMD5}, success: function (res) {
-            let $right = $("#right");
-            // removePathContainsAfter("Edit Question")
-            transitionPage($right, res, undefined, undefined, function () {
-                let fromServer = false;
-                if (currentQuestionFormData === undefined) {
-                    fromServer = true;
-                    currentQuestionFormData = new QuestionFormData(false);
-                } else {
-                    currentQuestionFormData = md5ToQuestionFormDataMap.get(questionMD5);
-                }
-                let $questionEditForm = $("#questionEditForm");
-                let formDataMap = new Map();
-                for (let key of currentQuestionFormData.keys()) {
-                    formDataMap.set(key, currentQuestionFormData.get(key));
-                }
-                for (const key of formDataMap.keys()) {
-                    let $formElement = $questionEditForm.find("*[name=" + key + "]");
-                    if ((!isNaN(Number(key)) || key.startsWith("correct")) && $questionEditForm.find("*[name=" + key + "]").length === 0) {
-                        addNewChoice(false);
-                        $formElement = $questionEditForm.find("*[name=" + key + "]");
-                    } else if (key.startsWith("question_partition_")) {
-                        if (formDataMap.get(key) === "true") {
-                            $formElement.parent().attr("selected", "selected");
-                        }
-                    }
-                    if (key.startsWith("correct")) {
-                        $formElement.attr("checked", "checked");
-                    }
-                    $formElement.val(formDataMap.get(key));
-                    initQuestionForm()
-                }
-                if (fromServer) {
-                }
-                // currentQuestionFormData.loadImagesFromServer();
-                else
-                    currentQuestionFormData.loadCurrentImages();
-            });
-        }, error: function (res) {
-            showTip("error", res.status);
-            console.error(res);
-        }
-    });*/
-
 }
 
 
 function initQuestionForm() {
     try {
         let newQ = false;
-        let questionFormData = md5ToQuestionFormDataMap.get($("#md5").val());
+        let questionFormData = idToQuestionFormDataMap.get($("#id").val());
         if (questionFormData === undefined) {
             newQ = true;
             questionFormData = new QuestionFormData();
-            md5ToQuestionFormDataMap.set(questionFormData.get("md5"), questionFormData);
+            idToQuestionFormDataMap.set(questionFormData.get("id"), questionFormData);
         } else {
             questionFormData.loadImagesFromServer();
         }
@@ -177,7 +114,7 @@ function initQuestionForm() {
             const authorQQ = $("#author").val();
             questionFormData.originalFormData.append("author", authorQQ);
             questionFormData.formData.append("author",authorQQ);
-            md5ToQuestionFormDataMap.set(questionFormData.get("md5"), questionFormData);
+            idToQuestionFormDataMap.set(questionFormData.get("id"), questionFormData);
             questionFormData.updateDataAndCheckChange();
         }
         if ($("#optionsDiv").children().length <= 2) {
@@ -238,12 +175,12 @@ class QuestionFormData {
 
     loadImagesFromServer() {
         let originalImageCount = 0;
-        let questionMD5 = this.formData.get("md5");
+        let questionID = this.formData.get("id");
         $.ajax({
             xhrFields: {
                 withCredentials: true
             },
-            url: "./../question/image/" + questionMD5 + "/", method: "get",
+            url: "./../question/image/" + questionID + "/", method: "get",
             success: function (res) {
                 originalImageCount = res.count;
                 if (originalImageCount >= 1) {
@@ -300,8 +237,8 @@ class QuestionFormData {
     /**void*/ contentChanged() {
         // this.updateDataAndCheckChange();
         let $questionContent = $("#questionContent");
-        let questionMD5 = $('#md5').val();
-        let $questions = $("#partitionDivs div.question" + questionMD5 + "> div:nth-child(2)");
+        let questionID = $('#id').val();
+        let $questions = $("#partitionDivs div[questionId='" + questionID + "'] > div:nth-child(2)");
         if ($questions.length >= 1) {
             $questions.text($questionContent.val());
         }
@@ -333,21 +270,21 @@ class QuestionFormData {
                 this.formData.append(key, changedMap.get(key));
             }
         }
-        let questionMD5 = this.formData.get("md5");
+        let questionID = this.formData.get("id");
 
         this.changed = this.checkChange();
 
         this.contentChanged();
         if (this.changed) {
-            $("#partitionDivs div.question" + questionMD5 + " > div.pointer").animate({
+            $("#partitionDivs div[questionId='" + questionID + "'] > div.pointer").animate({
                 opacity: 1
             }, 200, "easeInOutQuad");
-            // questionMD5ToChangedBooleanMap.set(questionMD5, true);
+            // questionIDToChangedBooleanMap.set(questionID, true);
         } else {
-            $("#partitionDivs div.question" + questionMD5 + " > div.pointer").animate({
+            $("#partitionDivs div[questionId='" + questionID + "'] > div.pointer").animate({
                 opacity: 0
             }, 200, "easeInOutQuad");
-            // questionMD5ToChangedBooleanMap.set(questionMD5, false);
+            // questionIDToChangedBooleanMap.set(questionID, false);
         }
 
     }
@@ -501,22 +438,22 @@ onmouseout="hideDeleteDiv(this);">-
             hiddenPartitionInput.attr("value", "true");
             $partitionSelection.attr("selected", "");
         }
-        let questionMd5 = this.formData.get("md5");
+        let questionId = this.formData.get("id");
         let $questionContent = $("#questionContent");
         let $partitionDetail = $("#partition" + partitionId);
-        let $questions = $partitionDetail.find(".question" + questionMd5);
+        let $questions = $partitionDetail.find("div[questionId='" + questionId + "']");
         let $questionsOfPartitions = $partitionDetail.children().eq(1);
         if (selected) {
-            let $questionsOfPartitionByMd5 = $questionsOfPartitions.find(".question" + questionMd5);
-            $questionsOfPartitionByMd5.animate({
+            let $questionsOfPartitionById = $questionsOfPartitions.find(".question" + questionId);
+            $questionsOfPartitionById.animate({
                 opacity: 0
             }, 200, "easeInOutQuad", function () {
-                $questionsOfPartitionByMd5.animate({
+                $questionsOfPartitionById.animate({
                     height: 0,
                     margin: 0,
                     padding: 0
                 }, 200, "easeInOutQuad", function () {
-                    $questionsOfPartitionByMd5.remove();
+                    $questionsOfPartitionById.remove();
                     if ($questionsOfPartitions.children().length === 0) {
                         let $empty = $(`<div rounded style="cursor: auto;background: rgba(0,0,0,0);" class="empty">empty</div>`);
                         // $empty.css("display", "none");
@@ -542,7 +479,7 @@ onmouseout="hideDeleteDiv(this);">-
             } else {
                 let $firstChild = $questionsOfPartitions.children().eq(0);
                 let $partitionDiv = $(`
-<div rounded clickable class="questionContentItem question${questionMd5}" onclick="switchToQuestion('${questionMd5}',this)">
+<div rounded clickable class="questionContentItem" questionId="${questionId}" onclick="switchToQuestion('${questionId}',this)">
 <div class="pointer"></div>
 <div style="flex: 1">
 ${$questionContent.val()}
@@ -628,16 +565,16 @@ function togglePartition(titleDiv) {
 }
 
 function addNewChoice(animate = true) {
-    md5ToQuestionFormDataMap.get($("#md5").val()).addNewChoice(animate);
+    idToQuestionFormDataMap.get($("#id").val()).addNewChoice(animate);
 }
 
 function deleteChoice(/**HTMLElement*/deleteButton) {
-    md5ToQuestionFormDataMap.get($("#md5").val()).deleteChoice(deleteButton);
+    idToQuestionFormDataMap.get($("#id").val()).deleteChoice(deleteButton);
 }
 
 function addImages(uploadInput) {
     const fileList = uploadInput.files;
-    let currentQuestionFormData = md5ToQuestionFormDataMap.get($("#md5").val());
+    let currentQuestionFormData = idToQuestionFormDataMap.get($("#id").val());
     for (let i = 0; i < fileList.length; i++) {
         let image = fileList[i];
         if (!currentQuestionFormData.imageNamesAndSizesToDataMap.has(image.name + image.size)) {
@@ -658,7 +595,7 @@ function showDeleteDiv(div) {
 }
 
 function removeImage(div) {
-    let currentQuestionFormData = md5ToQuestionFormDataMap.get($("#md5").val());
+    let currentQuestionFormData = idToQuestionFormDataMap.get($("#id").val());
     let $parent = $(div).parent();
     let imageNameAndSize = $parent.attr("imageNameAndSize");//image.name + image.size;
     currentQuestionFormData.removeImageData(imageNameAndSize);
@@ -686,17 +623,17 @@ function hideDeleteDiv(childDiv) {
 }
 
 function updateAllQuestions() {
-    for (let formData of md5ToQuestionFormDataMap.values()) {
+    for (let formData of idToQuestionFormDataMap.values()) {
         if (formData.changed) {
-            let questionMD5 = formData.get("md5");
-            updateQuestionBy(questionMD5, formData);
+            let questionID = formData.get("id");
+            updateQuestionBy(questionID, formData);
         }
     }
 }
 
-function updateQuestionBy(questionMD5, questionFormData) {
+function updateQuestionBy(questionID, questionFormData) {
     if (questionFormData === undefined)
-        questionFormData = md5ToQuestionFormDataMap.get(questionMD5);
+        questionFormData = idToQuestionFormDataMap.get(questionID);
     $.ajax({
         url: "./data/updateQuestion/",
         method: "post",
@@ -708,18 +645,18 @@ function updateQuestionBy(questionMD5, questionFormData) {
         },
         success: function (res) {
             if (res === "success") {
-                showTip("info", "upload success: " + questionMD5);
-                const $questionSimpleDiv = $(`.question${questionMD5}`);
+                showTip("info", "upload success: " + questionID);
+                const $questionSimpleDiv = $(`div[questionId='${questionID}']`);
                 if ($questionSimpleDiv.css("opacity") !== 1) {
                     $questionSimpleDiv.fadeTo(200, 1, "easeInOutQuad");
                 }
                 questionFormData.updateOriginalFormData();
             } else {
-                showTip("error", "upload failed: " + questionMD5 + "; " + res, true);
+                showTip("error", "upload failed: " + questionID + "; " + res, true);
             }
         },
         error: function (res) {
-            showTip("error", "upload failed: " + questionMD5 + ";" + res.responseJSON.message, true);
+            showTip("error", "upload failed: " + questionID + ";" + res.responseJSON.message, true);
             console.error(res);
         }
     });

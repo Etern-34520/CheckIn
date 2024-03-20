@@ -1,4 +1,5 @@
-create table user_traffics (
+create table user_traffics
+(
     id         int auto_increment
         primary key,
     attributes text         null,
@@ -11,4 +12,3 @@ create table user_traffics (
 
 create index FKagnavjvhptp82o54ydyi0vhhk
     on user_traffics (date);
-

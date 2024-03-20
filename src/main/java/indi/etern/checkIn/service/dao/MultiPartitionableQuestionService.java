@@ -46,15 +46,15 @@ public class MultiPartitionableQuestionService {
         this.partitionService = partitionService;
     }
 
-    public static MultiPartitionableQuestion buildQuestionFromRequest(HttpServletRequest httpServletRequest, String originalMd5, User author) throws IOException, ServletException {
+    public static MultiPartitionableQuestion buildQuestionFromRequest(HttpServletRequest httpServletRequest, String id, User author) throws IOException, ServletException {
         Map<String, String[]> map = httpServletRequest.getParameterMap();
         MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
-        if (originalMd5 != null) {
-            multipleQuestionBuilder.setMD5(originalMd5);
+        if (id != null) {
+            multipleQuestionBuilder.setId(id);
         } else {
-            originalMd5 = map.get("md5")[0];
-            if (originalMd5 != null) {
-                multipleQuestionBuilder.setMD5(originalMd5);
+            id = map.get("id")[0];
+            if (id != null) {
+                multipleQuestionBuilder.setId(id);
             }
         }
 /*
@@ -120,8 +120,8 @@ public class MultiPartitionableQuestionService {
         return multiplePartitionableQuestionRepository.findAll();
     }
 
-    public MultiPartitionableQuestion getByMD5(String md5) {
-        return multiplePartitionableQuestionRepository.findById(md5).orElse(null);
+    public MultiPartitionableQuestion getById(String id) {
+        return multiplePartitionableQuestionRepository.findById(id).orElse(null);
     }
 
     public void saveAndFlush(MultiPartitionableQuestion multiPartitionableQuestion) {
@@ -142,9 +142,9 @@ public class MultiPartitionableQuestionService {
         }
     }
 
-    public void unbindAndDeleteById(String questionMD5) {
+    public void unbindAndDeleteById(String questionID) {
         transactionTemplate.execute((TransactionCallback<Object>) result -> {
-            MultiPartitionableQuestion multiPartitionableQuestion = getByMD5(questionMD5);
+            MultiPartitionableQuestion multiPartitionableQuestion = getById(questionID);
             Set<Partition> partitions = multiPartitionableQuestion.getPartitions();
             for (Partition partition : partitions) {
                 partition.getQuestions().remove(multiPartitionableQuestion);
@@ -152,7 +152,7 @@ public class MultiPartitionableQuestionService {
             }
             return Boolean.TRUE;
         });
-        deleteById(questionMD5);
+        deleteById(questionID);
     }
 
     public void deleteById(String id) {
@@ -203,14 +203,14 @@ public class MultiPartitionableQuestionService {
         update = true;
         transactionTemplate.execute((TransactionCallback<Object>) status -> {
             try {
-//                final String md5 = multiPartitionableQuestion.getMd5();
-//                if (multiplePartitionableQuestionRepository.existsById(md5)) {
-//                    MultiPartitionableQuestion oldMultiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
+//                final String id = multiPartitionableQuestion.getId();
+//                if (multiplePartitionableQuestionRepository.existsById(id)) {
+//                    MultiPartitionableQuestion oldMultiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(id).orElseThrow();
 //                    oldMultiPartitionableQuestion.getPartitions().forEach(partition -> {
 //                        partition.getQuestions().remove(oldMultiPartitionableQuestion);
 //                        partitionService.save(partition);
 //                    });
-//                    deleteById(md5);
+//                    deleteById(id);
 //                    multiPartitionableQuestion.getPartitions().forEach(partition -> {
 //                        partition.getQuestions().remove(multiPartitionableQuestion);
 //                        partitionService.save(partition);
@@ -253,7 +253,7 @@ public class MultiPartitionableQuestionService {
         Map<String, MultiPartitionableQuestion> map = new HashMap<>();
         List<MultiPartitionableQuestion> questions = findAllById(questionIds);
         for (MultiPartitionableQuestion question : questions) {
-            map.put(question.getMd5(), question);
+            map.put(question.getId(), question);
         }
         return map;
     }
@@ -271,9 +271,9 @@ public class MultiPartitionableQuestionService {
         multiplePartitionableQuestionRepository.saveAll(multiPartitionableQuestions);
     }
 
-    public void deleteAllById(Collection<String> md5s) {
-        for (String md5 : md5s) {
-            deleteById(md5);
+    public void deleteAllById(Collection<String> ids) {
+        for (String id : ids) {
+            deleteById(id);
         }
     }
 
@@ -281,10 +281,10 @@ public class MultiPartitionableQuestionService {
         return multiplePartitionableQuestionRepository.countByEnabledIsTrue();
     }
 
-    public List<MultiPartitionableQuestion> enableAllById(Collection<String> md5s) {
+    public List<MultiPartitionableQuestion> enableAllById(Collection<String> ids) {
         List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
-        for (String md5 : md5s) {
-            MultiPartitionableQuestion multiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
+        for (String id : ids) {
+            MultiPartitionableQuestion multiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(id).orElseThrow();
             multiPartitionableQuestion.setEnabled(true);
             multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
             multiPartitionableQuestions.add(multiPartitionableQuestion);
@@ -292,10 +292,10 @@ public class MultiPartitionableQuestionService {
         return multiPartitionableQuestions;
     }
 
-    public List<MultiPartitionableQuestion> disableAllById(Collection<String> md5s) {
+    public List<MultiPartitionableQuestion> disableAllById(Collection<String> ids) {
         List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
-        for (String md5 : md5s) {
-            MultiPartitionableQuestion multiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(md5).orElseThrow();
+        for (String id : ids) {
+            MultiPartitionableQuestion multiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(id).orElseThrow();
             multiPartitionableQuestion.setEnabled(false);
             multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
             multiPartitionableQuestions.add(multiPartitionableQuestion);
