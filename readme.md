@@ -4,7 +4,7 @@
 ![Static Badge](https://img.shields.io/badge/Author-Etern-cyan)
 ![Static Badge](https://img.shields.io/badge/Language-Java-red)
 ![Static Badge](https://img.shields.io/badge/JavaRequire-21-red)
-![Static Badge](https://img.shields.io/badge/Version-1.0.0-blue)
+![Static Badge](https://img.shields.io/badge/Version-0.2.0-blue)
 ![Static Badge](https://img.shields.io/badge/Status-Developing-green)
 ---
 
@@ -118,6 +118,15 @@ spring.datasource.password=[your password]
 4. 在jar包下新建文件夹`data`并授予读写权限
 5. 运行jar包
 > 推荐Java21版本 理论上17以上皆可
+
+> 注意：此时需要命令行主目录在jar包所在目录下
+> 
+> 以cmd为例，若jar包在C:\checkIn\checkIn-x.x.x.jar下，则需要在cmd中输入
+> ```shell
+> cd C:\checkIn\
+> ```
+> 或者参考网上其他修改springboot properties配置目录的方法
+
 ```shell
 java -jar checkIn-x.x.x.jar
 ```
@@ -128,13 +137,13 @@ java -jar checkIn-x.x.x.jar
 - 管理 `8080:/checkIn/manage/` `8080:/checkIn/login/`
 - QBot API `8080:/checkIn/api/check/`
 
-post
-```json
-{
-  "qq": 123456789,
-  "token": "[your token]"
-}
-```
+> post
+> ```json
+> {
+>  "qq": 123456789,
+>  "token": "[your token]"
+> }
+> ```
 ---
 <details>
 <summary>如何修改默认的8080端口</summary>
