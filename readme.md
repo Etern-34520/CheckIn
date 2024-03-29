@@ -118,6 +118,15 @@ spring.datasource.password=[your password]
 4. 在jar包下新建文件夹`data`并授予读写权限
 5. 运行jar包
 > 推荐Java21版本 理论上17以上皆可
+
+> 注意：此时需要命令行主目录在jar包所在目录下
+> 
+> 以cmd为例，若jar包在C:\checkIn\checkIn-x.x.x.jar下，则需要在cmd中输入
+> ```shell
+> cd C:\checkIn\
+> ```
+> 或者参考网上其他修改springboot properties配置目录的方法
+
 ```shell
 java -jar checkIn-x.x.x.jar
 ```
