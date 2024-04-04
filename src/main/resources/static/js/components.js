@@ -459,21 +459,17 @@ function initSlider($sliders) {
     }
 }
 
-/*
-<span border id="${switchID}" class="toggleSwitchBasic"
-      style="width: ${width}px;height: ${height}px;align-self: center;flex: none;
-      <c:if test="${state}">background: var(--highlight-component-background-color-hover)</c:if>;${empty style?null:style}" component_type="toggleSwitch" move_distance="${moveLeft}"
-      <c:if test="${disabled}">disabled="disabled"</c:if>
-      onclick="toggleSwitch($(this),${moveLeft},${onFuncName},${offFuncName})">
-    <input type="hidden" class="toggleSwitchInput" name="${switchID}" id="input_${switchID}" value="${empty state?"true":state}">
-    <span class="toggleSwitchDot" style="height: ${dotSize}px;width: ${dotSize}px;<c:if
-            test="${state}">left: ${moveLeft}px</c:if>"></span>
-</span>
-* */
-
+/**
+ * use as
+ <span id="enabled"
+ state="ture"
+ disabled="false"></span>
+ <script>initSwitch($("#enabled"))</script>
+ * */
 function initSwitch($spans) {
     for (const span of $spans) {
         const $span = $(span);
+        $span.children("script").remove();
         if ($span.attr("component_type") !== undefined) continue;
         $span.addClass("toggleSwitchBasic")
         $span.attr("component_type", "toggleSwitch");
@@ -502,6 +498,7 @@ function initSwitch($spans) {
         if (moveLeft === null || moveLeft === undefined || moveLeft === "") {
             moveLeft = Number(cssWidth) - dotSize - dotMargin * 2;
         }
+        $span.attr("move_distance", moveLeft);
         const switchID = $span.attr("id");
         const state = $span.attr("state") !== undefined && $span.attr("state") === "true";
         let leftCssString = state ? `left: ${moveLeft}px` : ""

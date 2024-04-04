@@ -14,5 +14,6 @@
         <th:block th:each="question:${@questionInfo.getNewQuestionInDays(14,30)}">
             <div th:replace="~{manage/pages/questionOverview::questionOverview(${question},${true})}"></div>
         </th:block>
+        <script>initSwitch($('.questionEnabled'))</script>
     </div>
 </div>

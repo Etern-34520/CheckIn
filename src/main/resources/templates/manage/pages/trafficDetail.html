@@ -18,8 +18,18 @@
         <div>
             <div th:each="entry:${userTraffic.getAttributesMap().entrySet()}" class="keyValueItem"
                  style="display: flex;flex-direction: row">
-                <div style="margin-right: 4px;" rounded th:text="${entry.getKey()}"></div>
-                <div rounded th:text="${entry.getValue()}"></div>
+                <th:block th:if="${entry.getValue().toString().length() > 500}">
+                    <div th:id="'attr_'+${entry.getKey()}" style="flex: 1" rounded th:title="${entry.getKey()}">
+                        <div th:text="${entry.getValue()}"></div>
+                    </div>
+                    <script th:inline="javascript">
+                        initShrinkPane($('#attr_'+[[${entry.getKey()}]]));
+                    </script>
+                </th:block>
+                <th:block th:unless="${entry.getValue().toString().length() > 500}">
+                    <div style="margin-right: 4px;" rounded th:text="${entry.getKey()}"></div>
+                    <div rounded th:text="${entry.getValue()}"></div>
+                </th:block>
             </div>
         </div>
     </div>
@@ -48,6 +58,7 @@
                             </th:block>
                         </th:block>
                     </th:block>
+                    <script>initSwitch($('.questionEnabled'))</script>
                 </th:block>
             </div>
         </div>

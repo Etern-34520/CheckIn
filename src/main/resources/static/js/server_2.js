@@ -567,8 +567,8 @@ function updateQuestionDiv(questionJsonData, animation = true) {
     const $questionsDiv = $("div.questions");
     if ($questionDivs.length === 0 && $questionsDiv.length > 0) {
         let containedInCurrentPartition = false;
-        for (const partitionName of questionObject.partitions) {
-            if (containsPath(partitionName)) {
+        for (const partitionId of questionObject.partitionIds) {
+            if (Number($("#partitionId").text()) === partitionId) {
                 containedInCurrentPartition = true;
                 break;
             }
@@ -580,8 +580,8 @@ function updateQuestionDiv(questionJsonData, animation = true) {
     } else {
         let deletedFromCurrentPartition = true;
         const $questionDiv = $questionDivs.eq(0);
-        for (const partitionName of questionObject.partitions) {
-            if (containsPath(partitionName) && $questionDiv.length > 0) {//if the question is deleted from the current partition
+        for (const partitionId of questionObject.partitionIds) {
+            if (Number($("#partitionId").text()) === partitionId && $questionDiv.length > 0) {//if the question is deleted from the current partition
                 deletedFromCurrentPartition = false;
             }
         }
@@ -600,7 +600,7 @@ function updateQuestionDiv(questionJsonData, animation = true) {
         const $questionContentDiv = $questionDiv.find(".questionContent");
         const $questionTypeDiv = $questionDiv.find(".questionType");
         const $questionChoicesDiv = $questionDiv.find(".questionChoices");
-        const $questionEnabledDiv = $questionDiv.find(".questionEnabled");
+        const $questionEnabledSwitch = $questionDiv.find(".questionEnabled");
         const $questionAuthorDiv = $questionDiv.find(".questionAuthor");
         $questionDiv.find(".imageDiv").remove();
         initQuestionViewImage(questionObject.id);
@@ -612,7 +612,12 @@ function updateQuestionDiv(questionJsonData, animation = true) {
         */
         $questionContentDiv.text(questionObject.content);
         $questionTypeDiv.text(questionObject.type);
-        $questionEnabledDiv.text(questionObject.enabled ? "已启用" : "已禁用");
+        // $questionEnabledDiv.text(questionObject.enabled ? "已启用" : "已禁用");
+        if (questionObject.enabled) {
+            switchOnIgnoreHandler($questionEnabledSwitch);
+        } else {
+            switchOffIgnoreHandler($questionEnabledSwitch);
+        }
         $questionAuthorDiv.text(questionObject.author.name + "(" + questionObject.author.qq + ")");
         $questionChoicesDiv.empty();
         for (const choice of questionObject.choices) {
@@ -889,7 +894,7 @@ function sendMoveOrCopy() {
             closeMenu();
             setTimeout(function () {
                 checkBatchSelect();
-            }, 200);
+            },400);
         }
     }, function () {
         $moveOrCopyButton.removeAttr("disabled");
@@ -949,33 +954,82 @@ function checkBatchSelect() {
 
 function updateBatchCopy(questionIds, partitionIds) {
     let $partitionButton = $(".partitionButton[selected]");
-    if ($partitionButton.length === 0) return;
-    if (partitionIds.includes(Number($partitionButton.attr("id").substring(15)))) {
+    if ($partitionButton.length !== 0) {
+        if (partitionIds.includes(Number($partitionButton.attr("id").substring(15)))) {
+            for (const questionId of questionIds) {
+                if ($("#" + questionId).length === 0)
+                    loadQuestion(questionId, $(".questions"));
+            }
+        }
+    } else if ($("#partitionDivs").length === 1) {
         for (const questionId of questionIds) {
-            if ($("#" + questionId).length === 0)
-                loadQuestion(questionId, $(".questions"));
+            copyQuestionTo(partitionIds, questionId);
         }
     }
 }
 
 function updateBatchMove(questionIds, partitionIds, sourcePartitionId) {
     let $partitionButton = $(".partitionButton[selected]");
-    if ($partitionButton.length === 0) return;
-    let currentPartitionId = Number($partitionButton.attr("id").substring(15));
-    if (!partitionIds.includes(sourcePartitionId) && sourcePartitionId === currentPartitionId) {
-        let elements = [];
-        for (const questionId of questionIds) {
-            elements.push(document.getElementById(questionId));
-        }
-        $(elements).fadeOut(200,"easeInCubic",function () {
-            $(this).slideUp(200,"easeInOutCubic",function () {
-                $(this).remove();
+    if ($partitionButton.length !== 0) {
+        let currentPartitionId = Number($partitionButton.attr("id").substring(15));
+        if (!partitionIds.includes(sourcePartitionId) && sourcePartitionId === currentPartitionId) {
+            let elements = [];
+            for (const questionId of questionIds) {
+                elements.push(document.getElementById(questionId));
+            }
+            $(elements).fadeOut(200, "easeInCubic", function () {
+                $(this).slideUp(200, "easeInOutCubic", function () {
+                    $(this).remove();
+                });
             });
-        });
-    } else if (partitionIds.includes(currentPartitionId)) {
+        } else if (partitionIds.includes(currentPartitionId)) {
+            for (const questionId of questionIds) {
+                if ($("#" + questionId).length === 0)
+                    loadQuestion(questionId, $(".questions"));
+            }
+        }
+    } else if ($("#partitionDivs").length === 1) {
         for (const questionId of questionIds) {
-            if ($("#" + questionId).length === 0)
-                loadQuestion(questionId, $(".questions"));
+            copyQuestionTo(partitionIds, questionId);
+            // let shouldRemove = false;
+            // for (let partitionId of partitionIds) {
+            //     if (partitionId === sourcePartitionId){
+            //         shouldRemove = true;
+            //     }
+            // }
+            // if (shouldRemove) {
+            for (let partitionId of partitionIds) {
+                let $questionContentItem = $(`#partitionDivs > div:not(#partition${partitionId}) .questionContentItem[questionId='${questionId}']`);
+                $questionContentItem.slideUp(200, "easeInCubic", function () {
+                    for (const questionContentItemSingle of $questionContentItem) {
+                        let $questionContentItemSingle = $(questionContentItemSingle);
+                        if ($questionContentItemSingle.parent().children().length === 1) {
+                            $(`<div rounded style="cursor: auto;background: none;" class="empty">empty</div>`).appendTo($questionContentItemSingle.parent());
+                        }
+                    }
+                    $questionContentItem.remove();
+                });
+            }
         }
     }
+}
+
+function copyQuestionTo(partitionIds, questionId) {
+    const $questionContentItem = $(".questionContentItem[questionId='" + questionId + "']");
+    let moved = false;
+    for (const partitionId of partitionIds) {
+        if ($(`#partition${partitionId} .questionContentItem[questionId='${questionId}']`).length === 0) {
+            let $cloneItem = $questionContentItem.clone();
+            // $cloneItem.slideUp(0, "linear", function () {
+                $cloneItem.appendTo($("#partition" + partitionId).children(".partitionQuestionsList"));
+                // $cloneItem.slideDown(200, "easeOutCubic");
+            // });
+            let $empty = $("#partition" + partitionId).find(".empty");
+            $empty.slideUp(200, "easeInOutCubic", function () {
+                $empty.remove();
+            });
+            moved = true;
+        }
+    }
+    return moved;
 }

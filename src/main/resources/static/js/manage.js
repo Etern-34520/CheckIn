@@ -88,7 +88,12 @@ function initContextMenu() {
             let $questionIDDiv = $(this).find("div.questionID");
             switch (key) {
                 case "edit":
-                    editQuestion($questionIDDiv.text());
+                    if ($.cookie("pageClass") !== "server" || $.cookie("page") !== "2")
+                        switchToPageWithAnimate("server", 2, true, function () {
+                            editQuestion($questionIDDiv.text());
+                        });
+                    else
+                        editQuestion($questionIDDiv.text());
                     break;
                 case "delete":
                     deleteQuestion($questionIDDiv.text());
@@ -161,7 +166,7 @@ $(function () {//页面加载完成后执行
     function showContent() {
         if (over1 && over2) {
             let $content = $("#content");
-            $content.css("scale",0.96);
+            $content.css("scale", 0.96);
             $content.animate({
                 opacity: 1,
                 scale: 1,
@@ -170,11 +175,11 @@ $(function () {//页面加载完成后执行
     }
 
     let $top = $("#top");
-    $top.css("scale",0.8);
+    $top.css("scale", 0.8);
     switchToPage($.cookie('pageClass'), $.cookie('page'), true, function () {
         over1 = true;
         showContent();
-    },false);
+    }, false);
     $top.animate({
         marginTop: 6,
     }, 400, "easeOutCubic", function () {
@@ -328,7 +333,7 @@ function switchToPageWithAnimate(pageClass, index, clearPathBool = true, callbac
                 $("#content").animate({
                     opacity: 1,
                     scale: 1
-                },200 , "easeInCubic");
+                }, 200, "easeInCubic");
             }, 200);
         });
     });
@@ -518,7 +523,7 @@ function popDialog(html, callBack) {
     $topMask.on("click", function () {
         $topMask.stop(true, false);
         $dialog.animate({
-            scale:0.94
+            scale: 0.94
         }, 200, "easeInCubic");
         $topMask.animate({
             opacity: 0,
@@ -865,21 +870,28 @@ let onClickTraffic = function (id, date) {
 };
 
 // noinspection JSUnusedGlobalSymbols
-function confirmAction(action,$button) {
-    const restore = function() {
+function confirmAction(action, $button) {
+    const restore = function () {
         $button.text($button.attr("confirm"));
         $button.removeAttr("confirm");
         $button.off("blur");
     };
-    if ($button.attr("confirm")!==undefined) {
+    if ($button.attr("confirm") !== undefined) {
         restore();
         action();
-    }
-    else {
-        $button.attr("confirm",$button.text());
+    } else {
+        $button.attr("confirm", $button.text());
         $button.text("确定");
         $button.on({
             blur: restore
         });
     }
+}
+
+function enableQuestion(id) {
+    console.log("enable" + id);
+}
+
+function disableQuestion(id) {
+    console.log("disable" + id);
 }

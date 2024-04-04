@@ -21,6 +21,7 @@
         <th:block th:each="question:${partition.getSortedQuestion()}">
             <div th:replace="~{manage/pages/questionOverview::questionOverview(${question},${false})}"></div>
         </th:block>
+        <script>initSwitch($('.questionEnabled'))</script>
     </div>
 </div>
 </html>

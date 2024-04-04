@@ -25,6 +25,7 @@
                         <th:block th:each="question:${@multiPartitionableQuestionService.findAllByAuthor(currentUser)}">
                             <div th:replace="~{manage/pages/questionOverview::questionOverview(${question},${true})}"></div>
                         </th:block>
+                        <script>initSwitch($('.questionEnabled'))</script>
                     </div>
                 </div>
             </div>

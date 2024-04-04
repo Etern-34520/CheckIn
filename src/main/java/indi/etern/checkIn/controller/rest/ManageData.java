@@ -113,8 +113,9 @@ public class ManageData {
             checkPermission(oldQuestion, (User) httpServletRequest.getAttribute("currentUser"), author, enabled);
             
             final MultiPartitionableQuestion multiPartitionableQuestion = MultiPartitionableQuestionService.buildQuestionFromRequest(httpServletRequest, id, author);
-            multiPartitionableQuestionService.save(multiPartitionableQuestion);
-            
+//            multiPartitionableQuestionService.save(multiPartitionableQuestion);
+            multiPartitionableQuestionService.saveAndFlush(multiPartitionableQuestion);
+
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("type", "updateQuestion");
             dataMap.put("question", multiPartitionableQuestion.toJsonData());
