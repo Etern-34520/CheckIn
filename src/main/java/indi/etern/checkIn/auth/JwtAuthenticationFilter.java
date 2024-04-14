@@ -1,5 +1,6 @@
 package indi.etern.checkIn.auth;
 
+import indi.etern.checkIn.entities.user.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -39,11 +40,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             try {
                 userDetails = jwtTokenProvider.getUser(token);
                 if (!userDetails.isEnabled()) {
-                    response.sendRedirect("/checkIn/login/");
+                    response.addCookie(new Cookie("name", userDetails.getUsername()));
+                    response.addCookie(new Cookie("qq", String.valueOf(((User)userDetails).getQQNumber())));
+//                    response.sendRedirect("/checkIn/login/");
                     return;
                 }
             } catch (Exception e) {
-                response.sendRedirect("/checkIn/login/");
+//                response.sendRedirect("/checkIn/login/");
                 return;
             }
             
@@ -62,7 +65,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     }
     
     private String getTokenFromRequest(HttpServletRequest request) {
-        
         String bearerTokenFromParameter = request.getParameter("token");
         String bearerTokenFromHeader = request.getHeader("Authorization");
         String bearerTokenFromWebSocketHeader = request.getHeader("Sec-WebSocket-Protocol");
@@ -82,7 +84,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                     }
                 }
         }
-        
         return null;
     }
 }

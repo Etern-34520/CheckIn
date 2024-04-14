@@ -8,11 +8,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.JstlView;
 
 @Configuration
-public class MVCConfig {
+public class MVCConfig implements WebMvcConfigurer {
 @Getter
     private static Gson gson;
     
@@ -20,9 +21,8 @@ public class MVCConfig {
     public ViewResolver viewResolver() {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
         
-        viewResolver.setViewClass(JstlView.class);
-        viewResolver.setPrefix("/WEB-INF/view/");
-        viewResolver.setSuffix(".jsp");
+        viewResolver.setPrefix("/view/");
+        viewResolver.setSuffix(".html");
         
         viewResolver.setExposeContextBeansAsAttributes(true);
         return viewResolver;
@@ -42,5 +42,12 @@ public class MVCConfig {
     @Bean
     public ObjectMapper objectMapper(){
         return new ObjectMapper();
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry resourceHandlerRegistry) {
+        resourceHandlerRegistry.addResourceHandler("/assets/**")
+                .addResourceLocations("classpath:/static/view/exam/assets/")
+                .addResourceLocations("classpath:/static/view/manage/assets/");
     }
 }

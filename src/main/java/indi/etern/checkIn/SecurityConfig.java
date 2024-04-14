@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/checkIn/login/"))
                         .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect("/checkIn/login/"))
                 ).logout((logout) -> {
-//                    logout.addLogoutHandler(logoutHandler);
+                    logout.addLogoutHandler(logoutHandler);
                 });
         return http.build();
     }

@@ -109,8 +109,8 @@ public class UserTest {
         roleService.savePermissionGroup(manageUser);
     }
     
-    @Test
-    public void testEncoding() {
-        System.out.println(SecurityConfig.ENCODER.encode("114514"));
-    }
+//    @Test
+//    public void testEncoding() {
+//        System.out.println(SecurityConfig.ENCODER.encode("114514"));
+//    }
 }
