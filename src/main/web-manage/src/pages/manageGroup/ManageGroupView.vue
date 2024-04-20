@@ -3,7 +3,7 @@
 </script>
 
 <template>
-<div></div>
+<div class="panel">组管理</div>
 </template>
 
 <style scoped>

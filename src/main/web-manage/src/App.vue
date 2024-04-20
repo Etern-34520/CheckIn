@@ -2,20 +2,30 @@
 import {RouterView} from "vue-router";
 import WebSocketConnector from "@/api/websocket.js";
 import Router from "@/router/index.js";
-import {getCurrentInstance} from 'vue';
-const { proxy } = getCurrentInstance();
+import {getCurrentInstance, onMounted} from 'vue';
+
+const {proxy} = getCurrentInstance();
 
 function loginAs(user) {
-    Router.push("/manage/");
-    proxy.$cookies.set("name", response.name);
-    proxy.$cookies.set("qq", response.qq);
+    if (window.location.pathname === "/checkIn/login/")
+        Router.push("/manage/");
+    proxy.$cookies.set("name", user.name);
+    proxy.$cookies.set("qq", user.qq);
+    WebSocketConnector.connect(user.qq, user.token);
 }
 
+onMounted(() => {
+    if (proxy.$cookies.get("token") !== null) {
+        loginAs({name: proxy.$cookies.get("name"), qq: proxy.$cookies.get("qq"), token: proxy.$cookies.get("token")});
+    } else {
+        Router.push("/login/");
+    }
+});
 </script>
 
 <template>
     <router-view @loginAs="loginAs" v-slot="{ Component }">
-        <transition name="main-router" mode="out-in">
+        <transition name="main-router" mode="out-in" duration="1000">
             <component :is="Component"/>
         </transition>
     </router-view>

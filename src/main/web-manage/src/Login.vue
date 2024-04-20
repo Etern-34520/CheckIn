@@ -1,5 +1,5 @@
 <script setup>
-import {ref,getCurrentInstance} from 'vue';
+import {ref,getCurrentInstance,defineEmits} from 'vue';
 import Router from "@/router/index.js";
 import {DArrowRight} from "@element-plus/icons-vue";
 /*import WebSocketConnector from "@/websocket/websocket.js";*/
@@ -22,7 +22,7 @@ function login() {
         if (response.result === "success") {
             proxy.$cookies.set("token", response.token);
             loginMessage.value = "";
-            emit("loginAs",{name:response.name,qq:response.qq})
+            emit("loginAs",{name:response.name,qq:response.qq,token:response.token});
         } else if (response.result === "fail") {
             requesting.value = false;
             loginMessage.value = response.message;
@@ -31,7 +31,7 @@ function login() {
             loginMessage.value = "请求时遇到错误"
         }
         key.value++;
-    }).error(response => {
+    }, error => {
         requesting.value = false;
         loginMessage.value = "请求时遇到错误";
         key.value++;
@@ -79,6 +79,7 @@ function login() {
     height: 100%;
     color: var(--el-bg-color);
     user-select: none;
+    overflow: hidden;
 }
 
 .message-enter-active , .message-leave-active {

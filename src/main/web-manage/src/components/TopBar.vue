@@ -8,7 +8,7 @@ const props = defineProps({
         required: true,
     },
     breadcrumbPathArray: {
-        type: Object,
+        type: Array,
         required: true,
     },
 });
@@ -36,17 +36,17 @@ function switchMenuStyle() {
                 </g>
             </svg>
         </el-button>
-        <el-breadcrumb :separator-icon="ArrowRight">
+        <el-breadcrumb style="flex-shrink: 0;" :separator-icon="ArrowRight">
             <!--suppress JSValidateTypes -->
             <el-breadcrumb-item :to="{ path: '/manage/' }">checkIn</el-breadcrumb-item>
             <TransitionGroup name="breadcrumb-item">
                 <!--suppress JSValidateTypes -->
-                <el-breadcrumb-item :key="pathItem" v-for="pathItem in breadcrumbPathArray" :to="{path: pathItem.path}">
+                <el-breadcrumb-item :key="pathItem.name" v-for="(pathItem,$index) in breadcrumbPathArray" :to="$index!==breadcrumbPathArray.length-1?{path: pathItem.path}:undefined">
                     {{ pathItem.name }}
                 </el-breadcrumb-item>
             </TransitionGroup>
         </el-breadcrumb>
-        <div style="flex: 1"></div>
+        <div class="flex_blank_1"></div>
         <el-button @click="router.push('/manage/user-setting/')" text
                    style="margin-right: 2px;padding: 4px;transition: 200ms ease-in-out">
             <el-avatar shape="circle" size="small" :src="'https://q1.qlogo.cn/g?b=qq&nk='+user.qq+'&s=100'"

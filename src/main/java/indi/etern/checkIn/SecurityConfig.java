@@ -27,22 +27,19 @@ public class SecurityConfig {
     final UserService userService;
     final LogoutHandler logoutHandler;
     AuthenticationManager authenticationManager;
-    
+
     public SecurityConfig(UserService userService, LogoutHandler logoutHandler) {
         this.userService = userService;
         this.logoutHandler = logoutHandler;
     }
-    
-    
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
                                 .requestMatchers("/manage/**").authenticated()
-//                                        .requestMatchers("/manage/page/").hasAnyAuthority("editing others question")
-//                                        .requestMatchers("/manage/css/**").authenticated()
-//                                        .requestMatchers("/manage/js/**").authenticated()
-//                                        .requestMatchers("/api/websocket/**").authenticated()
+                                .requestMatchers("/api/websocket/**").authenticated()
                                 .anyRequest().permitAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
@@ -58,7 +55,7 @@ public class SecurityConfig {
                 });
         return http.build();
     }
-    
+
     //    @Bean
     public AuthenticationManager authenticationManager(
             UserDetailsService userDetailsService,
@@ -72,22 +69,22 @@ public class SecurityConfig {
         authenticationManager = new ProviderManager(authenticationProvider);
         return authenticationManager;
     }
-    
+
     @Bean
     public UserDetailsService userDetailsService() {
         return userService;
     }
-    
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return ENCODER;
     }
-    
+
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userService).passwordEncoder(new UserService.CustomPasswordEncoder());
     }
-    
+
     @Bean
     JwtAuthenticationFilter jwtAuthenticationFilter() {
         if (authenticationManager == null) {
@@ -95,4 +92,5 @@ public class SecurityConfig {
         }
         return new JwtAuthenticationFilter(authenticationManager);
     }
+
 }

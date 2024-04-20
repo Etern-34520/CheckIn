@@ -1,6 +1,7 @@
 package indi.etern.checkIn.api.webSocket;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.api.webSocket.action.*;
@@ -59,63 +60,63 @@ public class Connector implements SubProtocolCapable {
     @Getter
     private String sid = "";
     private User sessionUser;
-    
+
     public Connector() {
 //        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);
     }
-    
+
     public static int getOnlineCount() {
         return onlineCount.get();
     }
-    
+
     public static void addOnlineCount() {
         onlineCount.getAndIncrement();
     }
-    
+
     public static void subOnlineCount() {
         onlineCount.getAndDecrement();
     }
-    
+
     @Autowired
     public void setPartitionService(PartitionService partitionService) {
         Connector.partitionService = partitionService;
     }
-    
+
     @Autowired
     public void setWebSocketService(WebSocketService webSocketService) {
         Connector.webSocketService = webSocketService;
     }
-    
+
     @Autowired
     public void setUserService(UserService userService) {
         Connector.userService = userService;
     }
-    
+
     @Autowired
     public void setRoleService(RoleService roleService) {
         Connector.roleService = roleService;
     }
-    
+
     @Autowired
     public void setMultiPartitionableQuestionService(MultiPartitionableQuestionService multiPartitionableQuestionService) {
         Connector.multiPartitionableQuestionService = multiPartitionableQuestionService;
     }
-    
+
     @Autowired
     public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
         Connector.transactionTemplate = transactionTemplate;
     }
-    
+
     @Autowired
     public void setJwtTokenProvider(JwtTokenProvider jwtTokenProvider) {
         Connector.jwtTokenProvider = jwtTokenProvider;
     }
-    
+
     @Autowired
     public void setGson(Gson gson) {
         Connector.gson = gson;
     }
-    
+
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) {
         this.session = session;
@@ -124,7 +125,7 @@ public class Connector implements SubProtocolCapable {
         addOnlineCount();           // 在线数加1
         logger.info("sid_" + sid + ":connected");
     }
-    
+
     @OnClose
     public void onClose() {
         CONNECTORS.remove(this);
@@ -138,7 +139,7 @@ public class Connector implements SubProtocolCapable {
             webSocketService.sendMessageToAll(gson.toJson(dataMap));
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     @OnMessage
     public void onMessage(String message, Session session) {
@@ -152,6 +153,7 @@ public class Connector implements SubProtocolCapable {
             long qqInContentMap = 0;
             String qqStr = "";
             Object qqObject = contentMap.get("QQ");
+            String messageId = contentMap.get("messageId").toString();
             if (qqObject != null) {
                 qqStr = (String) qqObject;
                 qqInContentMap = Long.parseLong(qqStr);
@@ -160,72 +162,72 @@ public class Connector implements SubProtocolCapable {
             switch ((String) contentMap.get("type")) {
                 case "addPartition" -> {
                     final String partitionName = (String) contentMap.get("partitionName");
-                    logging = doAction(new AddPartitionAction(partitionName));
+                    logging = doAction(contentMap,new AddPartitionAction(partitionName));
                 }
                 case "deletePartition" -> {
                     final int partitionId = Integer.parseInt((String) contentMap.get("partitionId"));
-                    logging = doAction(new DeletePartitionAction(partitionId));
+                    logging = doAction(contentMap,new DeletePartitionAction(partitionId));
                 }
                 case "deleteQuestion" -> {
                     final String questionID = (String) contentMap.get("questionID");
-                    logging = doAction(new DeleteQuestionAction(questionID));
+                    logging = doAction(contentMap,new DeleteQuestionAction(questionID));
                 }
                 case "editPartition" -> {
-                    logging = doAction(new EditPartitionNameAction(Integer.parseInt((String) contentMap.get("partitionId")),(String) contentMap.get("partitionName")));
+                    logging = doAction(contentMap,new EditPartitionNameAction(Integer.parseInt((String) contentMap.get("partitionId")), (String) contentMap.get("partitionName")));
                 }
                 case "newUser" -> {
-                    logging = doAction(new CreateUserAction(qqInContentMap, (String) contentMap.get("name"), (String) contentMap.get("role")));
+                    logging = doAction(contentMap,new CreateUserAction(qqInContentMap, (String) contentMap.get("name"), (String) contentMap.get("role")));
                 }
                 case "deleteUser" -> {
                     if (qqInContentMap != sessionUser.getQQNumber() && webSocketService.isOnline(String.valueOf(qqInContentMap))) {
-                        sendError("user is online");
+                        sendError(messageId,"user is online");
                         return;
                     }
-                    logging = doAction(new DeleteUserAction(qqInContentMap,sessionUser));
+                    logging = doAction(contentMap,new DeleteUserAction(qqInContentMap, sessionUser));
                 }
                 case "changeUserName" -> {
-                    logging = doAction(new ChangeUserNameAction(qqInContentMap, (String) contentMap.get("newName")));
+                    logging = doAction(contentMap,new ChangeUserNameAction(qqInContentMap, (String) contentMap.get("newName")));
                 }
                 case "changePassword" -> {
-                    logging = doAction(new ChangeUserPasswordAction(qqInContentMap,(String) contentMap.get("oldPassword"), (String) contentMap.get("newPassword")));
+                    logging = doAction(contentMap,new ChangeUserPasswordAction(qqInContentMap, (String) contentMap.get("oldPassword"), (String) contentMap.get("newPassword")));
                 }
                 case "enableUser" -> {
-                    logging = doAction(new SetUserStateAction(qqInContentMap,true));
+                    logging = doAction(contentMap,new SetUserStateAction(qqInContentMap, true));
                 }
                 case "disableUser" -> {
-                    logging = doAction(new SetUserStateAction(qqInContentMap,false));
+                    logging = doAction(contentMap,new SetUserStateAction(qqInContentMap, false));
                 }
                 case "offLine" -> {
-                    logging = doAction(new ForceOfflineAction(qqInContentMap));
+                    logging = doAction(contentMap,new ForceOfflineAction(qqInContentMap));
                 }
                 case "changeRole" -> {
-                    logging = doAction(new ChangeUserRoleAction(qqInContentMap, (String) contentMap.get("role")));
+                    logging = doAction(contentMap,new ChangeUserRoleAction(qqInContentMap, (String) contentMap.get("role")));
                 }
                 case "savePermission" -> {
                     Role role = roleService.findById((String) contentMap.get("role")).orElseThrow();
-                    logging = doAction(new SavePermissionAction(role,(List<String>)contentMap.get("enable")));
+                    logging = doAction(contentMap,new SavePermissionAction(role, (List<String>) contentMap.get("enable")));
                 }
                 case "createRole" -> {
-                    logging = doAction(new CreateRoleAction((String) contentMap.get("role"),(List<String>)contentMap.get("enable")));
+                    logging = doAction(contentMap,new CreateRoleAction((String) contentMap.get("role"), (List<String>) contentMap.get("enable")));
                 }
                 case "deleteRole" -> {
-                    logging = doAction(new DeleteRoleAction((String) contentMap.get("role")));
+                    logging = doAction(contentMap,new DeleteRoleAction((String) contentMap.get("role")));
                 }
                 case "saveSetting" -> {
-                    Map<String,Object> dataMap = (Map<String, Object>) contentMap.get("data");
-                    logging = doAction(new SaveSettingAction(dataMap,(String) contentMap.get("settingName")));
+                    Map<String, Object> dataMap = (Map<String, Object>) contentMap.get("data");
+                    logging = doAction(contentMap,new SaveSettingAction(dataMap, (String) contentMap.get("settingName")));
                 }
                 case "getDateTrafficDetail" -> {
-                    logging = doAction(new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
+                    logging = doAction(contentMap,new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
                 }
                 case "batchDeleteQuestions" -> {
-                    logging = doAction(new BatchDeleteQuestionsAction((List<String>) contentMap.get("ids"), sessionUser));
+                    logging = doAction(contentMap,new BatchDeleteQuestionsAction((List<String>) contentMap.get("ids"), sessionUser));
                 }
                 case "batchEnableQuestions" -> {
-                    logging = doAction(new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("ids"), sessionUser, true));
+                    logging = doAction(contentMap,new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("ids"), sessionUser, true));
                 }
                 case "batchDisableQuestions" -> {
-                    logging = doAction(new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("ids"), sessionUser, false));
+                    logging = doAction(contentMap,new BatchEnableOrDisableQuestionsAction((List<String>) contentMap.get("ids"), sessionUser, false));
                 }
                 case "batchMoveOrCopyQuestions" -> {
                     List<String> partitionIdStrings = (List<String>) contentMap.get("partitionIds");
@@ -233,13 +235,22 @@ public class Connector implements SubProtocolCapable {
                     for (String partitionIdString : partitionIdStrings) {
                         partitionIds.add(Integer.parseInt(partitionIdString));
                     }
-                    if (contentMap.get("actionType").equals("move")){
-                        logging = doAction(new BatchMoveAction((List<String>) contentMap.get("ids"), partitionIds, Integer.parseInt((String) contentMap.get("sourcePartitionId"))));
-                    } else if (contentMap.get("actionType").equals("copy")){
-                        logging = doAction(new BatchCopyAction((List<String>) contentMap.get("ids"), partitionIds));
+                    if (contentMap.get("actionType").equals("move")) {
+                        logging = doAction(contentMap,new BatchMoveAction((List<String>) contentMap.get("ids"), partitionIds, Integer.parseInt((String) contentMap.get("sourcePartitionId"))));
+                    } else if (contentMap.get("actionType").equals("copy")) {
+                        logging = doAction(contentMap,new BatchCopyAction((List<String>) contentMap.get("ids"), partitionIds));
                     } else {
-                        sendError("actionType is invalid, must be 'move' or 'copy'");
+                        sendError(messageId,"actionType is invalid, must be 'move' or 'copy'");
                     }
+                }
+                case "getQuestionIdAndContentList" -> {
+                    logging = doAction(contentMap,new GetQuestionIdAndContentListAction(Integer.parseInt(contentMap.get("partitionId").toString())));
+                }
+                case "getPartitions" -> {
+                    logging = doAction(contentMap,new GetPartitions());
+                }
+                case "getQuestionInfo" -> {
+                    logging = doAction(contentMap,new GetQuestionInfoAction(contentMap.get("questionId").toString()));
                 }
             }
             if (logging) {
@@ -248,52 +259,66 @@ public class Connector implements SubProtocolCapable {
         } catch (Exception e) {
             try {
                 logger.info("sid_" + sid + ":" + message);
-                logger.error(e.getClass().getName() + ":" + e.getMessage());
-                sendError(e.getClass().getSimpleName() + ":" + e.getMessage());
+                logger.error("{}:{}", e.getClass().getName(), e.getMessage());
+                String messageId = gson.fromJson(message, HashMap.class).get("messageId").toString();
+                sendError(messageId,e.getClass().getSimpleName() + ":" + e.getMessage());
             } catch (IOException exception) {
-                logger.error("while sending message:" + message + "to sid_" + sid + ":" + exception.getMessage());
+                logger.error("while sending message:{}to sid_{}:{}", message, sid, exception.getMessage());
             }
             e.printStackTrace();
         }
     }
-    
+
     private void sendUpdateUser(User user) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("type", "updateUser");
         dataMap.put("user", user.toDataMap());
         webSocketService.sendMessageToAll(gson.toJson(dataMap));
     }
-    
+
     private void sendUserIsOnlineError() throws IOException {
-        sendError("user is online");
+        /*sendError(messageId,"user is online");*/
     }
-    
-    private void sendError(String data) throws IOException {
+
+    private void sendError(String messageId,String data) throws IOException {
         Map<String, String> dataMap = new HashMap<>();
         dataMap.put("type", "error");
         dataMap.put("message", data);
+        dataMap.put("messageId",messageId);
         sendMessage(gson.toJson(dataMap));
     }
-    
+
     private boolean checkToken(Map<String, Object> contentMap) throws IOException {
         if (contentMap.get("type").equals("token")) {
             token = (String) contentMap.get("token");
             sessionUser = jwtTokenProvider.getUser(token);
+
             Map<String, String> dataMap = new HashMap<>();
             dataMap.put("type", "userOnline");
             dataMap.put("qq", String.valueOf(sessionUser.getQQNumber()));
             webSocketService.sendMessageToAll(gson.toJson(dataMap));
+
+            JsonObject message = new JsonObject();
+            message.addProperty("messageId",contentMap.get("messageId").toString());
+            JsonArray permissions = new JsonArray();
+            sessionUser.getRole().getPermissions().forEach(permission -> {
+                permissions.add(permission.getName());
+            });
+            message.add("permissions",permissions);
+            sendMessage(gson.toJson(message));
             return true;
         } else if (token == null || token.isEmpty()) {
             Map<String, String> dataMap = new HashMap<>();
             dataMap.put("type", "error");
             dataMap.put("data", "token is empty");
+            dataMap.put("messageId", contentMap.get("messageId").toString());
             sendMessage(gson.toJson(dataMap));
             return true;
         } else if (!jwtTokenProvider.validateToken(token)) {
             Map<String, String> dataMap = new HashMap<>();
             dataMap.put("type", "error");
             dataMap.put("data", "token is invalid");
+            dataMap.put("messageId", contentMap.get("messageId").toString());
             sendMessage(gson.toJson(dataMap));
             return true;
         } else if (sessionUser != null) {
@@ -310,46 +335,51 @@ public class Connector implements SubProtocolCapable {
             return true;
         }
     }
-    
+
     @OnError
     public void onError(Session session, Throwable error) {
         logger.error(session.getBasicRemote().toString());
         error.printStackTrace();
     }
-    
+
     public void sendMessage(JsonObject jsonObject) throws IOException {
         sendMessage(jsonObject.toString());
     }
-    
+
     public void sendMessageWithOutLog(JsonObject jsonObject) throws IOException {
         sendMessageWithOutLog(jsonObject.toString());
     }
-    
+
     public void sendMessageWithOutLog(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
     }
-    
+
     public void sendMessage(String message) throws IOException {
-        logger.info("webSocket to sid_" + sid + ":" + message);
+        logger.info("webSocket to sid_{}:{}", sid, message);
         this.session.getBasicRemote().sendText(message);
     }
-    
+
     @NonNull
     @Override
     public List<String> getSubProtocols() {
         return new ArrayList<>();
     }
-    
+
     public boolean isOpen() {
         return session.isOpen();
     }
-    
-    private boolean doAction(JsonResultAction jsonResultAction) throws Exception {
+
+    private boolean doAction(Map<String,Object> contentMap,JsonResultAction jsonResultAction) throws Exception {
         Optional<JsonObject> optionalResult = jsonResultAction.call();
-        if (optionalResult.isPresent()) {
-            final JsonObject jsonObject = optionalResult.get();
+        if (contentMap.get("expectResponse") != null && !((boolean) contentMap.get("expectResponse"))) {
+            return jsonResultAction.shouldLogging();
+        }
+        JsonObject jsonObject;
+        jsonObject = optionalResult.orElseGet(JsonObject::new);
+        jsonObject.addProperty("messageId", contentMap.get("messageId").toString());
+        {
             sendMessage(gson.toJson(jsonObject));
-            if (!jsonObject.get("type").getAsString().equals("error")) {
+            if (jsonObject.get("type")!=null && !jsonObject.get("type").getAsString().equals("error")) {
                 jsonResultAction.afterAction();
             }
         }

@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <div></div>
+    <div class="panel">服务器设置</div>
 </template>
 
 <style scoped>

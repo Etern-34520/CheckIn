@@ -1,1 +1,115 @@
 @import './base.css';
+
+div.container {
+    border-radius: 8px;
+    border: solid var(--el-border-color-extra-light) 1px;
+}
+
+div.panel {
+    display: flex;
+    flex-direction: column;
+    margin: 2px;
+}
+
+*.panel {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, var(--panel-bg-color) 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
+    border-radius: 8px;
+}
+
+.question-content-input, .question-content-input textarea {
+    min-height: 60px !important;
+}
+
+.el-input > *, .el-textarea > * {
+    border-radius: 4px;
+    margin: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
+    transition-delay: 50ms;
+}
+
+.el-input:hover > *, .el-textarea:hover > * {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
+    transition-delay: 50ms;
+}
+
+.el-input__wrapper.is-focus {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 3px calc(100% - 3px), var(--el-color-primary-3) calc(100% - 1.5px) 100%) !important;
+}
+
+.el-checkbox__inner {
+    background: transparent !important;
+    border: 4px var(--el-border-color) !important;
+    background-clip: padding-box;
+}
+
+.el-checkbox__input.is-focus > .el-checkbox__inner {
+    background: linear-gradient(180deg, transparent calc(100% - 3px), var(--el-color-primary-3) calc(100% - 1.5px) 100%) !important;
+}
+
+.el-input:not(.is-focus) > div,
+.el-textarea,
+.el-textarea > textarea {
+    box-shadow: none !important;
+}
+
+.el-textarea, .el-input, .el-checkbox__input {
+    background: var(--panel-bg-color);
+    transition: 0.2s ease-in-out;
+}
+
+.el-textarea:hover, .el-input:hover, .el-checkbox__input {
+    background: var(--panel-bg-color-overlay);
+}
+
+.el-textarea > textarea:focus {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 3px calc(100% - 3px), var(--el-color-primary-3) calc(100% - 1.5px) 100%) !important;
+    background-clip: padding-box;
+    transition-delay: 50ms;
+}
+
+.is-current > .el-tree-node__content {
+    background: var(--panel-bg-color) !important;
+}
+
+.el-tree-node__content:hover {
+    background: var(--panel-bg-color-overlay) !important;
+}
+
+* {
+    font-family: "HarmonyOS Sans", "微软雅黑", sans-serif;
+}
+
+
+.menuGroup .el-button .el-icon {
+    margin-left: 1px;
+    margin-right: 5px;
+}
+
+#top-bar, #menu-container {
+    transition: 0.4s ease-out;
+    transform: none;
+}
+
+.main-router-enter-from #menu-container {
+    transform: translateX(-44px);
+}
+
+.main-router-enter-from #top-bar {
+    transform: translateY(-44px);
+}
+
+#menu-avatar-button > span {
+    flex: 1;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.main-router-enter-active .manage-page-router {
+    transition: all 0.7s ease-out;
+    transition-delay: 0.3s;
+}
+
+.main-router-enter-from .manage-page-router {
+    opacity: 0;
+    transform: scale(0.8) translateY(-80px) translateX(-150px);
+}

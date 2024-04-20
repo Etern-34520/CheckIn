@@ -3,17 +3,19 @@ import {RouterLink, RouterView} from 'vue-router'
 import TopBar from "@/components/TopBar.vue";
 import router from "@/router/index.js";
 import topBar from "@/components/TopBar.vue";
-import {ref, reactive, getCurrentInstance} from 'vue'
+import {ref, reactive, getCurrentInstance, onBeforeMount} from 'vue'
 import SideMenu from "@/components/SideMenu.vue";
 
 const {proxy} = getCurrentInstance();
 
+onBeforeMount(() => {
+    updateBreadcrumbArray({path: window.location.pathname});
+});
 
 const menuInlineStyle = ref(false);
 
 const breadcrumbMap = {
     "traffic": "流量",
-    "log": "日志",
     "questions": "题库",
     "manage-user": "用户管理",
     "manage-group": "组管理",
@@ -23,15 +25,25 @@ const breadcrumbMap = {
 
 let breadcrumbPathArray = reactive([]);
 
-router.afterEach((to, from) => {
+let ignoredPathItems = ["", "checkIn", "manage"];
+
+let updateBreadcrumbArray = (to) => {
     breadcrumbPathArray.splice(0, breadcrumbPathArray.length);
+    let absolutePath = "/manage/";
     for (let toPathItem of to.path.split("/")) {
+        let notIgnored = !ignoredPathItems.includes(toPathItem);
+        if (notIgnored) {
+            absolutePath += toPathItem + "/";
+        }
         let name = breadcrumbMap[toPathItem];
         if (name !== undefined) {
-            breadcrumbPathArray.push({path: toPathItem, name: name});
+            breadcrumbPathArray.push({path: absolutePath, name: name});
+        } else if (notIgnored) {
+            breadcrumbPathArray.push({path: absolutePath, name: toPathItem});
         }
     }
-});
+};
+router.afterEach(updateBreadcrumbArray);
 
 let userObj = {
     qq: proxy.$cookies.get("qq"),
@@ -48,7 +60,7 @@ const user = reactive(userObj);
                  :breadcrumb-path-array="breadcrumbPathArray"></top-bar>
         <div id="manageBase">
             <side-menu v-model:inlineStyle="menuInlineStyle" :user="user"/>
-            <router-view v-slot="{ Component }">
+            <router-view class="manage-page-router" v-slot="{ Component }">
                 <transition name="routePage" mode="out-in">
                     <component :is="Component"/>
                 </transition>
@@ -61,6 +73,7 @@ const user = reactive(userObj);
 .routePage-enter-active {
     transition: all 0.4s ease-out;
 }
+
 .routePage-leave-active {
     transition: all 0.4s ease-in;
 }
@@ -76,12 +89,10 @@ const user = reactive(userObj);
     align-items: stretch;
     justify-items: stretch;
     flex: 1;
+    height: 0;
 }
 
-.page, #manageBase > *:nth-of-type(2) {
+#manageBase > *:nth-of-type(2) {
     flex: 1;
-    border-radius: 8px;
-    border: solid var(--el-border-color-extra-light) 1px;
-    /*    background: var(--el-bg-color);*/
 }
 </style>

@@ -1,7 +1,9 @@
 <script setup>
 
 import router from "@/router/index.js";
-import {ArrowLeftBold, DArrowRight, Menu} from "@element-plus/icons-vue";
+import {DArrowRight} from "@element-plus/icons-vue";
+import {getCurrentInstance} from "vue";
+const {proxy} = getCurrentInstance();
 
 const pageGroups = [
     {
@@ -9,7 +11,6 @@ const pageGroups = [
         paths: [
             {path: '', name: '首页', icon: "House"},
             {path: 'traffic/', name: '流量', icon: "Odometer"},
-            {path: 'log/', name: '日志', icon: "Memo"},
             {path: 'questions/', name: '题库', icon: "Finished"}
         ]
     }, {
@@ -51,6 +52,9 @@ function routeTo(path) {
 }
 
 function logout() {
+    proxy.$cookies.remove("token");
+    proxy.$cookies.remove("name");
+    proxy.$cookies.remove("qq");
     router.push('/login/');
 }
 
@@ -77,14 +81,14 @@ const props = defineProps({
             <div style="flex: 1"></div>
             <div style="display: flex;flex-direction: row" class="default-hidden-menu">
                 <el-button-group style="display:flex;flex-direction: row;align-items: stretch">
-                    <el-button @click="routeTo('user-setting/')" text
-                               style="width: 150px;height: 52px;display: flex;flex-direction: row;padding: 4px">
+                    <el-button id="menu-avatar-button" @click="routeTo('user-setting/')" text
+                               style="width: 150px;height: 52px;display: flex;flex-direction: row;padding: 4px;">
                         <div>
                             <el-avatar shape="circle" size="default"
                                        :src="'https://q1.qlogo.cn/g?b=qq&nk='+user.qq+'&s=100'"
                                        style="margin-right: 4px"></el-avatar>
                         </div>
-                        <div style="text-align: left;">
+                        <div style="text-align: left;flex: 1;overflow: hidden;">
                             <el-text size="large" style="display: block">{{ user.name }}</el-text>
                             <el-text size="large" type="info" style="display: block">{{ user.qq }}</el-text>
                         </div>
@@ -128,7 +132,7 @@ const props = defineProps({
 
 #menu {
     background: rgba(0, 0, 0, 0);
-    border: 1px solid rgba(0,0,0,0);
+    border: 1px solid rgba(0, 0, 0, 0);
     position: absolute;
     height: calc(100% - 44px);
     width: 32px;
@@ -137,7 +141,7 @@ const props = defineProps({
     transition-delay: 100ms;
     overflow-x: hidden;
     overflow-y: auto;
-    border-right-color: var(--el-border-color-lighter) !important;
+    /*border-right-color: var(--el-border-color-lighter) !important;*/
     border-radius: 0;
     z-index: 3;
 }
@@ -190,12 +194,12 @@ const props = defineProps({
 }
 
 .menu-inline {
-    background: rgba(0,0,0,0) !important;
+    background: rgba(0, 0, 0, 0) !important;
     width: 200px !important;
     /*backdrop-filter: blur(8px);*/
     transition-delay: 0ms !important;
     box-shadow: none;
-    border-right-color: var(--el-border-color-lighter) !important;
+    /*border-right-color: var(--el-border-color-lighter) !important;*/
     border-radius: 0;
 }
 

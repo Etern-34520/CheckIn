@@ -20,11 +20,6 @@ const router = createRouter({
                     component: () => import('../pages/serverGroup/TrafficView.vue')
                 },
                 {
-                    path: 'log/',
-                    name: 'log',
-                    component: () => import('../pages/serverGroup/LogView.vue')
-                },
-                {
                     path: 'manage-user/',
                     name: 'manage-user',
                     component: () => import('../pages/manageGroup/ManageUserView.vue')
@@ -47,14 +42,21 @@ const router = createRouter({
                 {
                     path: 'questions/',
                     name: 'questions',
-                    component: () => import('../pages/serverGroup/QuestionsView.vue')
+                    component: () => import('../pages/serverGroup/QuestionsView.vue'),
+                    children: [
+                        {
+                            path: ':id/',
+                            name: 'question-detail',
+                            component: () => import('../components/QuestionEditor.vue')
+                        }
+                    ]
                 }
             ]
         },
         {
             path: '/login/',
             name: 'login',
-            component: () => import('../pages/LoginView.vue')
+            component: () => import('../Login.vue')
         }
     ]
 });

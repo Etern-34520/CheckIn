@@ -35,7 +35,7 @@ public abstract class JsonResultAction implements Callable<Optional<JsonObject>>
         return TransactionTemplateUtil.getTransactionTemplate().execute((res) -> {
             try {
                 String requiredPermissionName = requiredPermissionName();
-                if (requiredPermissionName != null)
+                if (requiredPermissionName != null && !requiredPermissionName.isEmpty())
                     for (String s : requiredPermissionName.split(",")) {
                         if (!JwtTokenProvider.currentUserHasPermission(s)) {
                             return getOptionalErrorJsonObject("权限不足，需要" + s);
