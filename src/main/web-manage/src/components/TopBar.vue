@@ -1,6 +1,7 @@
 <script setup>
 import {ArrowRight} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
+import getAvatarUrlOf from "@/utils/Avatar.js";
 
 const props = defineProps({
     user: {
@@ -26,13 +27,13 @@ function switchMenuStyle() {
 </script>
 <template>
     <div id="top-bar">
-        <el-button v-on:click="switchMenuStyle" style="width: 30px;height: 30px;margin-left: 5px;margin-right: 4px"
+        <el-button v-on:click="switchMenuStyle" text class="menu-display-button" style="width: 30px;height: 30px;margin-left: 6px;margin-right: 4px"
                    link>
             <svg id="menuIcon" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
                 <g>
-                    <rect rx="1" id="svg_1" height="2" width="16" y="19" x="8"/>
-                    <rect rx="1" id="svg_2" height="2" width="16" y="14" x="8"/>
-                    <rect rx="1" id="svg_3" height="2" width="16" y="9" x="8"/>
+                    <rect rx="1" id="svg_1" height="2" width="16" y="19" x="7"/>
+                    <rect rx="1" id="svg_2" height="2" width="16" y="14" x="7"/>
+                    <rect rx="1" id="svg_3" height="2" width="16" y="9" x="7"/>
                 </g>
             </svg>
         </el-button>
@@ -49,7 +50,7 @@ function switchMenuStyle() {
         <div class="flex_blank_1"></div>
         <el-button @click="router.push('/manage/user-setting/')" text
                    style="margin-right: 2px;padding: 4px;transition: 200ms ease-in-out">
-            <el-avatar shape="circle" size="small" :src="'https://q1.qlogo.cn/g?b=qq&nk='+user.qq+'&s=100'"
+            <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
                        style="margin-right: 4px"></el-avatar>
             <el-text size="large">{{ user.name }}</el-text>
             <el-text size="large" type="info" style="margin-left: 4px;">{{ user.qq }}</el-text>

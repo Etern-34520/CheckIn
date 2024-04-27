@@ -5,6 +5,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.api.webSocket.action.*;
+import indi.etern.checkIn.api.webSocket.action.partition.CreatePartitionAction;
+import indi.etern.checkIn.api.webSocket.action.partition.DeletePartitionAction;
+import indi.etern.checkIn.api.webSocket.action.partition.EditPartitionNameAction;
+import indi.etern.checkIn.api.webSocket.action.partition.GetPartitions;
 import indi.etern.checkIn.api.webSocket.action.question.*;
 import indi.etern.checkIn.api.webSocket.action.setting.SaveSettingAction;
 import indi.etern.checkIn.api.webSocket.action.traffic.GetTrafficByDateAction;
@@ -160,12 +164,12 @@ public class Connector implements SubProtocolCapable {
             }
             boolean logging = true;
             switch ((String) contentMap.get("type")) {
-                case "addPartition" -> {
-                    final String partitionName = (String) contentMap.get("partitionName");
-                    logging = doAction(contentMap,new AddPartitionAction(partitionName));
+                case "createPartition" -> {
+                    final String partitionName = (String) contentMap.get("name");
+                    logging = doAction(contentMap,new CreatePartitionAction(partitionName));
                 }
                 case "deletePartition" -> {
-                    final int partitionId = Integer.parseInt((String) contentMap.get("partitionId"));
+                    final int partitionId = (int) ((double) contentMap.get("id"));
                     logging = doAction(contentMap,new DeletePartitionAction(partitionId));
                 }
                 case "deleteQuestion" -> {
@@ -252,18 +256,21 @@ public class Connector implements SubProtocolCapable {
                 case "getQuestionInfo" -> {
                     logging = doAction(contentMap,new GetQuestionInfoAction(contentMap.get("questionId").toString()));
                 }
+                case "getUsers" -> {
+                    logging = doAction(contentMap,new GetAllUserAction());
+                }
             }
             if (logging) {
-                logger.info("sid_" + sid + ":" + message);
+                logger.info(sessionUser.getName() + "(" + sid + "):" + message);
             }
         } catch (Exception e) {
             try {
-                logger.info("sid_" + sid + ":" + message);
+                logger.info(sessionUser.getName() + "(" + sid + "):" + message);
                 logger.error("{}:{}", e.getClass().getName(), e.getMessage());
                 String messageId = gson.fromJson(message, HashMap.class).get("messageId").toString();
                 sendError(messageId,e.getClass().getSimpleName() + ":" + e.getMessage());
             } catch (IOException exception) {
-                logger.error("while sending message:{}to sid_{}:{}", message, sid, exception.getMessage());
+                logger.error("while sending message:{}to {}({}):{}", message, sessionUser.getName(), sid, exception.getMessage());
             }
             e.printStackTrace();
         }
@@ -355,7 +362,7 @@ public class Connector implements SubProtocolCapable {
     }
 
     public void sendMessage(String message) throws IOException {
-        logger.info("webSocket to sid_{}:{}", sid, message);
+        logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, message);
         this.session.getBasicRemote().sendText(message);
     }
 

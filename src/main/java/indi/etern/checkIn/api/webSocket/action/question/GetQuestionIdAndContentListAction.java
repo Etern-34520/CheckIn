@@ -17,7 +17,7 @@ public class GetQuestionIdAndContentListAction extends QuestionAction{
 
     @Override
     public String requiredPermissionName() {
-        return "";
+        return null;
     }
 
     @Override

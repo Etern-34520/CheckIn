@@ -11,10 +11,6 @@ import java.io.Serializable;
 public class Choice implements Serializable {
     @Id
     @Column(name = "ID")
-    /*
-    * don't know how it must be String
-    * else jpa will throw exception
-    */
     private String id;
     
     @Getter

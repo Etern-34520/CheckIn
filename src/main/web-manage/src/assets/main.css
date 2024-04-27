@@ -16,63 +16,21 @@ div.panel {
     border-radius: 8px;
 }
 
+*.panel-1 {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, var(--panel-bg-color) 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
+    border-radius: 4px;
+}
+
 .question-content-input, .question-content-input textarea {
     min-height: 60px !important;
 }
 
-.el-input > *, .el-textarea > * {
-    border-radius: 4px;
-    margin: 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
-    transition-delay: 50ms;
+.svg-text-fill {
+    fill: var(--el-text-color-secondary);
 }
 
-.el-input:hover > *, .el-textarea:hover > * {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
-    transition-delay: 50ms;
-}
-
-.el-input__wrapper.is-focus {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 3px calc(100% - 3px), var(--el-color-primary-3) calc(100% - 1.5px) 100%) !important;
-}
-
-.el-checkbox__inner {
-    background: transparent !important;
-    border: 4px var(--el-border-color) !important;
-    background-clip: padding-box;
-}
-
-.el-checkbox__input.is-focus > .el-checkbox__inner {
-    background: linear-gradient(180deg, transparent calc(100% - 3px), var(--el-color-primary-3) calc(100% - 1.5px) 100%) !important;
-}
-
-.el-input:not(.is-focus) > div,
-.el-textarea,
-.el-textarea > textarea {
-    box-shadow: none !important;
-}
-
-.el-textarea, .el-input, .el-checkbox__input {
-    background: var(--panel-bg-color);
-    transition: 0.2s ease-in-out;
-}
-
-.el-textarea:hover, .el-input:hover, .el-checkbox__input {
-    background: var(--panel-bg-color-overlay);
-}
-
-.el-textarea > textarea:focus {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 3px calc(100% - 3px), var(--el-color-primary-3) calc(100% - 1.5px) 100%) !important;
-    background-clip: padding-box;
-    transition-delay: 50ms;
-}
-
-.is-current > .el-tree-node__content {
-    background: var(--panel-bg-color) !important;
-}
-
-.el-tree-node__content:hover {
-    background: var(--panel-bg-color-overlay) !important;
+.svg-text-stroke {
+    stroke: var(--el-text-color-secondary);
 }
 
 * {
@@ -113,3 +71,27 @@ div.panel {
     opacity: 0;
     transform: scale(0.8) translateY(-80px) translateX(-150px);
 }
+
+.el-upload--picture-card {
+    transition: 0.2s ease-in-out;
+}
+
+.menu-display-button > span{
+    padding: 0 !important;
+}
+
+/*
+
+.el-select-dropdown__list {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+}
+
+.el-select-dropdown__warp {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    justify-items: stretch !important;
+}*/

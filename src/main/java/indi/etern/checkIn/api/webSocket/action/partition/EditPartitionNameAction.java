@@ -1,4 +1,4 @@
-package indi.etern.checkIn.api.webSocket.action.question;
+package indi.etern.checkIn.api.webSocket.action.partition;
 
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
@@ -26,7 +26,7 @@ public class EditPartitionNameAction extends PartitionJsonResultAction {
         partition.setName(newName);
         PartitionService.singletonInstance.save(partition);
         
-        sendUpdatePartitionToAll();
+        sendUpdatePartitionToAll(partition);
         return Optional.empty();
     }
 }

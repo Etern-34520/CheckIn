@@ -14,5 +14,9 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 app.use(router).use(VueCookies);
 app.config.globalProperties.$http = axios
+/*
+app.config.warnHandler = (msg, vm, trace) => {
+};
+*/
 
 app.mount('#app')

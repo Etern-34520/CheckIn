@@ -3,7 +3,7 @@
     --el-color-primary-1: #aac7ce !important;
     --el-color-primary-2: #94acb2 !important;
     --el-color-primary-3: #7d9398 !important;
-
+    --el-mask-color: rgba(0, 0, 0, 0.3) !important;
     --ease-in-bounce: cubic-bezier(0.845, 0.545, 0.565, 1.335);
 }
 
@@ -11,8 +11,9 @@
     :root {
         --el-color-primary: #aac7ce;
         --bg-color-alpha: rgba(20, 20, 20, 0.6);
-        --panel-bg-color: rgba(128,128,128, 0.05);
-        --panel-bg-color-overlay: rgba(128,128,128, 0.1);
+        --panel-bg-color: rgba(128, 128, 128, 0.05);
+        --panel-bg-color-overlay: rgba(128, 128, 128, 0.1);
+        --popper-bg-color: rgba(20, 20, 20, 0.9);
     }
 }
 
@@ -20,8 +21,9 @@
     :root {
         --el-color-primary: #aac7ce;
         --bg-color-alpha: rgba(20, 20, 20, 0.6);
-        --panel-bg-color: rgba(255,255,255, 0.1);
-        --panel-bg-color-overlay: rgba(255,255,255, 0.2);
+        --panel-bg-color: rgba(255, 255, 255, 0.1);
+        --panel-bg-color-overlay: rgba(255, 255, 255, 0.2);
+        --popper-bg-color: rgba(20, 20, 20, 0.9);
     }
 }
 
@@ -63,12 +65,47 @@
     padding: 8px;
 }
 
+.el-button:not(.is-text) {
+    --button-bg-color: var(--panel-bg-color);
+    background: var(--button-bg-color) !important;
+    border: none !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: stretch !important;
+    justify-items: stretch !important;
+    align-content: stretch !important;
+    justify-content: stretch !important;
+    transition: 0.2s ease-in-out;
+}
+
+button:not(.is-text):hover {
+    --button-hover-bg-color: var(--panel-bg-color-overlay);
+    background: var(--button-hover-bg-color) !important;
+}
+
+button:not(.is-text) > span {
+    flex: 1;
+    place-content: center;
+    padding: 8px 15px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0, transparent 2px calc(100% - 2px), rgba(0, 0, 0, 0.08) 100%) !important;
+}
+
+button:hover,
+button.is-text:hover {
+    background: var(--panel-bg-color-overlay) !important;
+}
+
 button.is-text {
-    background: transparent;
+    transition: 200ms ease-in-out;
+    background: transparent !important;
+}
+
+.el-select-dropdown__item {
+    transition: 150ms ease-in-out;
 }
 
 button.is-text:hover {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0, var(--el-button-bg-color) 2px calc(100% - 2px), rgba(0, 0, 0, 0.08) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0, var(--el-button-hover-bg-color) 2px calc(100% - 2px), rgba(0, 0, 0, 0.08) 100%);
 }
 
 .el-notification {
@@ -121,6 +158,125 @@ button.is-text:hover {
 .flex_blank_1 {
     flex: 1 1 0;
 }
+
+.el-checkbox__input, .el-checkbox__inner {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+.el-checkbox__inner:after {
+    top: 3px !important;
+    left: 6px !important;
+    transition: 100ms var(--ease-in-bounce) !important;
+}
+
+.el-input > *, .el-textarea > *, .el-select__wrapper {
+    border-radius: 4px;
+    margin: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
+    transition-delay: 50ms;
+}
+
+.el-input__wrapper.is-focus, .el-select__wrapper.is-focused {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 3px calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
+}
+
+.el-checkbox__inner {
+    background: transparent !important;
+    border: 4px var(--el-border-color) !important;
+    background-clip: padding-box;
+}
+
+.el-checkbox__input.is-focus > .el-checkbox__inner {
+    background: linear-gradient(180deg, transparent calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
+}
+
+.el-input:not(.is-focus) > div,
+.el-textarea,
+.el-textarea > textarea,
+.el-select__wrapper {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+.el-input--small {
+    border-radius: 3px;
+}
+
+.el-textarea, .el-input, .el-checkbox__input, .el-select {
+    border-radius: 4px !important;
+    background: var(--panel-bg-color);
+    transition: 0.2s ease-in-out;
+}
+
+.el-textarea:hover, .el-input:hover, .el-select:hover, *:has(> .is-focused), *:has(> .is-focus) {
+    background: var(--panel-bg-color-overlay);
+}
+
+.el-textarea > textarea:focus {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 3px calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
+    background-clip: padding-box;
+    transition-delay: 50ms;
+}
+
+.is-current > .el-tree-node__content {
+    background: var(--panel-bg-color) !important;
+}
+
+.el-tree-node__content:hover {
+    background: var(--panel-bg-color-overlay) !important;
+}
+
+.el-tag__close {
+    transition: 100ms ease-in-out;
+}
+
+.el-popper {
+    border: none !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, var(--popper-bg-color) 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
+    backdrop-filter: blur(16px) !important;
+}
+
+.el-popper[data-popper-placement^=bottom] .el-popper__arrow:before {
+    background: var(--popper-bg-color) !important;
+    backdrop-filter: blur(8px) !important;
+    border-color: var(rgba(255, 255, 255, 0.1)) !important;
+}
+
+.el-scrollbar__bar {
+    transition: 300ms ease-in-out;
+}
+
+.el-scrollbar__bar.is-vertical {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.el-scrollbar__bar.is-horizontal {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.el-scrollbar__thumb {
+    transition: background-color 100ms ease-in-out,
+    width 100ms ease-in-out !important;
+    width: 3px !important;
+    background: var(--el-scrollbar-bg-color) !important;
+}
+
+.el-scrollbar__bar:hover > .el-scrollbar__thumb {
+    width: 6px !important;
+}
+
+.el-upload-list .el-icon--close-tip {
+    display: none !important;
+}
+
+.el-loading-mask {
+    backdrop-filter: blur(8px);
+}
+
+
 
 .noScrollBar::-webkit-scrollbar {
     display: none; /* Chrome Safari */

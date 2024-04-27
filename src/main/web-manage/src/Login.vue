@@ -53,7 +53,7 @@ function login() {
             </div>
         </div>
         <div class="background-font">
-            <div style="font-size: 256px;color: var(--el-color-primary-3);opacity: 0.1">
+            <div style="font-size: 256px;color: var(--el-color-primary-3);opacity: 0.4">
                 CHECKIN
             </div>
             <div style="font-size: 200px;margin-top: -200px">

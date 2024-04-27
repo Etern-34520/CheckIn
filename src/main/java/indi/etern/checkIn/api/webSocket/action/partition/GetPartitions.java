@@ -1,4 +1,4 @@
-package indi.etern.checkIn.api.webSocket.action.question;
+package indi.etern.checkIn.api.webSocket.action.partition;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -10,7 +10,7 @@ import java.util.Optional;
 public class GetPartitions extends JsonResultAction {
     @Override
     public String requiredPermissionName() {
-        return "";
+        return null;
     }
 
     @Override

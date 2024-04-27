@@ -55,10 +55,6 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(qqNumber);
     }
     
-    public List<User> getAll() {
-        return userRepository.findAll();
-    }
-    
     public List<User> findAll() {
         return userRepository.findAll();
     }

@@ -6,7 +6,9 @@ import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion;
 import indi.etern.checkIn.entities.question.interfaces.ImagesWith;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
+import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
+import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import org.apache.commons.io.IOUtils;
 
@@ -24,7 +26,7 @@ public class GetQuestionInfoAction extends JsonResultAction {
 
     @Override
     public String requiredPermissionName() {
-        return "";
+        return null;
     }
 
     @Override
@@ -41,6 +43,7 @@ public class GetQuestionInfoAction extends JsonResultAction {
             if (question instanceof MultipleChoiceQuestion multipleChoiceQuestion) {
                 JsonArray choices = new JsonArray();
                 List<String> correctIds = new ArrayList<>(1);
+                int index = 0;
                 for (Choice choice : multipleChoiceQuestion.getChoices()) {
                     JsonObject choiceJson = new JsonObject();
                     choiceJson.addProperty("id", choice.getId());
@@ -51,6 +54,7 @@ public class GetQuestionInfoAction extends JsonResultAction {
                         correctIds.add(choice.getId());
                     }
                     choices.add(choiceJson);
+                    index++;
                 }
                 result.add("choices", choices);
                 if (correctIds.size() == 1) {
@@ -99,6 +103,20 @@ public class GetQuestionInfoAction extends JsonResultAction {
                 }
                 result.add("images", images);
             }
+            Set<Partition> partitions1 = question.getPartitions();
+            JsonArray partitions = new JsonArray(partitions1.size());
+            JsonArray partitionIds = new JsonArray(partitions1.size());
+            for (Partition partition : partitions1) {
+                JsonObject partitionJson = new JsonObject();
+                partitionJson.addProperty("id", partition.getId());
+                partitionJson.addProperty("name", partition.getName());
+                partitions.add(partitionJson);
+                partitionIds.add(partition.getId());
+            }
+            result.add("partitionIds", partitionIds);
+            result.add("partitions", partitions);
+            User author = question.getAuthor();
+            result.addProperty("authorQQ", author==null?null:author.getQQNumber());
             return Optional.of(result);
         }
     }

@@ -1,14 +1,7 @@
 import {ElNotification} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {h} from "vue";
-
-function randomUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        const r = (Math.random() * 16) | 0,
-            v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-    });
-}
+import randomUUID from "@/utils/UUID.js";
 
 const WebSocketConnector = {
     ws: null,
@@ -16,8 +9,9 @@ const WebSocketConnector = {
     promises: {},
     waitingTasks: [],
     timeOut: 5000,
+    actions: {},
     connect: function (qq, token) {
-        let url = window.location.host;
+        let url = "localhost:8080"//TODO window.location.host;
         const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
         setTimeout(() => {
             if (ws.readyState !== WebSocket.OPEN) {
@@ -86,7 +80,10 @@ const WebSocketConnector = {
         }.bind(this);
         ws.onmessage = function (event) {
             const message = JSON.parse(event.data);
-            if (message.messageId) {
+            // delete message.messageId;
+            if (WebSocketConnector.actions[message.type]) {
+                WebSocketConnector.actions[message.type](message);
+            } else if (message.messageId) {
                 const promise = this.promises[message.messageId];
                 if (promise && promise instanceof Promise) {
                     if (message.type === "error") {
@@ -111,7 +108,7 @@ const WebSocketConnector = {
     send: function (/** Object*/objMessage, expectResponse = true) {
         let ableToSend = this.ws !== null && this.ws.readyState === WebSocket.OPEN;
         objMessage["messageId"] = randomUUID();
-        let promise = null;
+        let promise;
         if (expectResponse) {
             objMessage["expectResponse"] = true;
             const promiseFunctions = {}
@@ -121,17 +118,21 @@ const WebSocketConnector = {
             })
             promise["resolve"] = promiseFunctions["resolve"];
             promise["reject"] = promiseFunctions["reject"];
-            if (ableToSend)
+            promise["message"] = objMessage;
+            if (ableToSend) {
                 this.promises[objMessage["messageId"]] = promise;
+            }
         }
-        promise["expectResponse"] = expectResponse;
-        promise["message"] = objMessage;
         if (ableToSend) {
             this.ws.send(JSON.stringify(objMessage));
         } else {
             this.waitingTasks.push(promise);
         }
-        return promise;
+        if (expectResponse)
+            return promise;
+    },
+    registerAction: function (type, callback) {
+        WebSocketConnector.actions[type] = callback;
     }
 }
 export default WebSocketConnector
