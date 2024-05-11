@@ -1,5 +1,14 @@
 @import './base.css';
 
+/*
+@font-face {
+    font-family: 'HarmonyOS Sans SC1';
+    src: url('/checkIn/fonts/HarmonyOS_Sans_SC_Regular.ttf') format('ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+*/
+
 div.container {
     border-radius: 8px;
     border: solid var(--el-border-color-extra-light) 1px;
@@ -12,13 +21,22 @@ div.panel {
 }
 
 *.panel {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, var(--panel-bg-color) 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
+    background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
     border-radius: 8px;
 }
 
 *.panel-1 {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, var(--panel-bg-color) 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
+    background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
     border-radius: 4px;
+}
+
+*.panel-1.clickable, *.panel.clickable {
+    cursor: pointer;
+    transition: 300ms ease-in-out;
+}
+
+*.panel-1.clickable:hover, *.panel.clickable:hover {
+    background-color: var(--panel-bg-color-overlay);
 }
 
 .question-content-input, .question-content-input textarea {
@@ -26,17 +44,20 @@ div.panel {
 }
 
 .svg-text-fill {
-    fill: var(--el-text-color-secondary);
+    fill: var(--icon-color);
 }
 
 .svg-text-stroke {
-    stroke: var(--el-text-color-secondary);
+    stroke: var(--icon-color);
+}
+
+.el-button--primary .svg-text-fill {
+    fill: var(--front-color-dark);
 }
 
 * {
-    font-family: "HarmonyOS Sans", "微软雅黑", sans-serif;
+    font-family: "HarmonyOS Sans SC", "微软雅黑", sans-serif;
 }
-
 
 .menuGroup .el-button .el-icon {
     margin-left: 1px;
@@ -63,7 +84,7 @@ div.panel {
 }
 
 .main-router-enter-active .manage-page-router {
-    transition: all 0.7s ease-out;
+    transition: all 1s var(--ease-in-bounce-1);
     transition-delay: 0.3s;
 }
 
@@ -76,8 +97,17 @@ div.panel {
     transition: 0.2s ease-in-out;
 }
 
-.menu-display-button > span{
+.menu-display-button > span {
     padding: 0 !important;
+}
+
+.el-select.not-empty .el-select__selection:has( .el-select__selected-item:nth-child(2):is(.el-select__input-wrapper)) .el-tag__close {
+    opacity: 0;
+    width: 0;
+}
+
+.node-button svg {
+    margin-left: 0 !important;
 }
 
 /*
@@ -95,3 +125,7 @@ div.panel {
     justify-content: stretch !important;
     justify-items: stretch !important;
 }*/
+
+.circular {
+    display: none!important;
+}

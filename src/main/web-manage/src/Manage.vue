@@ -1,9 +1,9 @@
 <script setup>
-import {RouterLink, RouterView} from 'vue-router'
+// import {RouterLink, RouterView} from 'vue-router'
 import TopBar from "@/components/TopBar.vue";
 import router from "@/router/index.js";
 import topBar from "@/components/TopBar.vue";
-import {ref, reactive, getCurrentInstance, onBeforeMount} from 'vue'
+// import {ref, reactive, getCurrentInstance, onBeforeMount} from 'vue'
 import SideMenu from "@/components/SideMenu.vue";
 
 const {proxy} = getCurrentInstance();
@@ -70,14 +70,17 @@ const user = reactive(userObj);
 </template>
 
 <style scoped>
+/*noinspection CssUnusedSymbol*/
 .routePage-enter-active {
-    transition: all 0.4s ease-out;
+    transition: all 0.8s var(--ease-in-bounce-1);
 }
 
+/*noinspection CssUnusedSymbol*/
 .routePage-leave-active {
     transition: all 0.4s ease-in;
 }
 
+/*noinspection CssUnusedSymbol*/
 .routePage-enter-from, .routePage-leave-to {
     opacity: 0;
     scale: 0.95;

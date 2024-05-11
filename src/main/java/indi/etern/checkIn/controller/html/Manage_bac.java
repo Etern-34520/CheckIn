@@ -108,12 +108,14 @@ public class Manage_bac {
             case "partitionQuestion" -> partitionQuestion(request, modelAndView);
             case "newQuestion" -> newQuestion(request, modelAndView);
             case "editQuestion" -> editQuestion(request, modelAndView);
+/*
             case "questionFormOfFormData" -> {
                 MultiPartitionableQuestion question = MultiPartitionableQuestionService.buildQuestionFromRequest(request, null, null);
                 modelAndView.addObject("question", question);
                 modelAndView.addObject("ignorePartitionSelection", false);
                 modelAndView.setViewName("manage/pages/editQuestion");
             }
+*/
             case "userInfo" -> userInfo(request, modelAndView);
             case "userPane" -> {
                 modelAndView.addObject("webSocketService", webSocketService);
@@ -171,8 +173,8 @@ public class Manage_bac {
                 }
             };
             final Comparator<MultiPartitionableQuestion> editTimeComparator = (o1, o2) -> {
-                final LocalDateTime o1Time = o1.getLastEditTime();
-                final LocalDateTime o2Time = o2.getLastEditTime();
+                final LocalDateTime o1Time = o1.getLastModifiedTime();
+                final LocalDateTime o2Time = o2.getLastModifiedTime();
                 if (o1Time == null) {
                     if (o2Time == null) {
                         return 0;//0

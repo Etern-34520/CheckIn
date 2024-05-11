@@ -154,4 +154,8 @@ public class PartitionService {
     public Collection<? extends Partition> findAllById(Collection<Integer> partitionId) {
         return partitionRepository.findAllById(partitionId);
     }
+
+    public boolean existsByName(String partitionName) {
+        return partitionRepository.existsByName(partitionName);
+    }
 }

@@ -47,7 +47,7 @@ function switchMenuStyle() {
                 </el-breadcrumb-item>
             </TransitionGroup>
         </el-breadcrumb>
-        <div class="flex_blank_1"></div>
+        <div class="flex-blank-1"></div>
         <el-button @click="router.push('/manage/user-setting/')" text
                    style="margin-right: 2px;padding: 4px;transition: 200ms ease-in-out">
             <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
@@ -78,14 +78,17 @@ button:hover #menuIcon rect {
     fill: var(--el-text-color-secondary);
 }
 
+/*noinspection CssUnusedSymbol*/
 .breadcrumb-item-enter-active {
     transition: all 0.3s ease-out;
 }
 
+/*noinspection CssUnusedSymbol*/
 .breadcrumb-item-leave-active {
     transition: all 0.3s ease-in;
 }
 
+/*noinspection CssUnusedSymbol*/
 .breadcrumb-item-enter-from,
 .breadcrumb-item-leave-to {
     margin-left: -10px;

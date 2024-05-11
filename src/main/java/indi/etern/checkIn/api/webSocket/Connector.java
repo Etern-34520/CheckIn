@@ -3,8 +3,7 @@ package indi.etern.checkIn.api.webSocket;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import indi.etern.checkIn.CheckInApplication;
-import indi.etern.checkIn.api.webSocket.action.*;
+import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
 import indi.etern.checkIn.api.webSocket.action.partition.CreatePartitionAction;
 import indi.etern.checkIn.api.webSocket.action.partition.DeletePartitionAction;
 import indi.etern.checkIn.api.webSocket.action.partition.EditPartitionNameAction;
@@ -21,6 +20,7 @@ import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.web.WebSocketService;
+import io.micrometer.core.instrument.config.MeterFilter;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Connector implements SubProtocolCapable {
     public static final HashSet<String> ALL = new HashSet<>(0);
     public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
-    private static final Logger logger = LoggerFactory.getLogger(CheckInApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(Connector.class);
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
     private static PartitionService partitionService;
     private static WebSocketService webSocketService;
@@ -64,6 +64,7 @@ public class Connector implements SubProtocolCapable {
     @Getter
     private String sid = "";
     private User sessionUser;
+    private MeterFilter metricsHttpClientUriTagFilter;
 
     public Connector() {
 //        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);
@@ -124,9 +125,11 @@ public class Connector implements SubProtocolCapable {
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) {
         this.session = session;
-        CONNECTORS.add(this);     // 加入set中
+        session.setMaxTextMessageBufferSize(10*1024*1024*8);
+        session.setMaxBinaryMessageBufferSize(10*1024*1024*8);
+        CONNECTORS.add(this);
         this.sid = sid;
-        addOnlineCount();           // 在线数加1
+        addOnlineCount();
         logger.info("sid_" + sid + ":connected");
     }
 
@@ -144,12 +147,14 @@ public class Connector implements SubProtocolCapable {
         }
     }
 
+    private final Map<String,PartMessage> partMessageMap = new HashMap<>();
+
     @SuppressWarnings("unchecked")
     @OnMessage
-    public void onMessage(String message, Session session) {
+    public boolean onMessage(String message) {
         try {
             Map<String, Object> contentMap = gson.fromJson(message, HashMap.class);
-            if (checkToken(contentMap)) return;//TODO TIP
+            if (checkToken(contentMap)) return false;//TODO TIP
             /*if (!JwtTokenProvider.currentUserHasPermission((String) contentMap.get("type"), PermissionType.WEB_SOCKET)) {
                 sendError("no permission");
                 return;
@@ -164,6 +169,28 @@ public class Connector implements SubProtocolCapable {
             }
             boolean logging = true;
             switch ((String) contentMap.get("type")) {
+                case "partMessage" -> {
+                    PartMessage partMessage;
+                    String partId;
+                    if (contentMap.get("messageIds") instanceof List<?> messageIds) {
+                        partMessage= new PartMessage((List<String>) messageIds);
+                        partMessageMap.put(messageId, partMessage);
+                        partId = messageId;
+                        sendMessage("{\"type\":\"success\",\"messageId\":\"" + messageId + "\"}");
+                    } else if (contentMap.get("partId") instanceof String) {
+                        partId = (String) contentMap.get("partId");
+                        partMessage = partMessageMap.get(partId);
+                        partMessage.put(messageId, (String) contentMap.get("messagePart"));
+                        logging = false;
+                    } else {
+                        //TODO Tip
+                        return false;
+                    }
+                    if (partMessage.isComplete()) {
+                        logging = onMessage(partMessage.toString());
+                        partMessageMap.remove(partId);
+                    }
+                }
                 case "createPartition" -> {
                     final String partitionName = (String) contentMap.get("name");
                     logging = doAction(contentMap,new CreatePartitionAction(partitionName));
@@ -177,7 +204,7 @@ public class Connector implements SubProtocolCapable {
                     logging = doAction(contentMap,new DeleteQuestionAction(questionID));
                 }
                 case "editPartition" -> {
-                    logging = doAction(contentMap,new EditPartitionNameAction(Integer.parseInt((String) contentMap.get("partitionId")), (String) contentMap.get("partitionName")));
+                    logging = doAction(contentMap,new EditPartitionNameAction(Integer.parseInt((String) contentMap.get("id")), (String) contentMap.get("name")));
                 }
                 case "newUser" -> {
                     logging = doAction(contentMap,new CreateUserAction(qqInContentMap, (String) contentMap.get("name"), (String) contentMap.get("role")));
@@ -185,7 +212,7 @@ public class Connector implements SubProtocolCapable {
                 case "deleteUser" -> {
                     if (qqInContentMap != sessionUser.getQQNumber() && webSocketService.isOnline(String.valueOf(qqInContentMap))) {
                         sendError(messageId,"user is online");
-                        return;
+                        return true;
                     }
                     logging = doAction(contentMap,new DeleteUserAction(qqInContentMap, sessionUser));
                 }
@@ -259,13 +286,19 @@ public class Connector implements SubProtocolCapable {
                 case "getUsers" -> {
                     logging = doAction(contentMap,new GetAllUserAction());
                 }
+                case "updateQuestions" -> {
+                    logging = doAction(contentMap,new UpdateQuestionsAction((List<Object>) contentMap.get("questions"),sessionUser.getQQNumber()));
+                }
             }
             if (logging) {
-                logger.info(sessionUser.getName() + "(" + sid + "):" + message);
+                logger.info("{}({}):{}", sessionUser.getName(), sid, message);
             }
+            return logging;
         } catch (Exception e) {
             try {
-                logger.info(sessionUser.getName() + "(" + sid + "):" + message);
+                if (message.length()<65535) {
+                    logger.info("{}({}):{}", sessionUser.getName(), sid, message);
+                }
                 logger.error("{}:{}", e.getClass().getName(), e.getMessage());
                 String messageId = gson.fromJson(message, HashMap.class).get("messageId").toString();
                 sendError(messageId,e.getClass().getSimpleName() + ":" + e.getMessage());
@@ -273,6 +306,7 @@ public class Connector implements SubProtocolCapable {
                 logger.error("while sending message:{}to {}({}):{}", message, sessionUser.getName(), sid, exception.getMessage());
             }
             e.printStackTrace();
+            return true;
         }
     }
 
@@ -337,6 +371,13 @@ public class Connector implements SubProtocolCapable {
                 );
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+            if (!sessionUser.isEnabled()) {
+                Map<String, String> dataMap = new HashMap<>();
+                dataMap.put("type", "error");
+                dataMap.put("data", "user is disabled");
+                dataMap.put("messageId", contentMap.get("messageId").toString());
+                sendMessage(gson.toJson(dataMap));
+            }
             return !sessionUser.isEnabled();
         } else {
             return true;
@@ -384,12 +425,19 @@ public class Connector implements SubProtocolCapable {
         JsonObject jsonObject;
         jsonObject = optionalResult.orElseGet(JsonObject::new);
         jsonObject.addProperty("messageId", contentMap.get("messageId").toString());
+        sendMessageWithOutLog(jsonObject);
         {
-            sendMessage(gson.toJson(jsonObject));
+            Optional<JsonObject> message = jsonResultAction.logMessage(optionalResult);
+            if (message.isPresent()) {
+                JsonObject jsonObject1 = message.get();
+                jsonObject1.addProperty("messageId", contentMap.get("messageId").toString());
+                logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, jsonObject1);
+            }
             if (jsonObject.get("type")!=null && !jsonObject.get("type").getAsString().equals("error")) {
                 jsonResultAction.afterAction();
             }
         }
         return jsonResultAction.shouldLogging();
     }
+
 }

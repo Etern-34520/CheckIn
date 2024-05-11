@@ -12,14 +12,15 @@ import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.dao.UserTrafficService;
 import indi.etern.checkIn.service.web.WebSocketService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -92,6 +93,7 @@ public class ManageData {
         return gson.toJson(jsonData);
     }
     
+/*
     @PostMapping(path = "/updateQuestion/")
     @ResponseBody
     public synchronized String updateQuestion(HttpServletRequest httpServletRequest) {
@@ -129,7 +131,8 @@ public class ManageData {
         }
         return "success";
     }
-    
+*/
+
     private static void checkPermission(MultiPartitionableQuestion oldQuestion,User currectUser, User author, boolean enabled) {
         if (oldQuestion != null && oldQuestion.getAuthor() != null && !oldQuestion.getAuthor().equals(currectUser) &&
                 !JwtTokenProvider.currentUserHasPermission("edit others question")) {

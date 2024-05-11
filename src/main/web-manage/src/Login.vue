@@ -1,7 +1,7 @@
 <script setup>
-import {ref,getCurrentInstance,defineEmits} from 'vue';
+// import {ref,getCurrentInstance,defineEmits} from 'vue';
 import Router from "@/router/index.js";
-import {DArrowRight} from "@element-plus/icons-vue";
+import {DArrowRight, Loading} from "@element-plus/icons-vue";
 /*import WebSocketConnector from "@/websocket/websocket.js";*/
 const usernameOrQQ = ref('');
 const password = ref('');
@@ -10,7 +10,7 @@ const { proxy } = getCurrentInstance();
 const loginMessage = ref('');
 const key = ref(0);
 const requesting = ref(false);
-const emit = defineEmits(["loginAs"])
+const emit = defineEmits(["loginAs"]);
 
 function login() {
     requesting.value = true;
@@ -45,7 +45,7 @@ function login() {
             <el-input v-model="usernameOrQQ" placeholder="用户名或QQ" type="text" size="large"></el-input>
             <el-input v-model="password" placeholder="密码" type="password" show-password clearable
                       size="large"></el-input>
-            <el-button text bg :disabled="requesting" :loading="requesting" :icon="DArrowRight" @click="login">登录</el-button>
+            <el-button text bg :disabled="requesting" :loading="requesting" loading-icon="_Loading_" :icon="DArrowRight" @click="login">登录</el-button>
             <div style="height: 30px;display: flex;place-items: stretch;place-content: center;">
                 <Transition name="message" mode="out-in">
                     <el-text :key="key">{{ loginMessage }}</el-text>
@@ -53,10 +53,10 @@ function login() {
             </div>
         </div>
         <div class="background-font">
-            <div style="font-size: 256px;color: var(--el-color-primary-3);opacity: 0.4">
+            <div style="font-size: 256px;color: var(--el-color-primary-3);opacity: 0.1;filter: blur(8px)">
                 CHECKIN
             </div>
-            <div style="font-size: 200px;margin-top: -200px">
+            <div style="font-size: 200px;margin-top: -200px;filter: blur(8px)">
                 LOGIN
             </div>
         </div>
@@ -82,10 +82,12 @@ function login() {
     overflow: hidden;
 }
 
+/*noinspection CssUnusedSymbol*/
 .message-enter-active , .message-leave-active {
     transition: all 0.2s;
 }
 
+/*noinspection CssUnusedSymbol*/
 .message-enter-from , .message-leave-to {
     filter: blur(8px);
     opacity: 0;

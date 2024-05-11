@@ -43,5 +43,4 @@ public class MultiPartitionableQuestion extends Question implements MultiPartiti
     public String toJsonData(){
         throw new UnsupportedOperationException("Not supported yet");
     }
-
 }

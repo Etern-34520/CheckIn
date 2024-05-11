@@ -1,7 +1,7 @@
 package indi.etern.checkIn.entities.question.interfaces;
 
-import java.util.List;
+import java.util.Map;
 
 public interface ImagesWith {
-    List<String> getImagePathStrings();
+    Map<String,String> getImageBase64Strings();
 }

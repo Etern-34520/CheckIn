@@ -1,8 +1,8 @@
 <script setup>
-import {RouterView} from "vue-router";
+// import {RouterView} from "vue-router";
 import WebSocketConnector from "@/api/websocket.js";
 import Router from "@/router/index.js";
-import {getCurrentInstance, onMounted} from 'vue';
+// import {getCurrentInstance, onMounted} from 'vue';
 
 const {proxy} = getCurrentInstance();
 
@@ -32,14 +32,17 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/*noinspection CssUnusedSymbol*/
 .main-router-enter-active, .main-router-leave-active {
     transition: opacity 0.4s;
 }
 
+/*noinspection CssUnusedSymbol*/
 .main-router-enter-from, .main-router-leave-to {
     opacity: 0;
 }
 
+/*noinspection CssUnusedSymbol*/
 .main-router-enter-to, .main-router-leave-from {
     opacity: 1;
 }

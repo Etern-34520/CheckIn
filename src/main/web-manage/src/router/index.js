@@ -1,5 +1,7 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import HomeView from "@/pages/serverGroup/HomeView.vue";
+import {ElMessageBox} from "element-plus";
+import QuestionTempStorage from "@/data/QuestionTempStorage.js";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,9 +49,25 @@ const router = createRouter({
                         {
                             path: ':id/',
                             name: 'question-detail',
-                            component: () => import('../components/QuestionEditor.vue')
+                            component: () => import('../components/QuestionEditor.vue'),
+                            meta: {
+                                warning: {
+                                    enabled: (from, to) => {
+                                        return (!(from.fullPath.split("/")[2] === to.fullPath.split("/")[2])) && QuestionTempStorage.dirty
+                                    },
+                                    leave: "离开后将丢失未保存的内容"
+                                }
+                            }
                         }
-                    ]
+                    ],
+                    meta: {
+                        warning: {
+                            enabled: (from, to) => {
+                                return (!(from.fullPath.split("/")[2] === to.fullPath.split("/")[2])) && QuestionTempStorage.dirty
+                            },
+                            leave: "离开后将丢失未保存的内容"
+                        }
+                    }
                 }
             ]
         },
@@ -59,6 +77,26 @@ const router = createRouter({
             component: () => import('../Login.vue')
         }
     ]
+});
+
+router.beforeEach((to, from, next) => {
+    if (from.meta.warning && from.meta.warning.enabled(from, to) && from.meta.warning.leave) {
+        ElMessageBox.confirm(
+            from.meta.warning.leave,
+            '警告',
+            {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning',
+            }
+        ).then(() => {
+            next();
+        })
+            .catch(() => {
+            })
+    } else {
+        next();
+    }
 });
 
 export default router

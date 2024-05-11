@@ -7,21 +7,12 @@ import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.SettingService;
-import jakarta.servlet.http.Part;
 import lombok.Getter;
-import org.apache.commons.io.file.PathUtils;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.stream.Stream;
 
+@SuppressWarnings("UnusedReturnValue")
 public class MultipleQuestionBuilder {
     MultiPartitionableQuestion multipleQuestion;
     @Getter
@@ -31,7 +22,7 @@ public class MultipleQuestionBuilder {
     @Getter
     final Set<Partition> partitions = new HashSet<>();
     @Getter
-    final List<Part> imageParts = new ArrayList<>();
+    final Map<String,String> imageBase64Strings = new LinkedHashMap<>();
 
     User author;
     boolean enable = false;
@@ -45,7 +36,7 @@ public class MultipleQuestionBuilder {
                 .setId(multiPartitionableQuestion.getId());
     }
 
-    private MultipleQuestionBuilder addPartitions(Collection<Partition> partitions) {
+    public MultipleQuestionBuilder addPartitions(Set<Partition> partitions) {
         this.partitions.addAll(partitions);
         return this;
     }
@@ -70,8 +61,14 @@ public class MultipleQuestionBuilder {
         return this;
     }
 
-    public MultipleQuestionBuilder addImage(Part part) {
-        imageParts.add(part);
+//    @Deprecated
+//    public MultipleQuestionBuilder addImage(Part part) {
+//        imageParts.add(part);
+//        return this;
+//    }
+
+    public MultipleQuestionBuilder addBase64Image(String name, String base64String) {
+        imageBase64Strings.put(name,base64String);
         return this;
     }
 
@@ -123,12 +120,12 @@ public class MultipleQuestionBuilder {
             partitions.add(Partition.getInstance(string));
         }
         if (singleCorrect) {
-            if (imageParts.isEmpty())
+            if (imageBase64Strings.isEmpty())
                 multipleQuestion = new SingleCorrectQuestion(questionContent, choices, partitions, author);
             else
                 multipleQuestion = new SingleCorrectQuestionWithImages(questionContent, choices, partitions, author);
         } else {
-            if (imageParts.isEmpty())
+            if (imageBase64Strings.isEmpty())
                 multipleQuestion = new MultipleCorrectQuestion(questionContent, choices, partitions, author);
             else
                 multipleQuestion = new MultipleCorrectQuestionWithImages(questionContent, choices, partitions, author);
@@ -152,61 +149,10 @@ public class MultipleQuestionBuilder {
 //                partition.addQuestion(multipleQuestion);
             }
         }
-        List<String> imagePathStrings = new ArrayList<>();
-        final Path imagesPath = Path.of("data/images/" + multipleQuestion.getId() + "/");
-        if (!imageParts.isEmpty()) {
-            if (!Files.exists(imagesPath)) {
-                try {
-                    Files.createDirectories(imagesPath);
-                } catch (Exception e) {
-                    throw new MultipleQuestionBuilderException("On creating images directory:" + e.getMessage());
-                }
-            }
-            try {
-                for (Part imagePart : imageParts) {
-                    final String pathString = "data/images/" + multipleQuestion.getId() + "/" + imagePart.getSubmittedFileName();
-                    final Path path = Path.of(pathString);
-                    if (!Files.exists(path)) {
-                        Files.createFile(path);
-                    }
-                    final OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.WRITE);
-                    BufferedOutputStream bos = new BufferedOutputStream(outputStream, 1024);
-                    final InputStream inputStream = imagePart.getInputStream();
-//                    inputStream.skip(new String(imagePart.getInputStream().readNBytes(25)).split("base64,",2)[0].length()+7);
-                    inputStream.transferTo(bos);
-                    inputStream.close();
-                    outputStream.close();
-                    bos.close();
-                    imagePathStrings.add(pathString);
-                }
-            } catch (Exception e) {
-                throw new MultipleQuestionBuilderException("On writing image to path:" + e.getMessage());
-            }
-            try (Stream<Path> pathStream = Files.list(imagesPath)) {
-                pathStream.forEach(path1 -> {
-                    if (!imagePathStrings.contains(path1.toString().replace('\\', '/'))) {
-                        try {
-                            Files.delete(path1);
-                        } catch (Exception e) {
-                            throw new MultipleQuestionBuilderException("On deleting unused images:" + e.getMessage());
-                        }
-                    }
-                });
-            } catch (Exception e) {
-                throw new MultipleQuestionBuilderException("On deleting unused images:" + e.getMessage());
-            }
-        } else {
-            try {
-                if (Files.exists(imagesPath))
-                    PathUtils.deleteDirectory(imagesPath);
-            } catch (IOException e) {
-                throw new MultipleQuestionBuilderException("On deleting unused images:" + e.getMessage());
-            }
-        }
         if (multipleQuestion instanceof MultipleCorrectQuestionWithImages) {
-            ((MultipleCorrectQuestionWithImages) multipleQuestion).setImagePathStrings(imagePathStrings);
+            ((MultipleCorrectQuestionWithImages) multipleQuestion).setImageBase64Strings(imageBase64Strings);
         } else if (multipleQuestion instanceof SingleCorrectQuestionWithImages) {
-            ((SingleCorrectQuestionWithImages) multipleQuestion).setImagePathStrings(imagePathStrings);
+            ((SingleCorrectQuestionWithImages) multipleQuestion).setImageBase64Strings(imageBase64Strings);
         }
         return multipleQuestion;
     }

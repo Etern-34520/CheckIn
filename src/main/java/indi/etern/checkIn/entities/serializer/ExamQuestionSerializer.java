@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion;
-import indi.etern.checkIn.entities.question.interfaces.ImagesWith;
 
 import java.io.IOException;
 
@@ -15,7 +14,7 @@ public class ExamQuestionSerializer extends StdSerializer<MultipleChoiceQuestion
     
     @Override
     public void serialize(MultipleChoiceQuestion multipleChoiceQuestion, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        jsonGenerator.writeStartObject();
+        /*jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("content", multipleChoiceQuestion.getContent());
         jsonGenerator.writeStringField("type", multipleChoiceQuestion.getClass().getSimpleName());
         jsonGenerator.writeStringField("id", multipleChoiceQuestion.getId());
@@ -29,8 +28,8 @@ public class ExamQuestionSerializer extends StdSerializer<MultipleChoiceQuestion
         });
         jsonGenerator.writeEndObject();
         if (multipleChoiceQuestion instanceof ImagesWith imagesWith) {
-            jsonGenerator.writeNumberField("imagesCount",imagesWith.getImagePathStrings().size());
+            jsonGenerator.writeNumberField("imagesCount",imagesWith.getImageBase64Strings().size());
         }
-        jsonGenerator.writeEndObject();
+        jsonGenerator.writeEndObject();*/
     }
 }

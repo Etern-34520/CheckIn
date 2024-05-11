@@ -18,6 +18,7 @@ public abstract class JsonResultAction implements Callable<Optional<JsonObject>>
     }
 
     protected boolean logging = true;
+    private Optional<JsonObject> result;
 
     protected JsonResultAction() {
     }
@@ -41,7 +42,9 @@ public abstract class JsonResultAction implements Callable<Optional<JsonObject>>
                             return getOptionalErrorJsonObject("权限不足，需要" + s);
                         }
                     }
-                return doAction();
+                Optional<JsonObject> optionalResult = doAction();
+                result = optionalResult;
+                return optionalResult;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -53,6 +56,10 @@ public abstract class JsonResultAction implements Callable<Optional<JsonObject>>
     abstract protected Optional<JsonObject> doAction() throws Exception;
 
     public void afterAction() {
+    }
+
+    public Optional<JsonObject> logMessage(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<JsonObject> result) {
+        return result;
     }
 
     public boolean shouldLogging() {

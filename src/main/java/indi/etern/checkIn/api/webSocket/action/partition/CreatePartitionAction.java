@@ -20,6 +20,12 @@ public class CreatePartitionAction extends PartitionJsonResultAction {
     
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
+        if (PartitionService.singletonInstance.existsByName(partitionName)) {
+            JsonObject error = new JsonObject();
+            error.addProperty("type", "error");
+            error.addProperty("message", "partition already exists");
+            return Optional.of(error);
+        }
         final Partition partition = Partition.getInstance(partitionName);
         PartitionService.singletonInstance.save(partition);
         createdPartition = partition;

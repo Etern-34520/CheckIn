@@ -1,8 +1,8 @@
 <script setup>
-
 import router from "@/router/index.js";
-import {DArrowRight} from "@element-plus/icons-vue";
-import {getCurrentInstance} from "vue";
+// import {getCurrentInstance,ref} from "vue";
+import HarmonyOSIcon_Quit from "@/components/icons/HarmonyOSIcon_Quit.vue";
+
 const {proxy} = getCurrentInstance();
 
 const pageGroups = [
@@ -46,6 +46,9 @@ function shrinkMenu() {
     expandBool.value = false;
 }
 
+const currentGroupIndex = ref(0);
+const currentButtonIndex = ref(0);
+
 function routeTo(path) {
     router.push('/manage/' + path);
     shrinkMenu();
@@ -73,8 +76,10 @@ const props = defineProps({
              :class="{'menu-inline': inlineBool,'menu-expand': expandBool || inlineBool}" @mouseenter="expandMenu"
              @mouseleave="shrinkMenu" @click.stop>
             <div class="menuGroup" v-for="(group,$index) in pageGroups">
-                <el-button v-for="pageItem of group.paths" text :icon="pageItem.icon"
-                           @mouseenter="expandMenu" @click="routeTo(pageItem.path)">{{ pageItem.name }}
+                <el-button v-for="(pageItem,$buttonIndex) of group.paths" text :icon="pageItem.icon"
+                           @click="routeTo(pageItem.path)"
+                           @mouseenter="expandMenu">
+                    {{ pageItem.name }}
                 </el-button>
                 <el-divider v-if="$index!==pageGroups.length-1" style="margin-top: 2px;margin-bottom: 2px"></el-divider>
             </div>
@@ -95,13 +100,9 @@ const props = defineProps({
                     </el-button>
                     <el-button style="width: 50px;height: 52px" @click="logout" text>
                         <div style="display: flex;flex-direction: column">
+                            <HarmonyOSIcon_Quit :size="20"/>
                             <div>
                                 退出
-                            </div>
-                            <div>
-                                <el-icon>
-                                    <DArrowRight/>
-                                </el-icon>
                             </div>
                         </div>
                     </el-button>
@@ -113,7 +114,7 @@ const props = defineProps({
 
 <style scoped>
 #menu-container {
-    transition: all 100ms ease-in-out;
+    transition: all 300ms var(--ease-in-bounce-1);
     transition-delay: 100ms;
     margin-right: 44px;
 }
@@ -137,13 +138,13 @@ const props = defineProps({
     height: calc(100% - 44px);
     width: 32px;
     padding: 4px;
-    transition: all 200ms var(--ease-in-bounce);
+    transition: all 300ms var(--ease-in-bounce-1);
     transition-delay: 100ms;
     overflow-x: hidden;
     overflow-y: auto;
     /*border-right-color: var(--el-border-color-lighter) !important;*/
     border-radius: 0;
-    z-index: 3;
+    z-index: 114514;
 }
 
 .menuGroup {
@@ -160,6 +161,10 @@ const props = defineProps({
     overflow: hidden;
 }
 
+/*.menuGroup .current {
+    background: var(--panel-bg-color);
+}*/
+
 #menu button {
     transition: 0.2s ease-in-out;
 }
@@ -172,14 +177,17 @@ const props = defineProps({
     transition: all 0.2s ease-in-out;
 }
 
+/*noinspection CssUnusedSymbol*/
 .mask-enter-active {
     transition: all 150ms ease-in-out;
 }
 
+/*noinspection CssUnusedSymbol*/
 .mask-leave-active {
     transition: all 150ms ease-in-out;
 }
 
+/*noinspection CssUnusedSymbol*/
 .mask-enter-from, .mask-leave-to {
     opacity: 0;
 }
@@ -187,7 +195,7 @@ const props = defineProps({
 .menu-expand {
     background: var(--bg-color-alpha) !important;
     width: 200px !important;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(32px);
     transition-delay: 500ms !important;
     box-shadow: 4px 0 32px rgba(0, 0, 0, 0.7);
     border-radius: 8px !important;

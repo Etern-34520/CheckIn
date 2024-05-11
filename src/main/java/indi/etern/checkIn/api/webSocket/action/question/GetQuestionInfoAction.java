@@ -1,6 +1,7 @@
 package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion;
@@ -10,12 +11,7 @@ import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
-import org.apache.commons.io.IOUtils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 public class GetQuestionInfoAction extends JsonResultAction {
@@ -31,15 +27,20 @@ public class GetQuestionInfoAction extends JsonResultAction {
 
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
+        //FIXME 无法获取图片
         Optional<MultiPartitionableQuestion> questionOptional = MultiPartitionableQuestionService.singletonInstance.findById(questionId);
         if (questionOptional.isEmpty()) {
-            return Optional.empty();
+            JsonObject notFound = new JsonObject();
+            notFound.addProperty("type", "question not found");
+            return Optional.of(notFound);
         } else {
             MultiPartitionableQuestion question = questionOptional.get();
             JsonObject result = new JsonObject();
             result.addProperty("id", question.getId());
             result.addProperty("type", question.getClass().getSimpleName());
             result.addProperty("content", question.getContent());
+            result.addProperty("enabled", question.isEnabled());
+            result.addProperty("lastModifiedTime", question.getLastModifiedTimeString());
             if (question instanceof MultipleChoiceQuestion multipleChoiceQuestion) {
                 JsonArray choices = new JsonArray();
                 List<String> correctIds = new ArrayList<>(1);
@@ -69,63 +70,37 @@ public class GetQuestionInfoAction extends JsonResultAction {
             }
             if (question instanceof ImagesWith imagesWith) {
                 JsonArray images = new JsonArray();
-                int index = 0;
-                for (String imagePathString : imagesWith.getImagePathStrings()) {
+                for (Map.Entry<String,String> imageEntry : imagesWith.getImageBase64Strings().entrySet()) {
                     JsonObject imageInfo = new JsonObject();
-                    final String imageName = imagePathString.substring(imagePathString.lastIndexOf('/') + 1);
-
-                    imageInfo.addProperty("name",imageName);
-
-                    byte[] bytes;
-                    try {
-                        final InputStream inputStream = getImageInputStreamOf(imagesWith, index);
-                        bytes = IOUtils.toByteArray(inputStream);
-
-                        imageInfo.addProperty("size",bytes.length);
-
-                        inputStream.close();
-                        String type;
-                        if (imageName.endsWith(".jpg") || imageName.endsWith(".jpeg"))
-                            type = "data:image/jpeg;base64,";
-                        else if (imageName.endsWith(".png"))
-                            type = "data:image/png;base64,";
-                        else if (imageName.endsWith(".gif"))
-                            type = "data:image/gif;base64,";
-                        else
-                            type = "data:image;base64,";
-
-                        imageInfo.addProperty("url", type + Base64.getEncoder().encodeToString(bytes));
-                        images.add(imageInfo);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    index++;
+                    imageInfo.addProperty("name", imageEntry.getKey());
+                    imageInfo.addProperty("size", imageEntry.getValue().length());
+                    imageInfo.addProperty("url", imageEntry.getValue());
+                    images.add(imageInfo);
                 }
                 result.add("images", images);
             }
             Set<Partition> partitions1 = question.getPartitions();
-            JsonArray partitions = new JsonArray(partitions1.size());
             JsonArray partitionIds = new JsonArray(partitions1.size());
             for (Partition partition : partitions1) {
-                JsonObject partitionJson = new JsonObject();
-                partitionJson.addProperty("id", partition.getId());
-                partitionJson.addProperty("name", partition.getName());
-                partitions.add(partitionJson);
                 partitionIds.add(partition.getId());
             }
             result.add("partitionIds", partitionIds);
-            result.add("partitions", partitions);
             User author = question.getAuthor();
             result.addProperty("authorQQ", author==null?null:author.getQQNumber());
             return Optional.of(result);
         }
     }
 
-    private InputStream getImageInputStreamOf(ImagesWith questionWithImage, int imageIndex) {
-        try {
-            return new FileInputStream(questionWithImage.getImagePathStrings().get(imageIndex));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+    @Override
+    public Optional<JsonObject> logMessage(Optional<JsonObject> result) {
+        //noinspection OptionalGetWithoutIsPresent Impossible to be null
+        JsonObject jsonObject = result.get();
+        JsonArray images = ((JsonArray)jsonObject.get("images"));
+        for (JsonElement image : images) {
+            JsonObject imageObject = (JsonObject) image;
+            imageObject.remove("url");
+            imageObject.addProperty("url", "[ image base64 url (masked due to length) ]");
         }
+        return Optional.of(jsonObject);
     }
 }

@@ -1,11 +1,25 @@
+<!--suppress ALL -->
 <script setup>
-import {Splitpanes, Pane} from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
-import WebSocketConnector from "@/api/websocket.js";
-import {ref, watch} from "vue";
+import {Pane, Splitpanes} from "splitpanes"
+import "splitpanes/dist/splitpanes.css"
+// import {getCurrentInstance, ref, watch} from "vue";
 import router from "@/router/index.js";
 import QuestionTempStorage from "@/data/QuestionTempStorage.js";
 import PartitionTempStorage from "@/data/PartitionTempStorage.js";
+import randomUUID from "@/utils/UUID.js";
+import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
+import HarmonyOSIcon_CheckBox from "@/components/icons/HarmonyOSIcon_CheckBox.vue";
+import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
+import EditPartitionNameDialog from "@/components/EditPartitionNameDialog.vue";
+import HarmonyOSIcon_Upload from "@/components/icons/HarmonyOSIcon_Upload.vue";
+import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
+import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
+import {ArrowLeftBold, Loading} from "@element-plus/icons-vue";
+
+const {proxy} = getCurrentInstance();
+
+QuestionTempStorage.reset();
+PartitionTempStorage.reset();
 
 const props = {
     label: 'name',
@@ -15,102 +29,298 @@ const props = {
 }
 
 const tree = ref();
-
 const filterText = ref('')
-
 const loading = ref(true);
+const showTree = ref(true);
+const errorsDisplay = ref(false);
 
-const filterNode = (value, data) => {
-    if (!value) return true
-    console.log(data)
+const filterNode = (value, node) => {
+    if (!value) return true;
+    // console.log(node);
     for (const v of value.split(",")) {
-        if (v !== "" && (data.name.toUpperCase().includes(v.toUpperCase())) || data.id.toString().includes(v)) {
-            return true
+        if (v !== "" &&
+            (node.data.type !== 'question') || (
+                (node.data.question.content && node.data.question.content.toUpperCase().includes(v.toUpperCase())) ||
+                (node.data.question.id && node.data.question.id.toUpperCase().includes(v.toUpperCase())))
+        ) {
+            return true;
         }
     }
-    return false
+    return false;
 }
 
 watch(filterText, (val) => {
-    tree.value.filter(val)
+    tree.value.filter(val);
 })
+
+const localPartitionQuestionData = {};
 
 const loadNode = (node, resolve, reject) => {
     if (node.level === 0) {
+        let createPartitionButtonData = {
+            id: "create-partition-" + node.data.id,
+            leaf: true,
+            data: {type: "createPartition"}
+        };
         PartitionTempStorage.getRefPartitionsAsync().then((partitions) => {
-            let data = []
+            let data = [createPartitionButtonData];
             for (const partitionInfo of partitions.value) {
-                data.push({
-                    id: partitionInfo.id,
-                    name: partitionInfo.name,
-                    leaf: partitionInfo.empty,
-                    zones: [],
-                    data: {
-                        id: partitionInfo.id,
-                        type: "partition"
-                    }
-                });
+                data.push(getTreeNodeDataOfPartition(partitionInfo));
             }
             loading.value = false;
             resolve(data);
         });
     } else {
-        QuestionTempStorage.getContentsAndIdsAsyncByPartitionId(node.data.id).then((questions) => {
-            let data = [];
-            for (const questionInfo of questions) {
-                // questionInfo.name = questionInfo.content;
-                questionInfo.leaf = true;
-                questionInfo.data = {
-                    id: questionInfo.id,
-                    type: "question",
-                    name: questionInfo.content,
-                };
-                data.push(questionInfo);
+        let createQuestionButtonData = {
+            id: "create-question-" + node.data.id,
+            leaf: true,
+            data: {
+                type: "createQuestion",
+                partitionId: node.data.id,
+                treeId: node.data.id + "/create-question"
             }
+        };
+        const localPartitionQuestionNodes = localPartitionQuestionData[node.data.id];
+        let data = [createQuestionButtonData];
+        if (localPartitionQuestionNodes instanceof Array) {
+            data.push(...localPartitionQuestionNodes);
+        }
+        localPartitionQuestionData[node.data.id] = false;
+        if (node.data.empty) {
             resolve(data);
-            // console.log(questions);
-        }, (error) => {
-            reject();
-        });
+        } else {
+            QuestionTempStorage.getContentsAndIdsAsyncByPartitionId(node.data.id).then((questionInfos) => {
+                remoteLoop:for (let questionInfo of questionInfos) {
+                    if (localPartitionQuestionNodes instanceof Array) {
+                        for (const localQuestionNode of localPartitionQuestionNodes) {
+                            if (localQuestionNode.data.question.id === questionInfo.question.id) {
+                                continue remoteLoop;
+                            }
+                        }
+                    }
+                    // questionInfo.name = questionInfo.content;
+                    const questionNode = QuestionTempStorage.getQuestionNodeItemDataOf(questionInfo, node.data.id);
+                    data.push(questionNode);
+                }
+                resolve(data);
+                // console.log(questionInfos);
+            }, (error) => {
+                reject();
+            });
+        }
     }
     /*resolve(data);*/
 }
 
-PartitionTempStorage.registerOnPartitionAdded((partition) => {
-    tree.value.append({
+function getTreeNodeDataOfPartition(partition) {
+    return {
         id: partition.id,
-        name: partition.name,
-        leaf: true,
+        treeId: partition.id,
         zones: [],
+        empty: partition.empty,
         data: {
-            id: partition.id,
-            type: "partition",
+            editing: false,
+            partition: partition,
+            type: "partition"
         }
-    }, tree.value.root);
-})
+    };
+}
 
-/*
-QuestionTempStorage.registerOnQuestionUpdateLocal((question, differFromOriginal) => {
-    if (differFromOriginal) question.state="changed"
-    else question.state=undefined
-})
-*/
+PartitionTempStorage.registerOnPartitionAdded((partition) => {
+    partition.empty = true;
+    tree.value.append(getTreeNodeDataOfPartition(partition), tree.value.root);
+});
+PartitionTempStorage.registerOnPartitionDeleted((partition) => {
+    tree.value.remove(tree.value.getNode(partition.id));
+});
+
+QuestionTempStorage.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) => {
+    for (let partitionId of questionInfo.question.partitionIds) {
+        if (tree.value.getNode(partitionId + "/" + questionInfo.question.id) === null) {
+            const questionNode = QuestionTempStorage.getQuestionNodeItemDataOf(questionInfo, partitionId);
+            if (localPartitionQuestionData[partitionId] === false)
+                tree.value.append(questionNode, tree.value.getNode(partitionId));
+            else {
+                if (localPartitionQuestionData[partitionId] === undefined) {
+                    localPartitionQuestionData[partitionId] = []
+                    localPartitionQuestionData[partitionId].push(questionNode);
+                } else {
+                    let exist = false;
+                    for (const questionInfo1 of localPartitionQuestionData[partitionId]) {
+                        if (questionInfo1.data.question.id === questionNode.data.question.id) {
+                            exist = true;
+                        }
+                    }
+                    if (!exist) {
+                        localPartitionQuestionData[partitionId].push(questionNode);
+                    }
+                }
+            }
+        }
+    }
+    for (const partition of PartitionTempStorage.reactivePartitions.value) {
+        if (questionInfo.question.partitionIds && questionInfo.question.partitionIds.includes(partition.id)) {
+            continue;
+        }
+        let localPartitionQuestionDatum1 = localPartitionQuestionData[partition.id];
+        if (localPartitionQuestionDatum1 === false) {
+            if (tree.value.getNode(partition.id) !== null) {
+                let questionNode = tree.value.getNode(partition.id + "/" + questionInfo.question.id);
+                if (questionNode !== null)
+                    tree.value.remove(questionNode);
+            }
+        } else if (localPartitionQuestionDatum1) {
+            let index = 0;
+            let find = false;
+            for (const questionNode of localPartitionQuestionDatum1) {
+                if (questionNode.data.question.id === questionInfo.question.id) {
+                    find = true;
+                    break;
+                }
+                index++;
+            }
+            if (find) {
+                localPartitionQuestionData[partition.id] = [];
+            }
+        }
+    }
+});
 
 const openEdit = (questionId) => {
     router.push("/manage/questions/" + questionId + "/");
 }
 
-/*
-const updateQuestion = (question) => {
-    console.log(question)
+const onEdit = (nodeObj, nodeItem, node, event) => {
+    // console.log(nodeObj,nodeItem,node,event);
+    nodeObj.data.type === 'question' ? openEdit(nodeObj.data.question.id) : null
 }
-*/
+
+const allowDrag = (node) => {
+    console.log(node);
+    return node.data.data.type === 'question';
+}
+
+const allowDrop = (draggingNode, dropNode, type) => {
+    // console.log(draggingNode, dropNode, type);
+    let nodeDataType = dropNode.data.data.type;
+    return ((nodeDataType === 'partition' || nodeDataType === 'questionGroup') && type === "inner") ||
+        (nodeDataType !== 'partition' && nodeDataType !== "createPartition" && type === "next");
+}
+
+const onDrop = (dragNode, dropNode, place, event) => {
+    let dragNodeData = dragNode.data.data;
+    let dropNodeData = dropNode.data.data;
+    console.log(dragNodeData, dropNodeData, place, event);
+
+    function replacePartitionId(dropPartitionId) {
+        let treeIdBlock = dragNode.data.treeId.split("/");
+        let originalItemPartitionId = treeIdBlock[0];
+        let index = 0;
+        for (let partitionId of dragNodeData.question.partitionIds) {
+            if (Number(originalItemPartitionId) === partitionId) {
+                dragNode.data.treeId = partitionId + "/" + dragNodeData.question.id;
+                dragNode.data.data.question.partitionIds.splice(index, 1, Number(dropPartitionId));
+                break;
+            }
+            index++
+        }
+        dragNodeData.question.partitionIds = Array.from(new Set(dragNodeData.question.partitionIds));
+        QuestionTempStorage.update(dragNodeData);
+    }
+
+    let dropPartitionId;
+    delete dropNode.data.data.dragHover;
+    if (dropNodeData.type === "partition") {
+        dropPartitionId = dropNodeData.id;
+    } else if (dropNodeData.type === "question") {
+        dropPartitionId = dropNode.data.treeId.split("/")[0];
+    } else if (dropNodeData.type === "createQuestion") {
+        dropPartitionId = dropNode.data.data.partitionId;
+    } else {
+        return;
+    }
+    if (dragNodeData.simple) {
+        QuestionTempStorage.getAsync(dragNodeData.question.id).then((questionInfo) => {
+            dragNode.data.data = questionInfo;
+            replacePartitionId(dropPartitionId);
+        });
+    } else {
+        replacePartitionId(dropPartitionId);
+    }
+}
+
+const onDragEnd = (node, dropNode, event) => {
+    delete dropNode.data.data.dragHover;
+}
 
 const onDeleteQuestion = (questionId) => {
 }
 
 const onDeletePartition = (partitionId) => {
     PartitionTempStorage.deleteRemote(partitionId);
+}
+
+const createQuestion = (partitionId, type) => {
+    console.log(partitionId + " create:" + type);
+    let question = {
+        id: randomUUID(),
+        content: "",
+        enabled: false,
+        partitionIds: [partitionId],
+        authorQQ: Number(proxy.$cookies.get("qq")),
+        choices: [{
+            id: randomUUID(),
+            correct: true,
+            content: ""
+        }, {
+            id: randomUUID(),
+            correct: false,
+            content: ""
+        }]
+    };
+    const questionInfo = QuestionTempStorage.create(question);
+    tree.value.append(QuestionTempStorage.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
+}
+
+const createPartitionVisible = ref(false);
+
+const dragEnter = (dragNode, enterNode, event) => {
+    if (enterNode.data.data.type === 'partition')
+        enterNode.data.data.dragHover = true;
+}
+
+const dragLeave = (dragNode, leaveNode, event) => {
+    if (leaveNode.data.data.type === 'partition')
+        delete leaveNode.data.data.dragHover;
+}
+
+const uploading = ref(false);
+
+const upload = () => {
+    if (QuestionTempStorage.hasErrorQuestions && showTree.value === true) {
+        errorsDisplay.value = true;
+        showTree.value = false;
+    } else if (QuestionTempStorage.hasErrorQuestions && showTree.value === false) {
+        uploading.value = true;
+        QuestionTempStorage.uploadAll().then(() => {
+            uploading.value = false;
+        });
+    } else if (!QuestionTempStorage.hasErrorQuestions) {
+        uploading.value = true;
+        QuestionTempStorage.uploadAll().then(() => {
+            uploading.value = false;
+        }, () => {
+            uploading.value = false;
+        });
+    }
+    // QuestionTempStorage.uploadAll();
+}
+
+const backToTree = () => {
+    showTree.value = true;
+    setTimeout(() => {
+        errorsDisplay.value = false;
+    }, 600);
 }
 </script>
 
@@ -119,99 +329,166 @@ const onDeletePartition = (partitionId) => {
         <splitpanes style="flex: 1">
             <pane min-size="20" size="30">
                 <div class="panel" style="display: flex" v-loading="loading">
-                    <el-input
-                        prefix-icon="Search"
-                        v-model="filterText"
-                        placeholder="搜索 (以 &quot;,&quot; 分词)"
-                    />
-                    <el-button-group>
-                        <el-button text size="small">
-                            <svg width="20" height="20" viewBox="0 0 24 24">
-                                <title>ic_gallery_material_select_checkbo</title>
-                                <g id="_ic_gallery_material_select_checkbo" stroke="none" fill="none" stroke-width="1"
-                                   fill-rule="evenodd">
-                                    <path class="svg-text-fill"
-                                          d="M18,2 C20.209139,2 22,3.790861 22,6 L22,18 C22,20.209139 20.209139,22 18,22 L6,22 C3.790861,22 2,20.209139 2,18 L2,6 C2,3.790861 3.790861,2 6,2 L18,2 Z M18,3.5 L6,3.5 C4.6745166,3.5 3.58996133,4.53153594 3.50531768,5.83562431 L3.5,6 L3.5,18 C3.5,19.3254834 4.53153594,20.4100387 5.83562431,20.4946823 L6,20.5 L18,20.5 C19.3254834,20.5 20.4100387,19.4684641 20.4946823,18.1643757 L20.5,18 L20.5,6 C20.5,4.6745166 19.4684641,3.58996133 18.1643757,3.50531768 L18,3.5 Z M17.5303301,8.46966991 C17.7965966,8.73593648 17.8208027,9.15260016 17.6029482,9.44621165 L17.5303301,9.53033009 L11.7374369,15.3232233 C11.0942204,15.9664398 10.0748689,16.004276 9.3874012,15.4367321 L9.26256313,15.3232233 L6.96966991,13.0303301 C6.6767767,12.7374369 6.6767767,12.2625631 6.96966991,11.9696699 C7.23593648,11.7034034 7.65260016,11.6791973 7.94621165,11.8970518 L8.03033009,11.9696699 L10.3232233,14.2625631 C10.4045825,14.3439224 10.5280669,14.3574822 10.6234678,14.3032427 L10.6767767,14.2625631 L16.4696699,8.46966991 C16.7625631,8.1767767 17.2374369,8.1767767 17.5303301,8.46966991 Z"
-                                          id="_形状结合" fill-rule="nonzero"/>
-                                </g>
-                            </svg>
-                            批量
-                        </el-button>
-                        <el-popover>
-                            <template #reference>
-                                <el-button text size="small">
-                                    <svg width="20" height="20" viewBox="0 0 24 24">
-                                        <title>Public/ic_public_add_norm</title>
-                                        <defs>
-                                            <path
-                                                d="M12,1 C18.0751322,1 23,5.92486775 23,12 C23,18.0751322 18.0751322,23 12,23 C5.92486775,23 1,18.0751322 1,12 C1,5.92486775 5.92486775,1 12,1 Z M12,2.5 C6.75329488,2.5 2.5,6.75329488 2.5,12 C2.5,17.2467051 6.75329488,21.5 12,21.5 C17.2467051,21.5 21.5,17.2467051 21.5,12 C21.5,6.75329488 17.2467051,2.5 12,2.5 Z M12.75,17.25 C12.75,17.6642136 12.4142136,18 12,18 C11.5857864,18 11.25,17.6642136 11.25,17.25 L11.25,12.749 L6.75,12.75 C6.33578644,12.75 6,12.4142136 6,12 C6,11.5857864 6.33578644,11.25 6.75,11.25 L11.25,11.249 L11.25,6.75 C11.25,6.33578644 11.5857864,6 12,6 C12.4142136,6 12.75,6.33578644 12.75,6.75 L12.75,17.25 Z M17.25,11.25 C17.6642136,11.25 18,11.5857864 18,12 C18,12.4142136 17.6642136,12.75 17.25,12.75 L13.75,12.75 L13.75,11.25 L17.25,11.25 Z"
-                                                id="_path-1"/>
-                                        </defs>
-                                        <g id="_Public/ic_public_add_norm" stroke="none" stroke-width="1" fill="none"
-                                           fill-rule="evenodd">
-                                            <mask id="_mask-2" class="svg-text-fill">
-                                                <use xlink:href="#_path-1"/>
-                                            </mask>
-                                            <use id="_形状结合" class="svg-text-fill" fill-rule="nonzero"
-                                                 xlink:href="#_path-1"/>
-                                        </g>
-                                    </svg>
-                                    添加
-                                </el-button>
-                            </template>
-                            <template #default>
-                                <div style="display: flex;flex-direction: column" class="create-option">
-                                    <el-button>题目</el-button>
-                                    <el-button>分区</el-button>
-                                </div>
-                            </template>
-                        </el-popover>
-                    </el-button-group>
+                    <el-input prefix-icon="Search" v-model="filterText" placeholder="搜索 (以 &quot;,&quot; 分词)"/>
+                    <el-button type="primary" style="margin-top: 8px" @click="upload" :loading="uploading" loading-icon="_Loading_"
+                               :disabled="!QuestionTempStorage.reactiveDirty.value">
+                        <HarmonyOSIcon_Upload/>
+                        <el-text>{{ showTree ? "上传题目更改" : "确认上传" }}</el-text>
+                    </el-button>
+                    <!--                    <el-button @click="showTree = !showTree">test</el-button>-->
                     <el-scrollbar>
-                        <div style="margin-top: 4px;overflow: auto">
-                            <el-tree
-                                ref="tree"
-                                :props="props"
-                                :load="loadNode"
-                                node-key="id"
-                                :filter-node-method="filterNode"
-                                lazy>
-                                <template #default="{ node : proxy, data : nodeObj }">
-                                    <div class="tree-node-item"
-                                         @click="nodeObj.data.type==='question'?openEdit(nodeObj.id):null">
-                                        <div class="point" :class="{changed:nodeObj.status==='changed'}"></div>
-                                        <div class="question_tree_node">
-                                        <span class="question_tree_node_content">{{
-                                                nodeObj.data.type === 'question' ? nodeObj.content : nodeObj.name
-                                            }}</span>
-                                        </div>
-                                        <div class="flex_blank_1"></div>
-                                        <el-button class="node_button" size="small"
-                                                   @click.stop="
-                                                   nodeObj.data.type==='question'?
-                                                   onDeleteQuestion(nodeObj.id):onDeletePartition(nodeObj.id)">
-                                                <svg width="20" height="20" viewBox="0 0 24 24">
-                                                <defs>
-                                                    <path d="M5.629,7.5 L6.72612901,18.4738834 C6.83893748,19.6019681 7.77211147,20.4662096 8.89848718,20.4990325 L8.96496269,20.5 L15.0342282,20.5 C16.1681898,20.5 17.1211231,19.6570911 17.2655686,18.5392856 L17.2731282,18.4732196 L18.1924161,9.2527383 L18.369,7.5 L19.877,7.5 L19.6849078,9.40262938 L18.7657282,18.6220326 C18.5772847,20.512127 17.0070268,21.9581787 15.1166184,21.9991088 L15.0342282,22 L8.96496269,22 C7.06591715,22 5.47142703,20.5815579 5.24265599,18.7050136 L5.23357322,18.6231389 L4.121,7.5 L5.629,7.5 Z M10.25,11.75 C10.6642136,11.75 11,12.0857864 11,12.5 L11,18.5 C11,18.9142136 10.6642136,19.25 10.25,19.25 C9.83578644,19.25 9.5,18.9142136 9.5,18.5 L9.5,12.5 C9.5,12.0857864 9.83578644,11.75 10.25,11.75 Z M13.75,11.75 C14.1642136,11.75 14.5,12.0857864 14.5,12.5 L14.5,18.5 C14.5,18.9142136 14.1642136,19.25 13.75,19.25 C13.3357864,19.25 13,18.9142136 13,18.5 L13,12.5 C13,12.0857864 13.3357864,11.75 13.75,11.75 Z M12,1.75 C13.7692836,1.75 15.2083571,3.16379796 15.2491124,4.92328595 L15.25,5 L21,5 C21.4142136,5 21.75,5.33578644 21.75,5.75 C21.75,6.14942022 21.43777,6.47591522 21.0440682,6.49872683 L21,6.5 L14.5,6.5 C14.1005798,6.5 13.7740848,6.18777001 13.7512732,5.7940682 L13.75,5.75 L13.75,5 C13.75,4.03350169 12.9664983,3.25 12,3.25 C11.0536371,3.25 10.2827253,4.00119585 10.2510148,4.93983756 L10.25,5 L10.25,5.75 C10.25,6.14942022 9.93777001,6.47591522 9.5440682,6.49872683 L9.5,6.5 L2.75,6.5 C2.33578644,6.5 2,6.16421356 2,5.75 C2,5.35057978 2.31222999,5.02408478 2.7059318,5.00127317 L2.75,5 L8.75,5 C8.75,3.20507456 10.2050746,1.75 12,1.75 Z" id="_path-3"/>
-                                                </defs>
-                                                <g id="_Public/ic_public_delete" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <mask class="svg-text-fill" id="_mask-3">
-                                                        <use xlink:href="#_path-3"/>
-                                                    </mask>
-                                                    <use id="_形状结合" class="svg-text-fill" fill-rule="nonzero" xlink:href="#_path-3"/>
-                                                </g>
-                                            </svg>
-                                            删除
+                        <div class="slide-base" style="display: flex;flex-direction: row">
+                            <div class="question-tree-base" :class="{hideLeft:!showTree}">
+                                <el-button-group>
+                                    <el-button text>
+                                        <HarmonyOSIcon_CheckBox style="margin: 0;"/>
+                                        <el-text>批量</el-text>
+                                    </el-button>
+                                </el-button-group>
+                                <el-tree ref="tree" icon="ArrowRightBold" node-key="treeId" :props="props"
+                                         @node-click="onEdit"
+                                         draggable :allow-drag="allowDrag" :allow-drop="allowDrop" @node-drop="onDrop"
+                                         @node-drag-enter="dragEnter" @node-drag-leave="dragLeave"
+                                         @node-drag-end="onDragEnd"
+                                         lazy :load="loadNode" :filter-node-method="filterNode">
+                                    <template #default="{ node : proxy, data : nodeObj }">
+                                        <template v-if="nodeObj.data.type==='createPartition'">
+                                            <el-popover trigger="click" v-model:visible="createPartitionVisible"
+                                                        width="400">
+                                                <template #reference>
+                                                    <el-button text size="small"
+                                                               class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus">
+                                                        <HarmonyOSIcon_Plus/>
+                                                        <el-text>创建分区</el-text>
+                                                    </el-button>
+                                                </template>
+                                                <template #default>
+                                                    <create-new-partition-dialog
+                                                        @on-confirm="createPartitionVisible = false;"
+                                                        @on-cancel="createPartitionVisible = false;" size="default"/>
+                                                </template>
+                                            </el-popover>
+                                        </template>
+                                        <template v-else-if="nodeObj.data.type==='createQuestion'">
+                                            <el-popover trigger="click" width="280">
+                                                <template #reference>
+                                                    <el-button text size="small"
+                                                               class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus">
+                                                        <HarmonyOSIcon_Plus style="margin: 8px"/>
+                                                        <el-text>创建题目</el-text>
+                                                    </el-button>
+                                                </template>
+                                                <template #default>
+                                                    <div class="no-pop-padding create-selection">
+                                                        <el-button-group>
+                                                            <el-button disabled>题组</el-button>
+                                                            <el-button
+                                                                @click="createQuestion(nodeObj.data.partitionId,'select')">
+                                                                选择题
+                                                            </el-button>
+                                                            <el-button disabled>排序题</el-button>
+                                                            <el-button disabled>填空题</el-button>
+                                                        </el-button-group>
+                                                    </div>
+                                                </template>
+                                            </el-popover>
+                                        </template>
+                                        <template v-else>
+                                            <div class="tree-node-item" :class="{dragHover:nodeObj.data.dragHover}">
+                                                <div class="point" :class="{
+                                                changed:nodeObj.data.dirty,
+                                                error:nodeObj.data.showError,
+                                                warning:nodeObj.data.showWarning
+                                            }"></div>
+                                                <div class="question-tree-node">
+                                                    <el-text class="question-tree-node-content">
+                                                        {{
+                                                            nodeObj.data.type === 'question' ? nodeObj.data.question.content : nodeObj.data.partition.name
+                                                        }}
+                                                    </el-text>
+                                                </div>
+                                                <el-button-group>
+                                                    <el-popover trigger="click" v-model:visible="nodeObj.data.editing"
+                                                                width="400" v-if="nodeObj.data.type === 'partition'">
+                                                        <template #reference>
+                                                            <el-button class="node-button" size="small"
+                                                                       @click.stop="nodeObj.data.editing = false"
+                                                                       v-if="nodeObj.data.type === 'partition'">
+                                                                <HarmonyOSIcon_Rename/>
+                                                                <el-text>重命名</el-text>
+                                                            </el-button>
+                                                        </template>
+                                                        <template #default>
+                                                            <EditPartitionNameDialog
+                                                                @on-over="nodeObj.data.editing = false"
+                                                                :partition="nodeObj.data.partition"
+                                                                size="default"/>
+                                                        </template>
+                                                    </el-popover>
+                                                    <el-button class="node-button" size="small"
+                                                               @click.stop="nodeObj.data.type==='question'?onDeleteQuestion(nodeObj.data.question.id):onDeletePartition(nodeObj.id)">
+                                                        <HarmonyOSIcon_Remove/>
+                                                        <el-text>删除</el-text>
+                                                    </el-button>
+                                                </el-button-group>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </el-tree>
+                            </div>
+                            <div class="errorsList" v-show="errorsDisplay" :class="{hideRight:showTree}">
+                                <el-scrollbar>
+                                    <el-alert type="warning" :closable="false">
+                                        <el-button style="padding: 8px" text @click="backToTree">
+                                            <el-icon>
+                                                <ArrowLeftBold/>
+                                            </el-icon>
                                         </el-button>
-                                    </div>
-                                </template>
-                            </el-tree>
+                                        <el-text type="warning">
+                                            这些有错误的题目将不会上传
+                                        </el-text>
+                                    </el-alert>
+                                    <transition-group name="errorQuestions">
+                                        <template v-for="questionInfo of QuestionTempStorage.getErrorQuestions()"
+                                                  :key="questionInfo.question.id">
+                                            <div class="clickable panel-1 questionInfoPanel"
+                                                 @click="openEdit(questionInfo.question.id)">
+                                                <div class="panel-1 question-content">
+                                                    <el-text>
+                                                        {{ questionInfo.question.content }}
+                                                    </el-text>
+                                                </div>
+                                                <div class="choicesList">
+                                                    <el-tag v-for="choice of questionInfo.question.choices"
+                                                            :type="choice.correct?'success':'danger'">
+                                                        {{ choice.content }}
+                                                    </el-tag>
+                                                </div>
+                                                <div>
+                                                    <el-tag v-for="partitionId of questionInfo.question.partitionIds"
+                                                            type="info">
+                                                        {{ PartitionTempStorage.getName(partitionId) }}
+                                                    </el-tag>
+                                                </div>
+                                                <div class="errorsDescription">
+                                                    <transition-group name="errorDescriptions">
+                                                        <el-text v-for="error of questionInfo.errors" type="danger"
+                                                                 :key="error">
+                                                            {{ error }}
+                                                        </el-text>
+                                                    </transition-group>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </transition-group>
+                                </el-scrollbar>
+                            </div>
                         </div>
                     </el-scrollbar>
                 </div>
             </pane>
             <pane min-size="50">
-                <div class="panel">
+                <div class="panel" style="padding: 0">
                     <router-view v-slot="{ Component }">
                         <transition mode="out-in" name="question-editor">
                             <component :is="Component"/>
@@ -224,30 +501,33 @@ const onDeletePartition = (partitionId) => {
 </template>
 
 <style scoped>
-.question_tree_node {
+.question-tree-node {
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex: 1;
 }
 
 .tree-node-item {
     display: flex;
     flex-direction: row;
     flex: 1;
+    transition: 200ms ease-in-out;
+    border-radius: 4px;
 }
 
-.question_tree_node_content {
+.question-tree-node-content {
     width: 0;
     flex: 1;
 }
 
-.node_button {
+.node-button {
     --button-bg-color: var(--el-color-info-light-9) !important;
     /*background: var(--el-button-bg-color) !important;*/
     border: 2px var(--panel-bg-color-overlay) !important;
 }
 
-.node_button:hover {
+.node-button:hover {
     --button-hover-bg-color: var(--el-color-info-light-8) !important;
     /*background: var(--panel-bg-color-overlay) !important;*/
 }
@@ -259,7 +539,7 @@ const onDeletePartition = (partitionId) => {
     margin-right: 4px;
     border-radius: 50%;
     align-self: center;
-    transition: scale 200ms var(--ease-in-bounce);
+    transition: 300ms var(--ease-in-bounce);
 }
 
 .point.changed {
@@ -267,26 +547,107 @@ const onDeletePartition = (partitionId) => {
     background: var(--el-color-primary);
 }
 
+.point.warning {
+    scale: 1;
+    background: var(--el-color-warning);
+}
+
 .point.error {
     scale: 1;
     background: var(--el-color-danger);
 }
 
-.point.deleted {
-    scale: 1;
-    background: var(--el-color-warning);
+.dragHover {
+    background: var(--el-color-primary-1) !important;
 }
 
+.dragHover > * {
+    color: var(--front-color-dark) !important;
+}
+
+/*noinspection CssUnusedSymbol*/
 .question-editor-enter-active, .question-editor-leave-active {
     transition: all 0.4s ease-out;
 }
 
+/*noinspection CssUnusedSymbol*/
 .question-editor-enter-from, .question-editor-leave-to {
     opacity: 0;
     scale: 0.95;
 }
 
-.create-option > * {
-    margin: 0;
+.errorDescriptions-enter-active, .errorDescriptions-leave-active {
+    transition: all 0.3s ease-out;
+}
+
+/*TODO width*/
+.errorDescriptions-enter-from, .errorDescriptions-leave-to {
+    opacity: 0;
+    filter: blur(8px);
+}
+
+.create-selection {
+    display: flex;
+    flex-direction: row;
+}
+
+/*noinspection CssUnusedSymbol*/
+.create-selection .el-button {
+    width: 70px;
+}
+
+.question-tree-base, errorsList {
+    transition: 600ms var(--ease-in-bounce-1);
+}
+
+.slide-base .question-tree-base,
+.slide-base .errorsList {
+    width: 100%;
+    max-width: 100%;
+}
+
+.question-tree-base.hideLeft {
+    margin-left: -100%;
+}
+
+.errorsList.hideRight {
+    margin-right: -100%;
+}
+
+.questionInfoPanel {
+    display: flex;
+    flex-direction: column;
+    margin: 2px;
+    padding: 8px;
+}
+
+.questionInfoPanel > div {
+    min-height: 25px;
+}
+
+.errorsDescription > * {
+    margin-right: 8px;
+}
+
+.choicesList > * {
+    min-width: 40px;
+    margin-right: 4px;
+}
+
+.question-content {
+    padding: 4px 16px;
+}
+
+.errorQuestions-enter-active,
+.errorQuestions-leave-active {
+    transition: all 0.3s ease-out;
+    overflow: hidden;
+}
+
+.errorQuestions-enter-from,
+.errorQuestions-leave-to {
+    height: 0;
+    opacity: 0;
+    filter: blur(4px);
 }
 </style>

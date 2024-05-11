@@ -3,20 +3,16 @@ package indi.etern.checkIn.controller.rest;
 import com.google.gson.Gson;
 import indi.etern.checkIn.entities.question.Question;
 import indi.etern.checkIn.entities.question.interfaces.ImagesWith;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
 import org.apache.coyote.BadRequestException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "question/")
@@ -31,15 +27,15 @@ public class QuestionDataRead {
         this.gson = gson;
     }
     
-    @GetMapping(path = "image/count/{questionID}")
+    /*@GetMapping(path = "image/count/{questionID}")
     public String getImageQuantity(@PathVariable String questionID) {
         MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
         if (question instanceof ImagesWith questionWithImages) {
-            return String.valueOf(questionWithImages.getImagePathStrings().size());
+            return String.valueOf(questionWithImages.getImageBase64Strings().size());
         } else {
             return "0";
         }
-    }
+    }*/
 
     @GetMapping(path = "/withImages/ofPartition/{partitionId}")
     public List<String> getQuestionWithImageIds(@PathVariable int partitionId) throws BadRequestException {
@@ -47,13 +43,13 @@ public class QuestionDataRead {
         return partition.getQuestions().stream().filter((question) -> question instanceof ImagesWith).map(Question::getId).toList();
     }
     
-    @GetMapping(path = "image/{questionID}/", produces = "application/json;charset=UTF-8")
+    /*@GetMapping(path = "image/{questionID}/", produces = "application/json;charset=UTF-8")
     @ResponseBody
     public String getAllImageJsonData(@PathVariable String questionID) {//TODO 优化 当前用时6647ms
         MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
         if (question instanceof ImagesWith questionWithImages) {
             Map<String, Object> dataMap = new HashMap<>();
-            dataMap.put("count", questionWithImages.getImagePathStrings().size());
+            dataMap.put("count", questionWithImages.getImageBase64Strings().size());
             
             List<String> imageNames = new ArrayList<>();
             dataMap.put("names", imageNames);
@@ -62,7 +58,7 @@ public class QuestionDataRead {
             
             Map<String, String> imageBase64Map = new HashMap<>();
             int index = 0;
-            for (String imagePathString : questionWithImages.getImagePathStrings()) {
+            for (String imagePathString : questionWithImages.getImageBase64Strings()) {
                 final String imageName = imagePathString.substring(imagePathString.lastIndexOf('/') + 1);
                 imageNames.add(imageName);
                 byte[] bytes;
@@ -91,8 +87,9 @@ public class QuestionDataRead {
         } else {
             return "{\"count\": 0}";
         }
-    }
+    }*/
     
+/*
     @GetMapping(path = "image/{questionID}/{imageIndex}")
     public void getImage(HttpServletResponse httpServletResponse, @PathVariable String questionID, @PathVariable int imageIndex) {
         MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
@@ -106,12 +103,13 @@ public class QuestionDataRead {
             }
         }
     }
-    
-    private InputStream getImageInputStreamOf(ImagesWith questionWithImage, int imageIndex) {
-        try {
-            return new FileInputStream(questionWithImage.getImagePathStrings().get(imageIndex));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+*/
+
+//    private InputStream getImageInputStreamOf(ImagesWith questionWithImage, int imageIndex) {
+//        try {
+//            return new FileInputStream(questionWithImage.getImageBase64Strings().get(imageIndex));
+//        } catch (FileNotFoundException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 }

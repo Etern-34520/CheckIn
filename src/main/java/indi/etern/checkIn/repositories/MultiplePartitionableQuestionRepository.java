@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface MultiplePartitionableQuestionRepository extends JpaRepository<MultiPartitionableQuestion, String> {
 //    List<MultiPartitionableQuestion> findAllByLastEditTimeBefore(LocalDateTime lastEditTime, Sort sort);
-    List<MultiPartitionableQuestion> findAllByLastEditTimeAfter(LocalDateTime lastEditTime, Pageable pageable);
+    List<MultiPartitionableQuestion> findAllByLastModifiedTimeAfter(LocalDateTime lastEditTime, Pageable pageable);
 
     long countByEnabledIsTrue();
 

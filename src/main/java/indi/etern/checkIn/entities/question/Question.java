@@ -27,11 +27,11 @@ public abstract class Question implements Serializable {
     protected User author = null;// = User.exampleOfName("unknown");
     
     @Getter
-    @Column(name = "LAST_EDIT_TIME")
-    protected LocalDateTime lastEditTime;
+    @Column(name = "LAST_MODIFIED_TIME")
+    protected LocalDateTime lastModifiedTime;
 
     protected Question() {
-        lastEditTime = LocalDateTime.now();
+        lastModifiedTime = LocalDateTime.now();
     }
     
     @Id
@@ -59,7 +59,7 @@ public abstract class Question implements Serializable {
     abstract public String toJsonData();
 
     @SuppressWarnings("unused")
-    public String getLastEditTimeString() {
-        return dateTimeFormatter.format(lastEditTime);
+    public String getLastModifiedTimeString() {
+        return dateTimeFormatter.format(lastModifiedTime);
     }
 }

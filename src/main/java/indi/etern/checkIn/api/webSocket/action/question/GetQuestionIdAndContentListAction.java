@@ -36,6 +36,7 @@ public class GetQuestionIdAndContentListAction extends QuestionAction{
                 JsonObject questionInfo = new JsonObject();
                 questionInfo.addProperty("id", question.getId());
                 questionInfo.addProperty("content", question.getContent());
+                questionInfo.addProperty("type", question.getClass().getSimpleName());
                 questionList.add(questionInfo);
             }
             if (questionList.size() > 20) shouldLogging = false;
