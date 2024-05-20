@@ -1,19 +1,10 @@
 package indi.etern.checkIn.service.exam;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
-import indi.etern.checkIn.entities.traffic.UserTraffic;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.SettingService;
 import indi.etern.checkIn.service.dao.UserTrafficService;
-import indi.etern.checkIn.service.exam.throwable.ExamException;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class ExamCheckService {
@@ -32,7 +23,7 @@ public class ExamCheckService {
         this.settingService = settingService;
     }
     
-    public ExamResult check(long qq, Map<String, Object> data) {
+    /*public ExamResult check(long qq, Map<String, Object> data) {
         final Optional<UserTraffic> lastTraffic = userTrafficService.findLastByInfoContainsEntryOf(qq, "action", "generateExam");
         if (lastTraffic.isEmpty()) throw new ExamException("No exam generated.");
         List<String> questionIds;
@@ -66,5 +57,5 @@ public class ExamCheckService {
         } catch (JsonProcessingException e) {
             throw new ExamException("Error while parsing exam data.");
         }
-    }
+    }*/
 }

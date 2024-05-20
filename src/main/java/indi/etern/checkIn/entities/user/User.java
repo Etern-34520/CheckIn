@@ -107,6 +107,11 @@ public class User implements UserDetails {
     }
     
     @Override
+    public int hashCode() {
+        return ((Long) QQNumber).hashCode();
+    }
+    
+    @Override
     public String getUsername() {
         return name;
     }

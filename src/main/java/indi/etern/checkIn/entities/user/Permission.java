@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Permission {
 /*
     @Setter
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,  CascadeType.REFRESH, CascadeType.REFRESH})
     @JoinColumn(name = "group_name", referencedColumnName = "name")
     protected PermissionGroup group;
 */

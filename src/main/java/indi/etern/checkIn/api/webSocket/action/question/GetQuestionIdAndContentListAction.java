@@ -2,12 +2,13 @@ package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
 
 import java.util.Optional;
 
-public class GetQuestionIdAndContentListAction extends QuestionAction{
+public class GetQuestionIdAndContentListAction extends TransactionalAction {
     private final int partitionId;
     private boolean shouldLogging = true;
 

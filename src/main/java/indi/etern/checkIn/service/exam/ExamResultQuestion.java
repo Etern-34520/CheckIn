@@ -1,13 +1,9 @@
 package indi.etern.checkIn.service.exam;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoiceQuestion;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleCorrectQuestion;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.SingleCorrectQuestion;
 import indi.etern.checkIn.service.exam.throwable.ExamException;
 import lombok.Getter;
 
-import java.util.HashSet;
 import java.util.List;
 
 @Getter
@@ -40,7 +36,7 @@ public class ExamResultQuestion {
         return answerIds != null;
     }
     
-    public boolean checkWith(MultipleChoiceQuestion multipleChoiceQuestion) {
+    /*public boolean checkWith(MultipleChoiceQuestion multipleChoiceQuestion) {
         if (answerId == null && answerIds == null)
             convertAnswer();
         if (multipleChoiceQuestion instanceof MultipleCorrectQuestion mcq) {
@@ -65,5 +61,5 @@ public class ExamResultQuestion {
         } else {
             throw new ExamException("Unknown question type");
         }
-    }
+    }*/
 }

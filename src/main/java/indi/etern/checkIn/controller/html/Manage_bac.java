@@ -215,7 +215,7 @@ public class Manage_bac {
             } else if (!sortType.equalsIgnoreCase("asc")) {
                 throw new BadRequestException("parameter \"sortType\" must be \"asc\"or\"desc\"");
             }
-            partition.setSort(comparator);
+//            partition.setSort(comparator);
         }
         modelAndView.addObject("partition", partition);
     }

@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Connector implements SubProtocolCapable {
     public static final HashSet<String> ALL = new HashSet<>(0);
     public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
-    private static final Logger logger = LoggerFactory.getLogger(Connector.class);
+    public static final Logger logger = LoggerFactory.getLogger(Connector.class);
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
     private static PartitionService partitionService;
     private static WebSocketService webSocketService;
@@ -200,7 +200,7 @@ public class Connector implements SubProtocolCapable {
                     logging = doAction(contentMap,new DeletePartitionAction(partitionId));
                 }
                 case "deleteQuestion" -> {
-                    final String questionID = (String) contentMap.get("questionID");
+                    final String questionID = (String) contentMap.get("id");
                     logging = doAction(contentMap,new DeleteQuestionAction(questionID));
                 }
                 case "editPartition" -> {
@@ -288,6 +288,15 @@ public class Connector implements SubProtocolCapable {
                 }
                 case "updateQuestions" -> {
                     logging = doAction(contentMap,new UpdateQuestionsAction((List<Object>) contentMap.get("questions"),sessionUser.getQQNumber()));
+                }
+                case "upVote" -> {
+                    logging = doAction(contentMap,new UpVoteAction(contentMap.get("questionId").toString(),sessionUser));
+                }
+                case "downVote" -> {
+                    logging = doAction(contentMap,new DownVoteAction(contentMap.get("questionId").toString(),sessionUser));
+                }
+                case "restoreVote" -> {
+                    logging = doAction(contentMap,new RestoreVoteAction(contentMap.get("questionId").toString(),sessionUser));
                 }
             }
             if (logging) {

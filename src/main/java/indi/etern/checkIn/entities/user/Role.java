@@ -17,7 +17,7 @@ public class Role {
     private String type;
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<User> users = new HashSet<>();
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST,  CascadeType.REFRESH, CascadeType.REFRESH}, fetch = FetchType.EAGER)
 //    @JoinColumn(name = "ROLE_TYPE",referencedColumnName = "TYPE")
 //    @NotFound(action = NotFoundAction.IGNORE)
     @JoinTable(name = "ROLE_PERMISSION_MAPPING",

@@ -22,11 +22,9 @@ public abstract class Question implements Serializable {
 //    protected int hashcode;
     
     @JoinColumn(name = "AUTHOR_QQNUMBER")
-    @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.DETACH,CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @NotFound(action = NotFoundAction.IGNORE)
     protected User author = null;// = User.exampleOfName("unknown");
-    
-    @Getter
     @Column(name = "LAST_MODIFIED_TIME")
     protected LocalDateTime lastModifiedTime;
 
@@ -56,8 +54,6 @@ public abstract class Question implements Serializable {
         return id.hashCode();
     }
     
-    abstract public String toJsonData();
-
     @SuppressWarnings("unused")
     public String getLastModifiedTimeString() {
         return dateTimeFormatter.format(lastModifiedTime);

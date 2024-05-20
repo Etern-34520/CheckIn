@@ -71,19 +71,21 @@ const user = reactive(userObj);
 
 <style scoped>
 /*noinspection CssUnusedSymbol*/
-.routePage-enter-active {
+/*.routePage-enter-active {
     transition: all 0.8s var(--ease-in-bounce-1);
-}
+}*/
 
 /*noinspection CssUnusedSymbol*/
+.routePage-enter-active,
 .routePage-leave-active {
-    transition: all 0.4s ease-in;
+    transition: all 0.4s var(--ease-in-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
 .routePage-enter-from, .routePage-leave-to {
+    filter: blur(32px);
     opacity: 0;
-    scale: 0.95;
+    scale: 0.98;
 }
 
 #manageBase {

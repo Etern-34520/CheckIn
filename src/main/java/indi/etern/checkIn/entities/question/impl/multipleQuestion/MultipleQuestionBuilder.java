@@ -1,6 +1,7 @@
 package indi.etern.checkIn.entities.question.impl.multipleQuestion;
 
 import indi.etern.checkIn.entities.question.Question;
+import indi.etern.checkIn.entities.question.interfaces.ImagesWith;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
@@ -22,12 +23,11 @@ public class MultipleQuestionBuilder {
     @Getter
     final Set<Partition> partitions = new HashSet<>();
     @Getter
-    final Map<String,String> imageBase64Strings = new LinkedHashMap<>();
-
+    final Map<String, String> imageBase64Strings = new LinkedHashMap<>();
     User author;
     boolean enable = false;
 
-    public static MultipleQuestionBuilder from(MultipleChoiceQuestion multiPartitionableQuestion) {
+    public static MultipleQuestionBuilder from(MultipleChoicesQuestion multiPartitionableQuestion) {
         return new MultipleQuestionBuilder().setQuestionContent(multiPartitionableQuestion.getContent())
                 .addChoices(multiPartitionableQuestion.getChoices())
                 .addPartitions(multiPartitionableQuestion.getPartitions())
@@ -51,11 +51,6 @@ public class MultipleQuestionBuilder {
         return this;
     }
 
-    public MultipleQuestionBuilder addChoices(Choice... choices) {
-        Collections.addAll(this.choices, choices);
-        return this;
-    }
-
     public MultipleQuestionBuilder setQuestionContent(String content) {
         questionContent = content;
         return this;
@@ -68,7 +63,7 @@ public class MultipleQuestionBuilder {
 //    }
 
     public MultipleQuestionBuilder addBase64Image(String name, String base64String) {
-        imageBase64Strings.put(name,base64String);
+        imageBase64Strings.put(name, base64String);
         return this;
     }
 
@@ -113,23 +108,17 @@ public class MultipleQuestionBuilder {
         if (choices.size() < 2) {
             throw new QuestionException("Less than two choices");
         }
-
         if (partitions.isEmpty()) {
             String string = SettingService.singletonInstance.get("other.defaultPartitionName");
             if (string == null) string = "undefined";
             partitions.add(Partition.getInstance(string));
         }
-        if (singleCorrect) {
-            if (imageBase64Strings.isEmpty())
-                multipleQuestion = new SingleCorrectQuestion(questionContent, choices, partitions, author);
-            else
-                multipleQuestion = new SingleCorrectQuestionWithImages(questionContent, choices, partitions, author);
-        } else {
-            if (imageBase64Strings.isEmpty())
-                multipleQuestion = new MultipleCorrectQuestion(questionContent, choices, partitions, author);
-            else
-                multipleQuestion = new MultipleCorrectQuestionWithImages(questionContent, choices, partitions, author);
+/*
+        for (Choice choice : choices) {
+            choice.setOrderIndex(choices.indexOf(choice));
         }
+*/
+        multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, partitions, author);
         multipleQuestion.setEnabled(enable);
         if (id != null) {
             try {
@@ -149,11 +138,8 @@ public class MultipleQuestionBuilder {
 //                partition.addQuestion(multipleQuestion);
             }
         }
-        if (multipleQuestion instanceof MultipleCorrectQuestionWithImages) {
-            ((MultipleCorrectQuestionWithImages) multipleQuestion).setImageBase64Strings(imageBase64Strings);
-        } else if (multipleQuestion instanceof SingleCorrectQuestionWithImages) {
-            ((SingleCorrectQuestionWithImages) multipleQuestion).setImageBase64Strings(imageBase64Strings);
-        }
+        if (multipleQuestion instanceof ImagesWith imagesWith)
+            imagesWith.setImageBase64Strings(imageBase64Strings);
         return multipleQuestion;
     }
 

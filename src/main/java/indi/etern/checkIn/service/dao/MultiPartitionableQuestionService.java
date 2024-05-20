@@ -11,14 +11,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -33,7 +31,6 @@ public class MultiPartitionableQuestionService {
     final Logger logger = LoggerFactory.getLogger(getClass());
     @Resource
     private MultiplePartitionableQuestionRepository multiplePartitionableQuestionRepository;
-    private volatile boolean update = false;
 
     protected MultiPartitionableQuestionService(TransactionTemplate transactionTemplate, PartitionService partitionService) {
         singletonInstance = this;
@@ -115,59 +112,15 @@ public class MultiPartitionableQuestionService {
 //                multiplePartitionableQuestionRepository.flush();
                 multiplePartitionableQuestionRepository.deleteById(id);
 //                multiplePartitionableQuestionRepository.flush();
-                if (!update)
-                    try {
-                        Path path = Paths.get("data/images/" + id + "/");
-                        if (Files.exists(path))
-                            PathUtils.deleteDirectory(path);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
             }
             return Boolean.TRUE;
         });
     }
 
     public void update(MultiPartitionableQuestion multiPartitionableQuestion) {
-        update = true;
-        transactionTemplate.execute((TransactionCallback<Object>) status -> {
-            try {
-//                final String id = multiPartitionableQuestion.getId();
-//                if (multiplePartitionableQuestionRepository.existsById(id)) {
-//                    MultiPartitionableQuestion oldMultiPartitionableQuestion = multiplePartitionableQuestionRepository.findById(id).orElseThrow();
-//                    oldMultiPartitionableQuestion.getPartitions().forEach(partition -> {
-//                        partition.getQuestions().remove(oldMultiPartitionableQuestion);
-//                        partitionService.save(partition);
-//                    });
-//                    deleteById(id);
-//                    multiPartitionableQuestion.getPartitions().forEach(partition -> {
-//                        partition.getQuestions().remove(multiPartitionableQuestion);
-//                        partitionService.save(partition);
-//                    });
-////                    status.flush();
-//                }
-                multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
-                return Boolean.TRUE;
-            } catch (JpaObjectRetrievalFailureException jpaObjectRetrievalFailureException) {
-                String errorId = jpaObjectRetrievalFailureException.getMessage().split("with id ")[1];
-                logger.error("error id:" + errorId);
-                try {
-                    multiplePartitionableQuestionRepository.deleteById(errorId);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    update = false;
-                }
-                update = false;
-            } catch (Exception e) {
-                status.setRollbackOnly();
-                logger.error(e.getMessage());
-                logger.debug("trace:");
-                e.printStackTrace();
-                update = false;
-            }
-            update = false;
-            return Boolean.FALSE;
-        });
+//        multiplePartitionableQuestionRepository.deleteById(multiPartitionableQuestion.getId());
+        multiplePartitionableQuestionRepository.save(multiPartitionableQuestion);
+//        entityManager.merge(multiPartitionableQuestion);
     }
 
     public List<MultiPartitionableQuestion> findAllById(List<String> questionIds) {
@@ -189,7 +142,7 @@ public class MultiPartitionableQuestionService {
 
     public List<MultiPartitionableQuestion> findEditedInLastDays(int dayCount, int count) {
         Pageable pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "lastEditTime"));
-        return multiplePartitionableQuestionRepository.findAllByLastModifiedTimeAfter(LocalDateTime.now().minusDays(dayCount),pageable);
+        return multiplePartitionableQuestionRepository.findAllByLastModifiedTimeAfter(LocalDateTime.now().minusDays(dayCount), pageable);
     }
 
     public boolean existsById(String questionId) {

@@ -1,6 +1,7 @@
 package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonObject;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
@@ -8,7 +9,9 @@ import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import java.util.List;
 import java.util.Optional;
 
-public class BatchEnableOrDisableQuestionsAction extends QuestionAction {
+import static indi.etern.checkIn.api.webSocket.action.question.utils.Utils.sendUpdateQuestionsToAll;
+
+public class BatchEnableOrDisableQuestionsAction extends TransactionalAction {
     private final List<String> ids;
     private final User currentUser;
     private final boolean enable;

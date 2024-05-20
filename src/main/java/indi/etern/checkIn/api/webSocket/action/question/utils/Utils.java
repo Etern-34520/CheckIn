@@ -1,35 +1,35 @@
-package indi.etern.checkIn.api.webSocket.action.question;
+package indi.etern.checkIn.api.webSocket.action.question.utils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.List;
 
-public abstract class QuestionAction extends JsonResultAction {
-    protected void sendDeleteQuestionToAll(String questionID) {
+public class Utils {
+    public static void sendDeleteQuestionToAll(String questionID) {
         JsonObject jsonObject = new JsonObject();
 //        Map<String, Object> dataMap = new HashMap<>();
         jsonObject.addProperty("type", "deleteQuestion");
-        jsonObject.addProperty("questionID", questionID);
+        jsonObject.addProperty("id", questionID);
 //        dataMap.put("type", "deleteQuestion");
 //        dataMap.put("questionID", questionID);
         WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
     }
-
-    protected void sendUpdateQuestionToAll(MultiPartitionableQuestion question) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "updateQuestion");
-        jsonObject.addProperty("question", question.toJsonData());
-        WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
-    }
-
-    protected void sendUpdateQuestionsToAll(List<MultiPartitionableQuestion> questions) {
+    
+    public static void sendUpdateQuestionsToAll(List<MultiPartitionableQuestion> questions) {
         JsonArray jsonArray = new JsonArray();
         for (MultiPartitionableQuestion question : questions) {
-            jsonArray.add(question.toJsonData());
+            JsonObject questionObj = new JsonObject();
+            questionObj.addProperty("id",question.getId());
+            questionObj.addProperty("content", question.getContent());
+            questionObj.addProperty("enabled", question.isEnabled());
+            questionObj.addProperty("type", question.getClass().getSimpleName());
+            JsonArray partitions = new JsonArray();
+            question.getPartitions().forEach(partition -> partitions.add(partition.getId()));
+            questionObj.add("partitionIds", partitions);
+            jsonArray.add(questionObj);
         }
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("type", "updateQuestions");

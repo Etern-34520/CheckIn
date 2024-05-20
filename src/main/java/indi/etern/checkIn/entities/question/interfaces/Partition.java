@@ -1,6 +1,5 @@
 package indi.etern.checkIn.entities.question.interfaces;
 
-import indi.etern.checkIn.entities.question.Question;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -28,7 +27,7 @@ public class Partition implements Serializable {
      * but the partition refers to the unsaved question
      * don't worry about the sync
      * jpa will save the question at last*/
-    @ManyToMany(mappedBy = "partitions", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "partitions", cascade = {CascadeType.PERSIST,  CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
     @Fetch(value = FetchMode.SUBSELECT)
     @NotFound(action = NotFoundAction.IGNORE)
     Set<MultiPartitionableQuestion> questions;
@@ -105,7 +104,7 @@ public class Partition implements Serializable {
         return name;
     }
     
-    public void setSort(Comparator<MultiPartitionableQuestion> sortedSet) {
+    /*public void setSort(Comparator<MultiPartitionableQuestion> sortedSet) {
         sortedQuestion = new TreeSet<>(sortedSet);
         sortedQuestion.addAll(questions);
     }
@@ -113,7 +112,7 @@ public class Partition implements Serializable {
     @PostLoad
     public void initSort() {
         setSort(Comparator.comparing(Question::getContent));
-    }
+    }*/
     
     public Set<MultiPartitionableQuestion> getEnabledQuestions() {
         Set<MultiPartitionableQuestion> questionSet = new HashSet<>();

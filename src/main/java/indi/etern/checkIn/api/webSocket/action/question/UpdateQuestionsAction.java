@@ -1,17 +1,22 @@
 package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonObject;
+import indi.etern.checkIn.api.webSocket.Connector;
+import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionBuilder;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class UpdateQuestionsAction extends QuestionAction {
+import static indi.etern.checkIn.api.webSocket.action.question.utils.Utils.sendUpdateQuestionsToAll;
+
+public class UpdateQuestionsAction extends JsonResultAction {
     boolean shouldLogging = false;
     boolean allOwned = true;
     boolean switchEnabled = false;
@@ -44,11 +49,13 @@ public class UpdateQuestionsAction extends QuestionAction {
 
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
+        List<MultiPartitionableQuestion> succeedQuestions = new ArrayList<>();
         for (Object questionObj : questions) {
             if (questionObj instanceof @SuppressWarnings("rawtypes")Map questionDataMap) {
-                String type = questionDataMap.get("type").toString();
-                if (type.startsWith("SingleCorrectQuestion") ||
-                        type.startsWith("MultipleCorrectQuestion")) {
+                try {
+//                String type = questionDataMap.get("type").toString();
+//                if (type.startsWith("SingleCorrectQuestion") ||
+//                        type.startsWith("MultipleCorrectQuestion")) {
                     String content = (String) questionDataMap.get("content");
                     String id = (String) questionDataMap.get("id");
                     boolean enabled = (boolean) questionDataMap.get("enabled");
@@ -84,12 +91,16 @@ public class UpdateQuestionsAction extends QuestionAction {
                         }
                     }
                     MultiPartitionableQuestion multiPartitionableQuestion = multipleQuestionBuilder.build();
-                    MultiPartitionableQuestionService.singletonInstance.deleteById(multiPartitionableQuestion.getId());
-                    MultiPartitionableQuestionService.singletonInstance.save(multiPartitionableQuestion);
+//                    MultiPartitionableQuestionService.singletonInstance.unbindAndDeleteById(multiPartitionableQuestion.getId());
+                    MultiPartitionableQuestionService.singletonInstance.update(multiPartitionableQuestion);
+                    succeedQuestions.add(multiPartitionableQuestion);
+                } catch (Exception e) {
+                    Connector.logger.error("UpdateQuestionsAction.doAction", e);
                 }
             }
         }
         MultiPartitionableQuestionService.singletonInstance.flush();
+        sendUpdateQuestionsToAll(succeedQuestions);
         return Optional.empty();
     }
 

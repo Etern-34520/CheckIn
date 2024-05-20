@@ -1,6 +1,6 @@
 <script setup>
 import WebSocketConnector from "@/api/websocket.js";
-import {Loading} from "@element-plus/icons-vue";
+import _Loading_ from "@/components/_Loading_.vue";
 
 const loading = ref(false);
 
@@ -15,7 +15,7 @@ const reconnect = () => {
 </script>
 
 <template>
-<ElButton type="primary" @click="reconnect" :loading="loading" loading-icon="_Loading_">重新连接</ElButton>
+<ElButton type="primary" @click="reconnect" :loading="loading" :loading-icon="_Loading_">重新连接</ElButton>
 </template>
 
 <style scoped>

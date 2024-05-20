@@ -16,11 +16,11 @@ public class MapConverter implements AttributeConverter<Map<?,?>,String> {
     
     @Override
     public String convertToDatabaseColumn(Map<?,?> attribute) {
-        return gson.toJson(attribute);
+        return attribute==null||attribute.isEmpty()?null:gson.toJson(attribute);
     }
     
     @Override
     public Map<String,String> convertToEntityAttribute(String dbData) {
-        return gson.fromJson(dbData,Map.class);
+        return dbData==null?null:gson.fromJson(dbData,Map.class);
     }
 }

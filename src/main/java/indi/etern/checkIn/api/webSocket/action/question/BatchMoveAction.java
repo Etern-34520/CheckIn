@@ -2,6 +2,7 @@ package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BatchMoveAction extends QuestionAction {
+public class BatchMoveAction extends TransactionalAction {
     private final List<String> questionIds;
     private final List<Integer> targetPartitionsId;
     private final List<MultiPartitionableQuestion> questions;

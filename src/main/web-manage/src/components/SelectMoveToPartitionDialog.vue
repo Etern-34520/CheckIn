@@ -1,0 +1,66 @@
+<script setup>
+// import {ref,defineEmits,defineProps} from "vue";
+import PartitionTempStorage from "@/data/PartitionTempStorage.js";
+
+const props = defineProps({
+    size: {
+        type: String,
+        default: "default",
+    }
+})
+
+const emits = defineEmits(["onCancel","onConfirm"]);
+
+const isCreating = ref(false);
+const partitionIds = ref([]);
+const partitions = ref([]);
+PartitionTempStorage.getRefPartitionsAsync().then((resp) => {
+    partitions.value = resp.value;
+});
+</script>
+<template>
+    <div style="display: flex;flex-direction: row">
+        <el-select
+            class="not-empty"
+            v-model="partitionIds"
+            placeholder="选择分区"
+            multiple
+            filterable
+            @focusout="isCreating = false"
+            style="flex:4;width:0"
+        >
+            <el-option v-for="partition of partitions" :key="partition.id"
+                       :label="partition.name" :value="partition.id"></el-option>
+            <template #footer>
+                <transition name="creatingPartition" mode="out-in">
+                    <el-button v-if="!isCreating" text bg size="small" style="width: 100%"
+                               @click="isCreating = true">
+                        创建新分区
+                    </el-button>
+                    <template v-else>
+                        <createNewPartitionDialog @on-cancel="isCreating = false" @on-confirm="isCreating = false"/>
+                    </template>
+                </transition>
+            </template>
+        </el-select>
+        <el-button-group>
+            <el-button type="primary" :size="size" @click="$emit('onConfirm',partitionIds)"
+                       :disabled="partitionIds.length===0">确定
+            </el-button>
+            <el-button :size="size" @click="partitionIds.length=0;$emit('onCancel');">取消</el-button>
+        </el-button-group>
+    </div>
+</template>
+
+<style scoped>
+/*noinspection CssUnusedSymbol*/
+.creatingPartition-enter-active, .creatingPartition-leave-active {
+    transition: all 0.3s var(--ease-in-bounce-1);
+}
+
+/*noinspection CssUnusedSymbol*/
+.creatingPartition-enter-from, .creatingPartition-leave-to {
+    opacity: 0;
+    scale: 0.95;
+}
+</style>

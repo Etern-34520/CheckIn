@@ -1,13 +1,16 @@
 package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonObject;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 
 import java.util.List;
 import java.util.Optional;
 
-public class BatchDeleteQuestionsAction extends QuestionAction {
+import static indi.etern.checkIn.api.webSocket.action.question.utils.Utils.sendDeleteQuestionToAll;
+
+public class BatchDeleteQuestionsAction extends TransactionalAction {
     List<String> ids;
     User currentUser;
 

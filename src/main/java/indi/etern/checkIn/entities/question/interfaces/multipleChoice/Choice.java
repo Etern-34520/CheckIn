@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+@Getter
 @Entity
 @Table(name = "choices")
 public class Choice implements Serializable {
@@ -13,17 +14,18 @@ public class Choice implements Serializable {
     @Column(name = "ID")
     private String id;
     
-    @Getter
     @Column(name = "CONTENT")
     private String content;
     
-    @Getter
     @Column(name = "IS_CORRECT")
     private Boolean isCorrect;
     
-    @Getter
     @Setter
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "ORDER_INDEX")
+    private int orderIndex;
+    
+    @Setter
+    @OneToOne(cascade = {CascadeType.REFRESH,CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id",referencedColumnName = "id")
     private MultiPartitionableQuestion question;
     protected Choice() {
@@ -51,8 +53,5 @@ public class Choice implements Serializable {
             return false;
         }
     }
-    
-    public String getId() {
-        return id;
-    }
+
 }

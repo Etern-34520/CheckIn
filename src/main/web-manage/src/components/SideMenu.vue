@@ -144,7 +144,7 @@ const props = defineProps({
     overflow-y: auto;
     /*border-right-color: var(--el-border-color-lighter) !important;*/
     border-radius: 0;
-    z-index: 114514;
+    z-index: 1000;
 }
 
 .menuGroup {
@@ -166,7 +166,7 @@ const props = defineProps({
 }*/
 
 #menu button {
-    transition: 0.2s ease-in-out;
+    transition: 0.2s var(--ease-in-out-quint);
 }
 
 #closeMenuButton {
@@ -174,17 +174,17 @@ const props = defineProps({
     height: 32px;
     margin: -14px 0 0 -14px;
     padding: 8px;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.2s var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
 .mask-enter-active {
-    transition: all 150ms ease-in-out;
+    transition: all 150ms var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
 .mask-leave-active {
-    transition: all 150ms ease-in-out;
+    transition: all 150ms var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -213,7 +213,7 @@ const props = defineProps({
 
 #menu .default-hidden-menu {
     opacity: 0;
-    transition: all 150ms ease-in-out;
+    transition: all 150ms var(--ease-in-out-quint);
 }
 
 .menu-expand .default-hidden-menu {

@@ -10,6 +10,11 @@ let token1;
 let notifications = {};
 let limits = 1024*1024;//125KB
 
+function getTime() {
+    let d1 = new Date();
+    return d1.getFullYear()+"-"+d1.getMonth()+"-"+d1.getDate()+"T"+d1.getHours()+":"+d1.getMinutes()+":"+d1.getSeconds()+"."+d1.getMilliseconds();
+}
+
 const WebSocketConnector = {
     ws: null,
     firstConnect: true,
@@ -23,7 +28,7 @@ const WebSocketConnector = {
         return new Promise((resolve, reject) => {
             const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
             ws.onclose = function () {
-                console.log('WebSocket closed');
+                console.log('WebSocket Closed');
                 if (!notifications["closed"])
                     notifications["closed"] = ElNotification({
                         title: 'Websocket已关闭',
@@ -66,7 +71,7 @@ const WebSocketConnector = {
                     notifications[key].close();
                 }
                 notifications = {};
-                console.log('WebSocket opened');
+                console.log('WebSocket Opened');
                 resolve();
             }.bind(this);
             ws.onmessage = function (event) {
@@ -89,7 +94,7 @@ const WebSocketConnector = {
                             });
                         } else {
                             promise.resolve(message);
-                            console.log("websocket response", message);
+                            console.log("["+ getTime() + "] WS resp:", message);
                         }
                     }
                 }
@@ -156,7 +161,6 @@ const WebSocketConnector = {
                     type: "partMessage",
                     messageIds: partMessageIds,
                 }));
-                //TODO test
             } else {
                 this.ws.send(message);
             }

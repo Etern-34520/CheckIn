@@ -49,7 +49,7 @@ function switchMenuStyle() {
         </el-breadcrumb>
         <div class="flex-blank-1"></div>
         <el-button @click="router.push('/manage/user-setting/')" text
-                   style="margin-right: 2px;padding: 4px;transition: 200ms ease-in-out">
+                   style="margin-right: 2px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
             <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
                        style="margin-right: 4px"></el-avatar>
             <el-text size="large">{{ user.name }}</el-text>
@@ -71,7 +71,7 @@ function switchMenuStyle() {
 
 #menuIcon rect {
     fill: var(--el-text-color-primary);
-    transition: 200ms ease-in-out;
+    transition: 200ms var(--ease-in-out-quint);
 }
 
 button:hover #menuIcon rect {
@@ -80,12 +80,12 @@ button:hover #menuIcon rect {
 
 /*noinspection CssUnusedSymbol*/
 .breadcrumb-item-enter-active {
-    transition: all 0.3s ease-out;
+    transition: all 0.3s var(--ease-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
 .breadcrumb-item-leave-active {
-    transition: all 0.3s ease-in;
+    transition: all 0.3s var(--ease-in-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -96,6 +96,6 @@ button:hover #menuIcon rect {
     overflow: visible;
     word-break: keep-all;
     opacity: 0;
-    filter: blur(6px);
+    filter: blur(12px);
 }
 </style>

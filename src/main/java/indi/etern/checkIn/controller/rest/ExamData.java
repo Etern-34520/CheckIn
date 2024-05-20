@@ -8,10 +8,12 @@ import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.UserTrafficService;
 import indi.etern.checkIn.service.exam.ExamCheckService;
-import indi.etern.checkIn.service.exam.ExamResult;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 
@@ -73,6 +75,7 @@ public class ExamData {
         return objectMapper.writeValueAsString(questions);
     }
     
+/*
     @RequestMapping(method = RequestMethod.POST,path = "/exam/submit/")
     @ResponseBody
     public ExamResult submit(@RequestBody Map<String, Object> questionMap, HttpServletRequest request) throws BadRequestException, JsonProcessingException {
@@ -96,4 +99,5 @@ public class ExamData {
         userTrafficService.log(qq, request);
         return result;
     }
+*/
 }

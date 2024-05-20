@@ -65,7 +65,7 @@ div.panel {
 }
 
 #top-bar, #menu-container {
-    transition: 0.4s ease-out;
+    transition: 0.4s var(--ease-out-quint);
     transform: none;
 }
 
@@ -94,7 +94,7 @@ div.panel {
 }
 
 .el-upload--picture-card {
-    transition: 0.2s ease-in-out;
+    transition: 0.2s var(--ease-in-out-quint);
 }
 
 .menu-display-button > span {

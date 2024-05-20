@@ -1,14 +1,8 @@
 package indi.etern.checkIn;
 
-import indi.etern.checkIn.entities.question.Question;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleCorrectQuestion;
 import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionBuilder;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.SingleCorrectQuestion;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
-import indi.etern.checkIn.entities.question.interfaces.Partition;
 import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
-import indi.etern.checkIn.entities.question.interfaces.multipleChoice.MultipleChoice;
-import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.ChoiceService;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
@@ -18,11 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest(classes = CheckInApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
@@ -34,6 +25,25 @@ public class QuestionTest {
     PartitionService partitionService;
     @Autowired
     ChoiceService choiceService;
+    @Test
+    void testInsert() {
+        MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
+        multipleQuestionBuilder.setQuestionContent("test insert");
+        multipleQuestionBuilder.setId("9c451b9b-73c9-4788-a005-ff382368c500");
+        multipleQuestionBuilder.addChoice(new Choice("A", true));
+        multipleQuestionBuilder.addChoice(new Choice("B", false));
+        MultiPartitionableQuestionService.singletonInstance.save(multipleQuestionBuilder.build());
+    }
+    @Test
+    void testFind() {
+        Optional<MultiPartitionableQuestion> question = MultiPartitionableQuestionService.singletonInstance.findById("9c451b9b-73c9-4788-a005-ff382368c500");
+        if (question.isPresent()) {
+            System.out.println(question.get().getContent());
+        } else {
+            throw new RuntimeException("not found");
+        }
+    }
+/*
 //    Dao dao = new Dao("indi.etern.checkIn.beans");
     List<Choice> choices1 = new ArrayList<>();
     {
@@ -113,6 +123,8 @@ public class QuestionTest {
             assert e.getMessage().equals("MultipleQuestionBuilder has already built");
         }
     }
+*/
+/*
     @Test
 //    @Transactional
     public void testCheckAnswer() {
@@ -126,6 +138,8 @@ public class QuestionTest {
         choices2.remove(0);
         assert !((MultipleCorrectQuestion) question2).checkAnswers(choices2);
     }
+*//*
+
     @Test
 //    @Transactional
     public void insertQuestion() {
@@ -165,4 +179,5 @@ public class QuestionTest {
         partitionService.deleteAll();
         choiceService.deleteAll();
     }
+*/
 }

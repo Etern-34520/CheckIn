@@ -1,6 +1,7 @@
 package indi.etern.checkIn.api.webSocket.action.question;
 
 import com.google.gson.JsonObject;
+import indi.etern.checkIn.api.webSocket.action.TransactionalAction;
 import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
@@ -8,7 +9,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
-public class DeleteQuestionAction extends QuestionAction {
+import static indi.etern.checkIn.api.webSocket.action.question.utils.Utils.sendDeleteQuestionToAll;
+
+public class DeleteQuestionAction extends TransactionalAction {
     private MultiPartitionableQuestion question;
     
     public DeleteQuestionAction(String questionID) {
