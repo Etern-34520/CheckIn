@@ -40,7 +40,7 @@ public class WebSocketService {
     
     public void sendMessage(String message, String sid) {
         logger.info("webSocket to:{}, msg:{}", sid, message);
-        
+
         for (Connector item : CONNECTORS) {
             try {
                 if (item.getSid().equals(sid)) {
@@ -53,16 +53,7 @@ public class WebSocketService {
     
     public void sendMessageToAll(String message) {
         logger.info("webSocket to all, msg:{}", message);
-        for (Connector item : CONNECTORS) {
-            if (item.isOpen()) {
-                try {
-                    item.sendMessageWithOutLog(message);
-                } catch (IllegalStateException ignored) {
-                } catch (Exception e) {
-                    logger.error("error occurred when send to sid_{}", item.getSid(), e);
-                }
-            }
-        }
+        sendMessageToAllWithoutLog(message);
     }
     
     public boolean isOnline(String sid) {
@@ -82,5 +73,22 @@ public class WebSocketService {
     
     public void sendMessageToAll(JsonObject jsonObject) {
         sendMessageToAll(jsonObject.toString());
+    }
+
+    public void sendMessageToAllWithoutLog(JsonObject jsonObject) {
+        sendMessageToAllWithoutLog(jsonObject.toString());
+    }
+
+    public void sendMessageToAllWithoutLog(String message) {
+        for (Connector item : CONNECTORS) {
+            if (item.isOpen()) {
+                try {
+                    item.sendMessageWithOutLog(message);
+                } catch (IllegalStateException ignored) {
+                } catch (Exception e) {
+                    logger.error("error occurred when send to sid_{}", item.getSid(), e);
+                }
+            }
+        }
     }
 }

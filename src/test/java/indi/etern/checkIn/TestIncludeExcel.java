@@ -1,3 +1,4 @@
+/*
 package indi.etern.checkIn;
 
 import com.alibaba.excel.EasyExcel;
@@ -52,9 +53,11 @@ public class TestIncludeExcel {
                 saveData();
             }
 
-            /**
+            */
+/**
              * 加上存储数据库
-             */
+             *//*
+
             private void saveData() {
                 for (ExcelQuestion excelQuestion : cachedDataList) {
                     try {
@@ -95,3 +98,4 @@ public class TestIncludeExcel {
         System.out.println(multiPartitionableQuestionService.count());
     }
 }
+*/

@@ -6,6 +6,7 @@
     --el-mask-color: rgba(0, 0, 0, 0.3) !important;
     --ease-in-bounce: cubic-bezier(0.845, 0.545, 0.565, 1.335);
     --ease-in-bounce-1: cubic-bezier(0.42, 0.62, 0.09, 1.23);
+    --ease-in-out-bounce: cubic-bezier(0.860, 0.000, 0.235, 1.195);
     --ease-in-out-quint: cubic-bezier(0.860, 0.000, 0.070, 1.000);
     --ease-out-quint: cubic-bezier(0.230, 1.000, 0.320, 1.000);
     --ease-in-quint: cubic-bezier(0.755, 0.050, 0.855, 0.060);

@@ -144,7 +144,7 @@ const props = defineProps({
     overflow-y: auto;
     /*border-right-color: var(--el-border-color-lighter) !important;*/
     border-radius: 0;
-    z-index: 1000;
+    z-index: 2001;
 }
 
 .menuGroup {

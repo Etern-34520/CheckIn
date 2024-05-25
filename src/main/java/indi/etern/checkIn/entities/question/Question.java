@@ -13,7 +13,6 @@ import java.util.UUID;
 
 @Getter
 @MappedSuperclass
-@Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
 public abstract class Question implements Serializable {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
     @Column(name = "content")

@@ -34,19 +34,21 @@ public class MultipleChoicesQuestion extends MultiPartitionableQuestion implemen
         this.author = author;
         boolean singleCorrect = false;
         boolean multipleCorrect = false;
+        int index = 0;
         for (Choice choice : choices) {
+            choice.setOrderIndex(index);
             if (!singleCorrect && choice.isCorrect()) {
                 singleCorrect = true;
             } else if (choice.isCorrect()) {
                 multipleCorrect = true;
             }
+            index++;
         }
         if (singleCorrect) type = Type.SINGLE_CORRECT;
         else if (multipleCorrect) type = Type.MULTIPLE_CORRECT;
         else throw new QuestionException("No correct choice found");
     }
 
-    @Getter
     public enum Type {
         SINGLE_CORRECT("single_correct") {
             private Choice correctChoice;
@@ -95,13 +97,12 @@ public class MultipleChoicesQuestion extends MultiPartitionableQuestion implemen
     MultipleChoicesQuestion.Type type;
     
     @OrderBy("orderIndex")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.REFRESH,CascadeType.PERSIST,CascadeType.REMOVE,CascadeType.MERGE,CascadeType.DETACH}, fetch = FetchType.LAZY)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     List<Choice> choices;
 
     @Setter
-    @Getter
     @Convert(converter = MapConverter.class)
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "image_base64_strings", columnDefinition = "mediumblob")

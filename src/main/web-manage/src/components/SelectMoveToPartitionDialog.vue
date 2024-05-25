@@ -1,6 +1,7 @@
 <script setup>
 // import {ref,defineEmits,defineProps} from "vue";
 import PartitionTempStorage from "@/data/PartitionTempStorage.js";
+import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
 
 const props = defineProps({
     size: {
@@ -9,7 +10,7 @@ const props = defineProps({
     }
 })
 
-const emits = defineEmits(["onCancel","onConfirm"]);
+const emits = defineEmits(["onConfirm"]);
 
 const isCreating = ref(false);
 const partitionIds = ref([]);
@@ -43,12 +44,9 @@ PartitionTempStorage.getRefPartitionsAsync().then((resp) => {
                 </transition>
             </template>
         </el-select>
-        <el-button-group>
-            <el-button type="primary" :size="size" @click="$emit('onConfirm',partitionIds)"
-                       :disabled="partitionIds.length===0">确定
-            </el-button>
-            <el-button :size="size" @click="partitionIds.length=0;$emit('onCancel');">取消</el-button>
-        </el-button-group>
+        <el-button type="primary" :size="size" @click="$emit('onConfirm',partitionIds)"
+                   :disabled="partitionIds.length===0">确定
+        </el-button>
     </div>
 </template>
 

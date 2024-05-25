@@ -8,7 +8,7 @@ let qq1;
 let token1;
 
 let notifications = {};
-let limits = 1024*1024;//125KB
+let limits = 4*1024*1024;//4MB
 
 function getTime() {
     let d1 = new Date();

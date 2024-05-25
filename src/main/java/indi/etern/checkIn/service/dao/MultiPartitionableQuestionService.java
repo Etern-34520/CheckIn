@@ -16,7 +16,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -82,7 +81,9 @@ public class MultiPartitionableQuestionService {
     }
 
     public void deleteById(String id) {
-        transactionTemplate.execute((TransactionCallback<Object>) status -> {
+        transactionTemplate.executeWithoutResult(status -> {
+            multiplePartitionableQuestionRepository.deleteById(id);
+/*
             final Optional<MultiPartitionableQuestion> optionalMultiPartitionableQuestion;
             optionalMultiPartitionableQuestion = findById(id);
             if (optionalMultiPartitionableQuestion.isPresent()) {
@@ -114,6 +115,7 @@ public class MultiPartitionableQuestionService {
 //                multiplePartitionableQuestionRepository.flush();
             }
             return Boolean.TRUE;
+*/
         });
     }
 

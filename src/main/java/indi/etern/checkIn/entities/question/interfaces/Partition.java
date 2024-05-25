@@ -27,7 +27,7 @@ public class Partition implements Serializable {
      * but the partition refers to the unsaved question
      * don't worry about the sync
      * jpa will save the question at last*/
-    @ManyToMany(mappedBy = "partitions", cascade = {CascadeType.PERSIST,  CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "partitions", cascade = {CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.LAZY)
     @Fetch(value = FetchMode.SUBSELECT)
     @NotFound(action = NotFoundAction.IGNORE)
     Set<MultiPartitionableQuestion> questions;

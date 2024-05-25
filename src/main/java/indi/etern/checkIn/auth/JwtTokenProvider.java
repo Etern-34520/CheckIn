@@ -92,12 +92,6 @@ public class JwtTokenProvider {
             if (authority.getName().equals(permissionName)/*&&authority.getPermissionType().equals(permissionType)*/) {
                 return true;
             }
-//            final String permissionNamesStr = authority.getName().split(":", 2)[1];
-//            final String[] permissions = permissionNamesStr.split("\\|");
-//            if (authority.getPermissionType().equals(permissionType) &&
-//                    List.of(permissions).contains(permissionName)){
-//                return true;
-//            }
         }
         return false;
     }

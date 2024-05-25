@@ -113,11 +113,6 @@ public class MultipleQuestionBuilder {
             if (string == null) string = "undefined";
             partitions.add(Partition.getInstance(string));
         }
-/*
-        for (Choice choice : choices) {
-            choice.setOrderIndex(choices.indexOf(choice));
-        }
-*/
         multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, partitions, author);
         multipleQuestion.setEnabled(enable);
         if (id != null) {

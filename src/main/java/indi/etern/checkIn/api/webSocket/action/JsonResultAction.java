@@ -2,6 +2,10 @@ package indi.etern.checkIn.api.webSocket.action;
 
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.auth.JwtTokenProvider;
+import indi.etern.checkIn.entities.user.User;
+import lombok.AccessLevel;
+import lombok.Getter;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -9,6 +13,9 @@ import java.util.concurrent.Callable;
 public abstract class JsonResultAction implements Callable<Optional<JsonObject>> {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected static final Optional<JsonObject> successOptionalJsonObject;
+
+    @Getter(AccessLevel.PROTECTED)
+    final User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
     static {
         JsonObject successJsonObject = new JsonObject();

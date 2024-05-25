@@ -56,14 +56,55 @@ const filterQuestionInfo = (questionInfo) => {
 
 watch(filterText, (val) => {
     tree.value.filter(val);
-})
+});
 
 const localPartitionQuestionData = {};
 
+function loadPartitionChildrenNode(partitionId, isPartitionEmpty, resolve, reject) {
+    let createQuestionButtonData = {
+        id: "create-question-" + partitionId,
+        treeId: partitionId + "/createQuestion",
+        leaf: true,
+        data: {
+            type: "createQuestion",
+            partitionId: partitionId,
+            treeId: partitionId + "/create-question"
+        }
+    };
+    const localPartitionQuestionNodes = localPartitionQuestionData[partitionId];
+    let data = [createQuestionButtonData];
+    if (localPartitionQuestionNodes instanceof Array) {
+        data.push(...localPartitionQuestionNodes);
+    }
+    localPartitionQuestionData[partitionId] = false;
+    if (isPartitionEmpty) {
+        resolve(data);
+    } else {
+        QuestionTempStorage.getContentsAndIdsAsyncByPartitionId(partitionId).then((questionInfos) => {
+            remoteLoop:for (let questionInfo of questionInfos) {
+                if (localPartitionQuestionNodes instanceof Array) {
+                    for (const localQuestionNode of localPartitionQuestionNodes) {
+                        if (localQuestionNode.data.question.id === questionInfo.question.id) {
+                            continue remoteLoop;
+                        }
+                    }
+                }
+                // questionInfo.name = questionInfo.content;
+                const questionNode = QuestionTempStorage.getQuestionNodeItemDataOf(questionInfo, partitionId);
+                data.push(questionNode);
+            }
+            resolve(data);
+        }, (error) => {
+            reject();
+        });
+    }
+}
+
 const loadNode = (node, resolve, reject) => {
+    let partitionId = node.data.id;
     if (node.level === 0) {
         let createPartitionButtonData = {
-            id: "create-partition-" + node.data.id,
+            id: "create-partition-" + partitionId,
             leaf: true,
             data: {type: "createPartition"}
         };
@@ -76,42 +117,10 @@ const loadNode = (node, resolve, reject) => {
             resolve(data);
         });
     } else {
-        let createQuestionButtonData = {
-            id: "create-question-" + node.data.id,
-            treeId: node.data.id + "/createQuestion",
-            leaf: true,
-            data: {
-                type: "createQuestion",
-                partitionId: node.data.id,
-                treeId: node.data.id + "/create-question"
-            }
-        };
-        const localPartitionQuestionNodes = localPartitionQuestionData[node.data.id];
-        let data = [createQuestionButtonData];
-        if (localPartitionQuestionNodes instanceof Array) {
-            data.push(...localPartitionQuestionNodes);
-        }
-        localPartitionQuestionData[node.data.id] = false;
-        if (node.data.empty) {
-            resolve(data);
+        if (node.data.data.loaded) {
+            resolve(node.data.data.loadedChildren);
         } else {
-            QuestionTempStorage.getContentsAndIdsAsyncByPartitionId(node.data.id).then((questionInfos) => {
-                remoteLoop:for (let questionInfo of questionInfos) {
-                    if (localPartitionQuestionNodes instanceof Array) {
-                        for (const localQuestionNode of localPartitionQuestionNodes) {
-                            if (localQuestionNode.data.question.id === questionInfo.question.id) {
-                                continue remoteLoop;
-                            }
-                        }
-                    }
-                    // questionInfo.name = questionInfo.content;
-                    const questionNode = QuestionTempStorage.getQuestionNodeItemDataOf(questionInfo, node.data.id);
-                    data.push(questionNode);
-                }
-                resolve(data);
-            }, (error) => {
-                reject();
-            });
+            loadPartitionChildrenNode(partitionId, node.data.empty, resolve, reject);
         }
     }
     /*resolve(data);*/
@@ -213,18 +222,18 @@ const openEdit = (questionId) => {
 
 const onEdit = (nodeObj, nodeItem, node, event) => {
     // console.log(nodeObj,nodeItem,node,event);
-    nodeObj.data.type === 'question' ? openEdit(nodeObj.data.question.id) : null
+    nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup' ? openEdit(nodeObj.data.question.id) : null
 }
 
 const allowDrag = (node) => {
     console.log(node);
-    return node.data.data.type === 'question';
+    return node.data.data.type === 'Question';
 }
 
 const allowDrop = (draggingNode, dropNode, type) => {
     // console.log(draggingNode, dropNode, type);
     let nodeDataType = dropNode.data.data.type;
-    return ((nodeDataType === 'partition' || nodeDataType === 'questionGroup') && type === "inner") ||
+    return ((nodeDataType === 'partition' || nodeDataType === 'QuestionGroup') && type === "inner") ||
         (nodeDataType !== 'partition' && nodeDataType !== "createPartition" && type === "next");
 }
 
@@ -253,7 +262,7 @@ const onDrop = (dragNode, dropNode, place, event) => {
     delete dropNode.data.data.dragHover;
     if (dropNodeData.type === "partition") {
         dropPartitionId = dropNodeData.partition.id;
-    } else if (dropNodeData.type === "question") {
+    } else if (dropNodeData.type === "Question") {
         dropPartitionId = dropNode.data.treeId.split("/")[0];
     } else if (dropNodeData.type === "createQuestion") {
         dropPartitionId = dropNode.data.data.partitionId;
@@ -274,16 +283,22 @@ const onDragEnd = (node, dropNode, event) => {
     delete dropNode.data.data.dragHover;
 }
 
-const onDeleteQuestion = (questionId) => {
-    QuestionTempStorage.delete(questionId);
+const createQuestionGroup = (partitionId) => {
+    let question = {
+        id: randomUUID(),
+        content: "",
+        enabled: false,
+        partitionIds: [partitionId],
+        authorQQ: Number(proxy.$cookies.get("qq")),
+        upVoters: new Set(),
+        downVoters: new Set(),
+        questions: []
+    };
+    const questionInfo = QuestionTempStorage.createQuestionGroup(question);
+    tree.value.append(QuestionTempStorage.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
 }
 
-const onDeletePartition = (partitionId) => {
-    PartitionTempStorage.deleteRemote(partitionId);
-}
-
-const createQuestion = (partitionId, type) => {
-    console.log(partitionId + " create:" + type);
+const createMultipleChoiceQuestion = (partitionId) => {
     let question = {
         id: randomUUID(),
         content: "",
@@ -342,7 +357,8 @@ const upload = () => {
 const backToTree = () => {
     showTree.value = true;
     setTimeout(() => {
-        errorsDisplay.value = false;
+        if (showTree.value === true)
+            errorsDisplay.value = false;
     }, 600);
 }
 
@@ -370,13 +386,64 @@ onMounted(() => {
     }
 })
 
-const batchActionMenuButtons = ref([
+function batchDo(questionInfoAction, questionNodeAction) {
+    // const checkedKeys = tree.value.getCheckedKeys();
+    const checkedNodes = tree.value.getCheckedNodes();
+    const checkedQuestionIds = new Set();
+    const checkedQuestionNodes = new Set();
+    for (const node of checkedNodes) {
+        if (node.data.type === "Question") {
+            let split = node.treeId.split("/");
+            const questionId = split[1];
+            if (questionId === "createQuestion") continue;
+            checkedQuestionIds.add(questionId);
+            checkedQuestionNodes.add(node);
+        } else if (node.data.type === "partition") {
+            let zones = node.zones;
+            for (const questionNode of zones) {
+                if (questionNode.data.type === "Question") {
+                    checkedQuestionIds.add(questionNode.data.question.id);
+                    checkedQuestionNodes.add(questionNode);
+                }
+            }
+        }
+    }
+    QuestionTempStorage.getAllAsync(Array.from(checkedQuestionIds)).then(questionInfos => {
+        if (questionInfoAction instanceof Function)
+            for (const questionInfo of questionInfos) {
+                questionInfoAction(questionInfo);
+            }
+        if (questionNodeAction instanceof Function) {
+            for (const questionNode of checkedQuestionNodes) {
+                questionNodeAction(questionNode);
+            }
+        }
+    });
+}
+
+function batchSetEnable(enable) {
+    batchDo((questionInfo) => {
+        questionInfo.question.enabled = enable;
+        QuestionTempStorage.update(questionInfo);
+    });
+}
+
+const batchActionSelectPartitionMenuButtons = ref([
     {
         name: "移动题目从所选分区到...",
         show: () => {
             return true;
         },
-        action: () => {
+        action: (partitionIds) => {
+            currentButton.menuVisible = false;
+            const partitionIdsSet = new Set(partitionIds);
+            batchDo(undefined, (questionNode) => {
+                //TODO test
+                const partitionId = Number(questionNode.treeId.split("/")[0]);
+                questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId && !partitionIdsSet.has(id));
+                questionNode.data.question.partitionIds.push(...partitionIds);
+                QuestionTempStorage.update(questionNode.data.question);
+            });
         },
         menuVisible: false
     }, {
@@ -384,7 +451,14 @@ const batchActionMenuButtons = ref([
         show: () => {
             return true;
         },
-        action: () => {
+        action: (partitionIds) => {
+            currentButton.menuVisible = false;
+            const partitionIdsSet = new Set(partitionIds);
+            batchDo((questionInfo) => {
+                questionInfo.question.partitionIds = questionInfo.question.partitionIds.filter(id => !partitionIdsSet.has(id));
+                questionInfo.question.partitionIds.push(...partitionIds);
+                QuestionTempStorage.update(questionInfo);
+            });
         },
         menuVisible: false
     }]
@@ -397,38 +471,52 @@ const batchActionButtons = ref([
             return true;
         },
         action: () => {
-            const checkedKeys = tree.value.getCheckedKeys();
-            console.log(checkedKeys);
-            for (const key of checkedKeys) {
-                let split = key.toString().split("/");
-                if (split.length === 2) {
-                    const partitionId = Number(split[0]);
-                    const questionId = split[1];
-                    if (questionId === "createQuestion") continue;
-                    QuestionTempStorage.getAsync(questionId).then((questionInfo) => {
-                        questionInfo.question.partitionIds = questionInfo.question.partitionIds.filter(id => id !== partitionId);
-                        QuestionTempStorage.update(questionInfo);
-                    });
+            batchDo(undefined, (questionNode) => {
+                if (questionNode.data.question.partitionIds.length === 1) {
+                    QuestionTempStorage.delete(questionNode.data.question.id);
+                } else {
+                    const partitionId = Number(questionNode.treeId.split("/")[0]);
+                    questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId);
+                    QuestionTempStorage.update(questionNode.data);
                 }
-            }
+            });
+        },
+    }, {
+        name: "启用",
+        show: () => {
+            return true;
+        },
+        action: () => {
+            batchSetEnable(true);
+        },
+    }, {
+        name: "禁用",
+        show: () => {
+            return true;
+        },
+        action: () => {
+            batchSetEnable(false);
         },
     }]
 );
 
 const switchMenuVisible = (button) => {
-    for (const button1 of batchActionMenuButtons.value) {
-        button1.menuVisible = false;
+    if (button.menuVisible) {
+        button.menuVisible = false;
+    } else {
+        for (const button1 of batchActionSelectPartitionMenuButtons.value) {
+            button1.menuVisible = false;
+        }
+        button.menuVisible = true;
     }
-    button.menuVisible = !button.menuVisible
 }
 
 const rectifyCheck = (nodeObj, checkStatus) => {
-    if (nodeObj.data.type === "question") {
-        const currentPartitionId = Number(nodeObj.treeId.split("/")[0]);
+    function rectify1(currentPartitionId) {
         const currentPartitionCheckedQuestionIds = new Set();
         for (const checkedNode of checkStatus.checkedNodes) {
             let partitionId = Number(checkedNode.treeId.split("/")[0]);
-            if (partitionId === currentPartitionId && checkedNode.data.type === "question") {
+            if (partitionId === currentPartitionId && checkedNode.data.type === "Question") {
                 currentPartitionCheckedQuestionIds.add(checkedNode.data.question.id);
             }
         }
@@ -444,7 +532,40 @@ const rectifyCheck = (nodeObj, checkStatus) => {
             }
         }
     }
+
+    if (nodeObj.data.type === "Question") {
+        const currentPartitionId = Number(nodeObj.treeId.split("/")[0]);
+        rectify1(currentPartitionId);
+    } else if (nodeObj.data.type === "partition") {
+        //FIXME
+        if (!QuestionTempStorage.loadedPartitionIds.has(nodeObj.treeId)) {
+            loadPartitionChildrenNode(nodeObj.treeId, nodeObj.data.empty, (data) => {
+                nodeObj.data.loadedChildren = data;
+                nodeObj.data.loaded = true;
+                for (const questionNode of data) {
+                    if (questionNode.data.type !== "createQuestion")
+                        tree.value.append(questionNode, nodeObj.treeId);
+                }
+                nextTick(() => {
+                    tree.value.setChecked(nodeObj.treeId, true, true);
+                });
+            }, () => {
+            });
+        }
+    }
 }
+
+function onDeleteNode(nodeObj) {
+    nodeObj.data.type === 'Question' ?
+        (nodeObj.data.question.localDeleted ?
+            QuestionTempStorage.restore(nodeObj.data.question.id) :
+            QuestionTempStorage.delete(nodeObj.data.question.id)) :
+        PartitionTempStorage.deleteRemote(nodeObj.id)
+}
+
+const currentButton = ref({
+    menuVisible: false
+});
 </script>
 
 <template>
@@ -459,149 +580,165 @@ const rectifyCheck = (nodeObj, checkStatus) => {
                         <HarmonyOSIcon_Upload/>
                         <el-text>{{ showTree ? "上传题目更改" : "确认上传" }}</el-text>
                     </el-button>
-                    <!--                    <el-button @click="showTree = !showTree">test</el-button>-->
-                    <el-scrollbar>
-                        <div class="slide-base" style="display: flex;flex-direction: row">
-                            <div class="question-tree-base" :class="{hideLeft:!showTree}">
+                    <!--                    <el-scrollbar>-->
+                    <div class="slide-base"
+                         style="display: flex;flex-direction: row;overflow-y:overlay;overflow-x: hidden;">
+                        <div class="question-tree-base" style="display: flex;flex-direction: column;overflow:overlay;"
+                             :class="{hideLeft:!showTree}">
+                            <div>
                                 <el-button-group>
                                     <el-button text style="width:106px" @click="switchShowCheckBox">
                                         <HarmonyOSIcon_CheckBox style="margin: 0;margin-right: 4px"/>
                                         <el-text v-if="!showCheckBox">批量</el-text>
                                         <el-text v-else>取消批量</el-text>
                                     </el-button>
-                                    <el-popover width="500" :visible="button.menuVisible"
-                                                v-for="button in batchActionMenuButtons">
-                                        <template #reference>
-                                            <transition name="batch-buttons">
-                                                <el-button text v-show="showCheckBox&&button.show()"
-                                                           :disabled="disabled"
-                                                           @click="switchMenuVisible(button);">
-                                                    <el-text>{{ button.name }}</el-text>
-                                                </el-button>
-                                            </transition>
-                                        </template>
-                                        <template #default>
-                                            <select-partitions-action-dialog
-                                                @on-confirm="button.action"
-                                                @on-cancel="button.menuVisible = false"
-                                            />
-                                        </template>
-                                    </el-popover>
                                     <transition-group name="batch-buttons">
-                                        <el-button text v-show="showCheckBox&&button.show()"
+                                        <el-button text v-show="showCheckBox&&button.show()" class="action-button"
+                                                   :class="{selected:button.menuVisible}"
+                                                   v-for="button in batchActionSelectPartitionMenuButtons" :key="button"
+                                                   :disabled="disabled"
+                                                   @click="currentButton=button;switchMenuVisible(button);">
+                                            <el-text>{{ button.name }}</el-text>
+                                        </el-button>
+                                        <el-button text v-show="showCheckBox&&button.show()" class="action-button"
                                                    v-for="button in batchActionButtons"
                                                    :key="button" :disabled="disabled" @click="button.action">
                                             <el-text>{{ button.name }}</el-text>
                                         </el-button>
                                     </transition-group>
                                 </el-button-group>
-                                <el-tree ref="tree" icon="ArrowRightBold" node-key="treeId" :props="props"
-                                         @node-click="onEdit" :show-checkbox="showCheckBox"
-                                         draggable :allow-drag="allowDrag" :allow-drop="allowDrop" @node-drop="onDrop"
-                                         @node-drag-enter="dragEnter" @node-drag-leave="dragLeave"
-                                         @node-drag-end="onDragEnd" @check="rectifyCheck"
-                                         lazy :load="loadNode" :filter-node-method="filterNode">
-                                    <template #default="{ node : proxy, data : nodeObj }">
-                                        <template v-if="nodeObj.data.type==='createPartition'">
-                                            <create-partition-button/>
-                                        </template>
-                                        <template v-else-if="nodeObj.data.type==='createQuestion'">
-                                            <!--                                            TODO component-->
-                                            <el-popover trigger="click" width="280">
-                                                <template #reference>
-                                                    <el-button text size="small"
-                                                               class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus disable-tree-checkbox">
-                                                        <HarmonyOSIcon_Plus style="margin: 8px"/>
-                                                        <el-text>创建题目</el-text>
-                                                    </el-button>
+                                <transition name="batch-buttons">
+                                    <select-partitions-action-dialog
+                                        v-show="currentButton.menuVisible"
+                                        @on-confirm="currentButton.action"/>
+                                </transition>
+                            </div>
+                            <div style="flex:1;overflow:overlay;">
+                                <el-scrollbar>
+                                    <div style="flex: 1">
+                                        <el-tree ref="tree" icon="ArrowRightBold" node-key="treeId" :props="props"
+                                                 @node-click="onEdit" :show-checkbox="showCheckBox"
+                                                 draggable :allow-drag="allowDrag" :allow-drop="allowDrop"
+                                                 @node-drop="onDrop"
+                                                 @node-drag-enter="dragEnter" @node-drag-leave="dragLeave"
+                                                 @node-drag-end="onDragEnd" @check="rectifyCheck"
+                                                 lazy :load="loadNode" :filter-node-method="filterNode">
+                                            <template #default="{ node : proxy, data : nodeObj }">
+                                                <template v-if="nodeObj.data.type==='createPartition'">
+                                                    <create-partition-button/>
                                                 </template>
-                                                <template #default>
-                                                    <div class="no-pop-padding create-selection">
-                                                        <el-button-group>
-                                                            <el-button disabled>题组</el-button>
-                                                            <el-button
-                                                                @click="createQuestion(nodeObj.data.partitionId,'select')">
-                                                                选择题
-                                                            </el-button>
-                                                            <el-button disabled>排序题</el-button>
-                                                            <el-button disabled>填空题</el-button>
-                                                        </el-button-group>
-                                                    </div>
-                                                </template>
-                                            </el-popover>
-                                        </template>
-                                        <template v-else>
-                                            <!--                                            TODO component-->
-                                            <div class="tree-node-item" :class="{dragHover:nodeObj.data.dragHover}">
-                                                <div class="point" :class="{
-                                                changed:nodeObj.data.dirty,
-                                                error:nodeObj.data.showError,
-                                                warning:nodeObj.data.showWarning
-                                            }"></div>
-                                                <div class="question-tree-node">
-                                                    <el-text class="question-tree-node-content">
-                                                        {{
-                                                            nodeObj.data.type === 'question' ? nodeObj.data.question.content : nodeObj.data.partition.name
-                                                        }}
-                                                    </el-text>
-                                                </div>
-                                                <el-button-group>
-                                                    <el-popover trigger="click" v-model:visible="nodeObj.data.editing"
-                                                                width="400" v-if="nodeObj.data.type === 'partition'">
+                                                <template v-else-if="nodeObj.data.type==='createQuestion'">
+                                                    <!--                                            TODO component-->
+                                                    <el-popover trigger="click" width="271">
                                                         <template #reference>
-                                                            <el-button class="node-button" size="small" link
-                                                                       @click.stop="nodeObj.data.editing = false"
-                                                                       v-if="nodeObj.data.type === 'partition'">
-                                                                <HarmonyOSIcon_Rename/>
-                                                                <el-text>重命名</el-text>
+                                                            <el-button text size="small"
+                                                                       class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus disable-tree-checkbox">
+                                                                <HarmonyOSIcon_Plus style="margin: 8px"/>
+                                                                <el-text>创建题目</el-text>
                                                             </el-button>
                                                         </template>
                                                         <template #default>
-                                                            <EditPartitionNameDialog
-                                                                @on-over="nodeObj.data.editing = false"
-                                                                :partition="nodeObj.data.partition"
-                                                                size="default"/>
+                                                            <div class="no-pop-padding create-selection">
+                                                                <el-button-group>
+                                                                    <el-button
+                                                                        @click="createQuestionGroup(nodeObj.data.partitionId)">
+                                                                        题组
+                                                                    </el-button>
+                                                                    <el-button
+                                                                        @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
+                                                                        选择题
+                                                                    </el-button>
+                                                                    <el-button disabled>排序题</el-button>
+                                                                    <el-button disabled>填空题</el-button>
+                                                                </el-button-group>
+                                                            </div>
                                                         </template>
                                                     </el-popover>
-                                                    <el-button class="node-button" size="small" link
-                                                               @click.stop="nodeObj.data.type==='question'?onDeleteQuestion(nodeObj.data.question.id):onDeletePartition(nodeObj.id)">
-                                                        <HarmonyOSIcon_Remove/>
-                                                        <el-text>删除</el-text>
-                                                    </el-button>
-                                                </el-button-group>
-                                            </div>
-                                        </template>
-                                    </template>
-                                </el-tree>
-                            </div>
-                            <div class="errorsList" v-show="errorsDisplay" :class="{hideRight:showTree}">
-                                <el-scrollbar>
-                                    <el-alert type="warning" :closable="false">
-                                        <el-button style="padding: 8px" text @click="backToTree">
-                                            <el-icon>
-                                                <ArrowLeftBold/>
-                                            </el-icon>
-                                        </el-button>
-                                        <el-text type="warning">
-                                            这些有错误的题目将不会上传
-                                        </el-text>
-                                    </el-alert>
-                                    <div class="errorQuestions">
-                                        <transition-group name="errorQuestions">
-                                            <template v-for="questionInfo of QuestionTempStorage.getErrorQuestions()"
-                                                      :key="questionInfo.question.id">
-                                                <question-info-panel @click="openEdit(questionInfo.question.id)"
-                                                                     :question-info="questionInfo"/>
+                                                </template>
+                                                <template v-else>
+                                                    <!--                                            TODO component-->
+                                                    <div class="tree-node-item"
+                                                         :class="{dragHover:nodeObj.data.dragHover}">
+                                                        <div class="point" :class="{
+                                                            changed:nodeObj.data.dirty,
+                                                            error:nodeObj.data.showError,
+                                                            warning:nodeObj.data.showWarning
+                                                        }"></div>
+                                                        <div class="question-tree-node">
+                                                            <el-text class="question-tree-node-content" :style="{
+                                                                opacity: (nodeObj.data.question&&nodeObj.data.question.localDeleted)?0.5:1}">
+                                                                {{
+                                                                    nodeObj.data.type === 'partition' ?
+                                                                        nodeObj.data.partition.name:nodeObj.data.question.content
+                                                                }}
+                                                            </el-text>
+                                                        </div>
+                                                        <el-button-group>
+                                                            <el-popover trigger="click"
+                                                                        v-model:visible="nodeObj.data.editing"
+                                                                        width="400"
+                                                                        v-if="nodeObj.data.type === 'partition'">
+                                                                <template #reference>
+                                                                    <el-button class="node-button" size="small" link
+                                                                               @click.stop="nodeObj.data.editing = false"
+                                                                               v-if="nodeObj.data.type === 'partition'">
+                                                                        <HarmonyOSIcon_Rename/>
+                                                                        <el-text>重命名</el-text>
+                                                                    </el-button>
+                                                                </template>
+                                                                <template #default>
+                                                                    <EditPartitionNameDialog
+                                                                        @on-over="nodeObj.data.editing = false"
+                                                                        :partition="nodeObj.data.partition"
+                                                                        size="default"/>
+                                                                </template>
+                                                            </el-popover>
+                                                            <el-button class="node-button" size="small" link
+                                                                       @click.stop="onDeleteNode(nodeObj)">
+                                                                <HarmonyOSIcon_Remove/>
+                                                                <el-text
+                                                                    v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
+                                                                    撤销删除
+                                                                </el-text>
+                                                                <el-text v-else>删除</el-text>
+                                                            </el-button>
+                                                        </el-button-group>
+                                                    </div>
+                                                </template>
                                             </template>
-                                        </transition-group>
+                                        </el-tree>
                                     </div>
-                                    <transition name="empty">
-                                        <el-empty v-show="QuestionTempStorage.getErrorQuestions().length===0"/>
-                                    </transition>
                                 </el-scrollbar>
                             </div>
                         </div>
-                    </el-scrollbar>
+                        <div class="errorsList" v-show="errorsDisplay" :class="{hideRight:showTree}">
+                            <el-scrollbar>
+                                <el-alert type="warning" :closable="false">
+                                    <el-button style="padding: 8px" text @click="backToTree">
+                                        <el-icon>
+                                            <ArrowLeftBold/>
+                                        </el-icon>
+                                    </el-button>
+                                    <el-text type="warning">
+                                        这些有错误的题目将不会上传
+                                    </el-text>
+                                </el-alert>
+                                <div class="errorQuestions">
+                                    <transition-group name="errorQuestions">
+                                            <question-info-panel
+                                                v-for="questionInfo of QuestionTempStorage.getErrorQuestions()"
+                                                :key="questionInfo.question.id"
+                                                @click="openEdit(questionInfo.question.id)"
+                                                                 :question-info="questionInfo"/>
+                                    </transition-group>
+                                </div>
+                                <transition name="empty">
+                                    <el-empty v-show="QuestionTempStorage.getErrorQuestions().length===0"/>
+                                </transition>
+                            </el-scrollbar>
+                        </div>
+                    </div>
+                    <!--                    </el-scrollbar>-->
                 </div>
             </pane>
             <pane min-size="50">
@@ -689,20 +826,20 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 
 /*noinspection CssUnusedSymbol*/
 .batch-buttons-enter-active {
-    transition: padding-top 400ms var(--ease-in-out-quint),
-    padding-bottom 400ms var(--ease-in-out-quint),
-    height 400ms var(--ease-in-out-quint),
-    filter 200ms var(--ease-in-out-quint) 450ms,
-    opacity 200ms var(--ease-out-quint) 450ms !important;
+    transition: padding-top 300ms var(--ease-in-out-quint),
+    padding-bottom 300ms var(--ease-in-out-quint),
+    height 300ms var(--ease-in-out-quint),
+    filter 150ms var(--ease-in-out-quint) 350ms,
+    opacity 150ms var(--ease-out-quint) 350ms !important;
 }
 
 /*noinspection CssUnusedSymbol*/
 .batch-buttons-leave-active {
-    transition: padding-top 400ms var(--ease-in-out-quint) 250ms,
-    padding-bottom 400ms var(--ease-in-out-quint) 250ms,
-    height 400ms var(--ease-in-out-quint) 250ms,
-    filter 200ms var(--ease-in-out-quint),
-    opacity 200ms var(--ease-out-quint) !important;
+    transition: padding-top 300ms var(--ease-in-out-quint) 200ms,
+    padding-bottom 300ms var(--ease-in-out-quint) 200ms,
+    height 300ms var(--ease-in-out-quint) 200ms,
+    filter 150ms var(--ease-in-out-quint),
+    opacity 150ms var(--ease-out-quint) !important;
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -764,8 +901,8 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 }
 
 .errorQuestions-leave-active {
-    --phrase-1: 350ms;
-    --phrase-2: 250ms;
+    --phrase-1: 300ms;
+    --phrase-2: 200ms;
     transition: margin-left var(--phrase-1) var(--ease-in-quint),
     margin-right var(--phrase-1) var(--ease-in-quint),
     grid-template-rows var(--phrase-2) var(--ease-in-out-quint) var(--phrase-1) !important;
@@ -773,8 +910,8 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 }
 
 .errorQuestions-enter-active {
-    --phrase-1: 250ms;
-    --phrase-2: 350ms;
+    --phrase-1: 200ms;
+    --phrase-2: 300ms;
     transition: margin-left var(--phrase-2) var(--ease-out-quint) var(--phrase-1),
     margin-right var(--phrase-2) var(--ease-out-quint) var(--phrase-1),
     grid-template-rows var(--phrase-1) var(--ease-in-out-quint) !important;
@@ -811,5 +948,31 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 .choicesList > * {
     min-width: 40px;
     margin-right: 4px;
+}
+
+.action-button::after {
+    content: "";
+    position: absolute;
+    background: var(--el-color-primary);
+    opacity: 0;
+    width: 0;
+    left: 50%;
+    top: calc(100% - 2px);
+    height: 2px;
+    /*    border-radius: 1px;*/
+    border-radius: 0 0 2px 2px;
+    filter: blur(4px);
+    transition: left 500ms cubic-bezier(.34, .26, .19, 1.18),
+    width 500ms cubic-bezier(.34, .26, .19, 1.18),
+    background-color 150ms var(--ease-in-out-quint),
+    opacity 150ms var(--ease-in-quint) 100ms,
+    filter 100ms var(--ease-in-out-quint) 100ms;
+}
+
+.action-button.selected::after {
+    opacity: 1;
+    width: 98%;
+    left: 1%;
+    filter: none;
 }
 </style>

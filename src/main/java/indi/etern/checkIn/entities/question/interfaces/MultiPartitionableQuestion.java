@@ -16,7 +16,7 @@ import java.util.Set;
 @Table(name = "MULTI_PARTITIONABLE_QUESTIONS")
 public class MultiPartitionableQuestion extends Question implements MultiPartitionable {
     
-    @ManyToMany(cascade = {CascadeType.REFRESH,CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.REFRESH,CascadeType.MERGE,CascadeType.DETACH}, fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "partitions_questions_mapping",
             joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id"),
