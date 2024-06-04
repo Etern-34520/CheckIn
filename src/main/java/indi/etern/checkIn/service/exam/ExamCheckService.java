@@ -1,7 +1,7 @@
 package indi.etern.checkIn.service.exam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.SettingService;
 import indi.etern.checkIn.service.dao.UserTrafficService;
 import org.springframework.stereotype.Service;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 public class ExamCheckService {
     private final ObjectMapper objectMapper;
     private final UserTrafficService userTrafficService;
-    private final MultiPartitionableQuestionService multiPartitionableQuestionService;
+    private final QuestionService multiPartitionableQuestionService;
     private SettingService settingService;
     
     protected ExamCheckService(ObjectMapper objectMapper,
                                UserTrafficService userTrafficService,
-                               MultiPartitionableQuestionService multiPartitionableQuestionService,
+                               QuestionService multiPartitionableQuestionService,
                                SettingService settingService) {
         this.objectMapper = objectMapper;
         this.userTrafficService = userTrafficService;
@@ -30,7 +30,7 @@ public class ExamCheckService {
         try {
             //noinspection unchecked
             questionIds = objectMapper.readValue(lastTraffic.get().getAttributesMap().get("examQuestionIds"), List.class);
-            Map<String, MultiPartitionableQuestion> questionsMap = multiPartitionableQuestionService.mapAllById(questionIds);
+            Map<String, Question> questionsMap = multiPartitionableQuestionService.mapAllById(questionIds);
             int correctCount = 0;
             int questionCount = questionIds.size();
             for (String questionId : questionIds) {

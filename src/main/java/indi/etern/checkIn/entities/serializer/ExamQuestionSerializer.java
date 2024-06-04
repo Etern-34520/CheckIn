@@ -3,7 +3,7 @@ package indi.etern.checkIn.entities.serializer;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoicesQuestion;
+import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
 
 import java.io.IOException;
 

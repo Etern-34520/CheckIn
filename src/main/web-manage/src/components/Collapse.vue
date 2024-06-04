@@ -8,7 +8,15 @@ const props = defineProps({
     expanded: {
         type: Boolean,
         default: false,
-    }
+    },
+    titleBackground: {
+        type: Boolean,
+        default: true,
+    },
+    contentBackground: {
+        type: Boolean,
+        default: true,
+    },
 });
 onMounted(() => {
     if (props.expanded) {
@@ -48,8 +56,11 @@ watch(() => expanded.value, (newVal, oldVal) => {
 </script>
 
 <template>
-    <div class="collapse" :class="{expanded:expanded}">
-        <div class="collapse-title" :class="{'border-changed':borderChanged}">
+    <div v-bind="$attrs" class="collapse" :class="{expanded:expanded}">
+        <div class="collapse-title" :class="{
+            'border-changed':borderChanged,
+            'title-background':titleBackground,
+        }">
             <div class="collapse-title-inner">
                 <slot name="title"/>
             </div>
@@ -63,7 +74,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
                 </transition>
             </el-button>
         </div>
-        <div class="collapse-content">
+        <div class="collapse-content" :class="{'content-background':contentBackground}">
             <div class="collapse-content-inner" v-show="showContent">
                 <slot name="content"/>
             </div>
@@ -74,13 +85,13 @@ watch(() => expanded.value, (newVal, oldVal) => {
 <style scoped>
 .collapse {
     display: grid;
-    grid-template-rows: 1fr 0fr;
-    transition: 400ms var(--ease-in-out-bounce) 200ms;
+    grid-template-rows: 0fr 0fr;
+    transition: 400ms var(--ease-in-out-quint) 100ms;
 }
 
 .collapse.expanded {
-    grid-template-rows: 1fr 1fr;
-    transition: 400ms var(--ease-in-out-bounce);
+    grid-template-rows: 0fr 1fr;
+    transition: 400ms var(--ease-in-out-quint);
 }
 
 .collapse-title {
@@ -89,6 +100,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
     border-radius: 4px;
     display: flex;
     flex-direction: row;
+    height: fit-content;
 }
 
 .collapse-title > .collapse-title-inner {
@@ -116,6 +128,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
     flex-direction: column;
     align-items: stretch;
     justify-content: end;
+    height: fit-content;
     min-height: 0;
     max-height: 0;
     overflow: hidden;
@@ -131,10 +144,22 @@ watch(() => expanded.value, (newVal, oldVal) => {
 
 .collapse-content-inner {
     padding: 4px 8px;
-    width: 100%;
 }
 
-.collapse.expanded .action-button-pointer {
+.collapse.expanded > .collapse-title .action-button-pointer {
     transform: rotate(180deg);
+}
+
+.collapse-title:not(.title-background) {
+    background: none !important;
+    padding: 0 !important;
+}
+
+.collapse-content:not(.content-background) {
+    background: none !important;
+}
+
+.collapse-content:not(.content-background) > .collapse-content-inner {
+    padding: 0 !important;
 }
 </style>

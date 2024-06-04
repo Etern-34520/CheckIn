@@ -3,12 +3,12 @@ package indi.etern.checkIn.controller.rest;
 import com.google.gson.Gson;
 import indi.etern.checkIn.auth.AuthException;
 import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
+import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.traffic.DateTraffic;
 import indi.etern.checkIn.entities.traffic.UserTraffic;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.DateTrafficService;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.dao.UserTrafficService;
 import indi.etern.checkIn.service.web.WebSocketService;
@@ -34,12 +34,12 @@ public class ManageData {
     final Logger logger = LoggerFactory.getLogger(getClass());
     final DateTrafficService dateTrafficService;
     final UserTrafficService userTrafficService;
-    final MultiPartitionableQuestionService multiPartitionableQuestionService;
+    final QuestionService multiPartitionableQuestionService;
     final WebSocketService webSocketService;
     final UserService userService;
     final Gson gson;
     
-    public ManageData(DateTrafficService dateTrafficService, UserTrafficService userTrafficService, MultiPartitionableQuestionService multiPartitionableQuestionService, WebSocketService webSocketService, UserService userService, Gson gson) {
+    public ManageData(DateTrafficService dateTrafficService, UserTrafficService userTrafficService, QuestionService multiPartitionableQuestionService, WebSocketService webSocketService, UserService userService, Gson gson) {
         this.dateTrafficService = dateTrafficService;
         this.userTrafficService = userTrafficService;
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
@@ -99,7 +99,7 @@ public class ManageData {
     public synchronized String updateQuestion(HttpServletRequest httpServletRequest) {
         try {
             final String id = httpServletRequest.getParameter("id");
-            final MultiPartitionableQuestion oldQuestion = multiPartitionableQuestionService.getById(id);
+            final Question oldQuestion = multiPartitionableQuestionService.getById(id);
             final String authorQQString = httpServletRequest.getParameter("author");
             User author;
             if (authorQQString == null) {
@@ -114,7 +114,7 @@ public class ManageData {
             final boolean enabled = Boolean.parseBoolean(httpServletRequest.getParameter("enabled"));
             checkPermission(oldQuestion, (User) httpServletRequest.getAttribute("currentUser"), author, enabled);
             
-            final MultiPartitionableQuestion multiPartitionableQuestion = MultiPartitionableQuestionService.buildQuestionFromRequest(httpServletRequest, id, author);
+            final Question multiPartitionableQuestion = QuestionService.buildQuestionFromRequest(httpServletRequest, id, author);
 //            multiPartitionableQuestionService.save(multiPartitionableQuestion);
             multiPartitionableQuestionService.saveAndFlush(multiPartitionableQuestion);
 
@@ -133,7 +133,7 @@ public class ManageData {
     }
 */
 
-    private static void checkPermission(MultiPartitionableQuestion oldQuestion,User currectUser, User author, boolean enabled) {
+    private static void checkPermission(Question oldQuestion,User currectUser, User author, boolean enabled) {
         if (oldQuestion != null && oldQuestion.getAuthor() != null && !oldQuestion.getAuthor().equals(currectUser) &&
                 !JwtTokenProvider.currentUserHasPermission("edit others question")) {
             throw new AuthException("permission denied: edit others question");

@@ -1,36 +1,16 @@
 package indi.etern.checkIn.controller.html;
 
-import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionBuilder;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
-import indi.etern.checkIn.entities.question.interfaces.Partition;
-import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
-import indi.etern.checkIn.entities.user.Permission;
-import indi.etern.checkIn.entities.user.User;
-import indi.etern.checkIn.service.dao.*;
-import indi.etern.checkIn.service.web.WebSocketService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import org.apache.coyote.BadRequestException;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.*;
-
 //@Controller
 public class Manage_bac {
+/*
     final WebSocketService webSocketService;
     final UserService userService;
     final UserTrafficService userTrafficService;
     final PartitionService partitionService;
     final RoleService roleService;
-    final MultiPartitionableQuestionService multiPartitionableQuestionService;
+    final QuestionService multiPartitionableQuestionService;
     
-    public Manage_bac(WebSocketService webSocketService, UserService userService, UserTrafficService userTrafficService, PartitionService partitionService, RoleService roleService, MultiPartitionableQuestionService multiPartitionableQuestionService) {
+    public Manage_bac(WebSocketService webSocketService, UserService userService, UserTrafficService userTrafficService, PartitionService partitionService, RoleService roleService, QuestionService multiPartitionableQuestionService) {
 //        System.out.println("Manage");
         this.webSocketService = webSocketService;
         this.userService = userService;
@@ -42,7 +22,7 @@ public class Manage_bac {
     
     private static void newQuestion(HttpServletRequest request, ModelAndView modelAndView) {
         //构建样本题目
-        MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
+        MultipleChoicesQuestion.Builder multipleQuestionFactory = new MultipleChoicesQuestion.Builder();
         final String partitionIdString = request.getParameter("partitionId");
         Partition partition;
         if (partitionIdString == null) {
@@ -65,7 +45,7 @@ public class Manage_bac {
         } else {
             user = User.exampleOfName("unknown");
         }
-        MultiPartitionableQuestion multiPartitionableQuestion =
+        Question multiPartitionableQuestion =
                 multipleQuestionFactory.setQuestionContent("")
                         .addChoice(new Choice("", true))
                         .addChoice(new Choice("", false))
@@ -108,14 +88,16 @@ public class Manage_bac {
             case "partitionQuestion" -> partitionQuestion(request, modelAndView);
             case "newQuestion" -> newQuestion(request, modelAndView);
             case "editQuestion" -> editQuestion(request, modelAndView);
+*/
 /*
             case "questionFormOfFormData" -> {
-                MultiPartitionableQuestion question = MultiPartitionableQuestionService.buildQuestionFromRequest(request, null, null);
+                Question question = QuestionService.buildQuestionFromRequest(request, null, null);
                 modelAndView.addObject("question", question);
                 modelAndView.addObject("ignorePartitionSelection", false);
                 modelAndView.setViewName("manage/pages/editQuestion");
             }
-*/
+*//*
+
             case "userInfo" -> userInfo(request, modelAndView);
             case "userPane" -> {
                 modelAndView.addObject("webSocketService", webSocketService);
@@ -145,15 +127,17 @@ public class Manage_bac {
         final String sortType = request.getParameter("sortType");
         final Partition partition = partitionService.findById(Integer.valueOf(request.getParameter("id"))).orElseThrow();
         if (sortBy != null && sortType != null) {
-            Comparator<MultiPartitionableQuestion> comparator;
-            final Comparator<MultiPartitionableQuestion> contentComparator = (o1, o2) -> {
+            Comparator<Question> comparator;
+            final Comparator<Question> contentComparator = (o1, o2) -> {
                 int compare = o1.getContent().compareTo(o2.getContent());
-                /*if (compare == 0) {
+                */
+/*if (compare == 0) {
                     compare = 1;
-                }*/
+                }*//*
+
                 return compare;
             };
-            final Comparator<MultiPartitionableQuestion> authorNameComparator = (o1, o2) -> {
+            final Comparator<Question> authorNameComparator = (o1, o2) -> {
                 if (o1.getAuthor() == null) {
                     if (o2.getAuthor() == null) {
                         return 0;//0
@@ -172,7 +156,7 @@ public class Manage_bac {
                     }
                 }
             };
-            final Comparator<MultiPartitionableQuestion> editTimeComparator = (o1, o2) -> {
+            final Comparator<Question> editTimeComparator = (o1, o2) -> {
                 final LocalDateTime o1Time = o1.getLastModifiedTime();
                 final LocalDateTime o2Time = o2.getLastModifiedTime();
                 if (o1Time == null) {
@@ -241,7 +225,7 @@ public class Manage_bac {
     }
     
     private void editQuestion(HttpServletRequest request, ModelAndView modelAndView) {
-        MultiPartitionableQuestion multiPartitionableQuestion = multiPartitionableQuestionService.getById(request.getParameter("id"));
+        Question multiPartitionableQuestion = multiPartitionableQuestionService.getById(request.getParameter("id"));
         modelAndView.addObject("newQuestion", Boolean.FALSE);
         if (multiPartitionableQuestion != null) {
             modelAndView.addObject("question", multiPartitionableQuestion);
@@ -268,7 +252,7 @@ public class Manage_bac {
             } else {
                 user = User.exampleOfName("unknown");
             }
-            MultipleQuestionBuilder multipleQuestionFactory = new MultipleQuestionBuilder();
+            MultipleChoicesQuestion.Builder multipleQuestionFactory = new MultipleChoicesQuestion.Builder();
             multiPartitionableQuestion =
                     multipleQuestionFactory.setQuestionContent("")
                             .addChoice(new Choice("", true))
@@ -281,4 +265,5 @@ public class Manage_bac {
             modelAndView.addObject("question", multiPartitionableQuestion);
         }
     }
+*/
 }

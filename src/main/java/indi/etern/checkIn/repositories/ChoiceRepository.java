@@ -1,6 +1,6 @@
 package indi.etern.checkIn.repositories;
 
-import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
+import indi.etern.checkIn.entities.question.impl.Choice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

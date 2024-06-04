@@ -49,7 +49,7 @@ const router = createRouter({
                         {
                             path: ':id/',
                             name: 'question-detail',
-                            component: () => import('../components/QuestionEditor.vue'),
+                            component: () => import('../components/editor/QuestionEditor.vue'),
                             meta: {
                                 warning: {
                                     enabled: (from, to) => {
@@ -83,10 +83,10 @@ router.beforeEach((to, from, next) => {
     if (from.meta.warning && from.meta.warning.enabled(from, to) && from.meta.warning.leave) {
         ElMessageBox.confirm(
             from.meta.warning.leave,
-            '警告',
+            '确定离开？',
             {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
+                confirmButtonText: '确定离开',
+                cancelButtonText: '返回保存',
                 type: 'warning',
             }
         ).then(() => {

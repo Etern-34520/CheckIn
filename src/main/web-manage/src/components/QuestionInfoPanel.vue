@@ -1,24 +1,45 @@
 <template>
-    <div class="clickable panel-1 error-question-info-panel">
+    <div class="panel-1 error-question-info-panel" :class="{clickable:clickable}">
         <div class="grid1">
             <div class="padding">
-                <div class="panel-1 question-content">
+                <div class="question-content panel-1 flex-blank-1" style="padding: 4px 16px;">
                     <el-text>
                         {{ questionInfo.question.content }}
                     </el-text>
                 </div>
-                <div class="choicesList">
+                <div class="choicesList"
+                     v-if="questionInfo.question.choices!==undefined&&questionInfo.question.choices!==null">
                     <el-tag v-for="choice of questionInfo.question.choices"
                             :type="choice.correct?'success':'danger'">
                         {{ choice.content }}
                     </el-tag>
                 </div>
+                <div v-if="questionInfo.type==='QuestionGroup'">
+                    <collapse @click.stop :content-background="false">
+                        <template #title>
+                            <el-text style="line-height: 32px;">题组内的题目</el-text>
+                        </template>
+                        <template #content>
+                            <transition-group name="slide-hide">
+                                <QuestionInfoPanel v-for="subQuestionInfo of questionInfo.questionInfos"
+                                                   :key="subQuestionInfo.question.id"
+                                                   :question-info="subQuestionInfo" :clickable="false"/>
+                            </transition-group>
+                        </template>
+                    </collapse>
+                </div>
                 <div>
-                    <el-tag
-                        v-for="partitionId of questionInfo.question.partitionIds"
-                        type="info">
-                        {{ PartitionTempStorage.getName(partitionId) }}
+                    <el-tag type="info" style="margin-right: 16px">
+                        {{ questionInfo.question.type ? questionInfo.question.type : questionInfo.type }}
                     </el-tag>
+                    <template
+                        v-if="questionInfo.question.partitionIds!==undefined&&questionInfo.question.partitionIds!==null">
+                        <el-tag
+                            v-for="partitionId of questionInfo.question.partitionIds"
+                            type="info">
+                            {{ PartitionTempStorage.getName(partitionId) }}
+                        </el-tag>
+                    </template>
                 </div>
                 <div class="errorsDescription">
                     <transition-group name="errorDescriptions">
@@ -35,9 +56,14 @@
 </template>
 <script setup>
 import PartitionTempStorage from "../data/PartitionTempStorage.js";
+import Collapse from "@/components/Collapse.vue";
 
 defineProps({
-    questionInfo: Object
+    questionInfo: Object,
+    clickable: {
+        type: Boolean,
+        default: true,
+    }
 })
 </script>
 <style scoped>
@@ -76,7 +102,9 @@ defineProps({
 }
 
 .question-content {
-    padding: 4px 16px;
+    display: flex;
+    flex-direction: row;
+    min-height: 30px !important;
 }
 
 .errorDescriptions-enter-active, .errorDescriptions-leave-active {

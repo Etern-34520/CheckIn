@@ -1,7 +1,7 @@
 package indi.etern.checkIn.beans;
 
-import indi.etern.checkIn.entities.question.interfaces.Partition;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.entities.question.impl.Partition;
+import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import java.util.List;
 @Component
 public class PartitionInfo {
     private final PartitionService partitionService;
-    private final MultiPartitionableQuestionService multiPartitionableQuestionService;
+    private final QuestionService multiPartitionableQuestionService;
     //Bean占位
     private List<Partition> partitions;
     //Bean占位
@@ -20,7 +20,7 @@ public class PartitionInfo {
     private Partition getByName;
     private Long questionCount;
     
-    public PartitionInfo(PartitionService partitionService, MultiPartitionableQuestionService multiPartitionableQuestionService) {
+    public PartitionInfo(PartitionService partitionService, QuestionService multiPartitionableQuestionService) {
         this.partitionService = partitionService;
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
     }
@@ -34,7 +34,7 @@ public class PartitionInfo {
         getPartitions();
         partitionNotEmpty = new ArrayList<>();
         for (Partition partition : partitions) {
-            if (!partition.getQuestions().isEmpty()) {
+            if (!partition.getQuestionLinks().isEmpty()) {
                 partitionNotEmpty.add(partition);
             }
         }

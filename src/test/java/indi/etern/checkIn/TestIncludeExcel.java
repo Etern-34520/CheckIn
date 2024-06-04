@@ -5,10 +5,10 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionBuilder;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
-import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoicesQuestion.MultipleQuestionBuilder;
+import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.entities.question.impl.Choice;
+import indi.etern.checkIn.service.dao.QuestionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,12 +27,12 @@ public class TestIncludeExcel {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private MultiPartitionableQuestionService multiPartitionableQuestionService;
+    private QuestionService multiPartitionableQuestionService;
 
     @Test
     void include() {
         String fileName = ".\\question.xlsx";
-        List<MultiPartitionableQuestion> multiPartitionableQuestionList = new ArrayList<>(250);
+        List<Question> multiPartitionableQuestionList = new ArrayList<>(250);
         // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
         EasyExcel.read(fileName, ExcelQuestion.class, new ReadListener<ExcelQuestion>() {
             public static final int BATCH_COUNT = 100;
@@ -75,7 +75,7 @@ public class TestIncludeExcel {
                             multipleQuestionBuilder.addChoice(choice);
                             index++;
                         }
-                        MultiPartitionableQuestion build = multipleQuestionBuilder.build();
+                        Question build = multipleQuestionBuilder.build();
 //                        multiPartitionableQuestionService.save(build);
                         multiPartitionableQuestionList.add(build);
 //                        System.out.println(index);

@@ -2,9 +2,9 @@ package indi.etern.checkIn.controller.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
+import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.traffic.UserTraffic;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.UserTrafficService;
 import indi.etern.checkIn.service.exam.ExamCheckService;
@@ -21,11 +21,11 @@ import java.util.*;
 public class ExamData {
     private final UserTrafficService userTrafficService;
     private final PartitionService partitionService;
-    private final MultiPartitionableQuestionService multiPartitionableQuestionService;
+    private final QuestionService multiPartitionableQuestionService;
     private final ObjectMapper objectMapper;
     private final ExamCheckService checkService;
     
-    public ExamData(UserTrafficService userTrafficService, PartitionService partitionService, MultiPartitionableQuestionService multiPartitionableQuestionService, ObjectMapper objectMapper, ExamCheckService checkService) {
+    public ExamData(UserTrafficService userTrafficService, PartitionService partitionService, QuestionService multiPartitionableQuestionService, ObjectMapper objectMapper, ExamCheckService checkService) {
         this.userTrafficService = userTrafficService;
         this.partitionService = partitionService;
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
@@ -39,10 +39,10 @@ public class ExamData {
         int examCount = userTrafficService.count(qqNumber);
         final long seed = Long.parseLong(qq + "00" + examCount);
         final Random random = new Random(seed);
-        List<MultiPartitionableQuestion> multiPartitionableQuestions = partitionService.generateExam(partitionIds, random);
+        List<Question> multiPartitionableQuestions = partitionService.generateExam(partitionIds, random);
         Collections.shuffle(multiPartitionableQuestions, random);
         List<String> examQuestionIds = new ArrayList<>();
-        for (MultiPartitionableQuestion multiPartitionableQuestion : multiPartitionableQuestions) {
+        for (Question multiPartitionableQuestion : multiPartitionableQuestions) {
             examQuestionIds.add(multiPartitionableQuestion.getId());
         }
         request.setAttribute("action", "generateExam");
@@ -70,7 +70,7 @@ public class ExamData {
         //noinspection unchecked
         List<String> questionIds = objectMapper.readValue(lastTraffic.get().getAttributesMap().get("examQuestionIds"), List.class);
         request.setAttribute("action", "reloadExam");
-        List<MultiPartitionableQuestion> questions = multiPartitionableQuestionService.findAllById(questionIds);
+        List<Question> questions = multiPartitionableQuestionService.findAllById(questionIds);
         userTrafficService.log(qqNumber, request);
         return objectMapper.writeValueAsString(questions);
     }

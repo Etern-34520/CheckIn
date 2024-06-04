@@ -1,12 +1,11 @@
 package indi.etern.checkIn.service.dao;
 
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
-import indi.etern.checkIn.entities.question.interfaces.Partition;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionLink;
+import indi.etern.checkIn.entities.question.impl.Partition;
+import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.repositories.PartitionRepository;
 import jakarta.annotation.Resource;
 import org.apache.coyote.BadRequestException;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -41,12 +40,15 @@ public class PartitionService {
     }
 
     public Optional<Partition> findByName(String name) {
+        return partitionRepository.findByName(name);
+/*
         Partition examplePartition = Partition.getExample(name);
         ExampleMatcher exampleMatcher = ExampleMatcher
                 .matching()
                 .withIgnorePaths("id");
         Example<Partition> example = Example.of(examplePartition, exampleMatcher);
         return partitionRepository.findOne(example);
+*/
     }
 
 //    @CacheEvict(value = "partition", allEntries = true)
@@ -74,18 +76,18 @@ public class PartitionService {
     }
 
 //    @CacheEvict(value = "partition", key = "#partition.id")
-    public void addQuestionOf(Partition partition, MultiPartitionableQuestion multipleQuestion) {
+    public void addQuestionOf(Partition partition, Question multipleQuestion) {
         transactionTemplate.execute((callback) -> {
             final Optional<Partition> partitionOptional = partitionRepository.findById(partition.getId());
             Partition partition1 = partitionOptional.orElse(partition);
-            partition1.getQuestions().add(multipleQuestion);
+            partition1.getQuestionLinks().add((ToPartitionLink) multipleQuestion.getLinkWrapper());
             partitionRepository.save(partition1);
             return Boolean.TRUE;
         });
     }
 
-    public List<MultiPartitionableQuestion> generateExam(List<Integer> partitionIds, Random random) throws Exception {
-        List<MultiPartitionableQuestion> multiPartitionableQuestions = new ArrayList<>();
+    public List<Question> generateExam(List<Integer> partitionIds, Random random) throws Exception {
+        List<Question> multiPartitionableQuestions = new ArrayList<>();
         int questionCount = Integer.parseInt(SettingService.singletonInstance.get("exam.questionCount"));
         int partitionCountMin = Integer.parseInt(SettingService.singletonInstance.get("exam.partitionCountMin"));
         int partitionCountMax = Integer.parseInt(SettingService.singletonInstance.get("exam.partitionCountMax"));
@@ -97,11 +99,11 @@ public class PartitionService {
         /*transactionTemplate.execute((callback) -> {
             partitionIds.forEach(partitionName -> {
                 final Partition partition = findByName(partitionName);
-                final List<MultiPartitionableQuestion> questions = new ArrayList<>();
+                final List<Question> questions = new ArrayList<>();
                 Random random = new Random();
                 int quantity = Math.min(questionCount+1, partition.getQuestions().size());
                 while (questions.size() < quantity) {
-                    final MultiPartitionableQuestion question = partition.getQuestions().stream().toList().get(random.nextInt(partition.getQuestions().size()));
+                    final Question question = partition.getQuestions().stream().toList().get(random.nextInt(partition.getQuestions().size()));
                     if (!questions.contains(question)) {
                         questions.add(question);
                     }
@@ -128,13 +130,13 @@ public class PartitionService {
                 });
                 while (multiPartitionableQuestions.size() < Math.min(questionCount, questionQuantity.get())) {
                     Partition partition = partitions.get(random.nextInt(partitions.size()));
-                    final Set<MultiPartitionableQuestion> enabledQuestions = partition.getEnabledQuestions();
+                    final Set<Question> enabledQuestions = partition.getEnabledQuestions();
                     final int partitionQuestionCount = enabledQuestions.size();
                     if (partitionQuestionCount == 0) {
                         continue;
                     }
-                    List<MultiPartitionableQuestion> list = enabledQuestions.stream().toList();
-                    final MultiPartitionableQuestion question = list.get(random.nextInt(partitionQuestionCount));
+                    List<Question> list = enabledQuestions.stream().toList();
+                    final Question question = list.get(random.nextInt(partitionQuestionCount));
                     if (!multiPartitionableQuestions.contains(question)) {
                         multiPartitionableQuestions.add(question);
                     }

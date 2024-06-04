@@ -10,9 +10,8 @@ let token1;
 let notifications = {};
 let limits = 4*1024*1024;//4MB
 
-function getTime() {
-    let d1 = new Date();
-    return d1.getFullYear()+"-"+d1.getMonth()+"-"+d1.getDate()+"T"+d1.getHours()+":"+d1.getMinutes()+":"+d1.getSeconds()+"."+d1.getMilliseconds();
+function getCurrentIsoTime() {
+    return new Date().toISOString();
 }
 
 const WebSocketConnector = {
@@ -87,14 +86,14 @@ const WebSocketConnector = {
                             console.error("websocket error", message);
                             ElNotification({
                                 title: 'Websocket错误',
-                                message: JSON.stringify(message),
+                                message: message.message,
                                 position: 'bottom-right',
                                 type: 'error',
                                 duration: 0
                             });
                         } else {
                             promise.resolve(message);
-                            console.log("["+ getTime() + "] WS resp:", message);
+                            console.log("["+ getCurrentIsoTime() + "] WS resp:", message);
                         }
                     }
                 }

@@ -1,10 +1,10 @@
 package indi.etern.checkIn;
 
 import com.google.gson.Gson;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleQuestionBuilder;
-import indi.etern.checkIn.entities.question.interfaces.MultiPartitionableQuestion;
-import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
+import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
+import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.entities.question.impl.Choice;
+import indi.etern.checkIn.service.dao.QuestionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,14 +26,14 @@ public class JsonParseTest {
     @Autowired
     Gson gson;// = new Gson();
     @Autowired
-    MultiPartitionableQuestionService multiPartitionableQuestionService;
+    QuestionService multiPartitionableQuestionService;
     @Test
     public void parse() throws IOException {
         Path jsonPath = Paths.get("questions.json");
         String content = Files.readString(jsonPath);
         List<Map<String,Object>> questions = gson.fromJson(content, List.class);
         for (Map<String,Object> questionMap : questions) {
-            MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
+            MultipleChoicesQuestion.Builder multipleQuestionBuilder = new MultipleChoicesQuestion.Builder();
             String questionContent = (String) questionMap.get("question_content");
             questionContent = questionContent.replace(" [单选题]","");
             multipleQuestionBuilder.setQuestionContent(questionContent.split("\\.",2)[1]);
@@ -49,7 +49,7 @@ public class JsonParseTest {
                 multipleQuestionBuilder.addChoice(choice);
                 index++;
             }
-            MultiPartitionableQuestion question = multipleQuestionBuilder.build();
+            Question question = multipleQuestionBuilder.build();
             multiPartitionableQuestionService.save(question);
         }
     }

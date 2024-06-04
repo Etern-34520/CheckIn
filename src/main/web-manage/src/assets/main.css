@@ -35,7 +35,7 @@ div.panel {
     transition: 300ms ease-in-out;
 }
 
-*.panel-1.clickable:hover, *.panel.clickable:hover {
+*.panel-1.clickable:not(.is-disabled):hover, *.panel.clickable:hover {
     background-color: var(--panel-bg-color-overlay);
 }
 
@@ -127,5 +127,43 @@ div.panel {
 }*/
 
 .circular {
-    display: none!important;
+    display: none !important;
+}
+
+.slide-hide-base {
+    display: grid;
+    overflow: hidden;
+    gap: 0;
+    outline: 0;
+    grid-template-rows: 1fr;
+}
+
+.slide-hide-leave-active {
+    --phrase-1: 300ms;
+    --phrase-2: 200ms;
+    /*transition: transform 5s var(--ease-in-out-quint);*/
+    transition:
+            transform var(--phrase-1) var(--ease-in-quint),
+            margin var(--phrase-2) var(--ease-in-out-quint) var(--phrase-1),
+            grid-template-rows var(--phrase-2) var(--ease-in-out-quint) var(--phrase-1) !important;
+    overflow: hidden;
+}
+
+.slide-hide-enter-active {
+    --phrase-1: 200ms;
+    --phrase-2: 300ms;
+    transition:
+            transform var(--phrase-2) var(--ease-out-quint) var(--phrase-1),
+            margin var(--phrase-1) var(--ease-in-out-quint),
+            grid-template-rows var(--phrase-1) var(--ease-in-out-quint) !important;
+    overflow: hidden;
+}
+
+.slide-hide-enter-from,
+.slide-hide-leave-to {
+    /*margin-left: -100%;*/
+    /*margin-right: 100%;*/
+    margin-top: 0 !important;
+    transform: translateX(-100%);
+    grid-template-rows: 0fr !important;
 }

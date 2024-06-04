@@ -3,24 +3,12 @@ package indi.etern.checkIn.api.webSocket;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import indi.etern.checkIn.api.webSocket.action.JsonResultAction;
-import indi.etern.checkIn.api.webSocket.action.partition.CreatePartitionAction;
-import indi.etern.checkIn.api.webSocket.action.partition.DeletePartitionAction;
-import indi.etern.checkIn.api.webSocket.action.partition.EditPartitionNameAction;
-import indi.etern.checkIn.api.webSocket.action.partition.GetPartitions;
-import indi.etern.checkIn.api.webSocket.action.question.*;
-import indi.etern.checkIn.api.webSocket.action.setting.SaveSettingAction;
-import indi.etern.checkIn.api.webSocket.action.traffic.GetTrafficByDateAction;
-import indi.etern.checkIn.api.webSocket.action.user.*;
+import indi.etern.checkIn.action.ActionExecutor;
+import indi.etern.checkIn.action.JsonResultAction;
+import indi.etern.checkIn.action.Result;
 import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
-import indi.etern.checkIn.service.dao.PartitionService;
-import indi.etern.checkIn.service.dao.RoleService;
-import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.web.WebSocketService;
-import io.micrometer.core.instrument.config.MeterFilter;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -33,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.socket.SubProtocolCapable;
 
 import java.io.IOException;
@@ -49,29 +36,18 @@ public class Connector implements SubProtocolCapable {
     public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
     public static final Logger logger = LoggerFactory.getLogger(Connector.class);
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
-    private static PartitionService partitionService;
     private static WebSocketService webSocketService;
-    private static UserService userService;
-    private static MultiPartitionableQuestionService multiPartitionableQuestionService;
-    private static TransactionTemplate transactionTemplate;
     private static JwtTokenProvider jwtTokenProvider;
     private static Gson gson;
-    private static RoleService roleService;
+    private static ActionExecutor actionExecutor;
     private String token;
-    //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
-    //接收sid
     @Getter
     private String sid = "";
     private User sessionUser;
-    private MeterFilter metricsHttpClientUriTagFilter;
 
     public Connector() {
 //        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);
-    }
-
-    public static int getOnlineCount() {
-        return onlineCount.get();
     }
 
     public static void addOnlineCount() {
@@ -83,33 +59,8 @@ public class Connector implements SubProtocolCapable {
     }
 
     @Autowired
-    public void setPartitionService(PartitionService partitionService) {
-        Connector.partitionService = partitionService;
-    }
-
-    @Autowired
     public void setWebSocketService(WebSocketService webSocketService) {
         Connector.webSocketService = webSocketService;
-    }
-
-    @Autowired
-    public void setUserService(UserService userService) {
-        Connector.userService = userService;
-    }
-
-    @Autowired
-    public void setRoleService(RoleService roleService) {
-        Connector.roleService = roleService;
-    }
-
-    @Autowired
-    public void setMultiPartitionableQuestionService(MultiPartitionableQuestionService multiPartitionableQuestionService) {
-        Connector.multiPartitionableQuestionService = multiPartitionableQuestionService;
-    }
-
-    @Autowired
-    public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-        Connector.transactionTemplate = transactionTemplate;
     }
 
     @Autowired
@@ -120,6 +71,11 @@ public class Connector implements SubProtocolCapable {
     @Autowired
     public void setGson(Gson gson) {
         Connector.gson = gson;
+    }
+
+    @Autowired
+    public void set(ActionExecutor actionExecutor) {
+        Connector.actionExecutor = actionExecutor;
     }
 
     @OnOpen
@@ -167,124 +123,17 @@ public class Connector implements SubProtocolCapable {
                 qqStr = (String) qqObject;
                 qqInContentMap = Long.parseLong(qqStr);
             }
-            boolean logging = true;
-            switch ((String) contentMap.get("type")) {
-                case "partMessage" -> {
-                    PartMessage partMessage;
-                    String partId;
-                    if (contentMap.get("messageIds") instanceof List<?> messageIds) {
-                        partMessage = new PartMessage((List<String>) messageIds);
-                        partMessageMap.put(messageId, partMessage);
-                        partId = messageId;
-                        sendMessage("{\"type\":\"success\",\"messageId\":\"" + messageId + "\"}");
-                    } else if (contentMap.get("partId") instanceof String) {
-                        partId = (String) contentMap.get("partId");
-                        partMessage = partMessageMap.get(partId);
-                        partMessage.put(messageId, (String) contentMap.get("messagePart"));
-                        logging = false;
-                    } else {
-                        //TODO Tip
-                        return false;
-                    }
-                    if (partMessage.isComplete()) {
-                        logging = onMessage(partMessage.toString());
-                        partMessageMap.remove(partId);
-                    }
-                }
-                case "createPartition" -> {
-                    final String partitionName = (String) contentMap.get("name");
-                    logging = doAction(contentMap, new CreatePartitionAction(partitionName));
-                }
-                case "deletePartition" -> {
-                    final int partitionId = (int) ((double) contentMap.get("id"));
-                    logging = doAction(contentMap, new DeletePartitionAction(partitionId));
-                }
-                case "editPartition" -> {
-                    logging = doAction(contentMap, new EditPartitionNameAction(Integer.parseInt((String) contentMap.get("id")), (String) contentMap.get("name")));
-                }
-                case "newUser" -> {
-                    logging = doAction(contentMap, new CreateUserAction(qqInContentMap, (String) contentMap.get("name"), (String) contentMap.get("role")));
-                }
-                case "deleteUser" -> {
-                    if (qqInContentMap != sessionUser.getQQNumber() && webSocketService.isOnline(String.valueOf(qqInContentMap))) {
-                        sendError(messageId, "user is online");
-                        return true;
-                    }
-                    logging = doAction(contentMap, new DeleteUserAction(qqInContentMap, sessionUser));
-                }
-                case "changeUserName" -> {
-                    logging = doAction(contentMap, new ChangeUserNameAction(qqInContentMap, (String) contentMap.get("newName")));
-                }
-                case "changePassword" -> {
-                    logging = doAction(contentMap, new ChangeUserPasswordAction(qqInContentMap, (String) contentMap.get("oldPassword"), (String) contentMap.get("newPassword")));
-                }
-                case "enableUser" -> {
-                    logging = doAction(contentMap, new SetUserStateAction(qqInContentMap, true));
-                }
-                case "disableUser" -> {
-                    logging = doAction(contentMap, new SetUserStateAction(qqInContentMap, false));
-                }
-                case "offLine" -> {
-                    logging = doAction(contentMap, new ForceOfflineAction(qqInContentMap));
-                }
-                case "changeRole" -> {
-                    logging = doAction(contentMap, new ChangeUserRoleAction(qqInContentMap, (String) contentMap.get("role")));
-                }
-                case "savePermission" -> {
-                    Role role = roleService.findById((String) contentMap.get("role")).orElseThrow();
-                    logging = doAction(contentMap, new SavePermissionAction(role, (List<String>) contentMap.get("enable")));
-                }
-                case "createRole" -> {
-                    logging = doAction(contentMap, new CreateRoleAction((String) contentMap.get("role"), (List<String>) contentMap.get("enable")));
-                }
-                case "deleteRole" -> {
-                    logging = doAction(contentMap, new DeleteRoleAction((String) contentMap.get("role")));
-                }
-                case "saveSetting" -> {
-                    Map<String, Object> dataMap = (Map<String, Object>) contentMap.get("data");
-                    logging = doAction(contentMap, new SaveSettingAction(dataMap, (String) contentMap.get("settingName")));
-                }
-                case "getDateTrafficDetail" -> {
-                    logging = doAction(contentMap, new GetTrafficByDateAction(String.valueOf(contentMap.get("date"))));
-                }
-                case "getQuestionIdAndContentList" -> {
-                    logging = doAction(contentMap, new GetQuestionIdAndContentListAction(Integer.parseInt(contentMap.get("partitionId").toString())));
-                }
-                case "getPartitions" -> {
-                    logging = doAction(contentMap, new GetPartitions());
-                }
-                case "getQuestionInfo" -> {
-                    logging = doAction(contentMap, new GetQuestionInfoAction(contentMap.get("questionId").toString()));
-                }
-                case "getQuestionInfos" -> {
-                    logging = doAction(contentMap, new GetQuestionInfosAction(((List<String>)contentMap.get("questionIds"))));
-                }
-                case "getUsers" -> {
-                    logging = doAction(contentMap, new GetAllUserAction());
-                }
-                case "updateQuestions" -> {
-                    logging = doAction(contentMap, new UpdateQuestionsAction((List<Object>) contentMap.get("updatedQuestions"), sessionUser.getQQNumber()));
-                    Object o = contentMap.get("deletedQuestionIds");
-                    if (o instanceof List<?>) {
-                        List<String> deletedQuestionIds = (List<String>) o;
-                        if (!deletedQuestionIds.isEmpty())
-                            logging = logging & doAction(contentMap, new DeleteQuestionsAction(deletedQuestionIds));
-                    }
-                }
-                case "upVote" -> {
-                    logging = doAction(contentMap, new UpVoteAction(contentMap.get("questionId").toString(), sessionUser));
-                }
-                case "downVote" -> {
-                    logging = doAction(contentMap, new DownVoteAction(contentMap.get("questionId").toString(), sessionUser));
-                }
-                case "restoreVote" -> {
-                    logging = doAction(contentMap, new RestoreVoteAction(contentMap.get("questionId").toString(), sessionUser));
-                }
+//            boolean logging = true;
+            Result result = actionExecutor.executeByMap(contentMap);
+            if (result.getResult().isPresent()) {
+                JsonObject jsonObject = result.getResult().get();
+                jsonObject.addProperty("messageId", messageId);
+                sendMessage(jsonObject);
             }
-            if (logging) {
+            if (result.isShouldLogging()) {
                 logger.info("{}({}):{}", sessionUser.getName(), sid, message);
             }
-            return logging;
+            return result.isShouldLogging();
         } catch (Exception e) {
             try {
                 if (message.length() < 65535) {
@@ -425,9 +274,11 @@ public class Connector implements SubProtocolCapable {
                 if (jsonResultAction.shouldLogging())
                     logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, jsonObject1);
             }
+/*
             if (jsonObject.get("type") != null && !jsonObject.get("type").getAsString().equals("error")) {
                 jsonResultAction.afterAction();
             }
+*/
         }
         return jsonResultAction.shouldLogging();
     }

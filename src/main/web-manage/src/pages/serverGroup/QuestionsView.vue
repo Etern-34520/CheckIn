@@ -44,7 +44,7 @@ const filterNode = (value, node) => {
 const filterQuestionInfo = (questionInfo) => {
     for (const v of filterText.value.split(",")) {
         if (v !== "" &&
-            (questionInfo.type !== 'question') || (
+            (questionInfo.type !== 'Wuestion') || (
                 (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase())) ||
                 (questionInfo.question.id && questionInfo.question.id.toUpperCase().includes(v.toUpperCase())))
         ) {
@@ -226,8 +226,8 @@ const onEdit = (nodeObj, nodeItem, node, event) => {
 }
 
 const allowDrag = (node) => {
-    console.log(node);
-    return node.data.data.type === 'Question';
+    const dataType = node.data.data.type;
+    return dataType === 'Question' || dataType === "QuestionGroup";
 }
 
 const allowDrop = (draggingNode, dropNode, type) => {
@@ -260,11 +260,12 @@ const onDrop = (dragNode, dropNode, place, event) => {
 
     let dropPartitionId;
     delete dropNode.data.data.dragHover;
-    if (dropNodeData.type === "partition") {
+    const dataType = dropNodeData.type;
+    if (dataType === "partition") {
         dropPartitionId = dropNodeData.partition.id;
-    } else if (dropNodeData.type === "Question") {
+    } else if (dataType === "Question" || dataType === "QuestionGroup") {
         dropPartitionId = dropNode.data.treeId.split("/")[0];
-    } else if (dropNodeData.type === "createQuestion") {
+    } else if (dataType === "createQuestion") {
         dropPartitionId = dropNode.data.data.partitionId;
     } else {
         return;
@@ -284,17 +285,17 @@ const onDragEnd = (node, dropNode, event) => {
 }
 
 const createQuestionGroup = (partitionId) => {
+    const authorQQ = Number(proxy.$cookies.get("qq"));
     let question = {
         id: randomUUID(),
         content: "",
         enabled: false,
         partitionIds: [partitionId],
-        authorQQ: Number(proxy.$cookies.get("qq")),
+        authorQQ: authorQQ,
         upVoters: new Set(),
         downVoters: new Set(),
-        questions: []
     };
-    const questionInfo = QuestionTempStorage.createQuestionGroup(question);
+    const questionInfo = QuestionTempStorage.createQuestionGroup(question,undefined,authorQQ);
     tree.value.append(QuestionTempStorage.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
 }
 
@@ -302,6 +303,7 @@ const createMultipleChoiceQuestion = (partitionId) => {
     let question = {
         id: randomUUID(),
         content: "",
+        type: "MultipleChoicesQuestion",
         enabled: false,
         partitionIds: [partitionId],
         authorQQ: Number(proxy.$cookies.get("qq")),
@@ -365,6 +367,9 @@ const backToTree = () => {
 const showCheckBox = ref(false);
 const switchShowCheckBox = () => {
     showCheckBox.value = !showCheckBox.value;
+    if (showCheckBox.value === false && currentButton && currentButton.value) {
+        currentButton.value.menuVisible = false;
+    }
 }
 
 const disabled = ref(false);
@@ -438,7 +443,6 @@ const batchActionSelectPartitionMenuButtons = ref([
             currentButton.menuVisible = false;
             const partitionIdsSet = new Set(partitionIds);
             batchDo(undefined, (questionNode) => {
-                //TODO test
                 const partitionId = Number(questionNode.treeId.split("/")[0]);
                 questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId && !partitionIdsSet.has(id));
                 questionNode.data.question.partitionIds.push(...partitionIds);
@@ -533,10 +537,11 @@ const rectifyCheck = (nodeObj, checkStatus) => {
         }
     }
 
-    if (nodeObj.data.type === "Question") {
+    const dataType = nodeObj.data.type;
+    if (dataType === "Question" || dataType === "QuestionGroup") {
         const currentPartitionId = Number(nodeObj.treeId.split("/")[0]);
         rectify1(currentPartitionId);
-    } else if (nodeObj.data.type === "partition") {
+    } else if (dataType === "partition") {
         //FIXME
         if (!QuestionTempStorage.loadedPartitionIds.has(nodeObj.treeId)) {
             loadPartitionChildrenNode(nodeObj.treeId, nodeObj.data.empty, (data) => {
@@ -556,7 +561,7 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 }
 
 function onDeleteNode(nodeObj) {
-    nodeObj.data.type === 'Question' ?
+    nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup' ?
         (nodeObj.data.question.localDeleted ?
             QuestionTempStorage.restore(nodeObj.data.question.id) :
             QuestionTempStorage.delete(nodeObj.data.question.id)) :
@@ -723,8 +728,8 @@ const currentButton = ref({
                                         这些有错误的题目将不会上传
                                     </el-text>
                                 </el-alert>
-                                <div class="errorQuestions">
-                                    <transition-group name="errorQuestions">
+                                <div>
+                                    <transition-group name="slide-hide">
                                             <question-info-panel
                                                 v-for="questionInfo of QuestionTempStorage.getErrorQuestions()"
                                                 :key="questionInfo.question.id"
@@ -875,7 +880,7 @@ const currentButton = ref({
 /*noinspection CssUnusedSymbol*/
 
 .question-tree-base, .errorsList {
-    transition: 600ms var(--ease-in-bounce-1);
+    transition: 450ms var(--ease-in-bounce-1);
 }
 
 .slide-base .question-tree-base,

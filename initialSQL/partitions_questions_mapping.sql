@@ -5,4 +5,4 @@ create table partitions_questions_mapping
 );
 
 create index FKlmojk4rsauadbhyr33v96f7kx
-    on partitions_questions_mapping (partition_id);
+    on questions_link_mapping (partition_id);

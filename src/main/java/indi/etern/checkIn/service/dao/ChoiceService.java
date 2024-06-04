@@ -1,6 +1,6 @@
 package indi.etern.checkIn.service.dao;
 
-import indi.etern.checkIn.entities.question.interfaces.multipleChoice.Choice;
+import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.repositories.ChoiceRepository;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;

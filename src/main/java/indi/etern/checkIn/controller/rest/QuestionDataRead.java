@@ -1,27 +1,19 @@
 package indi.etern.checkIn.controller.rest;
 
 import com.google.gson.Gson;
-import indi.etern.checkIn.entities.question.Question;
-import indi.etern.checkIn.entities.question.interfaces.ImagesWith;
-import indi.etern.checkIn.entities.question.interfaces.Partition;
-import indi.etern.checkIn.service.dao.MultiPartitionableQuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
-import org.apache.coyote.BadRequestException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import indi.etern.checkIn.service.dao.QuestionService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "question/")
 public class QuestionDataRead {
-    final MultiPartitionableQuestionService multiPartitionableQuestionService;
+    final QuestionService multiPartitionableQuestionService;
     final PartitionService partitionService;
     final Gson gson;
     
-    public QuestionDataRead(MultiPartitionableQuestionService multiPartitionableQuestionService, PartitionService partitionService, Gson gson) {
+    public QuestionDataRead(QuestionService multiPartitionableQuestionService, PartitionService partitionService, Gson gson) {
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
         this.partitionService = partitionService;
         this.gson = gson;
@@ -29,7 +21,7 @@ public class QuestionDataRead {
     
     /*@GetMapping(path = "image/count/{questionID}")
     public String getImageQuantity(@PathVariable String questionID) {
-        MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
+        Question question = multiPartitionableQuestionService.getById(questionID);
         if (question instanceof ImagesWith questionWithImages) {
             return String.valueOf(questionWithImages.getImageBase64Strings().size());
         } else {
@@ -37,16 +29,18 @@ public class QuestionDataRead {
         }
     }*/
 
+/*
     @GetMapping(path = "/withImages/ofPartition/{partitionId}")
     public List<String> getQuestionWithImageIds(@PathVariable int partitionId) throws BadRequestException {
         Partition partition = partitionService.findById(partitionId).orElseThrow(() -> new BadRequestException("partitions not exist"));
-        return partition.getQuestions().stream().filter((question) -> question instanceof ImagesWith).map(Question::getId).toList();
+        return partition.getQuestions().stream().map(Question::getId).toList();
     }
+*/
     
     /*@GetMapping(path = "image/{questionID}/", produces = "application/json;charset=UTF-8")
     @ResponseBody
-    public String getAllImageJsonData(@PathVariable String questionID) {//TODO 优化 当前用时6647ms
-        MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
+    public String getAllImageJsonData(@PathVariable String questionID) {
+        Question question = multiPartitionableQuestionService.getById(questionID);
         if (question instanceof ImagesWith questionWithImages) {
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("count", questionWithImages.getImageBase64Strings().size());
@@ -92,7 +86,7 @@ public class QuestionDataRead {
 /*
     @GetMapping(path = "image/{questionID}/{imageIndex}")
     public void getImage(HttpServletResponse httpServletResponse, @PathVariable String questionID, @PathVariable int imageIndex) {
-        MultiPartitionableQuestion question = multiPartitionableQuestionService.getById(questionID);
+        Question question = multiPartitionableQuestionService.getById(questionID);
         if (question != null) {
             //TODO 后缀
             httpServletResponse.setContentType("image/png");
