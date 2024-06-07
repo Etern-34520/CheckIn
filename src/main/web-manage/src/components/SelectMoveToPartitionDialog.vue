@@ -1,6 +1,6 @@
 <script setup>
 // import {ref,defineEmits,defineProps} from "vue";
-import PartitionTempStorage from "@/data/PartitionTempStorage.js";
+import PartitionCache from "@/data/PartitionCache.js";
 import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
 
 const props = defineProps({
@@ -15,7 +15,7 @@ const emits = defineEmits(["onConfirm"]);
 const isCreating = ref(false);
 const partitionIds = ref([]);
 const partitions = ref([]);
-PartitionTempStorage.getRefPartitionsAsync().then((resp) => {
+PartitionCache.getRefPartitionsAsync().then((resp) => {
     partitions.value = resp.value;
 });
 </script>

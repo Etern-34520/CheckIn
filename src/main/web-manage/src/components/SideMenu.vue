@@ -2,6 +2,8 @@
 import router from "@/router/index.js";
 // import {getCurrentInstance,ref} from "vue";
 import HarmonyOSIcon_Quit from "@/components/icons/HarmonyOSIcon_Quit.vue";
+import getAvatarUrlOf from "@/utils/Avatar.js";
+import UserDataInterface from "@/data/UserDataInterface.js";
 
 const {proxy} = getCurrentInstance();
 
@@ -46,19 +48,9 @@ function shrinkMenu() {
     expandBool.value = false;
 }
 
-const currentGroupIndex = ref(0);
-const currentButtonIndex = ref(0);
-
 function routeTo(path) {
     router.push('/manage/' + path);
     shrinkMenu();
-}
-
-function logout() {
-    proxy.$cookies.remove("token");
-    proxy.$cookies.remove("name");
-    proxy.$cookies.remove("qq");
-    router.push('/login/');
 }
 
 const props = defineProps({
@@ -76,7 +68,7 @@ const props = defineProps({
              :class="{'menu-inline': inlineBool,'menu-expand': expandBool || inlineBool}" @mouseenter="expandMenu"
              @mouseleave="shrinkMenu" @click.stop>
             <div class="menuGroup" v-for="(group,$index) in pageGroups">
-                <el-button v-for="(pageItem,$buttonIndex) of group.paths" text :icon="pageItem.icon"
+                <el-button v-for="pageItem of group.paths" text :icon="pageItem.icon"
                            @click="routeTo(pageItem.path)"
                            @mouseenter="expandMenu">
                     {{ pageItem.name }}
@@ -90,7 +82,7 @@ const props = defineProps({
                                style="width: 150px;height: 52px;display: flex;flex-direction: row;padding: 4px;">
                         <div>
                             <el-avatar shape="circle" size="default"
-                                       :src="'https://q1.qlogo.cn/g?b=qq&nk='+user.qq+'&s=100'"
+                                       :src="getAvatarUrlOf(user.qq)"
                                        style="margin-right: 4px"></el-avatar>
                         </div>
                         <div style="text-align: left;flex: 1;overflow: hidden;">
@@ -98,9 +90,9 @@ const props = defineProps({
                             <el-text size="large" type="info" style="display: block">{{ user.qq }}</el-text>
                         </div>
                     </el-button>
-                    <el-button style="width: 50px;height: 52px" @click="logout" text>
+                    <el-button style="width: 50px;height: 52px" @click="UserDataInterface.logout()" text>
                         <div style="display: flex;flex-direction: column">
-                            <HarmonyOSIcon_Quit :size="20"/>
+                            <el-icon size="20" style="align-self:center"><HarmonyOSIcon_Quit/></el-icon>
                             <div>
                                 退出
                             </div>

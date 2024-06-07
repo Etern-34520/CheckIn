@@ -141,6 +141,17 @@ public class Utils {
         if (questionInfosObj instanceof List<?>) {
             builder.getQuestions().clear();
         }
+        Object imageBase64Strings1 = questionDataMap.get("images");
+        if (imageBase64Strings1 instanceof List) {
+            builder.getImageBase64Strings().clear();
+            //noinspection unchecked
+            List<Map<String, String>> imageBase64Strings = (List<Map<String, String>>) imageBase64Strings1;
+            for (Map<String, String> imageBase64String : imageBase64Strings) {
+                String key = imageBase64String.get("name");
+                String value = imageBase64String.get("url");
+                builder.addBase64Image(key, value);
+            }
+        }
         QuestionGroup questionGroup = builder.build();
         if (questionInfosObj instanceof List<?> questionInfos) {
             for (Object questionInfoObj : questionInfos) {
@@ -150,7 +161,6 @@ public class Utils {
                 }
             }
         }
-
         return questionGroup;
     }
 }

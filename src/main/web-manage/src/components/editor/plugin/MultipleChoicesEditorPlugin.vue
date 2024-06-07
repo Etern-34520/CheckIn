@@ -72,6 +72,17 @@ const onEndDrag = () => {
 </template>
 
 <style scoped>
+.handle {
+    width: 30px;
+    aspect-ratio: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
 .choicePanel {
     display: flex;
     flex-direction: row;

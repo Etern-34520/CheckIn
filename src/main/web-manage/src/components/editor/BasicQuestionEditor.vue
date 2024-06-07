@@ -5,7 +5,7 @@ import {ElNotification} from "element-plus";
 import WebSocketConnector from "@/api/websocket.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
-import PartitionTempStorage from "@/data/PartitionTempStorage.js";
+import PartitionCache from "@/data/PartitionCache.js";
 import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import Collapse from "@/components/Collapse.vue";
@@ -17,7 +17,7 @@ const upload = ref();
 
 const allUsers = ref([]);
 
-let partitions = PartitionTempStorage.reactivePartitions;
+let partitions = PartitionCache.reactivePartitions;
 
 UserDataInterface.getUsersAsync().then((users) => {
     allUsers.value.push(...users);
@@ -221,23 +221,6 @@ const switchDisLike = () => {
                     </el-button-group>
                 </div>
             </el-tag>
-<!--            <el-alert v-for="warning of questionInfo.warnings" :key="'warning'+warning.content"
-                      type="warning" :closable="false">
-                <template #title>
-                    <div style="display: flex;flex-direction: row;">
-                        <el-text type="warning" style="margin-right: 16px">
-                            {{ warning.content }}
-                        </el-text>
-                        <el-button-group>
-                            <el-button v-for="warningButton of warning.buttons"
-                                       @click="warningButton.action"
-                                       :text="warningButton.isText" :type="warningButton.type">
-                                {{ warningButton.content }}
-                            </el-button>
-                        </el-button-group>
-                    </div>
-                </template>
-            </el-alert>-->
         </transition-group>
     </div>
     <el-input class="question-content-input"
@@ -247,7 +230,10 @@ const switchDisLike = () => {
               autosize></el-input>
     <collapse :content-background="false" :expanded="true">
         <template #title>
-            <el-text style="line-height: 32px;margin-left: 8px;">图片</el-text>
+            <div style="display: flex;flex-direction: row;align-items: center">
+                <el-text style="line-height: 32px;margin-left: 8px;margin-right: 8px">图片</el-text>
+                <el-tag type="info">{{ questionInfo.question.images ? questionInfo.question.images.length : 0 }}</el-tag>
+            </div>
         </template>
         <template #content>
             <div class="question-image-upload panel-1" style="padding: 16px">
@@ -267,7 +253,7 @@ const switchDisLike = () => {
     <div style="display: flex;flex-direction: row">
         <el-select
             class="not-empty"
-            :class="{error:questionInfo.question.partitionIds.length===0}"
+            :class="{error:questionInfo.question.partitionIds&&questionInfo.question.partitionIds.length===0}"
             v-model="questionInfo.question.partitionIds"
             placeholder="分区"
             multiple
@@ -338,7 +324,7 @@ const switchDisLike = () => {
 .alert-enter-active {
     transition:
         all 300ms var(--ease-in-bounce-1) 300ms,
-        max-width 200ms var(--ease-in-out-quint),
+        grid-template-columns 200ms var(--ease-in-out-quint),
         max-height 200ms var(--ease-in-out-quint),
         padding 200ms var(--ease-in-out-quint);
 }
@@ -347,7 +333,7 @@ const switchDisLike = () => {
 .alert-leave-active {
     transition:
         all 300ms var(--ease-in-bounce-1) 0ms,
-        max-width 200ms var(--ease-in-out-quint) 350ms,
+        grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
         max-height 200ms var(--ease-in-out-quint) 350ms,
         padding 200ms var(--ease-in-out-quint) 350ms;
 }
@@ -355,22 +341,29 @@ const switchDisLike = () => {
 /*noinspection CssUnusedSymbol*/
 .alert-enter-from, .alert-leave-to {
     opacity: 0;
-/*    margin-top: -40px;*/
+    /*    margin-top: -40px;*/
     overflow: hidden;
     filter: blur(16px);
-    max-width: 0 !important;
+    grid-template-columns: 0fr !important;
+    /*    max-width: 0 !important;*/
     max-height: 0 !important;
     padding: 0;
-    margin-right: 0;
 }
 
 .alerts > * {
-    height: 30px;
-    max-height: 30px;
-    max-width: 500px;
+    max-height: 24px;
+    display: grid;
+    grid-template-columns: 1fr;
+    /*    max-width: 500px;*/
 }
 
 .alerts > *:not(:last-child) {
     margin-right: 4px;
+}
+</style>
+
+<style>
+.alerts > * > * {
+    min-width: 0;
 }
 </style>

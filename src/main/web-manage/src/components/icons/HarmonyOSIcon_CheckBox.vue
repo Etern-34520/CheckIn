@@ -9,7 +9,7 @@ const props = defineProps({
 });
 </script>
 <template>
-    <svg :width="size" :height="size" viewBox="0 0 24 24" style="margin: 4px;">
+    <svg :width="size" :height="size" viewBox="0 0 24 24" >
         <title>ic_gallery_material_select_checkbo</title>
         <g id="_ic_gallery_material_select_checkbo" stroke="none" fill="none" stroke-width="1"
            fill-rule="evenodd">

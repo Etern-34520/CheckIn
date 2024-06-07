@@ -36,13 +36,15 @@ public abstract class BaseAction<Res, InitDataType> implements Callable<Optional
 
     abstract protected Optional<Res> doAction() throws Exception;
 
-    public Optional<Res> logMessage(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Res> result) {
+    /*public Optional<Res> getLogMessage(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Res> result) {
         return result;
-    }
+    }*/
 
     public boolean shouldLogging() {
         return logging;
     }
 
     public void initData(InitDataType dataObj) {}
+
+    protected abstract void preLog();
 }

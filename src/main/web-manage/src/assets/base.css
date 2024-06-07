@@ -259,6 +259,12 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 3px calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
 }*/
 
+.el-input__wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch !important;
+}
+
 .el-checkbox__inner {
     background: transparent !important;
     border: 4px var(--el-border-color) !important;

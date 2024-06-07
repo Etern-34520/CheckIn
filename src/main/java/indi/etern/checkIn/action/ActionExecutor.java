@@ -3,6 +3,8 @@ package indi.etern.checkIn.action;
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.interfaces.Action;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -24,6 +26,7 @@ import java.util.Optional;
 public class ActionExecutor {
     @Resource
     private ApplicationContext applicationContext;
+    private final Logger logger = LoggerFactory.getLogger(ActionExecutor.class);
 
     private final Map<String, Class<? extends BaseAction<?, ?>>> actionMap = new HashMap<>();
 
@@ -61,21 +64,26 @@ public class ActionExecutor {
         }
         JsonResultAction jsonResultAction = (JsonResultAction) applicationContext.getBean(actionMap.get(actionName));
         jsonResultAction.initData(contentMap);
+        jsonResultAction.preLog();
 
         Result result = new Result();
         Optional<JsonObject> optionalResult = jsonResultAction.call();
         result.setResult(optionalResult);
+
+/*
         if (contentMap.get("expectResponse") != null && !((boolean) contentMap.get("expectResponse"))) {
             result.setShouldLogging(jsonResultAction.shouldLogging());
             return result;
         }
+*/
         JsonObject jsonObject;
         jsonObject = optionalResult.orElseGet(JsonObject::new);
         jsonObject.addProperty("messageId", contentMap.get("messageId").toString());
-        {
-            Optional<JsonObject> message = jsonResultAction.logMessage(optionalResult);
+        /*{
+            String message = jsonResultAction.getLogMessage(optionalResult);
             result.setLoggingMessage(message);
-        }
+        }*/
+        logger.debug("Execute by map: {}", actionName);
         return result;
     }
 
@@ -95,6 +103,8 @@ public class ActionExecutor {
                     }
                 }
             }
+            action.preLog();
+            logger.debug("Execute by type class and data object: {}", clazz.getName());
             return action.call();
         } catch (Exception e) {
             throw new RuntimeException(e);

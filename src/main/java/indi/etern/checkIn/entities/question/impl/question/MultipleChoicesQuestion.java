@@ -96,7 +96,7 @@ public class MultipleChoicesQuestion extends Question /*implements ImagesWith*/ 
     MultipleChoicesQuestion.Type type;
 
     @OrderBy("orderIndex")
-    @OneToMany(cascade = {CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     List<Choice> choices;

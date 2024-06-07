@@ -5,13 +5,13 @@ import {ElNotification} from "element-plus";
 import WebSocketConnector from "@/api/websocket.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
-import PartitionTempStorage from "@/data/PartitionTempStorage.js";
+import PartitionCache from "@/data/PartitionCache.js";
 import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
 import Collapse from "@/components/Collapse.vue";
 import MultipleChoicesEditorPlugin from "@/components/editor/plugin/MultipleChoicesEditorPlugin.vue";
-import QuestionTempStorage from "@/data/QuestionTempStorage.js";
+import QuestionCache from "@/data/QuestionCache.js";
 
 const {proxy} = getCurrentInstance();
 const imageDialogVisible = ref(false);
@@ -41,7 +41,7 @@ if (group) {
 watch(() => questionInfo.value.question, (newVal, oldVal) => {
     const groupInfo = questionInfo.value.getGroup();
     groupInfo.check();
-    QuestionTempStorage.update(groupInfo);
+    QuestionCache.update(groupInfo);
 }, {deep: true});
 
 const filter = function (rawFile) {
@@ -151,7 +151,7 @@ const switchDisLike = () => {
 </script>
 
 <template>
-    <collapse style="flex:1;overflow: hidden" :content-background="false" :title-background="false">
+    <collapse style="flex:1;overflow: hidden" :content-background="false" :title-background="false" :clickable="false">
         <template #title>
             <div style="display: flex;flex-direction: column">
                 <div style="display: flex;margin-bottom: 4px" class="alerts">
@@ -268,7 +268,7 @@ const switchDisLike = () => {
 .alert-enter-active {
     transition:
         all 300ms var(--ease-in-bounce-1) 300ms,
-        max-width 200ms var(--ease-in-out-quint),
+        grid-template-columns 200ms var(--ease-in-out-quint),
         max-height 200ms var(--ease-in-out-quint),
         padding 200ms var(--ease-in-out-quint);
 }
@@ -277,7 +277,7 @@ const switchDisLike = () => {
 .alert-leave-active {
     transition:
         all 300ms var(--ease-in-bounce-1) 0ms,
-        max-width 200ms var(--ease-in-out-quint) 350ms,
+        grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
         max-height 200ms var(--ease-in-out-quint) 350ms,
         padding 200ms var(--ease-in-out-quint) 350ms;
 }
@@ -288,17 +288,25 @@ const switchDisLike = () => {
     /*    margin-top: -40px;*/
     overflow: hidden;
     filter: blur(16px);
-    max-width: 0 !important;
+    grid-template-columns: 0fr !important;
+    /*    max-width: 0 !important;*/
     max-height: 0 !important;
     padding: 0;
 }
 
 .alerts > * {
     max-height: 24px;
-    max-width: 500px;
+    display: grid;
+    grid-template-columns: 1fr;
+    /*    max-width: 500px;*/
 }
 
 .alerts > *:not(:last-child) {
     margin-right: 4px;
+}
+</style>
+<style>
+.alerts > * > * {
+    min-width: 0;
 }
 </style>

@@ -5,6 +5,8 @@ import router from "@/router/index.js";
 import topBar from "@/components/TopBar.vue";
 // import {ref, reactive, getCurrentInstance, onBeforeMount} from 'vue'
 import SideMenu from "@/components/SideMenu.vue";
+import UserDataInterface from "@/data/UserDataInterface.js";
+import {Loading} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 
@@ -21,6 +23,7 @@ const breadcrumbMap = {
     "manage-group": "组管理",
     "global-setting": "服务器设置",
     "user-setting": "用户设置",
+    "my-data": "我的",
 }
 
 let breadcrumbPathArray = reactive([]);
@@ -45,12 +48,7 @@ let updateBreadcrumbArray = (to) => {
 };
 router.afterEach(updateBreadcrumbArray);
 
-let userObj = {
-    qq: proxy.$cookies.get("qq"),
-    name: proxy.$cookies.get("name"),
-};
-
-const user = reactive(userObj);
+const user = UserDataInterface.getCurrentUser();
 
 </script>
 

@@ -1,6 +1,6 @@
 <script setup>
 // import {ref,defineEmits,defineProps} from "vue";
-import PartitionTempStorage from "@/data/PartitionTempStorage.js";
+import PartitionCache from "@/data/PartitionCache.js";
 
 const props = defineProps({
     size: {
@@ -19,7 +19,7 @@ const emits = defineEmits(["onOver"]);
 
 const onConfirmCreating = () => {
     if (newName.value) {
-        PartitionTempStorage.rename(props.partition,newName.value);
+        PartitionCache.rename(props.partition,newName.value);
         /*allPartitions.value.push({name: createdPartitionName.value});*/
         // emits("onConfirm", createdPartitionName.value);
         emits("onOver");
@@ -38,7 +38,7 @@ const onConfirmCreating = () => {
         />
         <el-button-group>
             <el-button type="primary" :size="size" @click="onConfirmCreating"
-                       :disabled="PartitionTempStorage.has(newName)">确定
+                       :disabled="PartitionCache.has(newName)">确定
             </el-button>
             <el-button :size="size" @click="$emit('onOver')">取消</el-button>
         </el-button-group>

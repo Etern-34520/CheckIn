@@ -1,6 +1,6 @@
 <script setup>
 // import {ref,defineEmits,defineProps} from "vue";
-import PartitionTempStorage from "@/data/PartitionTempStorage.js";
+import PartitionCache from "@/data/PartitionCache.js";
 
 const createdPartitionName = ref("")
 
@@ -15,7 +15,7 @@ const emits = defineEmits(["onCancel","onConfirm"]);
 
 const onConfirmCreating = () => {
     if (createdPartitionName.value) {
-        PartitionTempStorage.create(createdPartitionName.value).then((resp) => {
+        PartitionCache.create(createdPartitionName.value).then((resp) => {
             console.log(resp)
         });
         /*allPartitions.value.push({name: createdPartitionName.value});*/
@@ -35,7 +35,7 @@ const onConfirmCreating = () => {
         />
         <el-button-group>
             <el-button type="primary" :size="size" @click="onConfirmCreating"
-                       :disabled="createdPartitionName===''||PartitionTempStorage.has(createdPartitionName)">确定
+                       :disabled="createdPartitionName===''||PartitionCache.has(createdPartitionName)">确定
             </el-button>
             <el-button :size="size" @click="$emit('onCancel');createdPartitionName = '';">取消</el-button>
         </el-button-group>

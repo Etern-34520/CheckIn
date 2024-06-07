@@ -17,6 +17,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    clickable: {
+        type: Boolean,
+        default: true,
+    }
 });
 onMounted(() => {
     if (props.expanded) {
@@ -60,11 +64,12 @@ watch(() => expanded.value, (newVal, oldVal) => {
         <div class="collapse-title" :class="{
             'border-changed':borderChanged,
             'title-background':titleBackground,
-        }">
+            clickable:clickable
+        }" @click="clickable?switchExpand():null">
             <div class="collapse-title-inner">
                 <slot name="title"/>
             </div>
-            <el-button @click="switchExpand" link class="action-button">
+            <el-button @click.stop="switchExpand" link class="action-button">
                 <transition name="pointer">
                     <span class="action-button-pointer">
                         <el-icon>
@@ -121,6 +126,15 @@ watch(() => expanded.value, (newVal, oldVal) => {
 
 .collapse-title > .action-button {
     aspect-ratio: 1;
+}
+
+*.clickable, *.clickable {
+    cursor: pointer;
+    transition: 300ms ease-in-out;
+}
+
+*.clickable:hover {
+    background-color: var(--panel-bg-color-overlay) !important;
 }
 
 .collapse-content {

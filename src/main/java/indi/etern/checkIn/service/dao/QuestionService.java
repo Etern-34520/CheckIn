@@ -192,5 +192,13 @@ public class QuestionService {
     public void flush() {
         questionRepository.flush();
     }
+
+    public List<Question> findAllByUpVotersContains(User user) {
+        return questionRepository.findAllByUpVotersContains(user);
+    }
+
+    public List<Question> findAllByDownVotersContains(User user) {
+        return questionRepository.findAllByDownVotersContains(user);
+    }
 }
 

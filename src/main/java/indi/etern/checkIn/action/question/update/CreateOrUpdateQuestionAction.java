@@ -1,26 +1,31 @@
 package indi.etern.checkIn.action.question.update;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static indi.etern.checkIn.action.question.update.utils.Utils.createMultipleChoicesQuestion;
 
 @Action(name = "createOrUpdateQuestion")
 public class CreateOrUpdateQuestionAction extends BaseAction<Question, Map<?, ?>> {
     final QuestionService multiPartitionableQuestionService;
+    private final ObjectMapper objectMapper;
+    private final Logger logger = LoggerFactory.getLogger(CreateOrUpdateQuestionAction.class);
 
     private Map<?, ?> questionDataMap;
     private Question multiPartitionableQuestion = null;
 
-    public CreateOrUpdateQuestionAction(QuestionService multiPartitionableQuestionService) {
+    public CreateOrUpdateQuestionAction(QuestionService multiPartitionableQuestionService, @Qualifier("objectMapper") ObjectMapper objectMapper) {
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -53,5 +58,25 @@ public class CreateOrUpdateQuestionAction extends BaseAction<Question, Map<?, ?>
     @Override
     public void initData(Map<?, ?> questionMap) {
         this.questionDataMap = questionMap;
+    }
+
+    @Override
+    protected void preLog() {
+        try {
+            //noinspection unchecked
+            Map<String,Object> copy = (Map<String, Object>) new HashMap<>(questionDataMap);
+            //noinspection unchecked
+            List<Map<String,Object>> images = (List<Map<String,Object>>) copy.getOrDefault  ("images",List.of());
+            List<Map<String,Object>> images1 = new ArrayList<>();
+            for (Map<String,Object> i:images) {
+                HashMap<String, Object> e = new HashMap<>(i);
+                e.put("url","[ masked due to length ]");
+                images1.add(e);
+            }
+            copy.put("images",images1);
+            logger.info(objectMapper.writeValueAsString(copy));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

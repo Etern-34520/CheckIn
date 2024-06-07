@@ -1,6 +1,9 @@
 package indi.etern.checkIn.entities.question.impl;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,10 +26,12 @@ public class Choice implements Serializable {
     @Column(name = "ORDER_INDEX")
     private int orderIndex;
     
+/*
     @Setter
-    @OneToOne(cascade = {CascadeType.REFRESH,CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id",referencedColumnName = "id")
-    private Question question;
+    private MultipleChoicesQuestion question;
+*/
     protected Choice() {
     }
     

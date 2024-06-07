@@ -60,7 +60,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber"))
     protected Set<User> downVoters = new HashSet<>();
     
-    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL,orphanRemoval = true)
     @JoinColumn(name = "id", referencedColumnName = "id")
     protected QuestionLinkImpl<?> linkWrapper;
     
@@ -80,7 +80,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     public void initId() {
         id = UUID.randomUUID().toString();
     }
-    
+
     @Override
     public boolean equals(Object object) {
         if (object instanceof Question question) {
@@ -108,7 +108,6 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @Override
     public void setLinkWrapper(QuestionLinkImpl<?> linkWrapper) {
         this.linkWrapper = linkWrapper;
-        //noinspection unchecked
         ((Link<Question, ?>) linkWrapper).setSource(this);
     }
 }

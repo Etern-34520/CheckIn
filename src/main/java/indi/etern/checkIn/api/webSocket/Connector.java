@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.ActionExecutor;
-import indi.etern.checkIn.action.JsonResultAction;
 import indi.etern.checkIn.action.Result;
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.User;
@@ -107,38 +106,51 @@ public class Connector implements SubProtocolCapable {
 
     @SuppressWarnings("unchecked")
     @OnMessage
-    public boolean onMessage(String message) {
+    public void onMessage(String message) {
         try {
             Map<String, Object> contentMap = gson.fromJson(message, HashMap.class);
-            if (checkToken(contentMap)) return false;//TODO TIP
-            /*if (!JwtTokenProvider.currentUserHasPermission((String) contentMap.get("type"), PermissionType.WEB_SOCKET)) {
-                sendError("no permission");
-                return;
-            }*/
-            long qqInContentMap = 0;
-            String qqStr = "";
-            Object qqObject = contentMap.get("QQ");
+            if (checkToken(contentMap)) return;//TODO TIP
             String messageId = contentMap.get("messageId").toString();
-            if (qqObject != null) {
-                qqStr = (String) qqObject;
-                qqInContentMap = Long.parseLong(qqStr);
-            }
-//            boolean logging = true;
             Result result = actionExecutor.executeByMap(contentMap);
             if (result.getResult().isPresent()) {
                 JsonObject jsonObject = result.getResult().get();
                 jsonObject.addProperty("messageId", messageId);
                 sendMessage(jsonObject);
             }
-            if (result.isShouldLogging()) {
-                logger.info("{}({}):{}", sessionUser.getName(), sid, message);
+            if (contentMap.get("type").equals("partMessage")) {
+                PartMessage partMessage;
+                String partId;
+                if (contentMap.get("messageIds") instanceof List<?> messageIds) {
+                    partMessage = new PartMessage((List<String>) messageIds);
+                    partMessageMap.put(messageId, partMessage);
+                    partId = messageId;
+                    sendMessage("{\"type\":\"success\",\"messageId\":\"" + messageId + "\"}");
+                } else if (contentMap.get("partId") instanceof String) {
+                    partId = (String) contentMap.get("partId");
+                    partMessage = partMessageMap.get(partId);
+                    partMessage.put(messageId, (String) contentMap.get("messagePart"));
+                } else {
+                    //TODO Tip
+                    return;
+                }
+                if (partMessage.isComplete()) {
+                    onMessage(partMessage.toString());
+                    partMessageMap.remove(partId);
+                }
             }
-            return result.isShouldLogging();
+/*
+            if (result.isShouldLogging()) {
+                logger.info("{}({}):{}", sessionUser.getName(), sid, result.getLoggingMessage());
+            }
+*/
+//            return result.isShouldLogging();
         } catch (Exception e) {
             try {
+/*
                 if (message.length() < 65535) {
                     logger.info("{}({}):{}", sessionUser.getName(), sid, message);
                 }
+*/
                 logger.error("{}:{}", e.getClass().getName(), e.getMessage());
                 String messageId = gson.fromJson(message, HashMap.class).get("messageId").toString();
                 sendError(messageId, e.getClass().getSimpleName() + ":" + e.getMessage());
@@ -146,7 +158,6 @@ public class Connector implements SubProtocolCapable {
                 logger.error("while sending message:{}to {}({}):{}", message, sessionUser.getName(), sid, exception.getMessage());
             }
             e.printStackTrace();
-            return true;
         }
     }
 
@@ -243,8 +254,9 @@ public class Connector implements SubProtocolCapable {
     }
 
     public void sendMessage(String message) throws IOException {
-        logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, message);
         this.session.getBasicRemote().sendText(message);
+        if (message.length() > 65535) message = message.substring(0,4096) + "..." ;
+        logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, message);
     }
 
     @NonNull
@@ -256,31 +268,4 @@ public class Connector implements SubProtocolCapable {
     public boolean isOpen() {
         return session.isOpen();
     }
-
-    private boolean doAction(Map<String, Object> contentMap, JsonResultAction jsonResultAction) throws Exception {
-        Optional<JsonObject> optionalResult = jsonResultAction.call();
-        if (contentMap.get("expectResponse") != null && !((boolean) contentMap.get("expectResponse"))) {
-            return jsonResultAction.shouldLogging();
-        }
-        JsonObject jsonObject;
-        jsonObject = optionalResult.orElseGet(JsonObject::new);
-        jsonObject.addProperty("messageId", contentMap.get("messageId").toString());
-        sendMessageWithOutLog(jsonObject);
-        {
-            Optional<JsonObject> message = jsonResultAction.logMessage(optionalResult);
-            if (message.isPresent()) {
-                JsonObject jsonObject1 = message.get();
-                jsonObject1.addProperty("messageId", contentMap.get("messageId").toString());
-                if (jsonResultAction.shouldLogging())
-                    logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, jsonObject1);
-            }
-/*
-            if (jsonObject.get("type") != null && !jsonObject.get("type").getAsString().equals("error")) {
-                jsonResultAction.afterAction();
-            }
-*/
-        }
-        return jsonResultAction.shouldLogging();
-    }
-
 }

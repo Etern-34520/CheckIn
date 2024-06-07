@@ -9,7 +9,7 @@ const props = defineProps({
 });
 </script>
 <template>
-    <svg :width="size" :height="size" viewBox="0 0 24 24" style="margin: 4px;">
+    <svg :width="size" :height="size" viewBox="0 0 24 24" >
         <title>Public/ic_public_quit</title>
         <defs>
             <path

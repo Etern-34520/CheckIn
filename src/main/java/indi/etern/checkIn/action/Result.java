@@ -10,6 +10,6 @@ import java.util.Optional;
 @Setter
 public class Result {
     Optional<JsonObject> result;
-    Optional<JsonObject> loggingMessage;
-    boolean shouldLogging;
+//    String loggingMessage = "";
+//    boolean shouldLogging;
 }

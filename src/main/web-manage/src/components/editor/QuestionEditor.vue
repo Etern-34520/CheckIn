@@ -1,13 +1,12 @@
 <script setup>
 // import {nextTick, onBeforeMount, ref, watch} from "vue";
 import {useRoute} from "vue-router";
-import QuestionTempStorage from "@/data/QuestionTempStorage.js";
+import QuestionCache from "@/data/QuestionCache.js";
 import randomUUID from "@/utils/UUID.js";
 import {VueDraggable} from "vue-draggable-plus";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
-import Collapse from "@/components/Collapse.vue";
 import BasicQuestionEditor from "@/components/editor/BasicQuestionEditor.vue";
 import SubQuestionEditor from "@/components/editor/SubQuestionEditor.vue";
 import MultipleChoicesEditorPlugin from "@/components/editor/plugin/MultipleChoicesEditorPlugin.vue";
@@ -29,7 +28,7 @@ let update = (newVal, oldVal) => {
             loading.value = true;
         }
     }, 200);
-    QuestionTempStorage.getAsync(newVal).then((questionData) => {
+    QuestionCache.getAsync(newVal).then((questionData) => {
         questionInfo.value = questionData;
         if (ready.value === false) ready.value = true;
         requested = true;
@@ -52,13 +51,13 @@ watch(() => route.params.id, update);
 watch(() => questionInfo.value.question, (newVal, oldVal) => {
     if (error.value) return;
     if (newVal && oldVal && oldVal.id === newVal.id) {
-        QuestionTempStorage.update(questionInfo);
+        QuestionCache.update(questionInfo);
     }
     questionInfo.value.check();
 }, {deep: true});
 
 watch(() => questionInfo.value.questionInfos, (newVal,oldVal) => {
-    QuestionTempStorage.update(questionInfo);
+    QuestionCache.update(questionInfo);
     questionInfo.value.check();
 });
 
@@ -67,9 +66,9 @@ onBeforeMount(() => {
 });
 
 const createQuestion = () => {
-    QuestionTempStorage.appendToGroup(
+    QuestionCache.appendToGroup(
         questionInfo,
-        QuestionTempStorage.create({
+        QuestionCache.create({
             id: randomUUID(),
             content: "",
             type: "MultipleChoicesQuestion",
@@ -131,7 +130,7 @@ const onEndDrag = () => {
                                          v-for="(questionInfo1, $index) of questionInfo.questionInfos"
                                          :key="questionInfo1.question.id">
                                         <div style="min-height: 0;grid-column: 1;">
-                                            <div class="handle" style="cursor: grab;width: 30px">
+                                            <div class="handle" style="cursor: grab">
                                                 <HarmonyOSIcon_Handle/>
                                             </div>
                                             <transition name="delete-question-button">
@@ -165,8 +164,9 @@ const onEndDrag = () => {
 
 <style scoped>
 .handle {
-    width: 20px;
-    padding: 5px;
+    width: 30px;
+    aspect-ratio: 1;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-items: center;
@@ -200,44 +200,6 @@ const onEndDrag = () => {
 }
 
 /*noinspection CssUnusedSymbol*/
-.alert-enter-active {
-    transition:
-        all 300ms var(--ease-in-bounce-1) 300ms,
-        max-width 200ms var(--ease-in-out-quint),
-        max-height 200ms var(--ease-in-out-quint),
-        padding 200ms var(--ease-in-out-quint);
-}
-
-/*noinspection CssUnusedSymbol*/
-.alert-leave-active {
-    transition:
-        all 300ms var(--ease-in-bounce-1) 0ms,
-        max-width 200ms var(--ease-in-out-quint) 350ms,
-        max-height 200ms var(--ease-in-out-quint) 350ms,
-        padding 200ms var(--ease-in-out-quint) 350ms;
-}
-
-/*noinspection CssUnusedSymbol*/
-.alert-enter-from, .alert-leave-to {
-    opacity: 0;
-    /*    margin-top: -40px;*/
-    overflow: hidden;
-    filter: blur(16px);
-    max-width: 0 !important;
-    max-height: 0 !important;
-    padding: 0;
-}
-
-.alerts > * {
-    max-height: 24px;
-    max-width: 500px;
-}
-
-.alerts > *:not(:last-child) {
-    margin-right: 4px;
-}
-
-/*noinspection CssUnusedSymbol*/
 .page-content-enter-active,
 .page-content-leave-active {
     transition: 400ms var(--ease-in-out-quint);
@@ -265,6 +227,8 @@ const onEndDrag = () => {
 }
 
 .remove-question-button {
-    width: 40px;
+    width: 30px;
+    padding: 0;
+    aspect-ratio: 1;
 }
 </style>

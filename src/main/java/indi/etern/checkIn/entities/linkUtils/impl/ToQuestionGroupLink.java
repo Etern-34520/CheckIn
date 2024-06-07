@@ -19,7 +19,7 @@ public class ToQuestionGroupLink extends QuestionLinkImpl<QuestionGroup> impleme
         target.addQuestionLink(this);
     }
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.EAGER)
     protected QuestionGroup target;
 
     @Setter

@@ -16,10 +16,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Entity
@@ -88,6 +85,8 @@ public class QuestionGroup extends Question implements LinkTarget, LinkSource<Qu
         private String id;
         private final Set<Question> questions = new HashSet<>();
         private Boolean enabled;
+        @Getter
+        final Map<String, String> imageBase64Strings = new LinkedHashMap<>();
 
         public Builder() {
         }
@@ -146,6 +145,9 @@ public class QuestionGroup extends Question implements LinkTarget, LinkSource<Qu
             } else {
                 questionGroup = new QuestionGroup(id, content/*, partitions*/, author, questions);
             }
+            if (!imageBase64Strings.isEmpty()) {
+                questionGroup.setImageBase64Strings(imageBase64Strings);//FIXME
+            }
             if (enabled!=null) {
                 questionGroup.setEnabled(enabled);
             }
@@ -155,6 +157,11 @@ public class QuestionGroup extends Question implements LinkTarget, LinkSource<Qu
 
         public Builder setEnabled(Boolean enabled) {
             this.enabled = enabled;
+            return this;
+        }
+
+        public QuestionGroup.Builder addBase64Image(String name, String base64String) {
+            imageBase64Strings.put(name, base64String);
             return this;
         }
     }

@@ -159,11 +159,14 @@ div.panel {
     overflow: hidden;
 }
 
-.slide-hide-enter-from,
-.slide-hide-leave-to {
-    /*margin-left: -100%;*/
-    /*margin-right: 100%;*/
+.slide-hide-enter-from{
     margin-top: 0 !important;
     transform: translateX(-100%);
+    grid-template-rows: 0fr !important;
+}
+
+.slide-hide-leave-to {
+    margin-top: 0 !important;
+    transform: translateX(100%);
     grid-template-rows: 0fr !important;
 }

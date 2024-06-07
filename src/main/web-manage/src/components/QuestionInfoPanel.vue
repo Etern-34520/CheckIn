@@ -37,11 +37,11 @@
                         <el-tag
                             v-for="partitionId of questionInfo.question.partitionIds"
                             type="info">
-                            {{ PartitionTempStorage.getName(partitionId) }}
+                            {{ PartitionCache.getName(partitionId) }}
                         </el-tag>
                     </template>
                 </div>
-                <div class="errorsDescription">
+                <div class="errorsDescription" v-if="!disableErrorAndWarning">
                     <transition-group name="errorDescriptions">
                         <el-text v-for="error of questionInfo.errors"
                                  :key="error.content?error.content:''"
@@ -55,7 +55,7 @@
     </div>
 </template>
 <script setup>
-import PartitionTempStorage from "../data/PartitionTempStorage.js";
+import PartitionCache from "../data/PartitionCache.js";
 import Collapse from "@/components/Collapse.vue";
 
 defineProps({
@@ -63,6 +63,10 @@ defineProps({
     clickable: {
         type: Boolean,
         default: true,
+    },
+    disableErrorAndWarning: {
+        type: Boolean,
+        default: false,
     }
 })
 </script>
@@ -97,7 +101,7 @@ defineProps({
 }
 
 .choicesList > * {
-    min-width: 40px;
+    /*min-width: 40px;*/
     margin-right: 4px;
 }
 
