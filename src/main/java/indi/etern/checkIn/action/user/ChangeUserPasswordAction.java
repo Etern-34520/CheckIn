@@ -2,6 +2,7 @@ package indi.etern.checkIn.action.user;
 
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.CheckInApplication;
+import indi.etern.checkIn.SecurityConfig;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
@@ -25,11 +26,14 @@ public class ChangeUserPasswordAction extends UserJsonResultAction {
     protected Optional<JsonObject> doAction() throws Exception {
         final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
         User user = optionalUser.orElseThrow();
-/*
         if (!(user.getPassword() == null || user.getPassword().isEmpty()) && !SecurityConfig.ENCODER.matches(oldPassword, user.getPassword())) {
-            throw new AuthException("wrong password");
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("type", "fail");
+            jsonObject.addProperty("message", "wrong password");
+            jsonObject.addProperty("failureType", "previousPasswordIncorrect");
+            return Optional.of(jsonObject);
+//            throw new AuthException("wrong password");
         }
-*/
         user.setPassword(CheckInApplication.applicationContext.getBean(PasswordEncoder.class).encode(password));
         UserService.singletonInstance.save(user);
 
@@ -40,7 +44,7 @@ public class ChangeUserPasswordAction extends UserJsonResultAction {
     @Override
     public void initData(Map<String, Object> dataMap) {
         Object qqObject = dataMap.get("QQ");
-        qqNumber = Long.parseLong((String) qqObject);
+        qqNumber = ((Double) qqObject).longValue();
         oldPassword = (String) dataMap.get("oldPassword");
         password = (String) dataMap.get("newPassword");
     }

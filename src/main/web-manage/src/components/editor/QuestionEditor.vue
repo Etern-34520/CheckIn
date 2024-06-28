@@ -9,7 +9,8 @@ import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
 import BasicQuestionEditor from "@/components/editor/BasicQuestionEditor.vue";
 import SubQuestionEditor from "@/components/editor/SubQuestionEditor.vue";
-import MultipleChoicesEditorPlugin from "@/components/editor/plugin/MultipleChoicesEditorPlugin.vue";
+import MultipleChoicesEditorPlugin from "@/components/editor/module/MultipleChoicesEditorModule.vue";
+import QuestionPreview from "@/components/question/QuestionPreview.vue";
 
 const {proxy} = getCurrentInstance();
 const route = useRoute();
@@ -20,6 +21,7 @@ const errorMessage = ref("");
 const ready = ref(false);
 const loading = ref(false);
 let requested = false;
+import Responsive from "@/utils/Responsive.js";
 
 let update = (newVal, oldVal) => {
     requested = false;
@@ -56,7 +58,7 @@ watch(() => questionInfo.value.question, (newVal, oldVal) => {
     questionInfo.value.check();
 }, {deep: true});
 
-watch(() => questionInfo.value.questionInfos, (newVal,oldVal) => {
+watch(() => questionInfo.value.questionInfos, (newVal, oldVal) => {
     QuestionCache.update(questionInfo);
     questionInfo.value.check();
 });
@@ -103,62 +105,96 @@ const onEndDrag = () => {
         dragging.value = false;
     });
 }
+
+const view = ref('编辑');
+watch(() => view.value, () => {
+    nextTick(() => {
+        view1.value = view.value !== '预览';
+    })
+})
+const view1 = ref(true);
+const forceMobilePreview = ref(Responsive.mobile.value);
 </script>
 
 <template>
-    <div v-loading="loading" style="width: 100%;height: 100%">
-        <transition name="page-content" mode="out-in">
-            <el-empty v-if="error" style="height: 100%;"></el-empty>
-            <div v-else-if="ready" style="display: flex;flex-direction: column;padding: 8px;box-sizing: border-box;height: 100%">
-                <basic-question-editor v-model:question-info="questionInfo"/>
-                <el-scrollbar>
-                    <transition name="page-content" mode="out-in">
-                        <multiple-choices-editor-plugin v-if="questionInfo.question.type === 'MultipleChoicesQuestion'"
-                                                        :question-info="questionInfo" :key="'multipleChoice'"/>
-                        <div v-else-if="questionInfo.type === 'QuestionGroup'" :key="'questionGroup'"
-                             style="display: flex;flex-direction:column;justify-items: stretch">
-                            <VueDraggable ref="draggable"
-                                          v-model="questionInfo.questionInfos"
-                                          :animation="150"
-                                          handle=".handle"
-                                          ghostClass="ghost"
-                                          @start="onStartDrag"
-                                          @end="onEndDrag"
-                            >
-                                <transition-group :name="/*dragging ? null:'drag'*/'slide-hide'">
-                                    <div class="slide-hide-base" style="display: grid;margin-top: 4px;grid-template-columns: 0fr 1fr;"
-                                         v-for="(questionInfo1, $index) of questionInfo.questionInfos"
-                                         :key="questionInfo1.question.id">
-                                        <div style="min-height: 0;grid-column: 1;">
-                                            <div class="handle" style="cursor: grab">
-                                                <HarmonyOSIcon_Handle/>
-                                            </div>
-                                            <transition name="delete-question-button">
-                                                <el-button class="remove-question-button"
-                                                           v-show="questionInfo.questionInfos.length>2" link
-                                                           @click="removeQuestion($index)">
-                                                    <HarmonyOSIcon_Remove/>
-                                                </el-button>
-                                            </transition>
-                                        </div>
-                                        <div style="min-height: 0;grid-column: 2;">
-                                            <sub-question-editor
-                                                v-model:question-info="questionInfo.questionInfos[$index]"/>
-                                        </div>
+    <div v-loading="loading" style="height: 100%;display: flex;flex-direction: column;">
+        <div style="display: flex;margin-left: 8px;margin-top: 8px;flex: none">
+            <el-segmented v-model="view" :options="['编辑','预览']" block/>
+            <transition name="preview-type-switch">
+                <div style="display: flex;margin-left: 16px" v-if="view==='预览'">
+                    <el-text style="margin-right: 4px;">移动端预览</el-text>
+                    <el-switch v-model="forceMobilePreview"/>
+                </div>
+            </transition>
+        </div>
+        <el-scrollbar style="flex: 1">
+            <div class="slide-switch-base" :class="{
+                'left-to-right':view==='编辑'
+            }">
+                <transition :name="view==='编辑'?'slide-left-to-right':'slide-right-to-left'">
+                    <div v-if="view1">
+                        <transition name="page-content" mode="out-in">
+                            <el-empty v-if="error" style="height: 100%;"></el-empty>
+                            <div v-else-if="ready"
+                                 style="display: flex;flex-direction: column;padding: 4px 8px 8px 8px;box-sizing: border-box;height: 100%">
+                                <basic-question-editor v-model:question-info="questionInfo"/>
+                                <transition name="page-content" mode="out-in">
+                                    <multiple-choices-editor-plugin
+                                        v-if="questionInfo.question.type === 'MultipleChoicesQuestion'"
+                                        :question-info="questionInfo" :key="'multipleChoice'"/>
+                                    <div v-else-if="questionInfo.type === 'QuestionGroup'" :key="'questionGroup'"
+                                         style="display: flex;flex-direction:column;justify-items: stretch">
+                                        <VueDraggable ref="draggable"
+                                                      v-model="questionInfo.questionInfos"
+                                                      :animation="150"
+                                                      handle=".handle"
+                                                      ghostClass="ghost"
+                                                      @start="onStartDrag"
+                                                      @end="onEndDrag"
+                                        >
+                                            <transition-group :name="/*dragging ? null:'drag'*/'slide-hide'">
+                                                <div class="slide-hide-base"
+                                                     style="display: grid;margin-top: 4px;grid-template-columns: 0fr 1fr;"
+                                                     v-for="(questionInfo1, $index) of questionInfo.questionInfos"
+                                                     :key="questionInfo1.question.id">
+                                                    <div style="min-height: 0;grid-column: 1;">
+                                                        <div class="handle" style="cursor: grab">
+                                                            <HarmonyOSIcon_Handle/>
+                                                        </div>
+                                                        <transition name="delete-question-button">
+                                                            <el-button class="remove-question-button"
+                                                                       v-show="questionInfo.questionInfos.length>2" link
+                                                                       @click="removeQuestion($index)">
+                                                                <HarmonyOSIcon_Remove/>
+                                                            </el-button>
+                                                        </transition>
+                                                    </div>
+                                                    <div style="min-height: 0;grid-column: 2;">
+                                                        <sub-question-editor
+                                                            v-model:question-info="questionInfo.questionInfos[$index]"/>
+                                                    </div>
+                                                </div>
+                                            </transition-group>
+                                        </VueDraggable>
+                                        <el-button @click="createQuestion" style="margin-top: 4px" size="large" text>
+                                            <HarmonyOSIcon_Plus/>
+                                            <el-text>
+                                                添加子题目
+                                            </el-text>
+                                        </el-button>
                                     </div>
-                                </transition-group>
-                            </VueDraggable>
-                            <el-button @click="createQuestion" style="margin-top: 4px" size="large" text>
-                                <HarmonyOSIcon_Plus/>
-                                <el-text>
-                                    添加子题目
-                                </el-text>
-                            </el-button>
-                        </div>
-                    </transition>
-                </el-scrollbar>
+                                </transition>
+                            </div>
+                        </transition>
+                    </div>
+                    <div v-else>
+                        <transition name="switch-preview" mode="out-in">
+                            <question-preview :key="questionInfo.question.id" :questionInfo="questionInfo" :force-mobile="forceMobilePreview"/>
+                        </transition>
+                    </div>
+                </transition>
             </div>
-        </transition>
+        </el-scrollbar>
     </div>
 </template>
 
@@ -189,17 +225,6 @@ const onEndDrag = () => {
 }
 
 /*noinspection CssUnusedSymbol*/
-.creatingPartition-enter-active, .creatingPartition-leave-active {
-    transition: all 0.3s var(--ease-in-bounce-1);
-}
-
-/*noinspection CssUnusedSymbol*/
-.creatingPartition-enter-from, .creatingPartition-leave-to {
-    opacity: 0;
-    scale: 0.95;
-}
-
-/*noinspection CssUnusedSymbol*/
 .page-content-enter-active,
 .page-content-leave-active {
     transition: 400ms var(--ease-in-out-quint);
@@ -216,7 +241,7 @@ const onEndDrag = () => {
 /*noinspection CssUnusedSymbol*/
 .delete-question-button-enter-active,
 .delete-question-button-leave-active {
-    transition:300ms var(--ease-in-out-quint);
+    transition: 300ms var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -230,5 +255,30 @@ const onEndDrag = () => {
     width: 30px;
     padding: 0;
     aspect-ratio: 1;
+}
+
+/*noinspection CssUnusedSymbol*/
+.preview-type-switch-enter-active,
+.preview-type-switch-leave-active {
+    transition: 250ms var(--ease-in-out-quint);
+}
+
+/*noinspection CssUnusedSymbol*/
+.preview-type-switch-enter-from,
+.preview-type-switch-leave-to {
+    filter: blur(8px);
+    opacity: 0;
+}
+
+/*noinspection CssUnusedSymbol*/
+.switch-preview-enter-active, .switch-preview-leave-active {
+    transition: all 0.3s var(--ease-in-out-quint);
+}
+
+/*noinspection CssUnusedSymbol*/
+.switch-preview-enter-from, .switch-preview-leave-to {
+    filter: blur(32px);
+    opacity: 0;
+    transform: scale(0.98);
 }
 </style>

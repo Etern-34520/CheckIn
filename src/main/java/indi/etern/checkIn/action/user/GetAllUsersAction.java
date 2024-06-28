@@ -8,7 +8,7 @@ import indi.etern.checkIn.service.dao.UserService;
 import java.util.Optional;
 
 @Action(name = "getAllUsers")
-public class GetAllUserAction extends UserJsonResultAction{
+public class GetAllUsersAction extends UserJsonResultAction{
 
     @Override
     public String requiredPermissionName() {

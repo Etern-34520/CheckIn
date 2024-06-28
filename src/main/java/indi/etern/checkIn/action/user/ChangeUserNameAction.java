@@ -23,7 +23,7 @@ public class ChangeUserNameAction extends UserJsonResultAction {
         final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
         User user = optionalUser.orElseThrow();
         user.setName(name);
-        UserService.singletonInstance.save(user);
+        UserService.singletonInstance.saveAndFlush(user);
         sendUpdateUserToAll(user);
         return successOptionalJsonObject;
     }
@@ -31,7 +31,7 @@ public class ChangeUserNameAction extends UserJsonResultAction {
     @Override
     public void initData(Map<String, Object> dataMap) {
         Object qqObject = dataMap.get("QQ");
-        qqNumber = Long.parseLong((String) qqObject);
+        qqNumber = ((Double) qqObject).longValue();
         name = (String) dataMap.get("newName");
     }
 }

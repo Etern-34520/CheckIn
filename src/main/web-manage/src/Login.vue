@@ -8,7 +8,7 @@ const password = ref('');
 const { proxy } = getCurrentInstance();
 
 const loginMessage = ref('');
-const key = ref(0);
+const key = ref(true);
 const requesting = ref(false);
 const emit = defineEmits(["loginAs"]);
 
@@ -30,11 +30,11 @@ function login() {
             requesting.value = false;
             loginMessage.value = "请求时遇到错误"
         }
-        key.value++;
+        key.value = !key.value;
     }, error => {
         requesting.value = false;
         loginMessage.value = "请求时遇到错误";
-        key.value++;
+        key.value = !key.value;
     });
 }
 </script>
@@ -42,7 +42,7 @@ function login() {
 <template>
     <div style="width: 100%;height:100%;display: flex;align-items: center;align-content:center;justify-content: center;overflow: hidden">
         <div id="login" style="z-index:2;width: 300px;display: flex;flex-direction: column;justify-content: stretch;">
-            <el-input v-model="usernameOrQQ" placeholder="用户名或QQ" type="text" size="large"></el-input>
+            <el-input v-model="usernameOrQQ" autofocus placeholder="用户名或QQ" type="text" size="large"></el-input>
             <el-input v-model="password" placeholder="密码" type="password" show-password clearable
                       size="large"></el-input>
             <el-button text bg :disabled="requesting" :loading="requesting" loading-icon="_Loading_" :icon="DArrowRight" @click="login">登录</el-button>

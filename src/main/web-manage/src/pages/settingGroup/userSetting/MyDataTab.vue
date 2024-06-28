@@ -4,25 +4,72 @@ import MyLikeQuestionsView from "@/pages/settingGroup/userSetting/MyLikeQuestion
 import MyDislikeQuestionsView from "@/pages/settingGroup/userSetting/MyDislikeQuestionsView.vue";
 import MyQuestionsView from "@/pages/settingGroup/userSetting/MyQuestionsView.vue";
 import router from "@/router/index.js";
+import TabPane from "@/components/common/TabPane.vue";
 
+
+const selectedTabName = ref("我的题目");
+
+const CnEnMapping = {
+    "我的题目": "my-questions",
+    "我点赞的题目": "my-like-questions",
+    "我点踩的题目": "my-dislike-questions"
+}
+
+const EnCnMapping = {
+    "my-questions": "我的题目",
+    "my-like-questions": "我点赞的题目",
+    "my-dislike-questions": "我点踩的题目"
+}
+
+if (router.currentRoute.value.query.tab) {
+    selectedTabName.value = EnCnMapping[router.currentRoute.value.query.tab];
+}
+
+const onSwitchTab = (tab) => {
+    router.replace({
+        name: "my-data",
+        query: {tab: CnEnMapping[tab]}
+    });
+}
+
+const tabs = {
+    '我的题目': MyQuestionsView,
+    '我点赞的题目': MyLikeQuestionsView,
+    '我点踩的题目': MyDislikeQuestionsView
+}
+/*
 const route = useRoute();
-/*watch(() => route.params.id , () => {
-    activeName.value = route.params.id;
-/!*
-    switch (route.params.id) {
-        case 'questions':
-            activeName.value = '我的题目';
-            break;
-        case 'like-questions':
-            activeName.value = '我点赞的题目';
-            break;
-        case 'dislike-questions':
-            activeName.value = '我点踩的题目';
-            break;
-    }
-*!/
-})*/
-const activeName = ref(route.query.tab);
+const tabsName = [
+    "我的题目",
+    "我点赞的题目",
+    "我点踩的题目"
+]
+
+const activeTabComponents = {
+    "我的题目": MyQuestionsView,
+    "我点赞的题目": MyLikeQuestionsView,
+    "我点踩的题目": MyDislikeQuestionsView
+}
+
+const activeCNValue = ref("我的题目");
+
+const switchType = ref(false);
+watch(() => activeCNValue.value, (newVal,oldValue) => {
+    setTimeout(() => {
+        switchType.value = tabsName.indexOf(oldValue) < tabsName.indexOf(newVal) ;//FIXME
+    },400);
+},{immediate: true});*/
+/*
+watch(activeCNValue, (value) => {
+    activeName.value = CnEnMapping[value];
+});
+*/
+/*const activeName = ref(route.query.tab);
+const EnCnMapping = {
+    "my-questions": "我的题目",
+    "my-like-questions": "我点赞的题目",
+    "my-dislike-questions": "我点踩的题目"
+}
 
 const replaceHistory = (tab) => {
     router.replace({
@@ -30,29 +77,11 @@ const replaceHistory = (tab) => {
             tab: tab.paneName
         }
     });
-}
+}*/
 </script>
 
 <template>
-    <div class="panel" style="padding: 20px 32px">
-        <el-tabs v-model="activeName" class="demo-tabs" @tabClick="replaceHistory">
-            <el-tab-pane label="我的题目" name="my-questions">
-                <transition name="tab" mode="out-in">
-                    <my-questions-view/>
-                </transition>
-            </el-tab-pane>
-            <el-tab-pane label="我点赞的题目" name="like-questions">
-                <transition name="tab" mode="out-in">
-                    <my-like-questions-view/>
-                </transition>
-            </el-tab-pane>
-            <el-tab-pane label="我点踩的题目" name="dislike-questions">
-                <transition name="tab" mode="out-in">
-                    <my-dislike-questions-view/>
-                </transition>
-            </el-tab-pane>
-        </el-tabs>
-    </div>
+    <tab-pane :tabs="tabs" @on-switch-tab="onSwitchTab" v-model="selectedTabName"/>
 </template>
 
 <style scoped>

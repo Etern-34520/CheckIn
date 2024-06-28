@@ -34,7 +34,14 @@ const router = createRouter({
                 {
                     path: 'manage-user/',
                     name: 'manage-user',
-                    component: () => import('../pages/manageGroup/ManageUserView.vue')
+                    component: () => import('../pages/manageGroup/ManageUserView.vue'),
+                    children: [
+                        {
+                            path: ':id/',
+                            name: 'user-detail',
+                            component: () => import('../components/user/UserView.vue'),
+                        }
+                    ]
                 },
                 {
                     path: 'manage-group/',
@@ -49,24 +56,20 @@ const router = createRouter({
                 {
                     path: 'user-setting/',
                     name: 'user-setting',
-                    component: () => import('../pages/settingGroup/UserSettingView.vue')
-                },
-                /*                {
-                                    path: "user-setting/my-question/",
-                                    name: "my-question",
-                                    component: () => import('../pages/settingGroup/userSetting/MyQuestionsView.vue')
-                                },
-                                {
-                                    path: "user-setting/my-likes/",
-                                    name: "my-likes",
-                                    component: () => import('../pages/settingGroup/userSetting/MyLikeQuestionsView.vue')
-                                },*/
-                {
-                    path: "user-setting/my-data/",
-                    name: "my-data",
-                    component: () => import('../pages/settingGroup/userSetting/MyDataTab.vue')
-                },
-                {
+                    component: () => import('../pages/settingGroup/UserSettingView.vue'),
+                    children: [
+                        {
+                            path: "",
+                            name: "base",
+                            component: () => import('../pages/settingGroup/userSetting/Base.vue')
+                        },
+                        {
+                            path: "my-data/",
+                            name: "my-data",
+                            component: () => import('../pages/settingGroup/userSetting/MyDataTab.vue')
+                        }
+                    ]
+                }, {
                     path: 'questions/',
                     name: 'questions',
                     component: () => import('../pages/serverGroup/QuestionsView.vue'),

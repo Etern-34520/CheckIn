@@ -63,7 +63,23 @@ public class ActionExecutor {
             throw new RuntimeException("Action not found: " + actionName);
         }
         JsonResultAction jsonResultAction = (JsonResultAction) applicationContext.getBean(actionMap.get(actionName));
-        jsonResultAction.initData(contentMap);
+        try {
+            jsonResultAction.initData(contentMap);
+        } catch (NullPointerException e) {
+            Result result = new Result();
+            JsonObject value = new JsonObject();
+            value.addProperty("type", "error");
+            value.addProperty("message", "parameter absent");
+            result.setResult(Optional.of(value));
+            return result;
+        } catch (ClassCastException e) {
+            Result result = new Result();
+            JsonObject value = new JsonObject();
+            value.addProperty("type", "error");
+            value.addProperty("message", "parameter type error");
+            result.setResult(Optional.of(value));
+            return result;
+        }
         jsonResultAction.preLog();
 
         Result result = new Result();

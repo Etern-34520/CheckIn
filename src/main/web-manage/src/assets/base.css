@@ -13,6 +13,8 @@
     --primary-button-text-color: rgba(0, 0, 0, 0.9);
     --front-color-dark: rgba(15, 15, 15, 0.9);
     --front-color-light: rgba(240, 240, 240, 0.9);
+    --mobile-width: 1080px;
+    --el-transition-duration: 150ms !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,6 +23,7 @@
         --bg-color-alpha: rgba(20, 20, 20, 0.6);
         --panel-bg-color: rgba(128, 128, 128, 0.05);
         --panel-bg-color-overlay: rgba(128, 128, 128, 0.1);
+        --fullscreen-bg-color: rgba(20, 20, 20, 0.9);
         --popper-bg-color: rgba(20, 20, 20, 0.9);
         --icon-color: rgba(255, 255, 255, 0.9);
         --front-color: var(--front-color-light);
@@ -33,6 +36,7 @@
         --bg-color-alpha: rgba(20, 20, 20, 0.6);
         --panel-bg-color: rgba(255, 255, 255, 0.1);
         --panel-bg-color-overlay: rgba(255, 255, 255, 0.2);
+        --fullscreen-bg-color: rgba(255, 255, 255, 0.9);
         --popper-bg-color: rgba(20, 20, 20, 0.9);
         --icon-color: rgba(0, 0, 0, 0.9);
         --front-color: var(--front-color-dark);
@@ -49,6 +53,12 @@
 
 .el-button {
     transition: 200ms var(--ease-in-out-quint) all !important;
+}
+
+.el-button:active,
+.el-upload--picture-card:active,
+.v-md-editor__toolbar li:active {
+    transform: scale(0.98);
 }
 
 .el-input {
@@ -115,7 +125,14 @@
 }
 
 .el-select-dropdown__item {
-    transition: 150ms var(--ease-in-out-quint);
+    border-radius: 4px;
+    margin: 0 4px;
+    transition: 200ms var(--ease-in-out-quint);
+    background: transparent !important;
+}
+
+.el-select-dropdown__item.is-hovering {
+    background: var(--panel-bg-color-overlay) !important;
 }
 
 .el-button.is-text:not(.is-disabled):hover {
@@ -238,7 +255,10 @@
 
 .el-checkbox__inner:after {
     top: 3px !important;
-    left: 6px !important;
+    left: 5px !important;
+    border-width: 2px !important;
+    border-radius: 1px;
+    --el-checkbox-checked-icon-color: var(--front-color-dark);
     transition: 200ms var(--ease-in-bounce-1) !important;
 }
 
@@ -251,8 +271,42 @@
     place-items: baseline !important;
 }
 
+.el-input__suffix {
+    align-self: center;
+}
+
 .el-select__suffix {
     place-self: center;
+}
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:after {
+    content: none !important;
+}
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 0;
+    width: 3px;
+    opacity: 0;
+    filter: blur(2px);
+    background: var(--el-color-primary);
+    border-radius: 1.5px;
+    transition: 200ms var(--ease-in-bounce-1);
+}
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:before {
+    top: 20%;
+    left: 0;
+    height: 60%;
+    opacity: 1;
+    filter: none;
+}
+
+.el-input__inner {
+    background-clip: text !important;
 }
 
 /*.el-input__wrapper.is-focus, .el-select__wrapper.is-focused {
@@ -266,9 +320,10 @@
 }
 
 .el-checkbox__inner {
-    background: transparent !important;
+    /*background: transparent !important;*/
     border: 4px var(--el-border-color) !important;
     background-clip: padding-box;
+    transition: 200ms var(--ease-in-out-quint);
 }
 
 /*.el-checkbox__input.is-focus > .el-checkbox__inner {
@@ -298,8 +353,33 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0, var(--panel-bg-color) 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
 }
 
-.el-textarea:not(.is-disabled):hover, .el-input:not(.is-disabled):hover, .el-select:not(.is-disabled):hover, *:has(> .is-focused), *:not(.el-checkbox):has(> .is-focus) {
+.el-textarea:not(.is-disabled):hover,
+.el-input:not(.is-disabled):hover,
+.el-select:not(.is-disabled):hover,
+*:not(.el-tabs__nav):has(> .is-focused),
+*:not(.el-checkbox):not(.el-tabs__nav):has(> .is-focus) {
     background: var(--panel-bg-color-overlay);
+}
+
+.el-tabs__nav-wrap:after {
+    transition-timing-function: var(--ease-in-out-quint);
+}
+
+.el-tabs {
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.el-tabs__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.el-tabs__content > .el-tab-pane {
+    max-height: 100%;
+    flex: 1;
 }
 
 /*.el-textarea > textarea:focus {
@@ -308,7 +388,7 @@
     transition-delay: 50ms;
 }*/
 
-
+.question-content-input::after,
 .el-input::after, .el-textarea::after, .el-select::after, .el-checkbox::after {
     content: "";
     position: absolute;
@@ -332,6 +412,7 @@
     top: calc(100% - 4px);
 }
 
+.question-content-input.warning::after, .question-content-input.error::after,
 .el-input:has(.is-focus)::after, .el-textarea:has(textarea:focus)::after, .el-select:has(.is-focused)::after,
 .el-input.warning::after, .el-textarea.warning::after, .el-select.warning::after, .el-checkbox.warning::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
@@ -341,10 +422,12 @@
     filter: none;
 }
 
+.question-content-input.error::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
     background: var(--el-color-danger);
 }
 
+.question-content-input.warning::after,
 .el-input.warning::after, .el-textarea.warning::after, .el-select.warning::after, .el-checkbox.warning::after {
     background: var(--el-color-warning);
 }
@@ -368,6 +451,7 @@
     border: none !important;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, var(--popper-bg-color) 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
     backdrop-filter: blur(16px) !important;
+    border-radius: 4px !important;
 }
 
 .el-popper[data-popper-placement^=bottom] .el-popper__arrow:before {
@@ -380,20 +464,25 @@
     padding: 0 !important;
 }
 
+#app .scrollbar__bar,
 .el-scrollbar__bar {
     transition: 300ms var(--ease-in-out-quint);
+    opacity: 1;
 }
 
+#app .scrollbar__bar.is-vertical,
 .el-scrollbar__bar.is-vertical {
     display: flex;
     flex-direction: row-reverse;
 }
 
+#app .scrollbar__bar.is-horizontal,
 .el-scrollbar__bar.is-horizontal {
     display: flex;
     flex-direction: column-reverse;
 }
 
+#app .scrollbar__bar.is-vertical .scrollbar__thumb,
 .el-scrollbar__bar.is-vertical .el-scrollbar__thumb {
     transition: background-color 100ms var(--ease-in-out-quint),
     width 100ms var(--ease-in-out-quint) !important;
@@ -401,6 +490,7 @@
     background: var(--el-scrollbar-bg-color) !important;
 }
 
+#app .scrollbar__bar.is-horizontal .scrollbar__thumb,
 .el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
     transition: background-color 100ms var(--ease-in-out-quint),
     height 100ms var(--ease-in-out-quint) !important;
@@ -408,10 +498,12 @@
     background: var(--el-scrollbar-bg-color) !important;
 }
 
+#app .scrollbar__bar.is-vertical:hover > .scrollbar__thumb,
 .el-scrollbar__bar.is-vertical:hover > .el-scrollbar__thumb {
     width: 6px !important;
 }
 
+#app .scrollbar__bar.is-horizontal:hover > .scrollbar__thumb,
 .el-scrollbar__bar.is-horizontal:hover > .el-scrollbar__thumb {
     height: 6px !important;
 }
@@ -458,6 +550,7 @@
     backdrop-filter: blur(8px);
     display: flex !important;
     justify-content: center !important;
+    background: transparent !important;
 }
 
 /* HTML: <div class="loader"></div> */
@@ -475,43 +568,6 @@
         transform: rotate(.5turn)
     }
 }
-
-
-/*.el-loading-spinner {
-    width: 25px !important;
-    height: 50px !important;
-    display: grid !important;
-    color: var(--front-color);
-    scale: 0.75;
-    !*noinspection CssInvalidFunction,CssReplaceWithShorthandSafely*!
-    background: linear-gradient(currentColor 0 0) top/100% 2px,
-    radial-gradient(farthest-side at top, #0000 calc(100% - 2px), currentColor calc(100% - 1px), #0000) top,
-    linear-gradient(currentColor 0 0) bottom/100% 2px,
-    radial-gradient(farthest-side at bottom, #0000 calc(100% - 2px), currentColor calc(100% - 1px), #0000) bottom;
-    background-size: 100% 1px, 100% 50%;
-    background-repeat: no-repeat;
-    animation: l18 4s infinite linear;
-}
-
-.el-loading-spinner::before,
-.el-loading-spinner::after {
-    content: "";
-    grid-area: 1/1;
-    background: inherit;
-    border: inherit;
-    animation: inherit;
-}
-
-.el-loading-spinner::after {
-    animation-duration: 2s;
-}
-
-@keyframes l18 {
-    100% {
-        transform: rotate(1turn)
-    }
-}*/
-
 
 .el-switch__core {
     --el-switch-off-color: var(--panel-bg-color);
@@ -601,52 +657,39 @@
     scale: 0.7;
 }
 
-/*
-
-.noScrollBar::-webkit-scrollbar {
-    display: none; !* Chrome Safari *!
+.el-link {
+    transition: 200ms var(--ease-in-out-quint);
 }
 
-.noScrollBar {
-    scrollbar-width: none; !* firefox *!
-    -ms-overflow-style: none; !* IE 10+ *!
+.el-segmented {
+    --el-segmented-item-hover-bg-color: var(--panel-bg-color-overlay) !important;
+    background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
 }
 
-!* 滚动条整体 *!
-div:not(.noScrollBar)::-webkit-scrollbar {
-    width: 5px;
+.el-segmented__item-selected {
+    height: 3px !important;
+    top: 100% !important;
+    border-radius: 1.5px !important;
+    transition: 250ms var(--ease-in-out-quint) !important;
 }
 
-!* 两个滚动条交接处 -- x轴和y轴 *!
-div:not(.noScrollBar)::-webkit-scrollbar-corner {
-    background-color: transparent;
+.el-segmented__item {
+    transition: 200ms var(--ease-in-out-quint);
 }
 
-!* 滚动条滑块 *!
-div:not(.noScrollBar)::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background: var(--el-bg-color-overlay);
-    transition: 0.2s;
-    transition-timing-function: var(--ease-in-out-quint);
+.el-dropdown-menu__item {
+    transition: 200ms var(--ease-in-out-quint);
 }
 
-!* 滚动条轨道 *!
-div:not(.noScrollBar)::-webkit-scrollbar-track {
-    border-radius: 4px;
-    background: rgba(0, 0, 0, 0);
+.el-dropdown-menu__item:hover,.el-dropdown-menu__item:focus {
+    background: var(--panel-bg-color-overlay) !important;
 }
 
-!* 滚动条两端按钮 *!
-div:not(.noScrollBar)::-webkit-scrollbar-button {
-    display: none;
-}
-*/
-
-/*noinspection CssInvalidPseudoSelector*/
+/*noinspection CssInvalidPseudoSelector*//*
 input:autofill {
     transition: 1000000000000000000000s linear 100000000000000000000000s;
 }
 
 input:-webkit-autofill {
     transition: 1000000000000000000000s linear 100000000000000000000000s;
-}
+}*/

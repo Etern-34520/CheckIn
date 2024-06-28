@@ -131,7 +131,11 @@ public class UserService implements UserDetailsService {
     public boolean existsByQQNumber(long qqNumber) {
         return userRepository.existsById(qqNumber);
     }
-    
+
+    public void saveAndFlush(User user) {
+        userRepository.saveAndFlush(user);
+    }
+
     public static class CustomPasswordEncoder implements PasswordEncoder {
         
         @Override

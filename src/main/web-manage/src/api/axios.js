@@ -1,7 +1,7 @@
 import axios from "axios";
 import {ElMessage} from "element-plus";
 
-// axios.defaults.baseURL = ''  //正式
+// axios.defaults.baseURL = 'http://localhost:5173/'
 axios.defaults.baseURL = 'http://localhost:8080/'
 
 //post请求头

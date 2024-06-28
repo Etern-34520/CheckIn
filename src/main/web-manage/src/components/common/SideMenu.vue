@@ -188,7 +188,7 @@ const props = defineProps({
     background: var(--bg-color-alpha) !important;
     width: 200px !important;
     backdrop-filter: blur(32px);
-    transition-delay: 500ms !important;
+    transition-delay: 900ms !important;
     box-shadow: 4px 0 32px rgba(0, 0, 0, 0.7);
     border-radius: 8px !important;
 }
@@ -210,11 +210,11 @@ const props = defineProps({
 
 .menu-expand .default-hidden-menu {
     opacity: 1 !important;
-    transition-delay: 600ms !important;
+    transition-delay: 970ms !important;
 }
 
 .menu-inline .default-hidden-menu {
     opacity: 1 !important;
-    transition-delay: 150ms !important;
+    transition-delay: 200ms !important;
 }
 </style>

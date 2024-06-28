@@ -1,5 +1,5 @@
 <script setup>
-import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
+import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionDialog.vue";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 
 const createPartitionVisible = ref(false);
@@ -27,7 +27,7 @@ const createPartitionVisible = ref(false);
     color: var(--front-color-dark) !important;
 }
 
-.error-question-info-panel > .grid1 > .padding > div {
+.question-info-panel > .grid1 > .padding > div {
     min-height: 25px;
 }
 

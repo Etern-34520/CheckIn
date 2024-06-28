@@ -1,10 +1,10 @@
 <script setup>
 import WebSocketConnector from "@/api/websocket.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
-import QuestionInfoPanel from "@/components/QuestionInfoPanel.vue";
+import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import QuestionCache from "@/data/QuestionCache.js";
 import router from "@/router/index.js";
-import Waterfall from "@/components/Waterfall.vue";
+import Waterfall from "@/components/common/Waterfall.vue";
 
 const questionInfos = ref([]);
 const loading = ref(true);

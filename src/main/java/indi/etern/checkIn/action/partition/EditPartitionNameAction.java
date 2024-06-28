@@ -30,7 +30,7 @@ public class EditPartitionNameAction extends PartitionJsonResultAction {
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        partitionId = (Integer) dataMap.get("id");
-        newName = (String) dataMap.get("newName");
+        partitionId = ((Double) dataMap.get("id")).intValue();
+        newName = (String) dataMap.get("name");
     }
 }

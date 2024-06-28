@@ -1,14 +1,10 @@
 <script setup>
-// import {RouterLink, RouterView} from 'vue-router'
-import TopBar from "@/components/TopBar.vue";
+import TopBar from "@/components/common/TopBar.vue";
 import router from "@/router/index.js";
-import topBar from "@/components/TopBar.vue";
-// import {ref, reactive, getCurrentInstance, onBeforeMount} from 'vue'
-import SideMenu from "@/components/SideMenu.vue";
+import topBar from "@/components/common/TopBar.vue";
+import SideMenu from "@/components/common/SideMenu.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import {Loading} from "@element-plus/icons-vue";
-
-const {proxy} = getCurrentInstance();
 
 onBeforeMount(() => {
     updateBreadcrumbArray({path: window.location.pathname});
@@ -74,7 +70,11 @@ const user = UserDataInterface.getCurrentUser();
 }*/
 
 /*noinspection CssUnusedSymbol*/
-.routePage-enter-active,
+.routePage-enter-active {
+    transition: all 0.4s var(--ease-out-quint);
+}
+
+/*noinspection CssUnusedSymbol*/
 .routePage-leave-active {
     transition: all 0.4s var(--ease-in-quint);
 }

@@ -1,6 +1,6 @@
 <script setup>
 import WebSocketConnector from "@/api/websocket.js";
-import _Loading_ from "@/components/_Loading_.vue";
+import _Loading_ from "@/components/common/_Loading_.vue";
 
 const loading = ref(false);
 

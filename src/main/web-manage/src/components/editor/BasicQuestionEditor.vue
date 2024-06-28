@@ -6,9 +6,12 @@ import WebSocketConnector from "@/api/websocket.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
 import PartitionCache from "@/data/PartitionCache.js";
-import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
+import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionDialog.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
-import Collapse from "@/components/Collapse.vue";
+import Collapse from "@/components/common/Collapse.vue";
+import toolbar from "@/data/MarkdownEditorToolbar.js"
+import Vditor from "vditor";
+import "vditor/dist/index.css"
 
 const {proxy} = getCurrentInstance();
 const imageDialogVisible = ref(false);
@@ -23,7 +26,7 @@ UserDataInterface.getUsersAsync().then((users) => {
     allUsers.value.push(...users);
 });
 
-const questionInfo = defineModel("questionInfo",{
+const questionInfo = defineModel("questionInfo", {
     required: true,
     type: Object
 })
@@ -105,7 +108,7 @@ const hideCreating = () => {
 }
 
 
-let lastPartitionId;
+let lastPartitionId = questionInfo.value.question.partitionIds[0];
 
 const preventEmptyPartition = (val) => {
     if (questionInfo.value.question.partitionIds.length === 0) {
@@ -166,6 +169,35 @@ const switchDisLike = () => {
         questionInfo.value.question.upVoters.delete(currentUserQQ);
     }
 }
+
+/*
+const vditor = ref();
+
+onMounted(() => {
+    const vditor1 = new Vditor('vditor', {
+        height: 360,
+        resize: {
+            "enable": true
+        },
+        theme: "dark",
+        preview: {
+            theme: {
+                current: "dark"
+            },
+            hljs: {
+                style: "native"
+            }
+        },
+        tab: "\t",
+        cache: {
+            "enable": false
+        },
+        mode: "ir",
+        value: questionInfo.value.question.content,
+        placeholder: "内容"
+    });
+    vditor.value = vditor1;
+})*/
 </script>
 
 <template>
@@ -178,23 +210,6 @@ const switchDisLike = () => {
     </el-dialog>
     <div style="display: flex;margin-bottom: 4px" class="alerts">
         <transition-group name="alert">
-            <!--        <el-alert v-for="error of questionInfo.errors" :key="'error'+error.content" type="error"
-                              :closable="false">
-                        <template #title>
-                            <div style="display: flex;flex-direction: row;">
-                                <el-text type="danger" style="margin-right: 16px">
-                                    {{ error.content }}
-                                </el-text>
-                                <el-button-group>
-                                    <el-button v-for="errorButton of error.buttons"
-                                               @click="errorButton.action"
-                                               :text="errorButton.isText" :type="errorButton.type">
-                                        {{ errorButton.content }}
-                                    </el-button>
-                                </el-button-group>
-                            </div>
-                        </template>
-                    </el-alert>-->
             <el-tag v-for="error of questionInfo.errors" :key="'error'+error.content" type="danger" :closable="false">
                 <div style="display: flex;flex-direction: row;align-items: center;">
                     <el-text type="danger" style="margin: 4px">
@@ -208,7 +223,8 @@ const switchDisLike = () => {
                     </el-button-group>
                 </div>
             </el-tag>
-            <el-tag v-for="warning of questionInfo.warnings" :key="'warning'+warning.content" type="warning" :closable="false">
+            <el-tag v-for="warning of questionInfo.warnings" :key="'warning'+warning.content" type="warning"
+                    :closable="false">
                 <div style="display: flex;flex-direction: row;align-items: center;">
                     <el-text type="warning" style="margin: 4px">
                         {{ warning.content }}
@@ -223,16 +239,39 @@ const switchDisLike = () => {
             </el-tag>
         </transition-group>
     </div>
-    <el-input class="question-content-input"
-              :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}"
-              type="textarea"
-              placeholder="内容" v-model="questionInfo.question.content"
-              autosize></el-input>
+    <!--    <el-input class="question-content-input"
+                  :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}"
+                  type="textarea"
+                  placeholder="内容" v-model="questionInfo.question.content"
+                  autosize></el-input>-->
+    <div style="position: relative;">
+        <div class="panel-1" style="padding: 4px 16px">
+            <el-link href="https://markdown.com.cn/basic-syntax/" target="_blank" type="info"
+                     style="margin-right: 16px">Markdown指南
+            </el-link>
+<!--            <el-link href="https://katex.org/docs/supported.html" target="_blank" type="info"
+                     style="margin-right: 16px">KaTeX指南
+            </el-link>-->
+            <el-link href="https://mermaid.nodejs.cn/intro/getting-started.html" target="_blank" type="info"
+                     style="margin-right: 16px">Mermaid指南
+            </el-link>
+        </div>
+        <div class="question-content-input" style="display: flex;max-height: 800px;min-height: 200px !important;"
+             :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}">
+                        <v-md-editor placeholder="内容" v-model="questionInfo.question.content" :toolbar="toolbar"
+                                     left-toolbar="undo redo clear | h bold italic strikethrough quote tip | ul ol table hr | link code mermaid"
+                        ></v-md-editor >
+<!--            <div id="vditor" ref="vditor"></div>-->
+        </div>
+    </div>
     <collapse :content-background="false" :expanded="true">
         <template #title>
             <div style="display: flex;flex-direction: row;align-items: center">
                 <el-text style="line-height: 32px;margin-left: 8px;margin-right: 8px">图片</el-text>
-                <el-tag type="info">{{ questionInfo.question.images ? questionInfo.question.images.length : 0 }}</el-tag>
+                <el-tag type="info">{{
+                        questionInfo.question.images ? questionInfo.question.images.length : 0
+                    }}
+                </el-tag>
             </div>
         </template>
         <template #content>
@@ -304,7 +343,8 @@ const switchDisLike = () => {
                         <el-text style="margin-left: 4px;">{{ questionInfo.question.upVoters.size }}
                         </el-text>
                     </el-button>
-                    <el-button link @click="switchDisLike" :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
+                    <el-button link @click="switchDisLike"
+                               :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
                         <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
                         <el-text style="margin-left: 4px;">{{ questionInfo.question.downVoters.size }}
                         </el-text>
@@ -322,20 +362,18 @@ const switchDisLike = () => {
 
 /*noinspection CssUnusedSymbol*/
 .alert-enter-active {
-    transition:
-        all 300ms var(--ease-in-bounce-1) 300ms,
-        grid-template-columns 200ms var(--ease-in-out-quint),
-        max-height 200ms var(--ease-in-out-quint),
-        padding 200ms var(--ease-in-out-quint);
+    transition: all 300ms var(--ease-in-bounce-1) 300ms,
+    grid-template-columns 200ms var(--ease-in-out-quint),
+    max-height 200ms var(--ease-in-out-quint),
+    padding 200ms var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
 .alert-leave-active {
-    transition:
-        all 300ms var(--ease-in-bounce-1) 0ms,
-        grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
-        max-height 200ms var(--ease-in-out-quint) 350ms,
-        padding 200ms var(--ease-in-out-quint) 350ms;
+    transition: all 300ms var(--ease-in-bounce-1) 0ms,
+    grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
+    max-height 200ms var(--ease-in-out-quint) 350ms,
+    padding 200ms var(--ease-in-out-quint) 350ms;
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -360,10 +398,62 @@ const switchDisLike = () => {
 .alerts > *:not(:last-child) {
     margin-right: 4px;
 }
+
+/*noinspection CssUnusedSymbol*/
+.creatingPartition-enter-active, .creatingPartition-leave-active {
+    transition: all 0.3s var(--ease-in-bounce-1);
+}
+
+/*noinspection CssUnusedSymbol*/
+.creatingPartition-enter-from, .creatingPartition-leave-to {
+    opacity: 0;
+    scale: 0.95;
+}
+
 </style>
 
 <style>
 .alerts > * > * {
     min-width: 0;
 }
+/*
+
+#vditor {
+    width: 100% !important;
+    background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
+    border-radius: 4px;
+}
+
+.vditor-ir pre.vditor-reset {
+    background: none !important;
+}
+
+.vditor-toolbar {
+    background: none;
+    padding: 6px 12px;
+}
+
+.vditor--fullscreen {
+    background: var(--panel-bg-color);
+    backdrop-filter: blur(64px);
+    z-index: 10000 !important;
+}
+
+.vditor-tooltipped--hover::after,
+.vditor-tooltipped:hover::after,
+.vditor-tooltipped:active::after,
+.vditor-tooltipped:focus::after {
+    background: var(--panel-bg-color-overlay) linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0, transparent 2px calc(100% - 2px), rgba(0, 0, 0, 0.07) 100%);
+    backdrop-filter: blur(8px);
+    border-radius: 4px;
+}
+
+.vditor-tooltipped--hover::before,
+.vditor-tooltipped:hover::before,
+.vditor-tooltipped:active::before,
+.vditor-tooltipped:focus::before {
+    border-top-color: var(--panel-bg-color-overlay) !important;
+}
+*/
+
 </style>

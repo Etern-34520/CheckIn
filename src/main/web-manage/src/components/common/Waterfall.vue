@@ -20,14 +20,12 @@ useResizeObserver(() => {
 });
 */
 onMounted(() => {
-    // 确保在DOM更新完毕后再获取尺寸
-    // setTimeout(() => {
     nextTick(() => {
         if (waterfall.value) {
             const observer = new ResizeObserver((entries) => {
                 for (const entry of entries) {
                     const width = entry.contentRect.width;
-                    rowCount.value = Math.floor(width / props.minRowWidth);
+                    rowCount.value = Math.max(1,Math.min(Math.floor(width / props.minRowWidth), props.data.length));
                 }
             });
             observer.observe(waterfall.value);

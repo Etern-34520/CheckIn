@@ -1,7 +1,7 @@
 <script setup>
 // import {ref,defineEmits,defineProps} from "vue";
 import PartitionCache from "@/data/PartitionCache.js";
-import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
+import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionDialog.vue";
 
 const props = defineProps({
     size: {

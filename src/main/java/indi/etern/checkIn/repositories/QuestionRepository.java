@@ -17,7 +17,8 @@ public interface QuestionRepository extends JpaRepository<Question, String> {
     long countByEnabledIsTrue();
 
     List<Question> findAllByAuthor(User author);
-
     List<Question> findAllByUpVotersContains(User user);
     List<Question> findAllByDownVotersContains(User user);
+
+    List<Question> findAllByAuthor(User user, Pageable pageable);
 }

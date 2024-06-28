@@ -6,12 +6,13 @@ import WebSocketConnector from "@/api/websocket.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
 import PartitionCache from "@/data/PartitionCache.js";
-import CreateNewPartitionDialog from "@/components/CreateNewPartitionDialog.vue";
+import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionDialog.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
-import Collapse from "@/components/Collapse.vue";
-import MultipleChoicesEditorPlugin from "@/components/editor/plugin/MultipleChoicesEditorPlugin.vue";
+import Collapse from "@/components/common/Collapse.vue";
+import MultipleChoicesEditorPlugin from "@/components/editor/module/MultipleChoicesEditorModule.vue";
 import QuestionCache from "@/data/QuestionCache.js";
+import toolbar from "@/data/MarkdownEditorToolbar.js";
 
 const {proxy} = getCurrentInstance();
 const imageDialogVisible = ref(false);
@@ -156,7 +157,8 @@ const switchDisLike = () => {
             <div style="display: flex;flex-direction: column">
                 <div style="display: flex;margin-bottom: 4px" class="alerts">
                     <transition-group name="alert">
-                        <el-tag v-for="error of questionInfo.errors" :key="'error'+error.content" type="danger" :closable="false">
+                        <el-tag v-for="error of questionInfo.errors" :key="'error'+error.content" type="danger"
+                                :closable="false">
                             <div style="display: flex;flex-direction: row;align-items: center;">
                                 <el-text type="danger" style="margin: 4px">
                                     {{ error.content }}
@@ -169,7 +171,8 @@ const switchDisLike = () => {
                                 </el-button-group>
                             </div>
                         </el-tag>
-                        <el-tag v-for="warning of questionInfo.warnings" :key="'warning'+warning.content" type="warning" :closable="false">
+                        <el-tag v-for="warning of questionInfo.warnings" :key="'warning'+warning.content" type="warning"
+                                :closable="false">
                             <div style="display: flex;flex-direction: row;align-items: center;">
                                 <el-text type="warning" style="margin: 4px">
                                     {{ warning.content }}
@@ -185,11 +188,23 @@ const switchDisLike = () => {
                     </transition-group>
                 </div>
                 <div style="display: flex;flex-direction: row">
-                    <el-input class="question-content-input"
-                              :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}"
-                              type="textarea" style="flex:4"
-                              placeholder="内容" v-model="questionInfo.question.content"
-                              autosize></el-input>
+                    <div class="panel-1">
+
+                    </div>
+                    <!--
+                                        <el-input class="question-content-input"
+                                                  :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}"
+                                                  type="textarea" style="flex:4"
+                                                  placeholder="内容" v-model="questionInfo.question.content"
+                                                  autosize></el-input>
+                    -->
+                    <div class="panel-1" style="flex: 4;max-height: 80px;padding:8px 16px">
+                        <el-scrollbar>
+                            <el-text>
+                                {{ questionInfo.question.content }}
+                            </el-text>
+                        </el-scrollbar>
+                    </div>
                     <div
                         style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column;justify-content: stretch">
                         <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"
@@ -208,12 +223,14 @@ const switchDisLike = () => {
                         <div class="panel-1"
                              style="padding: 2px;display: flex;flex-direction: row;align-items: center;flex:1">
                             <el-button-group>
-                                <el-button link @click="switchLike" :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
+                                <el-button link @click="switchLike"
+                                           :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
                                     <like :filled="questionInfo.question.upVoters.has(currentUserQQ)"/>
                                     <el-text style="margin-left: 4px;">{{ questionInfo.question.upVoters.size }}
                                     </el-text>
                                 </el-button>
-                                <el-button link @click="switchDisLike" :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
+                                <el-button link @click="switchDisLike"
+                                           :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
                                     <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
                                     <el-text style="margin-left: 4px;">{{ questionInfo.question.downVoters.size }}
                                     </el-text>
@@ -226,6 +243,16 @@ const switchDisLike = () => {
         </template>
         <template #content>
             <div style="margin-right: 32px;">
+<!--                <div class="question-content-input el-input" :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}">-->
+                <div style="position: relative;">
+                    <div class="question-content-input" style="display: flex;max-height: 800px;min-height: 200px !important;"
+                         :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}">
+                        <v-md-editor placeholder="内容" v-model="questionInfo.question.content" :toolbar="toolbar"
+                                     left-toolbar="undo redo clear | h bold italic strikethrough quote tip | ul ol table hr | link code mermaid"
+                        ></v-md-editor >
+                    </div>
+                </div>
+<!--                </div>-->
                 <collapse :content-background="false">
                     <template #title>
                         <el-text style="line-height: 32px;margin-left: 8px;">图片</el-text>
@@ -266,20 +293,18 @@ const switchDisLike = () => {
 
 /*noinspection CssUnusedSymbol*/
 .alert-enter-active {
-    transition:
-        all 300ms var(--ease-in-bounce-1) 300ms,
-        grid-template-columns 200ms var(--ease-in-out-quint),
-        max-height 200ms var(--ease-in-out-quint),
-        padding 200ms var(--ease-in-out-quint);
+    transition: all 300ms var(--ease-in-bounce-1) 300ms,
+    grid-template-columns 200ms var(--ease-in-out-quint),
+    max-height 200ms var(--ease-in-out-quint),
+    padding 200ms var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
 .alert-leave-active {
-    transition:
-        all 300ms var(--ease-in-bounce-1) 0ms,
-        grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
-        max-height 200ms var(--ease-in-out-quint) 350ms,
-        padding 200ms var(--ease-in-out-quint) 350ms;
+    transition: all 300ms var(--ease-in-bounce-1) 0ms,
+    grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
+    max-height 200ms var(--ease-in-out-quint) 350ms,
+    padding 200ms var(--ease-in-out-quint) 350ms;
 }
 
 /*noinspection CssUnusedSymbol*/

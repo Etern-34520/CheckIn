@@ -84,13 +84,13 @@ div.panel {
 }
 
 .main-router-enter-active .manage-page-router {
-    transition: all 1s var(--ease-in-bounce-1);
+    transition: all 0.6s var(--ease-in-bounce-1);
     transition-delay: 0.3s;
 }
 
 .main-router-enter-from .manage-page-router {
     opacity: 0;
-    transform: scale(0.8) translateY(-80px) translateX(-150px);
+    transform: translateX(-100px);
 }
 
 .el-upload--picture-card {
@@ -169,4 +169,168 @@ div.panel {
     margin-top: 0 !important;
     transform: translateX(100%);
     grid-template-rows: 0fr !important;
+}
+
+#app .v-md-textarea-editor textarea {
+    color: var(--el-text-color);
+    background: transparent;
+    transition: 200ms ease-in-out;
+}
+
+#app .v-md-editor {
+    padding: 8px 16px;
+    flex:1;
+    box-sizing: border-box;
+    background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
+    border-radius: 4px;
+}
+
+#app .v-md-editor--fullscreen {
+    background: var(--fullscreen-bg-color);
+    backdrop-filter: blur(32px);
+    z-index: 20000;
+}
+
+#app .scrollbar__wrap{
+    transition: 200ms ease-in-out;
+    background: transparent;
+    border-radius: 4px;
+}
+
+#app .scrollbar__wrap:has(textarea):hover,
+#app .scrollbar__wrap:has(textarea:focus){
+    background: var(--panel-bg-color) !important;
+}
+
+#app .v-md-editor__left-area-title,
+#app .v-md-editor__toc-nav-title {
+    color: var(--el-color-primary);
+}
+
+#app .v-md-editor__left-area-title:after,
+#app .v-md-editor__left-area {
+    border-color: var(--el-border-color-lighter);
+}
+
+#app .v-md-editor__toolbar {
+    border-color: transparent;
+}
+
+#app .v-md-editor__editor-wrapper,
+#app .v-md-editor__preview-wrapper {
+    border-color: var(--el-border-color-lighter);
+    padding: 16px;
+}
+
+
+#app .v-md-editor__toolbar-item {
+    color: var(--el-text-color-secondary);
+}
+
+#app .v-md-editor__toolbar-item:hover {
+    background-color: var(--panel-bg-color-overlay);
+}
+
+#app .v-md-editor__toolbar-item--active, #app .v-md-editor__toolbar-item--active:hover {
+    background-color: var(--panel-bg-color-overlay);
+}
+
+#app .v-md-editor__toolbar-item:after{
+    content: "";
+    position: absolute;
+    background: var(--el-color-primary);
+    opacity: 0;
+    width: 0;
+    left: 50%;
+    top: calc(100% - 2px);
+    height: 2px;
+    /*    border-radius: 1px;*/
+    border-radius: 0 0 2px 2px;
+    filter: blur(4px);
+    transition: left 500ms cubic-bezier(.34, .26, .19, 1.18),
+    width 500ms cubic-bezier(.34, .26, .19, 1.18),
+    background-color 150ms var(--ease-in-out-quint),
+    opacity 150ms var(--ease-in-quint) 100ms,
+    filter 100ms var(--ease-in-out-quint) 100ms;
+}
+
+#app .v-md-editor__toolbar-item--active:after {
+    opacity: 1;
+    filter: none;
+    width: 60%;
+    left: 20%;
+}
+
+#app .v-md-editor__menu {
+    border-radius: 4px !important;
+    background: var(--popper-bg-color);
+    transition: 0.2s var(--ease-in-out-quint);
+    backdrop-filter: blur(32px);
+}
+
+#app .v-md-editor__menu-item {
+    color: var(--el-text-color);
+    transition: 200ms var(--ease-in-out-quint);
+}
+
+#app .v-md-editor__menu-item:hover {
+    background: var(--panel-bg-color);
+}
+
+#app .v-md-editor__toolbar-divider::before {
+    border-color: var(--el-border-color);
+}
+
+#app .v-md-editor__toolbar-item {
+    margin-left: 4px;
+}
+
+.slide-switch-base {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: hidden;
+}
+
+.slide-switch-base > * {
+    width: 100%;
+    flex: none;
+}
+
+.slide-switch-base.left-to-right > *:first-child {
+    order: 2;
+}
+
+.slide-switch-base.left-to-right > *:nth-child(2) {
+    order: 1;
+}
+
+.slide-left-to-right-enter-active,
+.slide-left-to-right-leave-active,
+.slide-right-to-left-enter-active,
+.slide-right-to-left-leave-active {
+    transition: 400ms var(--ease-in-out-quint);
+}
+
+.slide-left-to-right-enter-from {
+    margin-left: -100%;
+}
+
+.slide-left-to-right-leave-to {
+    opacity: 0.99999999999;/*to delay display switch*/
+}
+
+.slide-right-to-left-leave-to {
+    margin-left: -100%;
+}
+
+/*noinspection CssUnusedSymbol*/
+.blur-scale-enter-active, .blur-scale-leave-active {
+    transition: all 0.3s var(--ease-in-out-quint);
+}
+
+/*noinspection CssUnusedSymbol*/
+.blur-scale-enter-from, .blur-scale-leave-to {
+    filter: blur(32px);
+    opacity: 0;
+    transform: scale(0.98);
 }

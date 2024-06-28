@@ -153,7 +153,7 @@ public class PartitionService {
         return multiPartitionableQuestions;
     }
 
-    public Collection<? extends Partition> findAllById(Collection<Integer> partitionId) {
+    public List<Partition> findAllById(Collection<Integer> partitionId) {
         return partitionRepository.findAllById(partitionId);
     }
 

@@ -10,14 +10,14 @@ import java.util.Optional;
 
 @Action(name = "deletePartition")
 public class DeletePartitionAction extends PartitionJsonResultAction {
-    
+
     private int partitionId;
-    
+
     @Override
     public String requiredPermissionName() {
         return "delete partition";
     }
-    
+
     @Override
     protected Optional<JsonObject> doAction() throws Exception {
         Partition partition = PartitionService.singletonInstance.findById(partitionId).orElseThrow();
@@ -32,6 +32,6 @@ public class DeletePartitionAction extends PartitionJsonResultAction {
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        partitionId = (int) dataMap.get("partitionId");
+        partitionId = ((Double) dataMap.get("id")).intValue();
     }
 }

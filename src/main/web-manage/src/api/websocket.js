@@ -2,7 +2,7 @@ import {ElButton, ElNotification} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {h} from "vue";
 import randomUUID from "@/utils/UUID.js";
-import Reconnect from "@/components/Reconnect.vue";
+import Reconnect from "@/components/common/Reconnect.vue";
 
 let qq1;
 let token1;

@@ -9,14 +9,16 @@ import PartitionCache from "@/data/PartitionCache.js";
 import randomUUID from "@/utils/UUID.js";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import HarmonyOSIcon_CheckBox from "@/components/icons/HarmonyOSIcon_CheckBox.vue";
-import EditPartitionNameDialog from "@/components/EditPartitionNameDialog.vue";
+import EditPartitionNameDialog from "@/components/question/EditPartitionNameDialog.vue";
 import HarmonyOSIcon_Upload from "@/components/icons/HarmonyOSIcon_Upload.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
-import {ArrowLeftBold} from "@element-plus/icons-vue";
-import CreatePartitionButton from "@/components/CreatePartitionButton.vue";
-import QuestionInfoPanel from "@/components/QuestionInfoPanel.vue";
-import SelectPartitionsActionDialog from "@/components/SelectMoveToPartitionDialog.vue";
+import {ArrowLeftBold, List} from "@element-plus/icons-vue";
+import CreatePartitionButton from "@/components/question/CreatePartitionButton.vue";
+import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
+import SelectPartitionsActionDialog from "@/components/question/SelectMoveToPartitionDialog.vue";
+import Responsive from "@/utils/Responsive.js";
+import ResponsiveSplitpane from "@/components/common/ResponsiveDoubleSplitpane.vue";
 
 const {proxy} = getCurrentInstance();
 
@@ -220,6 +222,7 @@ QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
 });
 
 const openEdit = (questionId) => {
+    responsiveSplitpane.value.hideLeft();
     router.push("/manage/questions/" + questionId + "/");
 }
 
@@ -298,7 +301,7 @@ const createQuestionGroup = (partitionId) => {
         upVoters: new Set(),
         downVoters: new Set(),
     };
-    const questionInfo = QuestionCache.createQuestionGroup(question,undefined,authorQQ);
+    const questionInfo = QuestionCache.createQuestionGroup(question, undefined, authorQQ);
     tree.value.append(QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
 }
 
@@ -574,192 +577,197 @@ function onDeleteNode(nodeObj) {
 const currentButton = ref({
     menuVisible: false
 });
+
+const responsiveSplitpane = ref(null)
+
+router.afterEach((to, from) => {
+    if (to.params.id === undefined) {
+        responsiveSplitpane.value.showLeft();
+    } else {
+        responsiveSplitpane.value.hideLeft();
+    }
+});
 </script>
 
 <template>
-    <div style="display: flex;flex-direction: row;align-content: stretch;align-items: stretch">
-        <splitpanes style="flex: 1">
-            <pane min-size="20" size="30">
-                <div class="panel" style="display: flex" v-loading="loading">
-                    <el-input prefix-icon="Search" v-model="filterText" placeholder="搜索 (以 &quot;,&quot; 分词)"/>
-                    <el-button type="primary" style="margin-top: 8px" @click="upload" :loading="uploading"
-                               loading-icon="_Loading_"
-                               :disabled="!QuestionCache.reactiveDirty.value">
-                        <HarmonyOSIcon_Upload/>
-                        <el-text>{{ showTree ? "上传题目更改" : "确认上传" }}</el-text>
-                    </el-button>
-                    <!--                    <el-scrollbar>-->
-                    <div class="slide-base"
-                         style="display: flex;flex-direction: row;overflow-y:overlay;overflow-x: hidden;">
-                        <div class="question-tree-base" style="display: flex;flex-direction: column;overflow:overlay;"
-                             :class="{hideLeft:!showTree}">
-                            <div>
-                                <el-button-group>
-                                    <el-button text style="width:106px" @click="switchShowCheckBox">
-                                        <HarmonyOSIcon_CheckBox style="margin: 0;margin-right: 4px"/>
-                                        <el-text v-if="!showCheckBox">批量</el-text>
-                                        <el-text v-else>取消批量</el-text>
-                                    </el-button>
-                                    <transition-group name="batch-buttons">
-                                        <el-button text v-show="showCheckBox&&button.show()" class="action-button"
-                                                   :class="{selected:button.menuVisible}"
-                                                   v-for="button in batchActionSelectPartitionMenuButtons" :key="button"
-                                                   :disabled="disabled"
-                                                   @click="currentButton=button;switchMenuVisible(button);">
-                                            <el-text>{{ button.name }}</el-text>
-                                        </el-button>
-                                        <el-button text v-show="showCheckBox&&button.show()" class="action-button"
-                                                   v-for="button in batchActionButtons"
-                                                   :key="button" :disabled="disabled" @click="button.action">
-                                            <el-text>{{ button.name }}</el-text>
-                                        </el-button>
-                                    </transition-group>
-                                </el-button-group>
-                                <transition name="batch-buttons">
-                                    <select-partitions-action-dialog
-                                        v-show="currentButton.menuVisible"
-                                        @on-confirm="currentButton.action"/>
-                                </transition>
-                            </div>
-                            <div style="flex:1;overflow:overlay;">
-                                <el-scrollbar>
-                                    <div style="flex: 1">
-                                        <el-tree ref="tree" icon="ArrowRightBold" node-key="treeId" :props="props"
-                                                 @node-click="onEdit" :show-checkbox="showCheckBox"
-                                                 draggable :allow-drag="allowDrag" :allow-drop="allowDrop"
-                                                 @node-drop="onDrop"
-                                                 @node-drag-enter="dragEnter" @node-drag-leave="dragLeave"
-                                                 @node-drag-end="onDragEnd" @check="rectifyCheck"
-                                                 lazy :load="loadNode" :filter-node-method="filterNode">
-                                            <template #default="{ node : proxy, data : nodeObj }">
-                                                <template v-if="nodeObj.data.type==='createPartition'">
-                                                    <create-partition-button/>
+    <responsive-splitpane ref="responsiveSplitpane" :left-loading="loading" show-left-label="题目列表">
+        <template #left>
+            <el-input prefix-icon="Search" v-model="filterText" placeholder="搜索 (以 &quot;,&quot; 分词)"/>
+            <el-button type="primary" style="margin-top: 8px" @click="upload" :loading="uploading"
+                       loading-icon="_Loading_"
+                       :disabled="!QuestionCache.reactiveDirty.value">
+                <HarmonyOSIcon_Upload/>
+                <el-text>{{ showTree ? "上传题目更改" : "确认上传" }}</el-text>
+            </el-button>
+            <!--                    <el-scrollbar>-->
+            <div class="slide-base"
+                 style="display: flex;flex-direction: row;overflow-y:overlay;overflow-x: hidden;">
+                <div class="question-tree-base" style="display: flex;flex-direction: column;overflow:overlay;"
+                     :class="{hideLeft:!showTree}">
+                    <div>
+                        <el-button-group>
+                            <el-button text style="width:106px" @click="switchShowCheckBox">
+                                <HarmonyOSIcon_CheckBox style="margin: 0;margin-right: 4px"/>
+                                <el-text v-if="!showCheckBox">批量</el-text>
+                                <el-text v-else>取消批量</el-text>
+                            </el-button>
+                            <transition-group name="batch-buttons">
+                                <el-button text v-show="showCheckBox&&button.show()" class="action-button"
+                                           :class="{selected:button.menuVisible}"
+                                           v-for="button in batchActionSelectPartitionMenuButtons" :key="button"
+                                           :disabled="disabled"
+                                           @click="currentButton=button;switchMenuVisible(button);">
+                                    <el-text>{{ button.name }}</el-text>
+                                </el-button>
+                                <el-button text v-show="showCheckBox&&button.show()" class="action-button"
+                                           v-for="button in batchActionButtons"
+                                           :key="button" :disabled="disabled" @click="button.action">
+                                    <el-text>{{ button.name }}</el-text>
+                                </el-button>
+                            </transition-group>
+                        </el-button-group>
+                        <transition name="batch-buttons">
+                            <select-partitions-action-dialog
+                                v-show="currentButton.menuVisible"
+                                @on-confirm="currentButton.action"/>
+                        </transition>
+                    </div>
+                    <div style="flex:1;overflow:overlay;">
+                        <el-scrollbar>
+                            <div style="flex: 1">
+                                <el-tree ref="tree" icon="ArrowRightBold" node-key="treeId" :props="props"
+                                         @node-click="onEdit" :show-checkbox="showCheckBox"
+                                         draggable :allow-drag="allowDrag" :allow-drop="allowDrop"
+                                         @node-drop="onDrop"
+                                         @node-drag-enter="dragEnter" @node-drag-leave="dragLeave"
+                                         @node-drag-end="onDragEnd" @check="rectifyCheck"
+                                         lazy :load="loadNode" :filter-node-method="filterNode">
+                                    <template #default="{ node : proxy, data : nodeObj }">
+                                        <template v-if="nodeObj.data.type==='createPartition'">
+                                            <create-partition-button/>
+                                        </template>
+                                        <template v-else-if="nodeObj.data.type==='createQuestion'">
+                                            <!--                                            TODO component-->
+                                            <el-popover trigger="click" width="271">
+                                                <template #reference>
+                                                    <el-button text size="small"
+                                                               class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus disable-tree-checkbox">
+                                                        <HarmonyOSIcon_Plus style="margin: 8px"/>
+                                                        <el-text>创建题目</el-text>
+                                                    </el-button>
                                                 </template>
-                                                <template v-else-if="nodeObj.data.type==='createQuestion'">
-                                                    <!--                                            TODO component-->
-                                                    <el-popover trigger="click" width="271">
-                                                        <template #reference>
-                                                            <el-button text size="small"
-                                                                       class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus disable-tree-checkbox">
-                                                                <HarmonyOSIcon_Plus style="margin: 8px"/>
-                                                                <el-text>创建题目</el-text>
+                                                <template #default>
+                                                    <div class="no-pop-padding create-selection">
+                                                        <el-button-group>
+                                                            <el-button
+                                                                @click="createQuestionGroup(nodeObj.data.partitionId)">
+                                                                题组
                                                             </el-button>
-                                                        </template>
-                                                        <template #default>
-                                                            <div class="no-pop-padding create-selection">
-                                                                <el-button-group>
-                                                                    <el-button
-                                                                        @click="createQuestionGroup(nodeObj.data.partitionId)">
-                                                                        题组
-                                                                    </el-button>
-                                                                    <el-button
-                                                                        @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
-                                                                        选择题
-                                                                    </el-button>
-                                                                    <el-button disabled>排序题</el-button>
-                                                                    <el-button disabled>填空题</el-button>
-                                                                </el-button-group>
-                                                            </div>
-                                                        </template>
-                                                    </el-popover>
+                                                            <el-button
+                                                                @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
+                                                                选择题
+                                                            </el-button>
+                                                            <el-button disabled>排序题</el-button>
+                                                            <el-button disabled>填空题</el-button>
+                                                        </el-button-group>
+                                                    </div>
                                                 </template>
-                                                <template v-else>
-                                                    <!--                                            TODO component-->
-                                                    <div class="tree-node-item"
-                                                         :class="{dragHover:nodeObj.data.dragHover}">
-                                                        <div class="point" :class="{
+                                            </el-popover>
+                                        </template>
+                                        <template v-else>
+                                            <!--                                            TODO component-->
+                                            <div class="tree-node-item"
+                                                 :class="{dragHover:nodeObj.data.dragHover}">
+                                                <div class="point" :class="{
                                                             changed:nodeObj.data.dirty,
                                                             error:nodeObj.data.showError,
                                                             warning:nodeObj.data.showWarning
                                                         }"></div>
-                                                        <div class="question-tree-node">
-                                                            <el-text class="question-tree-node-content" :style="{
-                                                                opacity: (nodeObj.data.question&&nodeObj.data.question.localDeleted)?0.5:1}">
-                                                                {{
-                                                                    nodeObj.data.type === 'partition' ?
-                                                                        nodeObj.data.partition.name:nodeObj.data.question.content
-                                                                }}
-                                                            </el-text>
-                                                        </div>
-                                                        <el-button-group>
-                                                            <el-popover trigger="click"
-                                                                        v-model:visible="nodeObj.data.editing"
-                                                                        width="400"
-                                                                        v-if="nodeObj.data.type === 'partition'">
-                                                                <template #reference>
-                                                                    <el-button class="node-button" size="small" link
-                                                                               @click.stop="nodeObj.data.editing = false"
-                                                                               v-if="nodeObj.data.type === 'partition'">
-                                                                        <HarmonyOSIcon_Rename/>
-                                                                        <el-text>重命名</el-text>
-                                                                    </el-button>
-                                                                </template>
-                                                                <template #default>
-                                                                    <EditPartitionNameDialog
-                                                                        @on-over="nodeObj.data.editing = false"
-                                                                        :partition="nodeObj.data.partition"
-                                                                        size="default"/>
-                                                                </template>
-                                                            </el-popover>
-                                                            <el-button class="node-button" size="small" link
-                                                                       @click.stop="onDeleteNode(nodeObj)">
-                                                                <HarmonyOSIcon_Remove/>
-                                                                <el-text
-                                                                    v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
-                                                                    撤销删除
-                                                                </el-text>
-                                                                <el-text v-else>删除</el-text>
+                                                <div class="question-tree-node">
+                                                    <el-text class="question-tree-node-content"
+                                                             :style="{
+                                                                opacity: (nodeObj.data.question&&nodeObj.data.question.localDeleted)?0.5:1
+                                                            }">
+                                                        {{
+                                                            nodeObj.data.type === 'partition' ?
+                                                                nodeObj.data.partition.name : nodeObj.data.question.content
+                                                        }}
+                                                    </el-text>
+                                                </div>
+                                                <el-button-group>
+                                                    <el-popover trigger="click"
+                                                                v-model:visible="nodeObj.data.editing"
+                                                                width="400"
+                                                                v-if="nodeObj.data.type === 'partition'">
+                                                        <template #reference>
+                                                            <el-button class="node-button" link
+                                                                       @click.stop="nodeObj.data.editing = false"
+                                                                       v-if="nodeObj.data.type === 'partition'">
+                                                                <HarmonyOSIcon_Rename/>
+                                                                <el-text>重命名</el-text>
                                                             </el-button>
-                                                        </el-button-group>
-                                                    </div>
-                                                </template>
-                                            </template>
-                                        </el-tree>
-                                    </div>
-                                </el-scrollbar>
+                                                        </template>
+                                                        <template #default>
+                                                            <EditPartitionNameDialog
+                                                                @on-over="nodeObj.data.editing = false"
+                                                                :partition="nodeObj.data.partition"
+                                                                size="default"/>
+                                                        </template>
+                                                    </el-popover>
+                                                    <el-button class="node-button" link
+                                                               @click.stop="onDeleteNode(nodeObj)">
+                                                        <HarmonyOSIcon_Remove/>
+                                                        <el-text
+                                                            v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
+                                                            撤销删除
+                                                        </el-text>
+                                                        <el-text v-else>删除</el-text>
+                                                    </el-button>
+                                                </el-button-group>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </el-tree>
                             </div>
-                        </div>
-                        <div class="errorsList" v-show="errorsDisplay" :class="{hideRight:showTree}">
-                            <el-scrollbar>
-                                <el-alert type="warning" :closable="false">
-                                    <el-button style="padding: 8px" text @click="backToTree">
-                                        <el-icon>
-                                            <ArrowLeftBold/>
-                                        </el-icon>
-                                    </el-button>
-                                    <el-text type="warning">
-                                        这些有错误的题目将不会上传
-                                    </el-text>
-                                </el-alert>
-                                <div>
-                                    <transition-group name="slide-hide">
-                                            <question-info-panel
-                                                v-for="questionInfo of QuestionCache.getErrorQuestions()"
-                                                :key="questionInfo.question.id"
-                                                @click="openEdit(questionInfo.question.id)"
-                                                                 :question-info="questionInfo"/>
-                                    </transition-group>
-                                </div>
-                                <transition name="empty">
-                                    <el-empty v-show="QuestionCache.getErrorQuestions().length===0"/>
-                                </transition>
-                            </el-scrollbar>
-                        </div>
+                        </el-scrollbar>
                     </div>
-                    <!--                    </el-scrollbar>-->
                 </div>
-            </pane>
-            <pane min-size="50">
-                <div class="panel" style="padding: 0">
-                    <router-view v-slot="{ Component }">
-                        <transition mode="out-in" name="question-editor">
-                            <component :is="Component"/>
+                <div class="errorsList" v-show="errorsDisplay" :class="{hideRight:showTree}">
+                    <el-scrollbar>
+                        <el-alert type="warning" :closable="false">
+                            <el-button style="padding: 8px" text @click="backToTree">
+                                <el-icon>
+                                    <ArrowLeftBold/>
+                                </el-icon>
+                            </el-button>
+                            <el-text type="warning">
+                                这些有错误的题目将不会上传
+                            </el-text>
+                        </el-alert>
+                        <div>
+                            <transition-group name="slide-hide">
+                                <question-info-panel
+                                    v-for="questionInfo of QuestionCache.getErrorQuestions()"
+                                    :key="questionInfo.question.id"
+                                    @click="openEdit(questionInfo.question.id)"
+                                    :question-info="questionInfo"/>
+                            </transition-group>
+                        </div>
+                        <transition name="empty">
+                            <el-empty v-show="QuestionCache.getErrorQuestions().length===0"/>
                         </transition>
-                    </router-view>
+                    </el-scrollbar>
                 </div>
-            </pane>
-        </splitpanes>
-    </div>
+            </div>
+        </template>
+        <template #right>
+            <router-view v-slot="{ Component }">
+                <transition mode="out-in" name="question-editor">
+                    <component :is="Component"/>
+                </transition>
+            </router-view>
+        </template>
+    </responsive-splitpane>
 </template>
 
 <style scoped>
@@ -883,7 +891,7 @@ const currentButton = ref({
 /*noinspection CssUnusedSymbol*/
 
 .question-tree-base, .errorsList {
-    transition: 450ms var(--ease-in-bounce-1);
+    transition: 450ms var(--ease-in-out-quint);
 }
 
 .slide-base .question-tree-base,
@@ -945,7 +953,7 @@ const currentButton = ref({
     opacity: 0;
 }
 
-.error-question-info-panel > .grid1 > .padding > div {
+.question-info-panel > .grid1 > .padding > div {
     min-height: 25px;
 }
 

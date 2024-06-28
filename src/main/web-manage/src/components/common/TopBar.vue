@@ -59,7 +59,7 @@ function switchMenuStyle() {
 </template>
 
 <style scoped>
-@import './../assets/base.css';
+@import '../../assets/base.css';
 
 #top-bar {
     height: 34px;

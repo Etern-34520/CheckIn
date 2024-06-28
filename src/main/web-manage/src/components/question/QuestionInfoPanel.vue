@@ -1,11 +1,46 @@
+<script setup>
+import PartitionCache from "../../data/PartitionCache.js";
+import Collapse from "@/components/common/Collapse.vue";
+
+const props = defineProps({
+    questionInfo: Object,
+    clickable: {
+        type: Boolean,
+        default: true,
+    },
+    disableErrorAndWarning: {
+        type: Boolean,
+        default: false,
+    }
+});
+
+const partitionNames = ref([]);
+
+if (props.questionInfo.question.partitionIds instanceof Array) {
+    PartitionCache.getNamesSyncByIds(props.questionInfo.question.partitionIds).then((names) => {
+        partitionNames.value = names;
+    });
+}
+/*
+for (const partitionId of props.questionInfo.question.partitionIds) {
+    PartitionCache.getNameSync(partitionId).then((name) => {
+        partitionNames.value.push(name);
+    });
+}
+*/
+</script>
+
+
 <template>
-    <div class="panel-1 error-question-info-panel" :class="{clickable:clickable}">
+    <div class="panel-1 question-info-panel" :class="{clickable:clickable}">
         <div class="grid1">
             <div class="padding">
-                <div class="question-content panel-1 flex-blank-1" style="padding: 4px 16px;">
-                    <el-text>
-                        {{ questionInfo.question.content }}
-                    </el-text>
+                <div class="question-content panel-1 flex-blank-1">
+                    <el-scrollbar :max-height="120" style="padding: 4px 16px">
+                        <el-text>
+                            {{ questionInfo.question.content }}
+                        </el-text>
+                    </el-scrollbar>
                 </div>
                 <div class="choicesList"
                      v-if="questionInfo.question.choices!==undefined&&questionInfo.question.choices!==null">
@@ -17,7 +52,7 @@
                 <div v-if="questionInfo.type==='QuestionGroup'">
                     <collapse @click.stop :content-background="false">
                         <template #title>
-                            <el-text style="line-height: 32px;">题组内的题目</el-text>
+                            <el-text style="line-height: 32px;margin-left: 8px;">子题目</el-text>
                         </template>
                         <template #content>
                             <transition-group name="slide-hide">
@@ -35,9 +70,9 @@
                     <template
                         v-if="questionInfo.question.partitionIds!==undefined&&questionInfo.question.partitionIds!==null">
                         <el-tag
-                            v-for="partitionId of questionInfo.question.partitionIds"
+                            v-for="partitionName of partitionNames"
                             type="info">
-                            {{ PartitionCache.getName(partitionId) }}
+                            {{ partitionName }}
                         </el-tag>
                     </template>
                 </div>
@@ -54,45 +89,37 @@
         </div>
     </div>
 </template>
-<script setup>
-import PartitionCache from "../data/PartitionCache.js";
-import Collapse from "@/components/Collapse.vue";
 
-defineProps({
-    questionInfo: Object,
-    clickable: {
-        type: Boolean,
-        default: true,
-    },
-    disableErrorAndWarning: {
-        type: Boolean,
-        default: false,
-    }
-})
-</script>
 <style scoped>
 
 .dragHover * {
     color: var(--front-color-dark) !important;
 }
 
-.error-question-info-panel {
+.question-info-panel {
     display: grid;
     margin-top: 2px;
     padding: 0;
     min-height: 0;
     grid-template-rows: 1fr;
+    transition:
+        transform 0.2s var(--ease-in-out-quint),
+        background-color 0.2s var(--ease-in-out-quint);
+}
+
+.question-info-panel:not(:has(.clickable:active)):active {
+    transform: scale(0.98);
 }
 
 .padding {
     padding: 8px;
 }
 
-.error-question-info-panel > .grid1 > .padding > div {
+.question-info-panel > .grid1 > .padding > div {
     min-height: 25px;
 }
 
-.error-question-info-panel > .grid1 {
+.question-info-panel > .grid1 {
     min-height: 0;
 }
 
