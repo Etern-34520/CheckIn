@@ -111,12 +111,6 @@ public class Connector implements SubProtocolCapable {
             Map<String, Object> contentMap = gson.fromJson(message, HashMap.class);
             if (checkToken(contentMap)) return;//TODO TIP
             String messageId = contentMap.get("messageId").toString();
-            Result result = actionExecutor.executeByMap(contentMap);
-            if (result.getResult().isPresent()) {
-                JsonObject jsonObject = result.getResult().get();
-                jsonObject.addProperty("messageId", messageId);
-                sendMessage(jsonObject);
-            }
             if (contentMap.get("type").equals("partMessage")) {
                 PartMessage partMessage;
                 String partId;
@@ -136,6 +130,15 @@ public class Connector implements SubProtocolCapable {
                 if (partMessage.isComplete()) {
                     onMessage(partMessage.toString());
                     partMessageMap.remove(partId);
+                }
+            } else {
+                Result result = actionExecutor.executeByMap(contentMap);
+                String logMessage = message.length() > 65535 ? message.substring(0, 4096) : message;
+                logger.info("{}({}):{}", sessionUser.getName(), sid, logMessage);
+                if (result.getResult().isPresent()) {
+                    JsonObject jsonObject = result.getResult().get();
+                    jsonObject.addProperty("messageId", messageId);
+                    sendMessage(jsonObject);
                 }
             }
 /*
@@ -255,7 +258,7 @@ public class Connector implements SubProtocolCapable {
 
     public void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
-        if (message.length() > 65535) message = message.substring(0,4096) + "..." ;
+        if (message.length() > 65535) message = message.substring(0, 4096) + "...";
         logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, message);
     }
 

@@ -19,10 +19,10 @@ const imageDialogVisible = ref(false);
 const image = ref({name: "", data: ""});
 const upload = ref();
 
-const allUsers = ref([]);
+const allUsers = ref({});
 
 UserDataInterface.getUsersAsync().then((users) => {
-    allUsers.value.push(...users);
+    allUsers.value = users;
 });
 
 const questionInfo = defineModel("questionInfo", {
@@ -209,7 +209,7 @@ const switchDisLike = () => {
                         style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column;justify-content: stretch">
                         <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"
                                    :class="{warning:questionInfo.question.authorQQ===undefined||questionInfo.question.authorQQ===null}">
-                            <el-option v-for="user of allUsers" :key="user.qq" :label="user.name" :value="user.qq">
+                            <el-option v-for="(user,i) in allUsers" :key="user.qq" :label="user.name" :value="user.qq">
                                 <div style="display: flex;align-items: stretch;justify-items: stretch">
                                     <el-avatar shape="circle" :size="28" style="margin: 4px" fit="cover"
                                                :src="getAvatarUrlOf(user.qq)"></el-avatar>

@@ -2,8 +2,10 @@ package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.repositories.RoleRepository;
 import indi.etern.checkIn.repositories.UserRepository;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -23,6 +26,9 @@ public class UserService implements UserDetailsService {
     private UserRepository userRepository;
     private final RoleService roleService;
     private final TransactionTemplate template;
+    @Autowired
+    private RoleRepository roleRepository;
+    
     protected UserService(RoleService roleService, TransactionTemplate template) {
         singletonInstance = this;
         this.roleService = roleService;
@@ -135,7 +141,11 @@ public class UserService implements UserDetailsService {
     public void saveAndFlush(User user) {
         userRepository.saveAndFlush(user);
     }
-
+    
+    public Set<User> findAllByRoleType(String roleType) {
+        return roleRepository.findById(roleType).orElseThrow().getUsers();
+    }
+    
     public static class CustomPasswordEncoder implements PasswordEncoder {
         
         @Override

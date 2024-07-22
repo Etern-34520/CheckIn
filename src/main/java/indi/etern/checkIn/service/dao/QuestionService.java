@@ -187,7 +187,9 @@ public class QuestionService {
     }
 
     public List<Question> findAllByAuthor(User author) {
-        return questionRepository.findAllByAuthor(author).stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionLink).toList();
+        return questionRepository.findAllByAuthor(author)
+                .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionLink)
+                .toList();
     }
 
     public void flush() {
@@ -203,7 +205,9 @@ public class QuestionService {
     }
 
     public List<Question> findFirstLimitByUser(User user, int limit) {
-        return questionRepository.findAllByAuthor(user,PageRequest.of(0,limit));
+        return questionRepository.findAllByAuthor(user, PageRequest.of(0, limit))
+                .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionLink)
+                .toList();
     }
 }
 

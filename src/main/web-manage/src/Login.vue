@@ -14,7 +14,7 @@ const emit = defineEmits(["loginAs"]);
 
 function login() {
     requesting.value = true;
-    proxy.$http.post("checkIn/login/", {
+    proxy.$http.post("", {
         usernameOrQQ: usernameOrQQ.value,
         password: password.value
     }).then(response => {

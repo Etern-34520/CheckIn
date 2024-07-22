@@ -18,7 +18,7 @@ defineProps({
 </script>
 
 <template>
-    <div class="panel-1 clickable" style="display: flex;padding: 16px 24px;align-items: center">
+    <div class="link-panel panel-1 clickable" style="display: flex;padding: 16px 24px;align-items: center">
         <el-icon size="20" style="margin-right: 8px">
             <component :is="icon"/>
         </el-icon>
@@ -34,5 +34,4 @@ defineProps({
 </template>
 
 <style scoped>
-
 </style>

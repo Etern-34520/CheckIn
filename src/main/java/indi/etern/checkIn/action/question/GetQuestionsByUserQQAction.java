@@ -23,6 +23,7 @@ public class GetQuestionsByUserQQAction extends TransactionalAction {
     private UserService userService;
     @Autowired
     private QuestionService questionService;
+
     @Override
     public String requiredPermissionName() {
         return "";
@@ -36,10 +37,10 @@ public class GetQuestionsByUserQQAction extends TransactionalAction {
             result = new JsonObject();
             JsonArray questions = new JsonArray();
             List<Question> questionList;
-            if (limit != -1) {
-                questionList =  questionService.findAllByAuthor(optionalUser.get());
+            if (limit == -1) {
+                questionList = questionService.findAllByAuthor(optionalUser.get());
             } else {
-                questionList =  questionService.findFirstLimitByUser(optionalUser.get(),limit);
+                questionList = questionService.findFirstLimitByUser(optionalUser.get(), limit);
             }
             questionList.forEach(question -> {
                 questions.add(Utils.getJsonObjectOf(question));
@@ -54,6 +55,10 @@ public class GetQuestionsByUserQQAction extends TransactionalAction {
     @Override
     public void initData(Map<String, Object> dataObj) {
         userQQ = ((Double) dataObj.get("qq")).longValue();
-        limit = ((Double) (dataObj.get("limit"))).intValue();
+        Object limit1 = dataObj.get("limit");
+        if (limit1 == null)
+            limit = -1;
+        else
+            limit = ((Double) limit1).intValue();
     }
 }

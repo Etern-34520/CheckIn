@@ -33,7 +33,7 @@ defineExpose({
 })
 
 const mobile = ref(false);
-const mobileShowLeftView = ref(router.currentRoute.value.params.id === undefined);
+const mobileShowLeftView = ref(Object.keys(router.currentRoute.value.params).length === 0);
 const noTreeViewTransition = ref(true);
 
 watch(Responsive.mobile, (val) => {
@@ -55,14 +55,14 @@ watch(Responsive.mobile, (val) => {
                 <div class="panel left-view" :class="{show:mobileShowLeftView,'no-transition':noTreeViewTransition}"
                      style="display: flex;" v-loading="leftLoading">
                     <div style="flex: none;height: 28px" v-if="mobile">
-                        <el-button @click="mobileShowTree = false" link><el-icon><arrow-left-bold/></el-icon>返回</el-button>
+                        <el-button @click="mobileShowLeftView = false" link><el-icon><arrow-left-bold/></el-icon>返回</el-button>
                     </div>
                     <slot name="left"/>
                 </div>
             </pane>
             <pane :min-size="mobile?100:50" :size="mobile?100:70">
                 <div class="panel"
-                     style="display:block;flex: none;height: 24px;padding: 4px;margin-bottom: 4px!important;"
+                     style="display:flex;flex-direction:row;flex: none;overflow:hidden;align-items:center;height: 24px;padding: 4px;margin-bottom: 4px!important;"
                      v-if="mobile">
                     <el-button @click="mobileShowLeftView = true" link>
                         <el-icon>
@@ -70,6 +70,7 @@ watch(Responsive.mobile, (val) => {
                         </el-icon>
                         {{ showLeftLabel }}
                     </el-button>
+                    <slot name="right-top"/>
                 </div>
                 <div class="panel" style="padding: 0" v-loading="RightLoading">
                     <slot name="right"/>
@@ -87,7 +88,7 @@ watch(Responsive.mobile, (val) => {
 
 .mobile .left-view {
     position: fixed;
-    backdrop-filter: blur(32px);
+    backdrop-filter: blur(32px) brightness(0.5);
     height: 100%;
     width: 70%;
     z-index: 2003;

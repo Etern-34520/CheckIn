@@ -55,6 +55,11 @@
     transition: 200ms var(--ease-in-out-quint) all !important;
 }
 
+.el-button:not(.no-init-animate) {
+    animation: var(--init-animation);
+    animation-fill-mode: both;
+}
+
 .el-button:active,
 .el-upload--picture-card:active,
 .v-md-editor__toolbar li:active {
@@ -65,6 +70,11 @@
     transition: 200ms var(--ease-in-out-quint) all !important;
     background: var(--el-bg-color);
     border-color: rgba(128, 128, 128, 0.5) !important;
+}
+
+.el-input:not(.no-init-animate) {
+    animation: var(--init-animation);
+    animation-fill-mode: both;
 }
 
 /*noinspection SpellCheckingInspection*/
@@ -133,6 +143,33 @@
 
 .el-select-dropdown__item.is-hovering {
     background: var(--panel-bg-color-overlay) !important;
+}
+
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:after {
+    content: none !important;
+}
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 0;
+    width: 3px;
+    opacity: 0;
+    filter: blur(2px);
+    background: var(--el-color-primary);
+    border-radius: 1.5px;
+    transition: 200ms var(--ease-in-bounce-1);
+}
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:before {
+    top: 20%;
+    left: 0;
+    height: 60%;
+    opacity: 1;
+    filter: none;
 }
 
 .el-button.is-text:not(.is-disabled):hover {
@@ -206,6 +243,12 @@
     background: var(--panel-bg-color-overlay) linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%) !important;
 }
 
+.el-tree-node:not(.no-init-animate) {
+    animation: var(--init-animation);
+    animation-fill-mode: both;
+    animation-delay: 100ms;
+}
+
 .el-tree-node__content:has(.disable-tree-item-hover), .el-tree-node__content:has(.disable-tree-item-focus) {
     background: transparent !important;
     cursor: default;
@@ -253,13 +296,20 @@
     height: 16px !important;
 }
 
+.el-checkbox__inner {
+    --el-checkbox-checked-icon-color: var(--front-color-dark);
+}
+
 .el-checkbox__inner:after {
     top: 3px !important;
     left: 5px !important;
     border-width: 2px !important;
     border-radius: 1px;
-    --el-checkbox-checked-icon-color: var(--front-color-dark);
     transition: 200ms var(--ease-in-bounce-1) !important;
+}
+
+.el-checkbox__inner:before {
+    top: 7px !important;
 }
 
 .el-input > *, .el-textarea > *, .el-select__wrapper {
@@ -279,32 +329,6 @@
     place-self: center;
 }
 
-.el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:after {
-    content: none !important;
-}
-
-.el-select-dropdown.is-multiple .el-select-dropdown__item:before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    height: 0;
-    width: 3px;
-    opacity: 0;
-    filter: blur(2px);
-    background: var(--el-color-primary);
-    border-radius: 1.5px;
-    transition: 200ms var(--ease-in-bounce-1);
-}
-
-.el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:before {
-    top: 20%;
-    left: 0;
-    height: 60%;
-    opacity: 1;
-    filter: none;
-}
-
 .el-input__inner {
     background-clip: text !important;
 }
@@ -316,7 +340,11 @@
 .el-input__wrapper {
     display: flex;
     flex-direction: row;
-    align-items: stretch !important;
+    align-items: center !important;
+}
+
+.el-input__inner {
+    align-self: stretch !important;
 }
 
 .el-checkbox__inner {
@@ -336,6 +364,10 @@
 .el-select__wrapper {
     border-radius: 4px !important;
     box-shadow: none !important;
+}
+
+.el-select__wrapper {
+    align-items: center !important;
 }
 
 .el-input--small {
@@ -484,8 +516,9 @@
 
 #app .scrollbar__bar.is-vertical .scrollbar__thumb,
 .el-scrollbar__bar.is-vertical .el-scrollbar__thumb {
-    transition: background-color 100ms var(--ease-in-out-quint),
-    width 100ms var(--ease-in-out-quint) !important;
+    transition: background-color 150ms var(--ease-in-out-quint),
+    width 150ms var(--ease-in-out-quint),
+    opacity 150ms var(--ease-in-out-quint) !important;
     width: 3px !important;
     background: var(--el-scrollbar-bg-color) !important;
 }
@@ -493,19 +526,33 @@
 #app .scrollbar__bar.is-horizontal .scrollbar__thumb,
 .el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
     transition: background-color 100ms var(--ease-in-out-quint),
-    height 100ms var(--ease-in-out-quint) !important;
+    height 150ms var(--ease-in-out-quint),
+    opacity 150ms var(--ease-in-out-quint) !important;
     height: 3px !important;
     background: var(--el-scrollbar-bg-color) !important;
 }
 
+.scrollbar__thumb,
+.el-scrollbar__thumb {
+    opacity: 0.5;
+}
+
 #app .scrollbar__bar.is-vertical:hover > .scrollbar__thumb,
-.el-scrollbar__bar.is-vertical:hover > .el-scrollbar__thumb {
+#app .el-scrollbar__bar.is-vertical:hover > .el-scrollbar__thumb,
+#app .scrollbar__bar.is-vertical > .scrollbar__thumb:active,
+#app .el-scrollbar__bar.is-vertical > .el-scrollbar__thumb:active {
     width: 6px !important;
+    background: var(--el-scrollbar-bg-color) !important;
+    opacity: 0.75;
 }
 
 #app .scrollbar__bar.is-horizontal:hover > .scrollbar__thumb,
-.el-scrollbar__bar.is-horizontal:hover > .el-scrollbar__thumb {
+#app .el-scrollbar__bar.is-horizontal:hover > .el-scrollbar__thumb,
+#app .scrollbar__bar.is-horizontal > .scrollbar__thumb:active,
+#app .el-scrollbar__bar.is-horizontal > .el-scrollbar__thumb:active {
     height: 6px !important;
+    background: var(--el-scrollbar-bg-color) !important;
+    opacity: 0.75;
 }
 
 .el-upload-list .el-icon--close-tip {
@@ -572,21 +619,29 @@
 .el-switch__core {
     --el-switch-off-color: var(--panel-bg-color);
     --el-switch-on-color: var(--el-color-primary-3);
-    border: 1px solid var(--el-border-color-lighter) !important;
+    border: 1px solid var(--el-border-color) !important;
 }
 
 .el-switch__core:not(.is-disabled):hover {
     --el-switch-on-color: var(--el-color-primary);
 }
 
-.el-switch__core .el-switch__action {
-    background-color: var(--front-color-light) !important;
-    transition: 400ms var(--ease-in-bounce-1) !important;
+#app .el-switch__core .el-switch__action {
+    left: 4px;
+    background-color: var(--front-color-light);
+    transition: 400ms var(--ease-in-bounce-1);
+    width: 12px;
+    height: 12px;
 }
 
-.el-switch.is-checked .el-switch__action {
+#app .el-switch.is-checked .el-switch__action {
     --el-switch-on-color: rgb(30, 30, 30);
     background-color: var(--el-switch-on-color) !important;
+    left: calc(100% - 16px);
+}
+
+.el-switch {
+    transition: 200ms var(--ease-in-out-quint);
 }
 
 .el-tree-node {
@@ -683,6 +738,24 @@
 
 .el-dropdown-menu__item:hover,.el-dropdown-menu__item:focus {
     background: var(--panel-bg-color-overlay) !important;
+}
+
+.el-dialog {
+    background: var(--panel-bg-color) !important;
+    backdrop-filter: blur(32px);
+}
+
+.el-overlay > * {
+    overflow: hidden !important;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.el-dialog__close {
+    transition: color 200ms var(--ease-in-out-quint);
 }
 
 /*noinspection CssInvalidPseudoSelector*//*

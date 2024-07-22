@@ -2,7 +2,8 @@ import axios from "axios";
 import {ElMessage} from "element-plus";
 
 // axios.defaults.baseURL = 'http://localhost:5173/'
-axios.defaults.baseURL = 'http://localhost:8080/'
+// axios.defaults.baseURL = 'http://localhost:8080/'
+// axios.defaults.baseURL = window.location.host;
 
 //post请求头
 axios.defaults.headers.post["Content-Type"] = "application/json;charset=UTF-8";

@@ -8,6 +8,22 @@
     font-style: normal;
 }
 */
+:not(.no-init-animate) {
+    --init-animation: init 400ms var(--ease-out-quint) 100ms;
+}
+
+.no-init-animate {
+    --init-animation: none;
+}
+
+*.init-animate {
+    animation: var(--init-animation);
+    animation-fill-mode: both;
+}
+/*
+.child-no-init-animate > * {
+    --init-animation: none;
+}*/
 
 div.container {
     border-radius: 8px;
@@ -28,6 +44,30 @@ div.panel {
 *.panel-1 {
     background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
     border-radius: 4px;
+}
+
+*.panel-1:not(.no-init-animate) {
+    animation: var(--init-animation);
+    animation-fill-mode: both;
+    animation-delay: 100ms;
+}
+
+.panel-1:not(.no-init-animate) .panel-1:not(.no-init-animate) {
+    animation-delay: 200ms;
+}
+
+.panel-1:not(.no-init-animate) .panel-1:not(.no-init-animate) .panel-1:not(.no-init-animate) {
+    animation-delay: 250ms;
+}
+
+@keyframes init {
+    0% {
+        margin-top: 12px;
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    100% {
+    }
 }
 
 *.panel-1.clickable, *.panel.clickable {

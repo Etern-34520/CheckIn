@@ -39,7 +39,7 @@ public class User implements UserDetails {
         this.QQNumber = QQNumber;
         PasswordEncoder encoder = CheckInApplication.applicationContext.getBean(PasswordEncoder.class);
         this.password = password==null?null:encoder.encode(password);
-        role = Role.getInstance("user");
+        role = Role.getInstance("user",null);
     }
     
     public User() {
@@ -81,7 +81,7 @@ public class User implements UserDetails {
     public Map<String, Object> toDataMap() {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("name", name);
-        dataMap.put("QQ", QQNumber);
+        dataMap.put("qq", QQNumber);
         dataMap.put("role", role.getType());
 //        dataMap.put("userStatus",enabled?"启用":"禁用");
         dataMap.put("enabled", enabled);
@@ -91,7 +91,7 @@ public class User implements UserDetails {
     public JsonObject toJsonObject() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("name", name);
-        jsonObject.addProperty("QQ", QQNumber);
+        jsonObject.addProperty("qq", QQNumber);
         jsonObject.addProperty("role", role.getType());
         jsonObject.addProperty("enabled", enabled);
         return jsonObject;

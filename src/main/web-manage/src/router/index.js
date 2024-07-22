@@ -34,34 +34,65 @@ const router = createRouter({
                 {
                     path: 'manage-user/',
                     name: 'manage-user',
-                    component: () => import('../pages/manageGroup/ManageUserView.vue'),
+                    component: () => import('../pages/manageGroup/userManage/ManageUserView.vue'),
                     children: [
                         {
                             path: ':id/',
-                            name: 'user-detail',
-                            component: () => import('../components/user/UserView.vue'),
+                            name: 'user-view-base',
+                            component: () => import('../pages/manageGroup/userManage/UserViewBase.vue'),
+                            children: [
+                                {
+                                    path: '',
+                                    name: 'user-detail',
+                                    component: () => import('../pages/manageGroup/userManage/UserView.vue'),
+                                },
+                                {
+                                    path: 'user-questions/',
+                                    name: 'user-questions',
+                                    component: () => import('../pages/manageGroup/userManage/UserOwnQuestionsPage.vue'),
+                                }
+                            ]
                         }
                     ]
                 },
                 {
                     path: 'manage-group/',
                     name: 'manage-group',
-                    component: () => import('../pages/manageGroup/ManageGroupView.vue')
+                    component: () => import('../pages/manageGroup/groupManage/ManageGroupView.vue'),
+                    children: [
+                        {
+                            path: ':type/',
+                            name: 'group-view',
+                            component: () => import('../pages/manageGroup/groupManage/UserGroupView.vue'),
+                        }
+                    ]
                 },
                 {
                     path: 'global-setting/',
                     name: 'global-setting',
-                    component: () => import('../pages/settingGroup/GlobalSettingView.vue')
+                    component: () => import('../pages/settingGroup/globalSetting/GlobalSettingViewBase.vue'),
+                    children: [
+                        {
+                            path: "",
+                            name: "global-setting-base",
+                            component: () => import('../pages/settingGroup/globalSetting/GlobalSettingView.vue')
+                        },
+                        {
+                            path: "verification-setting/",
+                            name: "verification-setting",
+                            component: () => import('../pages/settingGroup/globalSetting/VerificationSettingView.vue')
+                        }
+                    ]
                 },
                 {
                     path: 'user-setting/',
                     name: 'user-setting',
-                    component: () => import('../pages/settingGroup/UserSettingView.vue'),
+                    component: () => import('../pages/settingGroup/userSetting/UserSettingViewBase.vue'),
                     children: [
                         {
                             path: "",
-                            name: "base",
-                            component: () => import('../pages/settingGroup/userSetting/Base.vue')
+                            name: "user-setting-base",
+                            component: () => import('../pages/settingGroup/userSetting/UserSettingView.vue')
                         },
                         {
                             path: "my-data/",

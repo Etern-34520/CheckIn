@@ -46,9 +46,9 @@ const filterNode = (value, node) => {
 const filterQuestionInfo = (questionInfo) => {
     for (const v of filterText.value.split(",")) {
         if (v !== "" &&
-            (questionInfo.type !== 'Question' && questionInfo.type !== 'QuestionGroup') || (
-                (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase())) ||
-                (questionInfo.question.id && questionInfo.question.id.toUpperCase().includes(v.toUpperCase())))
+                (questionInfo.type !== 'Question' && questionInfo.type !== 'QuestionGroup') || (
+                        (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase())) ||
+                        (questionInfo.question.id && questionInfo.question.id.toUpperCase().includes(v.toUpperCase())))
         ) {
             return true;
         }
@@ -240,7 +240,7 @@ const allowDrop = (draggingNode, dropNode, type) => {
     // console.log(draggingNode, dropNode, type);
     let nodeDataType = dropNode.data.data.type;
     return ((nodeDataType === 'partition' || nodeDataType === 'QuestionGroup') && type === "inner") ||
-        (nodeDataType !== 'partition' && nodeDataType !== "createPartition" && type === "next");
+            (nodeDataType !== 'partition' && nodeDataType !== "createPartition" && type === "next");
 }
 
 const onDrop = (dragNode, dropNode, place, event) => {
@@ -568,10 +568,10 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 
 function onDeleteNode(nodeObj) {
     nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup' ?
-        (nodeObj.data.question.localDeleted ?
-            QuestionCache.restore(nodeObj.data.question.id) :
-            QuestionCache.delete(nodeObj.data.question.id)) :
-        PartitionCache.deleteRemote(nodeObj.id)
+            (nodeObj.data.question.localDeleted ?
+                    QuestionCache.restore(nodeObj.data.question.id) :
+                    QuestionCache.delete(nodeObj.data.question.id)) :
+            PartitionCache.deleteRemote(nodeObj.id)
 }
 
 const currentButton = ref({
@@ -582,9 +582,11 @@ const responsiveSplitpane = ref(null)
 
 router.afterEach((to, from) => {
     if (to.params.id === undefined) {
-        responsiveSplitpane.value.showLeft();
+        if (responsiveSplitpane.value)
+            responsiveSplitpane.value.showLeft();
     } else {
-        responsiveSplitpane.value.hideLeft();
+        if (responsiveSplitpane.value)
+            responsiveSplitpane.value.hideLeft();
     }
 });
 </script>
@@ -612,14 +614,14 @@ router.afterEach((to, from) => {
                                 <el-text v-else>取消批量</el-text>
                             </el-button>
                             <transition-group name="batch-buttons">
-                                <el-button text v-show="showCheckBox&&button.show()" class="action-button"
+                                <el-button text v-show="showCheckBox&&button.show()" class="action-button no-init-animate"
                                            :class="{selected:button.menuVisible}"
                                            v-for="button in batchActionSelectPartitionMenuButtons" :key="button"
                                            :disabled="disabled"
                                            @click="currentButton=button;switchMenuVisible(button);">
                                     <el-text>{{ button.name }}</el-text>
                                 </el-button>
-                                <el-button text v-show="showCheckBox&&button.show()" class="action-button"
+                                <el-button text v-show="showCheckBox&&button.show()" class="action-button no-init-animate"
                                            v-for="button in batchActionButtons"
                                            :key="button" :disabled="disabled" @click="button.action">
                                     <el-text>{{ button.name }}</el-text>
@@ -628,8 +630,8 @@ router.afterEach((to, from) => {
                         </el-button-group>
                         <transition name="batch-buttons">
                             <select-partitions-action-dialog
-                                v-show="currentButton.menuVisible"
-                                @on-confirm="currentButton.action"/>
+                                    v-show="currentButton.menuVisible"
+                                    @on-confirm="currentButton.action"/>
                         </transition>
                     </div>
                     <div style="flex:1;overflow:overlay;">
@@ -660,11 +662,11 @@ router.afterEach((to, from) => {
                                                     <div class="no-pop-padding create-selection">
                                                         <el-button-group>
                                                             <el-button
-                                                                @click="createQuestionGroup(nodeObj.data.partitionId)">
+                                                                    @click="createQuestionGroup(nodeObj.data.partitionId)">
                                                                 题组
                                                             </el-button>
                                                             <el-button
-                                                                @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
+                                                                    @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
                                                                 选择题
                                                             </el-button>
                                                             <el-button disabled>排序题</el-button>
@@ -690,7 +692,7 @@ router.afterEach((to, from) => {
                                                             }">
                                                         {{
                                                             nodeObj.data.type === 'partition' ?
-                                                                nodeObj.data.partition.name : nodeObj.data.question.content
+                                                                    nodeObj.data.partition.name : nodeObj.data.question.content
                                                         }}
                                                     </el-text>
                                                 </div>
@@ -709,16 +711,16 @@ router.afterEach((to, from) => {
                                                         </template>
                                                         <template #default>
                                                             <EditPartitionNameDialog
-                                                                @on-over="nodeObj.data.editing = false"
-                                                                :partition="nodeObj.data.partition"
-                                                                size="default"/>
+                                                                    @on-over="nodeObj.data.editing = false"
+                                                                    :partition="nodeObj.data.partition"
+                                                                    size="default"/>
                                                         </template>
                                                     </el-popover>
                                                     <el-button class="node-button" link
                                                                @click.stop="onDeleteNode(nodeObj)">
                                                         <HarmonyOSIcon_Remove/>
                                                         <el-text
-                                                            v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
+                                                                v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
                                                             撤销删除
                                                         </el-text>
                                                         <el-text v-else>删除</el-text>
@@ -746,11 +748,11 @@ router.afterEach((to, from) => {
                         </el-alert>
                         <div>
                             <transition-group name="slide-hide">
-                                <question-info-panel
-                                    v-for="questionInfo of QuestionCache.getErrorQuestions()"
-                                    :key="questionInfo.question.id"
-                                    @click="openEdit(questionInfo.question.id)"
-                                    :question-info="questionInfo"/>
+                                <question-info-panel class="no-init-animate"
+                                        v-for="questionInfo of QuestionCache.getErrorQuestions()"
+                                        :key="questionInfo.question.id"
+                                        @click="openEdit(questionInfo.question.id)"
+                                        :question-info="questionInfo"/>
                             </transition-group>
                         </div>
                         <transition name="empty">
@@ -759,6 +761,14 @@ router.afterEach((to, from) => {
                     </el-scrollbar>
                 </div>
             </div>
+        </template>
+        <template #right-top>
+            <el-button type="primary" @click="upload" :loading="uploading"
+                       loading-icon="_Loading_" style="height: 24px"
+                       :disabled="!QuestionCache.reactiveDirty.value">
+                <HarmonyOSIcon_Upload/>
+                <el-text>{{ showTree ? "上传题目更改" : "确认上传" }}</el-text>
+            </el-button>
         </template>
         <template #right>
             <router-view v-slot="{ Component }">

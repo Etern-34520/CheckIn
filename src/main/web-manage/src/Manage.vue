@@ -1,7 +1,6 @@
 <script setup>
 import TopBar from "@/components/common/TopBar.vue";
 import router from "@/router/index.js";
-import topBar from "@/components/common/TopBar.vue";
 import SideMenu from "@/components/common/SideMenu.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import {Loading} from "@element-plus/icons-vue";
@@ -19,6 +18,7 @@ const breadcrumbMap = {
     "manage-group": "组管理",
     "global-setting": "服务器设置",
     "user-setting": "用户设置",
+    "user-questions": "用户题目",
     "my-data": "我的",
 }
 
@@ -35,10 +35,12 @@ let updateBreadcrumbArray = (to) => {
             absolutePath += toPathItem + "/";
         }
         let name = breadcrumbMap[toPathItem];
-        if (name !== undefined) {
+        if (name instanceof Function) {
+            breadcrumbPathArray.push({path: absolutePath, name: name()});
+        } else if (name !== undefined) {
             breadcrumbPathArray.push({path: absolutePath, name: name});
         } else if (notIgnored) {
-            breadcrumbPathArray.push({path: absolutePath, name: toPathItem});
+            breadcrumbPathArray.push({path: absolutePath, name: decodeURI(toPathItem)});
         }
     }
 };
@@ -83,7 +85,16 @@ const user = UserDataInterface.getCurrentUser();
 .routePage-enter-from, .routePage-leave-to {
     filter: blur(32px);
     opacity: 0;
-    scale: 0.98;
+}
+
+/*noinspection CssUnusedSymbol*/
+.routePage-enter-from {
+    scale: 0.95;
+}
+
+/*noinspection CssUnusedSymbol*/
+.routePage-leave-to {
+    scale: 1.05;
 }
 
 #manageBase {

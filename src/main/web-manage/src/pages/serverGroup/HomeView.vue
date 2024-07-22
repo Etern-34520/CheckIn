@@ -2,13 +2,20 @@
 import {Splitpanes, Pane} from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import UserDataInterface from "@/data/UserDataInterface.js";
+import router from "@/router/index.js";
 
 const user = UserDataInterface.getCurrentUser();
+const animate = ref(false);
+console.log(router.options.history.state.back);
+if (router.options.history.state.back === "/login/") {
+    animate.value = true;
+}
+
 </script>
 
 <template>
     <div style="display: flex;flex-direction: column;align-content: stretch;align-items: stretch">
-        <div class="welcome">
+        <div class="welcome" :class="{animate:animate}">
             <el-text style="font-size: 24px">
                 欢迎回来，
             </el-text>
@@ -41,6 +48,40 @@ const user = UserDataInterface.getCurrentUser();
     box-sizing: border-box;
     align-items: end;
     overflow: hidden;
+    max-height: 0;
+}
+
+.welcome.animate {
+    animation: welcomeAnimation 4s var(--ease-in-out-quint);
+    animation-delay: 600ms;
+    animation-fill-mode: both;
+}
+
+@keyframes welcomeAnimation {
+    0% {
+        opacity: 0;
+        transform: translateY(16px);
+        filter: blur(8px);
+        max-height: 0;
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+        max-height: 46px;
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+        max-height: 46px;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(0);
+        filter: blur(0);
+        max-height: 0;
+    }
 }
 
 .welcome > *:first-child {
@@ -56,27 +97,5 @@ const user = UserDataInterface.getCurrentUser();
     max-height: 30px;
     margin-bottom: 4px !important;
     justify-content: center;
-}
-</style>
-
-<style>
-.main-router-enter-active .welcome {
-    transition: 200ms var(--ease-in-out-quint);
-    transition-delay: 600ms;
-    max-height: 46px;
-    opacity: 1;
-}
-
-.welcome {
-    transition: 600ms var(--ease-in-out-quint);
-    transition-delay: 1000ms;
-    max-height: 0;
-    opacity: 0;
-}
-
-.main-router-enter-from .welcome {
-    opacity: 0;
-    filter: blur(8px);
-    transform: translateY(16px);
 }
 </style>

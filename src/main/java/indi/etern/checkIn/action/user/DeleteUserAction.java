@@ -28,7 +28,7 @@ public class DeleteUserAction extends TransactionalAction {
             {
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "deleteUser");
-                jsonObject.addProperty("QQ", qqNumber);
+                jsonObject.addProperty("qq", qqNumber);
                 WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
             }
         }
@@ -37,6 +37,6 @@ public class DeleteUserAction extends TransactionalAction {
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        qqNumber = Long.parseLong((String) dataMap.get("QQ"));
+        qqNumber = ((Double) dataMap.get("qq")).longValue();
     }
 }

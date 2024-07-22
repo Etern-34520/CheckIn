@@ -1,5 +1,4 @@
 <script setup>
-// import {useResizeObserver} from "@vueuse/core";
 const props = defineProps({
     minRowWidth: {
         type: Number,
@@ -13,6 +12,7 @@ const props = defineProps({
 
 const waterfall = ref();
 const rowCount = ref(1);
+let observer;
 
 /*
 useResizeObserver(() => {
@@ -22,7 +22,7 @@ useResizeObserver(() => {
 onMounted(() => {
     nextTick(() => {
         if (waterfall.value) {
-            const observer = new ResizeObserver((entries) => {
+            observer = new ResizeObserver((entries) => {
                 for (const entry of entries) {
                     const width = entry.contentRect.width;
                     rowCount.value = Math.max(1,Math.min(Math.floor(width / props.minRowWidth), props.data.length));
@@ -32,6 +32,9 @@ onMounted(() => {
         }
     });
 });
+onDeactivated(() => {
+    observer.disconnect();
+})
 </script>
 
 <template>

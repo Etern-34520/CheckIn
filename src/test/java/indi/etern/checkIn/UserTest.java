@@ -26,7 +26,7 @@ public class UserTest {
     private User etern = new User("etern", 941651914, "114514");
     
     {
-        Role role = Role.getInstance("admin");
+        Role role = Role.getInstance("admin",null);
         etern.setRole(role);
     }
     

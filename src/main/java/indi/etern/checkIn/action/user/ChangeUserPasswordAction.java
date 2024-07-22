@@ -43,7 +43,7 @@ public class ChangeUserPasswordAction extends UserJsonResultAction {
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        Object qqObject = dataMap.get("QQ");
+        Object qqObject = dataMap.get("qq");
         qqNumber = ((Double) qqObject).longValue();
         oldPassword = (String) dataMap.get("oldPassword");
         password = (String) dataMap.get("newPassword");

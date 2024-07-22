@@ -60,7 +60,12 @@ public class ActionExecutor {
     public Result executeByMap(Map<String, Object> contentMap) throws Exception {
         String actionName = (String) contentMap.get("type");
         if (!actionMap.containsKey(actionName)) {
-            throw new RuntimeException("Action not found: " + actionName);
+            Result result = new Result();
+            JsonObject value = new JsonObject();
+            value.addProperty("type", "error");
+            value.addProperty("message", "Action \"" + actionName + "\" not found");
+            result.setResult(Optional.of(value));
+            return result;
         }
         JsonResultAction jsonResultAction = (JsonResultAction) applicationContext.getBean(actionMap.get(actionName));
         try {
@@ -69,14 +74,14 @@ public class ActionExecutor {
             Result result = new Result();
             JsonObject value = new JsonObject();
             value.addProperty("type", "error");
-            value.addProperty("message", "parameter absent");
+            value.addProperty("message", "Action \"" + actionName + "\" : parameter absent");
             result.setResult(Optional.of(value));
             return result;
         } catch (ClassCastException e) {
             Result result = new Result();
             JsonObject value = new JsonObject();
             value.addProperty("type", "error");
-            value.addProperty("message", "parameter type error");
+            value.addProperty("message", "Action \"" + actionName + "\" : parameter type error");
             result.setResult(Optional.of(value));
             return result;
         }

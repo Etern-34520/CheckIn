@@ -1,4 +1,4 @@
-package indi.etern.checkIn.action.user;
+package indi.etern.checkIn.action.role;
 
 import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "savePermission")
+@Action(name = "savePermissionsOfRole")
 public class SavePermissionAction extends TransactionalAction {
     Role role;
     List<String> enables;

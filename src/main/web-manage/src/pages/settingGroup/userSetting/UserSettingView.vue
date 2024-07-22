@@ -126,34 +126,32 @@ const confirmChangePassword = () => {
     } else {
         if (oldPassword.value === '') {
             message.value = "请输入原密码";
-            return;
         } else if (newPassword.value !== newPasswordRepeat.value) {
             message.value = "两次输入的密码不一致";
-            return;
         } else if (newPassword.value.length < 5) {
             message.value = "密码过短";
-            return;
         } else if (newPassword.value === oldPassword.value) {
             message.value = "新密码与旧密码一致";
+        } else {
+            WebSocketConnector.send({
+                type: "changeUserPassword",
+                qq: user.qq,
+                oldPassword: oldPassword.value,
+                newPassword: newPassword.value
+            }).then((resp) => {
+                if (resp.type === 'fail') {
+                    resp.failureType === 'previousPasswordIncorrect' ? message.value = '原密码错误' : message.value = '修改失败'
+                    // message.value = resp.message;
+                } else {
+                    message.value = "修改成功";
+                    done.value = true;
+                }
+                // changePasswordDialogVisible.value = false;
+            }, (err) => {
+                message.value = err.message;
+                return false;
+            });
         }
-        WebSocketConnector.send({
-            type: "changeUserPassword",
-            QQ: user.qq,
-            oldPassword: oldPassword.value,
-            newPassword: newPassword.value
-        }).then((resp) => {
-            if (resp.type === 'fail') {
-                resp.failureType === 'previousPasswordIncorrect' ? message.value = '原密码错误' : message.value = '修改失败'
-                // message.value = resp.message;
-            } else {
-                message.value = "修改成功";
-                done.value = true;
-            }
-            // changePasswordDialogVisible.value = false;
-        }, (err) => {
-            message.value = err.message;
-            return false;
-        });
     }
 }
 
@@ -173,7 +171,7 @@ const confirmRename = () => {
         }
         WebSocketConnector.send({
             type: "changeUserName",
-            QQ: user.qq,
+            qq: user.qq,
             newName: name.value
         }).then((resp) => {
             if (resp.type === 'fail') {

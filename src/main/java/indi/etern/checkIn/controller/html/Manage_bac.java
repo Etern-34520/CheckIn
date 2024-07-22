@@ -101,10 +101,10 @@ public class Manage_bac {
             case "userInfo" -> userInfo(request, modelAndView);
             case "userPane" -> {
                 modelAndView.addObject("webSocketService", webSocketService);
-                modelAndView.addObject("user", userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
+                modelAndView.addObject("user", userService.findByQQNumber(Long.parseLong(request.getParameter(qq))).orElseThrow());
             }
             case "changeRole" ->
-                    modelAndView.addObject("user", userService.findByQQNumber(Long.parseLong(request.getParameter("QQ"))).orElseThrow());
+                    modelAndView.addObject("user", userService.findByQQNumber(Long.parseLong(request.getParameter(qq))).orElseThrow());
             case "questionOverview" ->
                     modelAndView.addObject("question", multiPartitionableQuestionService.getById(request.getParameter("id")));
             case "editPermission" ->
@@ -214,7 +214,7 @@ public class Manage_bac {
     }
     
     private void userInfo(HttpServletRequest request, ModelAndView modelAndView) {
-        final String qqString = request.getParameter("QQ");
+        final String qqString = request.getParameter(qq);
         final long qq = Long.parseLong(qqString);
         Optional<User> optionalUser = userService.findByQQNumber(qq);
         if (optionalUser.isPresent()) {

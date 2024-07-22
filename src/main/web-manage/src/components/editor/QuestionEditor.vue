@@ -118,7 +118,7 @@ const forceMobilePreview = ref(Responsive.mobile.value);
 
 <template>
     <div v-loading="loading" style="height: 100%;display: flex;flex-direction: column;">
-        <div style="display: flex;margin-left: 8px;margin-top: 8px;flex: none">
+        <div style="display: flex;margin-left: 8px;margin-top: 8px;margin-bottom:4px;flex: none">
             <el-segmented v-model="view" :options="['编辑','预览']" block/>
             <transition name="preview-type-switch">
                 <div style="display: flex;margin-left: 16px" v-if="view==='预览'">

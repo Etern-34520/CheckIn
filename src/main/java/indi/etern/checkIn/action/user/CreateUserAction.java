@@ -17,13 +17,13 @@ import java.util.UUID;
 @Action(name = "createUser")
 public class CreateUserAction extends TransactionalAction {
     
-    private String roleName;
+    private String roleType;
     private long qqNumber;
     private String name;
 
     @Override
     public String requiredPermissionName() {
-        return "create user" + (Objects.equals(roleName, "user") ? "" : ",change role,change role " + roleName);
+        return "create user" + (Objects.equals(roleType, "user") ? "" : ",change role,change role " + roleType);
     }
     
     @Override
@@ -35,7 +35,7 @@ public class CreateUserAction extends TransactionalAction {
             UserService.singletonInstance.unbindAndDeleteById(qqNumber);
             final String initPassword = UUID.randomUUID().toString();
             User newUser = new User(name, qqNumber, initPassword);
-            newUser.setRole(RoleService.singletonInstance.findById(roleName).orElse(Role.getInstance(roleName)));
+            newUser.setRole(RoleService.singletonInstance.findById(roleType).orElse(Role.getInstance(roleType,null)));
             UserService.singletonInstance.save(newUser);
             {
                 JsonObject jsonObject = new JsonObject();
@@ -57,8 +57,8 @@ public class CreateUserAction extends TransactionalAction {
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        roleName = (String) dataMap.get("roleName");
-        qqNumber = (long) dataMap.get("qqNumber");
+        roleType = (String) dataMap.get("roleType");
+        qqNumber = ((Double) dataMap.get("qq")).longValue();
         name = (String) dataMap.get("name");
     }
 }

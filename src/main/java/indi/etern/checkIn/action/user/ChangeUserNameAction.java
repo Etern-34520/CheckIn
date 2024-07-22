@@ -15,7 +15,7 @@ public class ChangeUserNameAction extends UserJsonResultAction {
 
     @Override
     public String requiredPermissionName() {
-        return null;
+        return null;//TODO
     }
 
     @Override
@@ -30,7 +30,7 @@ public class ChangeUserNameAction extends UserJsonResultAction {
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        Object qqObject = dataMap.get("QQ");
+        Object qqObject = dataMap.get("qq");
         qqNumber = ((Double) qqObject).longValue();
         name = (String) dataMap.get("newName");
     }

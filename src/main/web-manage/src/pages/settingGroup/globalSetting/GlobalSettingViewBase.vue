@@ -1,6 +1,4 @@
 <script setup>
-import Base from "@/pages/settingGroup/userSetting/Base.vue";
-
 const page = ref(null);
 
 const switchType = ref(false);

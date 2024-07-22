@@ -44,4 +44,13 @@ public class Permission {
     protected Permission() {
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Permission && ((Permission) obj).id.equals(this.id);
+    }
+    
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

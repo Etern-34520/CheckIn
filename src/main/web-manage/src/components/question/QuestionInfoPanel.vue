@@ -35,7 +35,7 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
     <div class="panel-1 question-info-panel" :class="{clickable:clickable}">
         <div class="grid1">
             <div class="padding">
-                <div class="question-content panel-1 flex-blank-1">
+                <div class="question-content panel-1 flex-blank-1 no-init-animate">
                     <el-scrollbar :max-height="120" style="padding: 4px 16px">
                         <el-text>
                             {{ questionInfo.question.content }}

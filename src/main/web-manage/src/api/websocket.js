@@ -14,6 +14,9 @@ function getCurrentIsoTime() {
     return new Date().toISOString();
 }
 
+let autoRetriedTimes = 0;
+let normallyClose = false;
+
 const WebSocketConnector = {
     ws: null,
     firstConnect: true,
@@ -24,30 +27,47 @@ const WebSocketConnector = {
         qq1 = qq;
         token1 = token;
         let url = "localhost:8080"//TODO window.location.host;
+        // let url = window.location.host;
         return new Promise((resolve, reject) => {
             const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
             ws.onclose = function () {
-                console.log('WebSocket Closed');
-                if (!notifications["closed"])
-                    notifications["closed"] = ElNotification({
-                        title: 'Websocket已关闭',
-                        message: h(Reconnect, {}, {}),
-                        position: 'bottom-right',
-                        type: 'warning',
-                        duration: 0,
+                if (!normallyClose && autoRetriedTimes < 3) {
+                    autoRetriedTimes++;
+                    WebSocketConnector.reconnect().then(() => {
+                        autoRetriedTimes = 0;
+                    },() => {
                     });
-                reject();
+                } else {
+                    autoRetriedTimes = 0;
+                    if (!normallyClose) {
+                        console.log('WebSocket Closed');
+                        if (!notifications["closed"])
+                            notifications["closed"] = ElNotification({
+                                title: 'Websocket已关闭',
+                                message: h(Reconnect, {}, {}),
+                                position: 'bottom-right',
+                                type: 'warning',
+                                duration: 0,
+                            });
+                        reject();
+                    } else {
+                        console.log('WebSocket Closed Normally');
+                        normallyClose = false;
+                    }
+                }
             }
             ws.onerror = function (error) {
                 console.log('WebSocket error', error);
                 if (!notifications["error"])
-                    notifications["error"] = ElNotification({
-                        title: 'Websocket连接失败',
-                        message: '请检查网络连接',
-                        position: 'bottom-right',
-                        type: 'error',
-                        duration: 0
-                    });
+                    if (autoRetriedTimes===3) {
+                        notifications["error"] = ElNotification({
+                            title: 'Websocket连接失败',
+                            message: '请检查网络连接',
+                            position: 'bottom-right',
+                            type: 'error',
+                            duration: 0
+                        });
+                    }
                 reject();
             }
             ws.onopen = function () {
@@ -171,6 +191,13 @@ const WebSocketConnector = {
     },
     registerAction: function (type, callback) {
         WebSocketConnector.actions[type] = callback;
+    },
+    close: function () {
+        if (this.ws) {
+            normallyClose = true;
+            this.ws.close();
+            this.ws = null;
+        }
     }
 }
 export default WebSocketConnector
