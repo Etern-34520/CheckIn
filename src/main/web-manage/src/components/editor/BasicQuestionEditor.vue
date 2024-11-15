@@ -2,25 +2,27 @@
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import {ElNotification} from "element-plus";
-import WebSocketConnector from "@/api/websocket.js";
-import Like from "@/components/icons/Like.vue";
-import DisLike from "@/components/icons/DisLike.vue";
 import PartitionCache from "@/data/PartitionCache.js";
-import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionDialog.vue";
+import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionPop.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import Collapse from "@/components/common/Collapse.vue";
-import toolbar from "@/data/MarkdownEditorToolbar.js"
-import Vditor from "vditor";
-import "vditor/dist/index.css"
+// import "vditor/dist/index.css"
+import ImageViewer from "@/components/editor/ImagesViewer.vue";
+import {MdEditor} from "md-editor-v3";
+import UIMeta from "@/utils/UI_Meta.js";
 
 const {proxy} = getCurrentInstance();
-const imageDialogVisible = ref(false);
+const imageViewerVisible = ref(false);
 const image = ref({name: "", data: ""});
 const upload = ref();
 
 const allUsers = ref({});
 
 let partitions = PartitionCache.reactivePartitions;
+
+import 'md-editor-v3/lib/style.css';
+// import 'md-editor-v3/lib/preview.css';
+
 
 UserDataInterface.getUsersAsync().then((users) => {
     allUsers.value = users;
@@ -130,144 +132,50 @@ const onPartitionChange = (val) => {
     }
 }
 
-const currentUserQQ = Number(proxy.$cookies.get("qq"));
-// const like = ref(false);
+const viewerIndex = ref(0);
 
-// const dislike = ref(false);
-const switchLike = () => {
-    const like = questionInfo.value.question.upVoters.has(currentUserQQ);
-    if (like) {
-        questionInfo.value.question.upVoters.delete(currentUserQQ);
-        WebSocketConnector.send({
-            type: "restoreVote",
-            questionId: questionInfo.value.question.id
-        });
-    } else {
-        WebSocketConnector.send({
-            type: "upVote",
-            questionId: questionInfo.value.question.id
-        });
-        questionInfo.value.question.upVoters.add(currentUserQQ);
-        questionInfo.value.question.downVoters.delete(currentUserQQ);
-    }
+const onPreview = (file) => {
+    viewerIndex.value = questionInfo.value.question.images.findIndex(item => item.uid === file.uid);
+    imageViewerVisible.value = true;
 }
 
-const switchDisLike = () => {
-    const disLike = questionInfo.value.question.downVoters.has(currentUserQQ);
-    if (disLike) {
-        WebSocketConnector.send({
-            type: "restoreVote",
-            questionId: questionInfo.value.question.id
-        });
-        questionInfo.value.question.downVoters.delete(currentUserQQ);
-    } else {
-        WebSocketConnector.send({
-            type: "downVote",
-            questionId: questionInfo.value.question.id
-        });
-        questionInfo.value.question.downVoters.add(currentUserQQ);
-        questionInfo.value.question.upVoters.delete(currentUserQQ);
-    }
+const reload = () => {
+    window.location.reload();
 }
-
-/*
-const vditor = ref();
-
-onMounted(() => {
-    const vditor1 = new Vditor('vditor', {
-        height: 360,
-        resize: {
-            "enable": true
-        },
-        theme: "dark",
-        preview: {
-            theme: {
-                current: "dark"
-            },
-            hljs: {
-                style: "native"
-            }
-        },
-        tab: "\t",
-        cache: {
-            "enable": false
-        },
-        mode: "ir",
-        value: questionInfo.value.question.content,
-        placeholder: "内容"
-    });
-    vditor.value = vditor1;
-})*/
 </script>
 
 <template>
-    <el-dialog
-        v-model="imageDialogVisible"
-        :title="image.name"
-        width="500"
-        align-center>
-        <el-image :src="image.data"/>
-    </el-dialog>
-    <div style="display: flex;margin-bottom: 4px" class="alerts">
-        <transition-group name="alert">
-            <el-tag v-for="error of questionInfo.errors" :key="'error'+error.content" type="danger" :closable="false">
-                <div style="display: flex;flex-direction: row;align-items: center;">
-                    <el-text type="danger" style="margin: 4px">
-                        {{ error.content }}
-                    </el-text>
-                    <el-button-group>
-                        <el-button v-for="errorButton of error.buttons" link
-                                   @click="errorButton.action" :type="errorButton.type">
-                            {{ errorButton.content }}
-                        </el-button>
-                    </el-button-group>
+    <image-viewer v-if="questionInfo.question.images" :images="questionInfo.question.images"
+                  v-model="imageViewerVisible" v-model:index="viewerIndex"/>
+    <collapse :content-background="false" class="question-input" expanded><!--TODO input warning and error-->
+        <template #title>
+            <div style="padding: 8px 16px;display: flex;flex-wrap: wrap">
+                <el-text style="margin-right: 24px">题目内容</el-text>
+                <div style="display: flex">
+                    <el-link href="https://markdown.com.cn/basic-syntax/" target="_blank" type="info"
+                             style="margin-right: 16px" @click.stop>Markdown指南
+                    </el-link>
+                    <el-link href="https://mermaid.nodejs.cn/intro/getting-started.html" target="_blank" type="info"
+                             style="margin-right: 16px" @click.stop>Mermaid指南
+                    </el-link>
                 </div>
-            </el-tag>
-            <el-tag v-for="warning of questionInfo.warnings" :key="'warning'+warning.content" type="warning"
-                    :closable="false">
-                <div style="display: flex;flex-direction: row;align-items: center;">
-                    <el-text type="warning" style="margin: 4px">
-                        {{ warning.content }}
-                    </el-text>
-                    <el-button-group>
-                        <el-button v-for="warningButton of warning.buttons" link
-                                   @click="warningButton.action" :type="warningButton.type">
-                            {{ warningButton.content }}
-                        </el-button>
-                    </el-button-group>
-                </div>
-            </el-tag>
-        </transition-group>
-    </div>
-    <!--    <el-input class="question-content-input"
-                  :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}"
-                  type="textarea"
-                  placeholder="内容" v-model="questionInfo.question.content"
-                  autosize></el-input>-->
-    <div style="position: relative;">
-        <div class="panel-1" style="padding: 4px 16px">
-            <el-link href="https://markdown.com.cn/basic-syntax/" target="_blank" type="info"
-                     style="margin-right: 16px">Markdown指南
-            </el-link>
-<!--            <el-link href="https://katex.org/docs/supported.html" target="_blank" type="info"
-                     style="margin-right: 16px">KaTeX指南
-            </el-link>-->
-            <el-link href="https://mermaid.nodejs.cn/intro/getting-started.html" target="_blank" type="info"
-                     style="margin-right: 16px">Mermaid指南
-            </el-link>
-        </div>
-        <div class="question-content-input" style="display: flex;max-height: 800px;min-height: 200px !important;"
-             :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}">
-                        <v-md-editor placeholder="内容" v-model="questionInfo.question.content" :toolbar="toolbar"
-                                     left-toolbar="undo redo clear | h bold italic strikethrough quote tip | ul ol table hr | link code mermaid"
-                        ></v-md-editor >
-<!--            <div id="vditor" ref="vditor"></div>-->
-        </div>
-    </div>
-    <collapse :content-background="false" :expanded="true">
+                <div class="flex-blank-1"></div>
+                <el-text type="info">字数 {{ questionInfo.question.content.length }}</el-text>
+            </div>
+        </template>
+        <template #content>
+            <div style="display: flex;max-height: 800px;min-height: 200px !important;">
+                <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
+                           preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']" style="height: 75vh"
+                           :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.mobile.value" :preview="!UIMeta.mobile.value"/>
+            </div>
+        </template>
+    </collapse>
+    <collapse :content-background="false" :expanded="true"
+              class="question-input"> <!--TODO input warning and error-->
         <template #title>
             <div style="display: flex;flex-direction: row;align-items: center">
-                <el-text style="line-height: 32px;margin-left: 8px;margin-right: 8px">图片</el-text>
+                <el-text style="line-height: 32px;margin-left: 16px;margin-right: 8px">图片</el-text>
                 <el-tag type="info">{{
                         questionInfo.question.images ? questionInfo.question.images.length : 0
                     }}
@@ -283,25 +191,24 @@ onMounted(() => {
                            :auto-upload="false"
                            action="ignore"
                            :on-change="filter"
-                           :on-preview="file => {image.name = file.name;image.data = file.url;imageDialogVisible = true}">
+                           :on-preview="onPreview">
                     <HarmonyOSIcon_Plus :size="32"/>
                 </el-upload>
             </div>
         </template>
     </collapse>
-    <div style="display: flex;flex-direction: row">
+    <div style="display: flex;flex-direction: row;margin-bottom: 8px">
         <el-select
-            class="not-empty"
-            :class="{error:questionInfo.question.partitionIds&&questionInfo.question.partitionIds.length===0}"
-            v-model="questionInfo.question.partitionIds"
-            placeholder="分区"
-            multiple
-            filterable
-            @focusout="hideCreating"
-            @remove-tag="preventEmptyPartition"
-            @change="onPartitionChange"
-            style="flex:4;width:0"
-        >
+                class="not-empty"
+                v-model="questionInfo.question.partitionIds"
+                placeholder="分区"
+                multiple
+                filterable
+                @focusout="hideCreating"
+                @remove-tag="preventEmptyPartition"
+                @change="onPartitionChange"
+                style="flex:4;width:0"
+        ><!--TODO input warning and error-->
             <el-option v-for="partition of partitions" :key="partition.id"
                        :label="partition.name" :value="partition.id"></el-option>
             <template #footer>
@@ -317,8 +224,14 @@ onMounted(() => {
             </template>
         </el-select>
         <div style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column">
-            <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"
-                       :class="{warning:questionInfo.question.authorQQ===undefined||questionInfo.question.authorQQ===null}">
+            <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"><!--TODO input warning and error-->
+                <template #label="{ label, value }">
+                    <div style="display: flex;align-items: center;justify-items: stretch">
+                        <el-avatar shape="circle" :size="24" style="margin: 4px" fit="cover"
+                                   :src="getAvatarUrlOf(value)"></el-avatar>
+                        <span>{{ label }}</span>
+                    </div>
+                </template>
                 <el-option v-for="(user,i) in allUsers" :key="user.qq" :label="user.name" :value="user.qq">
                     <div style="display: flex;align-items: stretch;justify-items: stretch">
                         <el-avatar shape="circle" :size="28" style="margin: 4px" fit="cover"
@@ -332,24 +245,10 @@ onMounted(() => {
             </el-select>
             <div class="panel-1"
                  style="padding: 2px;display: flex;flex-direction: row;align-items: center">
-                <el-text style="margin-left: 4px;">
+                <el-text style="margin: 0 8px;">
                     启用
                 </el-text>
                 <el-switch v-model="questionInfo.question.enabled"/>
-                <div class="flex-blank-1"></div>
-                <el-button-group>
-                    <el-button link @click="switchLike" :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
-                        <like :filled="questionInfo.question.upVoters.has(currentUserQQ)"/>
-                        <el-text style="margin-left: 4px;">{{ questionInfo.question.upVoters.size }}
-                        </el-text>
-                    </el-button>
-                    <el-button link @click="switchDisLike"
-                               :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
-                        <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
-                        <el-text style="margin-left: 4px;">{{ questionInfo.question.downVoters.size }}
-                        </el-text>
-                    </el-button>
-                </el-button-group>
             </div>
         </div>
     </div>
@@ -358,45 +257,6 @@ onMounted(() => {
 <style scoped>
 .question-image-upload > div {
     min-height: 152px;
-}
-
-/*noinspection CssUnusedSymbol*/
-.alert-enter-active {
-    transition: all 300ms var(--ease-in-bounce-1) 300ms,
-    grid-template-columns 200ms var(--ease-in-out-quint),
-    max-height 200ms var(--ease-in-out-quint),
-    padding 200ms var(--ease-in-out-quint);
-}
-
-/*noinspection CssUnusedSymbol*/
-.alert-leave-active {
-    transition: all 300ms var(--ease-in-bounce-1) 0ms,
-    grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
-    max-height 200ms var(--ease-in-out-quint) 350ms,
-    padding 200ms var(--ease-in-out-quint) 350ms;
-}
-
-/*noinspection CssUnusedSymbol*/
-.alert-enter-from, .alert-leave-to {
-    opacity: 0;
-    /*    margin-top: -40px;*/
-    overflow: hidden;
-    filter: blur(16px);
-    grid-template-columns: 0fr !important;
-    /*    max-width: 0 !important;*/
-    max-height: 0 !important;
-    padding: 0;
-}
-
-.alerts > * {
-    max-height: 24px;
-    display: grid;
-    grid-template-columns: 1fr;
-    /*    max-width: 500px;*/
-}
-
-.alerts > *:not(:last-child) {
-    margin-right: 4px;
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -413,9 +273,7 @@ onMounted(() => {
 </style>
 
 <style>
-.alerts > * > * {
-    min-width: 0;
-}
+
 /*
 
 #vditor {

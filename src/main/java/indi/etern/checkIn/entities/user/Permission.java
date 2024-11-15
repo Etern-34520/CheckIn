@@ -16,7 +16,7 @@ public class Permission {
 /*
     @Setter
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,  CascadeType.REFRESH, CascadeType.REFRESH})
-    @JoinColumn(name = "group_name", referencedColumnName = "name")
+    @JoinColumn(value = "group_name", referencedColumnName = "value")
     protected PermissionGroup group;
 */
     @Id
@@ -30,7 +30,7 @@ public class Permission {
     private String name;
     
 /*
-    @Column(name = "type", nullable = false)
+    @Column(value = "type", nullable = false)
     @Setter
     private PermissionType type;
 */

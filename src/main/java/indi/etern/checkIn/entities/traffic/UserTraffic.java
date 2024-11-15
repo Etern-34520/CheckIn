@@ -2,6 +2,7 @@ package indi.etern.checkIn.entities.traffic;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -9,12 +10,12 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
-import com.google.gson.Gson;
 import indi.etern.checkIn.MVCConfig;
 import indi.etern.checkIn.entities.convertor.LocalDateToDateConvertor;
 import indi.etern.checkIn.entities.convertor.LocalTimeToTimestampConvertor;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -68,6 +69,7 @@ public class UserTraffic {
         localDate = LocalDate.now();
     }
 
+    @SneakyThrows
     public UserTraffic(long qqNumber, HttpServletRequest httpServletRequest) {
         localDate = LocalDate.now();
         localTime = LocalTime.now();
@@ -87,21 +89,25 @@ public class UserTraffic {
                 attributesMap.put(name, s);
             }
         });
-        Gson gson = MVCConfig.getGson();
-        deviceInfo = gson.toJson(headerMap);
-        attributes = gson.toJson(attributesMap);
+        ObjectMapper objectMapper = MVCConfig.getObjectMapper();
+        deviceInfo = objectMapper.writeValueAsString(headerMap);
+        attributes = objectMapper.writeValueAsString(attributesMap);
     }
 
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
     public Map<String, String> getHeaderMap() {
         if (headerMap == null) {
-            headerMap = MVCConfig.getGson().fromJson(deviceInfo, Map.class);
+            headerMap = MVCConfig.getObjectMapper().readValue(deviceInfo, Map.class);
         }
         return headerMap;
     }
-
+    
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
     public Map<String, String> getAttributesMap() {
         if (attributesMap == null) {
-            attributesMap = MVCConfig.getGson().fromJson(attributes, Map.class);
+            attributesMap = MVCConfig.getObjectMapper().readValue(attributes, Map.class);
         }
         return attributesMap;
     }

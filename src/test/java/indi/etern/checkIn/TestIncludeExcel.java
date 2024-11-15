@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
+import java.util.ArrayList<Object>;
 import java.util.List;
 
 
@@ -32,11 +32,11 @@ public class TestIncludeExcel {
     @Test
     void include() {
         String fileName = ".\\question.xlsx";
-        List<Question> multiPartitionableQuestionList = new ArrayList<>(250);
+        List<Question> multiPartitionableQuestionList = new ArrayList<Object><>(250);
         // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
         EasyExcel.read(fileName, ExcelQuestion.class, new ReadListener<ExcelQuestion>() {
             public static final int BATCH_COUNT = 100;
-            private List<ExcelQuestion> cachedDataList = new ArrayList<>(BATCH_COUNT);
+            private List<ExcelQuestion> cachedDataList = new ArrayList<Object><>(BATCH_COUNT);
 
             @Override
             public void invoke(ExcelQuestion data, AnalysisContext context) {
@@ -44,7 +44,7 @@ public class TestIncludeExcel {
                 if (cachedDataList.size() >= BATCH_COUNT) {
                     saveData();
                     // 存储完成清理 list
-                    cachedDataList = new ArrayList<>(BATCH_COUNT);
+                    cachedDataList = new ArrayList<Object><>(BATCH_COUNT);
                 }
             }
 

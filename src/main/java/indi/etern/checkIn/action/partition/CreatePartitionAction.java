@@ -1,15 +1,15 @@
 package indi.etern.checkIn.action.partition;
 
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "createPartition")
-public class CreatePartitionAction extends PartitionJsonResultAction {
+@Action("createPartition")
+public class CreatePartitionAction extends PartitionMapResultAction {
     private String partitionName;
     private Partition createdPartition;
 
@@ -19,23 +19,23 @@ public class CreatePartitionAction extends PartitionJsonResultAction {
     }
     
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         if (PartitionService.singletonInstance.existsByName(partitionName)) {
-            JsonObject error = new JsonObject();
-            error.addProperty("type", "error");
-            error.addProperty("message", "partition already exists");
+            LinkedHashMap<String,Object> error = new LinkedHashMap<>();
+            error.put("type", "error");
+            error.put("message", "partition already exists");
             return Optional.of(error);
         }
         final Partition partition = Partition.getInstance(partitionName);
         PartitionService.singletonInstance.save(partition);
         createdPartition = partition;
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "addPartitionCallBack");
-        jsonObject.addProperty("id", partition.getId());
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        map.put("type", "addPartitionCallBack");
+        map.put("id", partition.getId());
         if (createdPartition != null) {
             sendAddPartitionToAll(createdPartition);
         }
-        return Optional.of(jsonObject);
+        return Optional.of(map);
     }
 
     @Override

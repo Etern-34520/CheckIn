@@ -20,6 +20,9 @@ const breadcrumbMap = {
     "user-setting": "用户设置",
     "user-questions": "用户题目",
     "my-data": "我的",
+    "verification-setting": "上传校验设置",
+    "facade-setting": "首页设置",
+    "drawing-setting": "抽取设置"
 }
 
 let breadcrumbPathArray = reactive([]);
@@ -44,7 +47,10 @@ let updateBreadcrumbArray = (to) => {
         }
     }
 };
-router.afterEach(updateBreadcrumbArray);
+const stop = router.afterEach(updateBreadcrumbArray);
+onUnmounted(() => {
+    stop();
+});
 
 const user = UserDataInterface.getCurrentUser();
 

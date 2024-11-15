@@ -1,21 +1,33 @@
 <script setup>
+import router from "@/router/index.js";
+
 const page = ref(null);
 
-const switchType = ref(false);
-onMounted(() => {
-    watch(() => page.value, () => {
-        setTimeout(() => {
-            switchType.value = !(page.value !== null && page.value.name === "Base");
-        },400);
-    },{immediate: true});
-})
+const transitionName = ref("slide-left-to-right");
+const className = ref("");
+const stop = router.beforeEach((to, from) => {
+    if (to.name === "global-setting-base") {
+        className.value = "left-to-right";
+        transitionName.value = "slide-left-to-right";
+    } else if (from.name === "global-setting-base") {
+        className.value = "";
+        transitionName.value = "slide-right-to-left";
+    } else {
+        className.value = "";
+        transitionName.value = "blur-scale";
+    }
+    console.log(to);
+});
+onUnmounted(() => {
+    stop();
+});
 </script>
 
 <template>
-    <div class="panel" style="padding: 32px;height: 100%">
-        <div class="slide-switch-base" :class="{'left-to-right':switchType}">
+    <div class="panel" style="padding: 32px;flex: 1;width: 0;">
+        <div class="slide-switch-base" :class="className">
             <router-view v-slot="{ Component }">
-                <transition :name="switchType?'slide-left-to-right':'slide-right-to-left'">
+                <transition :name="transitionName">
                     <component ref="page" :is="Component"/>
                 </transition>
             </router-view>

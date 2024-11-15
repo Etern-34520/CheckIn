@@ -27,7 +27,7 @@ function switchMenuStyle() {
 </script>
 <template>
     <div id="top-bar">
-        <el-button v-on:click="switchMenuStyle" text class="menu-display-button" style="width: 30px;height: 30px;margin-left: 6px;margin-right: 4px"
+        <el-button v-on:click="switchMenuStyle" text class="menu-display-button" style="width: 30px;height: 30px;margin-left: 8px;margin-right: 16px"
                    link>
             <svg id="menuIcon" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
                 <g>
@@ -49,7 +49,7 @@ function switchMenuStyle() {
         </el-breadcrumb>
         <div class="flex-blank-1"></div>
         <el-button @click="router.push('/manage/user-setting/')" text
-                   style="margin-right: 2px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
+                   style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
             <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
                        style="margin-right: 4px"></el-avatar>
             <el-text size="large">{{ user.name }}</el-text>
@@ -62,7 +62,7 @@ function switchMenuStyle() {
 @import '../../assets/base.css';
 
 #top-bar {
-    height: 34px;
+    height: 36px;
     display: flex;
     flex-direction: row;
     align-items: center;

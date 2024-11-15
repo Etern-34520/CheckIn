@@ -1,14 +1,14 @@
-import {ElButton, ElNotification} from "element-plus";
+import {ElNotification} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {h} from "vue";
-import randomUUID from "@/utils/UUID.js";
+import randomUUIDv4 from "@/utils/UUID.js";
 import Reconnect from "@/components/common/Reconnect.vue";
 
 let qq1;
 let token1;
 
 let notifications = {};
-let limits = 4*1024*1024;//4MB
+let limits = 4 * 1024 * 1024;//4MB
 
 function getCurrentIsoTime() {
     return new Date().toISOString();
@@ -26,8 +26,9 @@ const WebSocketConnector = {
     connect: function (qq, token) {
         qq1 = qq;
         token1 = token;
-        let url = "localhost:8080"//TODO window.location.host;
-        // let url = window.location.host;
+        // let url = "localhost:8080"//TODO window.location.host;
+        let url = window.location.host;
+        // let url = window.location.hostname + ":8080";
         return new Promise((resolve, reject) => {
             const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
             ws.onclose = function () {
@@ -35,7 +36,7 @@ const WebSocketConnector = {
                     autoRetriedTimes++;
                     WebSocketConnector.reconnect().then(() => {
                         autoRetriedTimes = 0;
-                    },() => {
+                    }, () => {
                     });
                 } else {
                     autoRetriedTimes = 0;
@@ -59,7 +60,7 @@ const WebSocketConnector = {
             ws.onerror = function (error) {
                 console.log('WebSocket error', error);
                 if (!notifications["error"])
-                    if (autoRetriedTimes===3) {
+                    if (autoRetriedTimes === 3) {
                         notifications["error"] = ElNotification({
                             title: 'Websocket连接失败',
                             message: '请检查网络连接',
@@ -97,25 +98,42 @@ const WebSocketConnector = {
                 const message = JSON.parse(event.data);
                 // delete message.messageId;
                 if (WebSocketConnector.actions[message.type]) {
+                    console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
                     WebSocketConnector.actions[message.type](message);
                 } else if (message.messageId) {
                     const promise = this.promises[message.messageId];
                     if (promise && promise instanceof Promise) {
                         if (message.type === "error") {
-                            promise.reject(message);
+                            let showNotification = true;
+                            message.disableNotification = () => {
+                                showNotification = false;
+                            };
                             console.error("websocket error", message);
-                            ElNotification({
-                                title: 'Websocket错误',
-                                message: message.message,
-                                position: 'bottom-right',
-                                type: 'error',
-                                duration: 0
-                            });
+                            const doNotification = () => {
+                                delete message.disableNotification;
+                                if (showNotification) {
+                                    ElNotification({
+                                        title: 'Websocket错误',
+                                        message: message.message,
+                                        position: 'bottom-right',
+                                        type: 'error',
+                                        duration: 0
+                                    });
+                                }
+                            };
+                            const reject1 = promise.reject(message);
+                            if (reject1) {
+                                reject1.then(doNotification);
+                            } else {
+                                doNotification();
+                            }
                         } else {
+                            console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
                             promise.resolve(message);
-                            console.log("["+ getCurrentIsoTime() + "] WS resp:", message);
                         }
                     }
+                } else {
+                    console.warn(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (no handler):`, message);
                 }
             }.bind(this);
             this.ws = ws;
@@ -126,7 +144,7 @@ const WebSocketConnector = {
     },
     send: function (/** Object*/objMessage, expectResponse = true) {
         let ableToSend = this.ws !== null && this.ws.readyState === WebSocket.OPEN;
-        objMessage["messageId"] = randomUUID();
+        objMessage["messageId"] = randomUUIDv4();
         let promise;
         if (expectResponse) {
             objMessage["expectResponse"] = true;
@@ -150,7 +168,7 @@ const WebSocketConnector = {
                 const partCount = Math.ceil(message.length / limits);
                 const partMessageIds = [];
                 for (let i = 0; i < partCount; i++) {
-                    const messageId = randomUUID();
+                    const messageId = randomUUIDv4();
                     partMessageIds.push(messageId);
                     messageParts.push({
                         messageId: messageId,
@@ -159,7 +177,7 @@ const WebSocketConnector = {
                         messagePart: message.substring(i * limits, (i + 1) * limits),
                     });
                 }
-                const oldPromise = this.promises[objMessage["messageId"]]
+                const oldPromise = this.promises[objMessage["messageId"]];
                 const promiseData1 = {};
                 let promise1 = new Promise((resolve, reject) => {
                     promiseData1["resolve"] = () => {
@@ -175,12 +193,17 @@ const WebSocketConnector = {
                 promise1["reject"] = promiseData1["reject"];
                 promise1["message"] = promiseData1["message"];
                 this.promises[objMessage["messageId"]] = promise1;
+
+                console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (part message [count: ${partMessageIds.length}]):`, objMessage);
+
                 this.ws.send(JSON.stringify({
                     messageId: objMessage["messageId"],
                     type: "partMessage",
                     messageIds: partMessageIds,
                 }));
             } else {
+                console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (simple message):`, objMessage);
+
                 this.ws.send(message);
             }
         } else {

@@ -1,6 +1,5 @@
 package indi.etern.checkIn.controller.rest;
 
-import com.google.gson.Gson;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.QuestionService;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,12 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuestionDataRead {
     final QuestionService multiPartitionableQuestionService;
     final PartitionService partitionService;
-    final Gson gson;
     
-    public QuestionDataRead(QuestionService multiPartitionableQuestionService, PartitionService partitionService, Gson gson) {
+    public QuestionDataRead(QuestionService multiPartitionableQuestionService, PartitionService partitionService) {
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
         this.partitionService = partitionService;
-        this.gson = gson;
     }
     
     /*@GetMapping(path = "image/count/{questionID}")
@@ -45,9 +42,9 @@ public class QuestionDataRead {
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("count", questionWithImages.getImageBase64Strings().size());
             
-            List<String> imageNames = new ArrayList<>();
+            List<String> imageNames = new ArrayList<Object><>();
             dataMap.put("names", imageNames);
-            List<Integer> sizes = new ArrayList<>();
+            List<Integer> sizes = new ArrayList<Object><>();
             dataMap.put("sizes", sizes);
             
             Map<String, String> imageBase64Map = new HashMap<>();

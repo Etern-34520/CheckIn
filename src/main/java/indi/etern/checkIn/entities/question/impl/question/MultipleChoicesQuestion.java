@@ -7,6 +7,7 @@ import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
 import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
 import indi.etern.checkIn.entities.serializer.ExamQuestionSerializer;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.SettingService;
@@ -21,7 +22,9 @@ import java.util.*;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
-public class MultipleChoicesQuestion extends Question /*implements ImagesWith*/ {
+public class MultipleChoicesQuestion extends Question implements RandomOrderable {
+    protected boolean randomOrdered;
+    
     protected MultipleChoicesQuestion() {
     }
 
@@ -116,12 +119,14 @@ public class MultipleChoicesQuestion extends Question /*implements ImagesWith*/ 
         boolean enable = false;
         QuestionLinkImpl<?> linkWrapper;
         private boolean manualLink = false;
-
+        private boolean randomOrdered = false;
+        
         public static Builder from(MultipleChoicesQuestion multiPartitionableQuestion) {
             final Builder builder = new Builder().setQuestionContent(multiPartitionableQuestion.getContent())
                     .addChoices(multiPartitionableQuestion.getChoices())
                     .setAuthor(multiPartitionableQuestion.getAuthor())
                     .setEnable(multiPartitionableQuestion.isEnabled())
+                    .setRandomOrdered(multiPartitionableQuestion.isRandomOrdered())
                     .setId(multiPartitionableQuestion.getId());
             if (multiPartitionableQuestion.getLinkWrapper() instanceof ToPartitionLink toPartitionLinkWrapper) {
                 builder.usePartitionLinks(toPartitionLinkWrapper1 -> {
@@ -137,54 +142,59 @@ public class MultipleChoicesQuestion extends Question /*implements ImagesWith*/ 
             }
             return builder;
         }
-
+        
         public Builder usePartitionLinks(ToPartitionLink.Configurator configurator) {
             linkWrapper = new ToPartitionLink();
             configurator.configure((ToPartitionLink) linkWrapper);
             return this;
         }
-
+        
         public Builder useQuestionGroupLinks(ToQuestionGroupLink.Configurator configurator) {
             linkWrapper = new ToQuestionGroupLink();
             configurator.configure((ToQuestionGroupLink) linkWrapper);
             return this;
         }
-
+        
         public Builder useManualLinkLater() {
             manualLink = true;
             return this;
         }
-
+        
         public Builder addChoice(Choice choice) {
             choices.add(choice);
             return this;
         }
-
+        
         public Builder addChoices(List<Choice> choices) {
             this.choices.addAll(choices);
             return this;
         }
-
+        
         public Builder setQuestionContent(String content) {
             questionContent = content;
             return this;
         }
-
+        
         public Builder addBase64Image(String name, String base64String) {
             imageBase64Strings.put(name, base64String);
             return this;
         }
-
+        
         public Builder setAuthor(User author) {
             this.author = author;
             return this;
         }
-
+        
         public Builder setEnable(boolean enable) {
             this.enable = enable;
             return this;
         }
-
+        
+        public Builder setRandomOrdered(boolean randomOrdered) {
+            this.randomOrdered = randomOrdered;
+            return this;
+        }
+        
         public MultipleChoicesQuestion build() {
             boolean singleCorrect = false;
             boolean multipleCorrect = false;
@@ -210,12 +220,13 @@ public class MultipleChoicesQuestion extends Question /*implements ImagesWith*/ 
                 throw new QuestionException("link not set");
             }
             if (partitions.isEmpty()) {
-                String string = SettingService.singletonInstance.get("other.defaultPartitionName");
+                String string = SettingService.singletonInstance.getItem("other.defaultPartitionName").getValue().toString();
                 if (string == null) string = "undefined";
                 partitions.add(Partition.getInstance(string));
             }
             multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, /*partitions,*/ author);
             multipleQuestion.setEnabled(enable);
+            multipleQuestion.setRandomOrdered(randomOrdered);
             if (id != null) {
                 multipleQuestion.setId(id);
             } else {
@@ -256,7 +267,11 @@ public class MultipleChoicesQuestion extends Question /*implements ImagesWith*/ 
             return this;
         }
     }
-
+    
+    private void setRandomOrdered(boolean randomOrdered) {
+        this.randomOrdered = randomOrdered;
+    }
+    
     private void setId(String id) {
         this.id = id;
     }

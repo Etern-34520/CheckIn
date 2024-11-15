@@ -1,33 +1,34 @@
 package indi.etern.checkIn.service.web;
 
-import com.google.gson.JsonObject;
-import indi.etern.checkIn.CheckInApplication;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.api.webSocket.Connector;
 import indi.etern.checkIn.entities.user.User;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 import static indi.etern.checkIn.api.webSocket.Connector.CONNECTORS;
 
 @Service
 public class WebSocketService {
-    private static final Logger logger = LoggerFactory.getLogger(CheckInApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketService.class);
     public static WebSocketService singletonInstance;
-    protected WebSocketService() {
+    private final ObjectMapper objectMapper;
+    
+    protected WebSocketService(ObjectMapper objectMapper) {
         singletonInstance = this;
+        this.objectMapper = objectMapper;
     }
-    /**
-     * 群发自定义消息
-     */
+    
     public void sendMessages(String message, HashSet<String> toSids) {
         logger.info("webSocket to:{}, msg:{}", toSids, message);
         for (Connector item : CONNECTORS) {
             try {
-                //这里可以设定只推送给传入的sid，为null则全部推送
                 if (toSids.isEmpty()) {
                     item.sendMessage(message);
                 } else if (toSids.contains(item.getSid())) {
@@ -40,7 +41,6 @@ public class WebSocketService {
     
     public void sendMessage(String message, String sid) {
         logger.info("webSocket to:{}, msg:{}", sid, message);
-
         for (Connector item : CONNECTORS) {
             try {
                 if (item.getSid().equals(sid)) {
@@ -71,12 +71,14 @@ public class WebSocketService {
         return isOnline(String.valueOf(user.getQQNumber()));
     }
     
-    public void sendMessageToAll(JsonObject jsonObject) {
-        sendMessageToAll(jsonObject.toString());
+    @SneakyThrows
+    public void sendMessageToAll(LinkedHashMap<String,Object> map) {
+        sendMessageToAll(objectMapper.writeValueAsString(map));
     }
 
-    public void sendMessageToAllWithoutLog(JsonObject jsonObject) {
-        sendMessageToAllWithoutLog(jsonObject.toString());
+    @SneakyThrows
+    public void sendMessageToAllWithoutLog(LinkedHashMap<String,Object> map) {
+        sendMessageToAllWithoutLog(objectMapper.writeValueAsString(map));
     }
 
     public void sendMessageToAllWithoutLog(String message) {

@@ -1,15 +1,15 @@
 package indi.etern.checkIn.action.partition;
 
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "getPartitionById")
-public class GetPartitionByIdAction extends PartitionJsonResultAction {
+@Action("getPartitionById")
+public class GetPartitionByIdAction extends PartitionMapResultAction {
     private final PartitionService partitionService;
     private Integer partitionId;
 
@@ -23,21 +23,23 @@ public class GetPartitionByIdAction extends PartitionJsonResultAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         Optional<Partition> optionalPartition = partitionService.findById(partitionId);
         if (optionalPartition.isPresent()) {
             Partition partition = optionalPartition.get();
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("id", partition.getId());
-            jsonObject.addProperty("name", partition.getName());
-            return Optional.of(jsonObject);
+            LinkedHashMap<String,Object> result = new LinkedHashMap<>();
+            LinkedHashMap<String,Object> partition1 = new LinkedHashMap<>();
+            partition1.put("id", partition.getId());
+            partition1.put("name", partition.getName());
+            result.put("partition",partition1);
+            return Optional.of(result);
         } else {
-            return getOptionalErrorJsonObject("Partition not found");
+            return getOptionalErrorMap("Partition not found");
         }
     }
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        partitionId = ((Double) dataMap.get("id")).intValue();
+        partitionId = (int) dataMap.get("id");
     }
 }

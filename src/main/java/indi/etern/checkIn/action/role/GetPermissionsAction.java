@@ -1,8 +1,6 @@
 package indi.etern.checkIn.action.role;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import indi.etern.checkIn.action.JsonResultAction;
+import indi.etern.checkIn.action.MapResultAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.PermissionGroup;
@@ -11,8 +9,8 @@ import indi.etern.checkIn.service.dao.RoleService;
 
 import java.util.*;
 
-@Action(name = "getPermissionsOfRole")
-public class GetPermissionsAction extends JsonResultAction {
+@Action("getPermissionsOfRole")
+public class GetPermissionsAction extends MapResultAction {
     String roleType;
     final RoleService roleService;
     
@@ -26,38 +24,38 @@ public class GetPermissionsAction extends JsonResultAction {
     }
     
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         Role role = roleService.findByType(roleType).orElseThrow();
-        JsonObject result = new JsonObject();
+        LinkedHashMap<String,Object> result = new LinkedHashMap<>();
         final Set<Permission> permissions1 = role.getPermissions();
         final List<PermissionGroup> allPermissionGroups = roleService.findAllPermissionGroup();
-        JsonArray permissionGroups = new JsonArray(permissions1.size());
+        ArrayList<Object> permissionGroups = new ArrayList<>(permissions1.size());
         for (PermissionGroup permissionGroup : allPermissionGroups) {
-            JsonObject permissionGroup1 = new JsonObject();
-            JsonArray groupPermissions = new JsonArray();
+            LinkedHashMap<String,Object> permissionGroup1 = new LinkedHashMap<>();
+            ArrayList<Object> groupPermissions = new ArrayList<>();
             
             final List<Permission> permissions = permissionGroup.getPermissions();
             permissions.sort(Comparator.comparing(Permission::getName));
             for (Permission permission : permissions) {
-                JsonObject permission1 = new JsonObject();
-                permission1.addProperty("name",permission.getName());
-                permission1.addProperty("description",permission.getDescription());
-                permission1.addProperty("enabled",permissions1.contains(permission));
+                LinkedHashMap<String,Object> permission1 = new LinkedHashMap<>();
+                permission1.put("name",permission.getName());
+                permission1.put("description",permission.getDescription());
+                permission1.put("enabled",permissions1.contains(permission));
                 groupPermissions.add(permission1);
             }
             
-            permissionGroup1.addProperty("name",permissionGroup.getName());
-            permissionGroup1.addProperty("description",permissionGroup.getDescription());
-            permissionGroup1.add("permissions",groupPermissions);
+            permissionGroup1.put("name",permissionGroup.getName());
+            permissionGroup1.put("description",permissionGroup.getDescription());
+            permissionGroup1.put("permissions",groupPermissions);
             
             permissionGroups.add(permissionGroup1);
         }
-        result.add("permissionGroups",permissionGroups);
+        result.put("permissionGroups",permissionGroups);
         return Optional.of(result);
     }
     
     @Override
-    public void initData(Map<String, Object> dataObj) {
-        roleType = dataObj.get("roleType").toString();
+    public void initData(Map<String, Object> dataMap) {
+        roleType = dataMap.get("roleType").toString();
     }
 }

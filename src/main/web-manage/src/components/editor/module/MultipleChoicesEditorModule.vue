@@ -4,7 +4,7 @@ import {VueDraggable} from "vue-draggable-plus";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
-import randomUUID from "@/utils/UUID.js";
+import randomUUIDv4 from "@/utils/UUID.js";
 
 const questionInfo = defineModel('questionInfo',{
     required:true,
@@ -13,7 +13,7 @@ const questionInfo = defineModel('questionInfo',{
 
 
 const createChoice = () => {
-    questionInfo.value.question.choices.push({content: "", correct: false, id: randomUUID()});
+    questionInfo.value.question.choices.push({content: "", correct: false, id: randomUUIDv4()});
 }
 
 const removeChoice = (index) => {
@@ -33,7 +33,13 @@ const onEndDrag = () => {
 </script>
 
 <template>
-    <div style="display: flex;flex-direction: column;overflow: hidden">
+    <div class="panel-1" style="display: flex;flex-direction: column;overflow: hidden;padding: 12px 20px">
+        <div style="display: flex;flex-direction: row;align-items: center">
+            <el-text>选项</el-text>
+            <div class="flex-blank-1"></div>
+            <el-text type="info" style="margin-right: 8px;">启用乱序选项</el-text>
+            <el-switch v-model="questionInfo.question.randomOrdered"/>
+        </div>
         <VueDraggable
             ref="draggable"
             v-model="questionInfo.question.choices"
@@ -52,8 +58,7 @@ const onEndDrag = () => {
                     <el-checkbox v-model="choice.correct" class="choice-correct-checkbox"
                                  size="large"></el-checkbox>
                     <el-input type="text" size="large" placeholder="选项内容"
-                              v-model="choice.content"
-                              :class="{error:choice.content===undefined || choice.content === ''}"></el-input>
+                              v-model="choice.content" :class="'TODO'"></el-input>
                     <transition name="delete-choice-button">
                         <el-button class="remove-choice-button"
                                    v-show="questionInfo.question.choices.length>2" text
@@ -90,7 +95,7 @@ const onEndDrag = () => {
     justify-items: stretch;
     align-items: center;
     height: 40px;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     overflow: hidden;
 }
 

@@ -1,17 +1,17 @@
 package indi.etern.checkIn.action.role;
 
-import com.google.gson.JsonObject;
-import indi.etern.checkIn.action.JsonResultAction;
+import indi.etern.checkIn.action.MapResultAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.RoleService;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "updateRoleLevels")
-public class UpdateRoleLevelsAction extends JsonResultAction {
+@Action("updateRoleLevels")
+public class UpdateRoleLevelsAction extends MapResultAction {
     private final RoleService roleService;
     private List<String> roleTypes;
     
@@ -26,7 +26,7 @@ public class UpdateRoleLevelsAction extends JsonResultAction {
     }
     
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         List<Role> roles = roleService.findAll();
         for (Role role : roles) {
             if (roleTypes.contains(role.getType())) {
@@ -34,12 +34,12 @@ public class UpdateRoleLevelsAction extends JsonResultAction {
             }
         }
         roleService.saveAll(roles);
-        return successOptionalJsonObject;
+        return successOptionalMap;
     }
     
     @Override
-    public void initData(Map<String, Object> dataObj) {
+    public void initData(Map<String, Object> dataMap) {
         //noinspection unchecked
-        roleTypes = (List<String>) dataObj.get("levels");
+        roleTypes = (List<String>) dataMap.get("levels");
     }
 }

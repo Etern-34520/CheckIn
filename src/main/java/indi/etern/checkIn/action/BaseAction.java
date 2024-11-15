@@ -15,14 +15,14 @@ public abstract class BaseAction<Res, InitDataType> implements Callable<Optional
     final User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
     protected boolean logging = true;
-
+    
     @Override
     public Optional<Res> call() throws Exception {
         try {
             String requiredPermissionName = requiredPermissionName();
             if (requiredPermissionName != null && !requiredPermissionName.isEmpty())
                 for (String s : requiredPermissionName.split(",")) {
-                    if (!JwtTokenProvider.currentUserHasPermission(s)) {
+                    if (!JwtTokenProvider.singletonInstance.currentUserHasPermission(s)) {
                         throw new PermissionDeniedException("权限不足，需要" + s,s);
                     }
                 }
@@ -44,7 +44,7 @@ public abstract class BaseAction<Res, InitDataType> implements Callable<Optional
         return logging;
     }
 
-    public void initData(InitDataType dataObj) {}
+    public void initData(InitDataType initData) {}
 
     protected abstract void preLog();
 }

@@ -1,3 +1,4 @@
+
 import './assets/main.css'
 
 import {createApp} from 'vue'
@@ -14,14 +15,13 @@ import VueMarkdownEditor from '@kangc/v-md-editor';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
 import '@/assets/vuePressDark.css';
 import '@/assets/vuePressLight.css';
-// noinspection JSFileReferences
 import vuepressTheme from '@kangc/v-md-editor/lib/theme/vuepress.js';
 import hljs from 'highlight.js';
 import Prism from 'prismjs';
-// import createTipPlugin from "@kangc/v-md-editor/es/plugins/tip/index.js";
-// import createKatexPlugin from '@kangc/v-md-editor/lib/plugins/katex/cdn.js';
 import createMermaidPlugin from '@kangc/v-md-editor/lib/plugins/mermaid/cdn.js';
 import '@kangc/v-md-editor/lib/plugins/mermaid/mermaid.css';
+// noinspection ES6UnusedImports
+import UIMeta from '@/utils/UI_Meta.js';
 
 VueMarkdownEditor.use(vuepressTheme, {
     Prism,
@@ -32,14 +32,17 @@ VMdPreview.use(vuepressTheme, {
     Prism,
 });
 
-
+/*
+if (window.mermaid) {
+    let mermaidConfig;
 // VueMarkdownEditor.use(createKatexPlugin());
 // noinspection JSValidateTypes
-VueMarkdownEditor.use(createMermaidPlugin());
-
+    VueMarkdownEditor.use(createMermaidPlugin());
 // VMdPreview.use(createKatexPlugin());
 // noinspection JSValidateTypes
-VMdPreview.use(createMermaidPlugin());
+    VMdPreview.use(createMermaidPlugin());
+}
+*/
 
 // VueMarkdownEditor.use(createTipPlugin());
 const app = createApp(App)

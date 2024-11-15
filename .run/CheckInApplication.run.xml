@@ -1,8 +1,23 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="CheckInApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <additionalParameters>
+      <param>
+        <option name="enabled" value="true" />
+        <option name="name" value="management.endpoint.env.show-values" />
+        <option name="value" value="when_authorized" />
+      </param>
+      <param>
+        <option name="enabled" value="true" />
+        <option name="name" value="management.endpoint.env.show-values" />
+        <option name="value" value="when_authorized" />
+      </param>
+    </additionalParameters>
+    <option name="ALTERNATIVE_JRE_PATH" value="graalvm-22" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <module name="checkIn" />
     <option name="SHORTEN_COMMAND_LINE" value="ARGS_FILE" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="indi.etern.checkIn.CheckInApplication" />
+    <option name="UPDATE_ACTION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="indi.etern.checkIn.*" />

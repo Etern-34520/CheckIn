@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.user;
 
-import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.User;
@@ -10,7 +10,7 @@ import indi.etern.checkIn.service.web.WebSocketService;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "setUserState")
+@Action("setUserState")
 public class SetUserStateAction extends TransactionalAction {
     private long qqNumber;
     private boolean enabled;
@@ -21,16 +21,16 @@ public class SetUserStateAction extends TransactionalAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (WebSocketService.singletonInstance.isOnline(user)) {
-                return getOptionalErrorJsonObject("user is online");
+                return getOptionalErrorMap("user is online");
             }
             user.setEnabled(enabled);
             UserService.singletonInstance.save(user);
-            UserJsonResultAction.sendUpdateUserToAll(user);
+            UserMapResultAction.sendUpdateUserToAll(user);
         }
         return Optional.empty();
     }

@@ -11,7 +11,7 @@ const warning = {
     title: "确定离开？",
     leave: "离开后将丢失未保存的内容",
     confirm: '确定离开',
-    cancel: '返回保存'
+    cancel: '返回保存',
 };
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -81,6 +81,16 @@ const router = createRouter({
                             path: "verification-setting/",
                             name: "verification-setting",
                             component: () => import('../pages/settingGroup/globalSetting/VerificationSettingView.vue')
+                        },
+                        {
+                            path: "facade-setting/",
+                            name: "facade-setting",
+                            component: () => import('../pages/settingGroup/globalSetting/FacadeSettingView.vue')
+                        },
+                        {
+                            path: "drawing-setting/",
+                            name: "drawing-setting",
+                            component: () => import('../pages/settingGroup/globalSetting/DrawingSettingView.vue')
                         }
                     ]
                 },
@@ -137,6 +147,8 @@ router.beforeEach((to, from, next) => {
                 confirmButtonText: from.meta.warning.confirm,
                 cancelButtonText: from.meta.warning.cancel,
                 type: 'warning',
+                draggable: true,
+                showClose: false,
             }
         ).then(() => {
             next();

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.*;
 
-@Action(name = "createOrUpdateQuestionGroup")
+@Action("createOrUpdateQuestionGroup")
 public class CreateOrUpdateQuestionGroup extends BaseAction<Object, Map<String,Object>> {
     private final ObjectMapper objectMapper;
     Map<String,Object> data;
@@ -39,8 +39,8 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<Object, Map<String,O
     }
 
     @Override
-    public void initData(Map<String,Object> dataObj) {
-        data = dataObj;
+    public void initData(Map<String,Object> dataMap) {
+        data = dataMap;
         questionGroup = Utils.createQuestionGroup(data);
     }
 

@@ -1,6 +1,5 @@
 package indi.etern.checkIn.service.dao;
 
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.PermissionGroup;
 import indi.etern.checkIn.entities.user.Role;
@@ -10,6 +9,7 @@ import indi.etern.checkIn.repositories.RoleRepository;
 import indi.etern.checkIn.service.web.WebSocketService;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,15 +42,15 @@ public class RoleService {
             rolePermissionGroup.getPermissions().add(permission);
             permissionGroupRepository.save(rolePermissionGroup);
             
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("type", "addPermission");
-            JsonObject permissionJson = new JsonObject();
-            permissionJson.addProperty("name", permission.getName());
-            permissionJson.addProperty("description", permission.getDescription());
-            permissionJson.addProperty("group", "role");
-            jsonObject.add("permission", permissionJson);
+            LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+            map.put("type", "addPermission");
+            LinkedHashMap<String,Object> permissionJson = new LinkedHashMap<>();
+            permissionJson.put("name", permission.getName());
+            permissionJson.put("description", permission.getDescription());
+            permissionJson.put("group", "role");
+            map.put("permission", permissionJson);
             
-            webSocketService.sendMessageToAll(jsonObject);
+            webSocketService.sendMessageToAll(map);
         }
     }
     
@@ -93,14 +93,14 @@ public class RoleService {
         final String permissionName = "change role " + role.getType();
         permissionRepository.deleteByName(permissionName);
         
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "deletePermission");
-        JsonObject permissionJson = new JsonObject();
-        permissionJson.addProperty("name", permissionName);
-        permissionJson.addProperty("group", "role");
-        jsonObject.add("permission", permissionJson);
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        map.put("type", "deletePermission");
+        LinkedHashMap<String,Object> permissionJson = new LinkedHashMap<>();
+        permissionJson.put("name", permissionName);
+        permissionJson.put("group", "role");
+        map.put("permission", permissionJson);
         
-        webSocketService.sendMessageToAll(jsonObject);
+        webSocketService.sendMessageToAll(map);
         
         roleRepository.delete(role);
     }

@@ -1,15 +1,16 @@
 package indi.etern.checkIn.action.user;
 
-import com.google.gson.JsonObject;
-import indi.etern.checkIn.action.JsonResultAction;
+import java.util.LinkedHashMap;
+
+import indi.etern.checkIn.action.MapResultAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "forceOffline")
-public class ForceOfflineAction extends JsonResultAction {
+@Action("forceOffline")
+public class ForceOfflineAction extends MapResultAction {
     long qqNumber;
     @Override
     public String requiredPermissionName() {
@@ -17,13 +18,13 @@ public class ForceOfflineAction extends JsonResultAction {
     }
     
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         WebSocketService.singletonInstance.sendMessage("{\"type\":\"offLine\"}", String.valueOf(qqNumber));
         return Optional.empty();
     }
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        qqNumber = (long) dataMap.get("qqNumber");
+        qqNumber = ((Number) dataMap.get("qqNumber")).longValue();
     }
 }

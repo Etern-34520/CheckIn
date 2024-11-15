@@ -10,39 +10,32 @@ import ElementPlus from 'unplugin-element-plus/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: '/checkIn/',
-    optimizeDeps: {
-        include: ['@kangc/v-md-editor/lib/theme/vuepress.js'],
-    },
-    plugins: [
-        vue(),
-        VueDevTools(),
-        AutoImport({
-            imports: ['vue', 'vue-router'],
-            resolvers: [ElementPlusResolver()],
-        }),
-        Components({
-            resolvers: [ElementPlusResolver()],
-        }),
-        ElementPlus({})
-    ],
-    resolve: {
+    server: {
+        port: 5173, host: '0.0.0.0', // 配置项目可以局域网访问
+        cors: true, // 默认启用并允许任何源
+        proxy: {
+            '/checkIn/login/api': {
+                target: 'http://localhost:8080',
+                changeOrigin: true
+                // rewrite: (path) => path.replace(/^\/checkIn\/login\/api/, '')
+            },
+            "/checkIn/api/websocket/": {
+                target: "http://localhost:8080",
+                changeOrigin: true,
+                ws: true
+            }
+        }
+    }, base: '/checkIn/'
+    , plugins: [vue(), VueDevTools(), AutoImport({
+        imports: ['vue', 'vue-router'], resolvers: [ElementPlusResolver()],
+    }), Components({
+        resolvers: [ElementPlusResolver()],
+    }), ElementPlus({})], resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
-    },
-    build: {
+    }, build: {
         outDir: "../resources/static/view/manage",
-    },
-/*
-    server: {
-        proxy: {
-            '/checkIn/login/': {
-                target: 'http://localhost:8080/checkIn/login',
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/checkIn\/login/, '')
-            }
-        }
+        emptyOutDir: true,
     }
-*/
 })

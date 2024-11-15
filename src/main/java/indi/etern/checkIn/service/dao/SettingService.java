@@ -4,6 +4,7 @@ import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.repositories.SettingRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,11 +17,12 @@ public class SettingService {
         singletonInstance = this;
         this.settingRepository = settingRepository;
     }
-    public String get(String key) {
-        return settingRepository.findById(key).orElse(SettingItem.EMPTY).getValue();
-    }
     
-    public String set(String key, String value) {
+//    public String get(String key) {
+//        return settingRepository.findById(key).orElse(SettingItem.EMPTY).getValue();
+//    }
+    
+    /*public String set(String key, String value) {
         Optional<SettingItem> optionalSettingItem = settingRepository.findById(key);
         if (optionalSettingItem.isPresent()) {
             SettingItem settingItem = optionalSettingItem.get();
@@ -30,10 +32,14 @@ public class SettingService {
             settingRepository.save(new SettingItem(key, value));
         }
         return value;
-    }
+    }*/
     
     public SettingItem getItem(String key) {
         return settingRepository.findById(key).orElseThrow();
+    }
+    
+    public List<SettingItem> findAllByKeys(Collection<String> keys) {
+        return settingRepository.findAllById(keys);
     }
     
     public Optional<SettingItem> findItem(String key) {
@@ -62,7 +68,11 @@ public class SettingService {
     
     public void setAll(Map<String, Object> dataMap) {
         for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            set(entry.getKey(), entry.getValue().toString());
+            save(new SettingItem(entry.getKey(), entry.getValue().toString(), entry.getValue().getClass()));
         }
+    }
+    
+    public void setAll(Iterable<SettingItem> settingItems) {
+        settingRepository.saveAll(settingItems);
     }
 }

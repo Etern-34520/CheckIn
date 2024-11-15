@@ -1,6 +1,5 @@
 package indi.etern.checkIn.action;
 
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.interfaces.Action;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,10 +44,10 @@ public class ActionExecutor {
 
             if (clazz.isAnnotationPresent(Action.class)) {
                 if (!baseActionClass.isAssignableFrom(clazz)) {
-                    throw new RuntimeException("Action class \"" + clazz.getName() + "\" must extends JsonResultAction");
+                    throw new RuntimeException("Action class \"" + clazz.getName() + "\" must extends MapResultAction");
                 }
                 Action actionAnnotation = clazz.getAnnotation(Action.class);
-                String name = actionAnnotation.name();
+                String name = actionAnnotation.value();
                 if (actionMap.containsKey(name)) {
                     throw new RuntimeException("Action name conflict: " + name);
                 }
@@ -61,56 +61,50 @@ public class ActionExecutor {
         String actionName = (String) contentMap.get("type");
         if (!actionMap.containsKey(actionName)) {
             Result result = new Result();
-            JsonObject value = new JsonObject();
-            value.addProperty("type", "error");
-            value.addProperty("message", "Action \"" + actionName + "\" not found");
+            LinkedHashMap<String,Object> value = new LinkedHashMap<>();
+            value.put("type", "error");
+            value.put("message", "Action \"" + actionName + "\" not found");
             result.setResult(Optional.of(value));
             return result;
         }
-        JsonResultAction jsonResultAction = (JsonResultAction) applicationContext.getBean(actionMap.get(actionName));
-        try {
-            jsonResultAction.initData(contentMap);
-        } catch (NullPointerException e) {
+        final BaseAction<?, ?> action = applicationContext.getBean(actionMap.get(actionName));
+        if (action instanceof MapResultAction mapResultAction) {
+            try{
+                mapResultAction.initData(contentMap);
+            } catch (NullPointerException e) {
+                Result result = new Result();
+                LinkedHashMap<String,Object> value = new LinkedHashMap<>();
+                value.put("type", "error");
+                value.put("message", "Action \"" + actionName + "\" : parameter absent ( " + e.getMessage() + " )");
+                result.setResult(Optional.of(value));
+                return result;
+            } catch (ClassCastException e) {
+                Result result = new Result();
+                LinkedHashMap<String,Object> value = new LinkedHashMap<>();
+                value.put("type", "error");
+                value.put("message", "Action \"" + actionName + "\" : parameter type error ( " + e.getMessage() + " )");
+                result.setResult(Optional.of(value));
+                return result;
+            }
+            mapResultAction.preLog();
+            
             Result result = new Result();
-            JsonObject value = new JsonObject();
-            value.addProperty("type", "error");
-            value.addProperty("message", "Action \"" + actionName + "\" : parameter absent");
-            result.setResult(Optional.of(value));
-            return result;
-        } catch (ClassCastException e) {
-            Result result = new Result();
-            JsonObject value = new JsonObject();
-            value.addProperty("type", "error");
-            value.addProperty("message", "Action \"" + actionName + "\" : parameter type error");
-            result.setResult(Optional.of(value));
-            return result;
-        }
-        jsonResultAction.preLog();
+            Optional<LinkedHashMap<String,Object>> optionalResult = mapResultAction.call();
+            result.setResult(optionalResult);
 
-        Result result = new Result();
-        Optional<JsonObject> optionalResult = jsonResultAction.call();
-        result.setResult(optionalResult);
-
-/*
-        if (contentMap.get("expectResponse") != null && !((boolean) contentMap.get("expectResponse"))) {
-            result.setShouldLogging(jsonResultAction.shouldLogging());
+            LinkedHashMap<String,Object> map;
+            map = optionalResult.orElseGet(LinkedHashMap::new);
+            map.put("messageId", contentMap.get("messageId").toString());
+            
+            logger.debug("Execute by map: {}", actionName);
             return result;
+        } else {
+            throw new RuntimeException("Not supported action base type");
         }
-*/
-        JsonObject jsonObject;
-        jsonObject = optionalResult.orElseGet(JsonObject::new);
-        jsonObject.addProperty("messageId", contentMap.get("messageId").toString());
-        /*{
-            String message = jsonResultAction.getLogMessage(optionalResult);
-            result.setLoggingMessage(message);
-        }*/
-        logger.debug("Execute by map: {}", actionName);
-        return result;
     }
 
     public Optional<?> executeByTypeClass(Class<? extends BaseAction<?, ?>> clazz, Object dataObj) {
         BaseAction<?, ?> action = applicationContext.getBean(clazz);
-//        action.initData(dataObj);
         Method[] methods = action.getClass().getMethods();
         try {
             for (Method method : methods) {
@@ -120,7 +114,7 @@ public class ActionExecutor {
                         method.invoke(action, dataObj);
                         break;
                     } else {
-                        throw new ClassCastException("dataObj cannot be cased to '"+ parameterType +"'");
+                        throw new ClassCastException("dataMap cannot be cased to '"+ parameterType +"'");
                     }
                 }
             }

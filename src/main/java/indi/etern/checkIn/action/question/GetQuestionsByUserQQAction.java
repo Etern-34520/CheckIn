@@ -1,7 +1,5 @@
 package indi.etern.checkIn.action.question;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.question.utils.Utils;
@@ -11,11 +9,9 @@ import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-@Action(name = "getQuestionsByUserQQ")
+@Action("getQuestionsByUserQQ")
 public class GetQuestionsByUserQQAction extends TransactionalAction {
     private long userQQ;
     private int limit = -1;
@@ -30,12 +26,12 @@ public class GetQuestionsByUserQQAction extends TransactionalAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         Optional<User> optionalUser = userService.findByQQNumber(userQQ);
-        JsonObject result;
+        LinkedHashMap<String,Object> result;
         if (optionalUser.isPresent()) {
-            result = new JsonObject();
-            JsonArray questions = new JsonArray();
+            result = new LinkedHashMap<>();
+            ArrayList<Object> questions = new ArrayList<>();
             List<Question> questionList;
             if (limit == -1) {
                 questionList = questionService.findAllByAuthor(optionalUser.get());
@@ -43,22 +39,22 @@ public class GetQuestionsByUserQQAction extends TransactionalAction {
                 questionList = questionService.findFirstLimitByUser(optionalUser.get(), limit);
             }
             questionList.forEach(question -> {
-                questions.add(Utils.getJsonObjectOf(question));
+                questions.add(Utils.getMapOfQuestion(question));
             });
-            result.add("questions", questions);
+            result.put("questions", questions);
         } else {
-            result = getErrorJsonObject("user not exist");
+            result = getErrorMap("user not exist");
         }
         return Optional.of(result);
     }
 
     @Override
-    public void initData(Map<String, Object> dataObj) {
-        userQQ = ((Double) dataObj.get("qq")).longValue();
-        Object limit1 = dataObj.get("limit");
+    public void initData(Map<String, Object> dataMap) {
+        userQQ = ((Number) dataMap.get("qq")).longValue();
+        Object limit1 = dataMap.get("limit");
         if (limit1 == null)
             limit = -1;
         else
-            limit = ((Double) limit1).intValue();
+            limit = ((Number) limit1).intValue();
     }
 }

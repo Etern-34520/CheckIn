@@ -69,7 +69,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
             <div class="collapse-title-inner">
                 <slot name="title"/>
             </div>
-            <el-button @click.stop="switchExpand" link class="action-button">
+            <el-button @click.stop="switchExpand" link class="action-button disable-init-animate">
                 <transition name="pointer">
                     <span class="action-button-pointer">
                         <el-icon>
@@ -101,19 +101,16 @@ watch(() => expanded.value, (newVal, oldVal) => {
 
 .collapse-title {
     padding: 4px 8px;
-    background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
+    background: var(--panel-bg-color) var(--lighting-effect-background-3);
     border-radius: 4px;
     display: flex;
     flex-direction: row;
     height: fit-content;
+    border: var(--border-1);
 }
 
 .collapse-title > .collapse-title-inner {
     flex: 1 !important;
-}
-
-.collapse.expanded .collapse-title {
-    background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px 100%);
 }
 
 .collapse-title.border-changed {
@@ -121,10 +118,11 @@ watch(() => expanded.value, (newVal, oldVal) => {
 }
 
 .action-button-pointer {
-    transition: transform 500ms var(--ease-in-bounce-1);
+    transition: transform 500ms var(--ease-in-bounce-1) 100ms;
 }
 
 .collapse-title > .action-button {
+    border: none !important;
     aspect-ratio: 1;
 }
 
@@ -147,12 +145,13 @@ watch(() => expanded.value, (newVal, oldVal) => {
     max-height: 0;
     overflow: hidden;
     transition: 250ms var(--ease-in-quint) 0ms;
+    border: var(--border-1);
 }
 
 .collapse.expanded .collapse-content {
     max-height: 100%;
     border-radius: 0 0 4px 4px;
-    background: var(--panel-bg-color) linear-gradient(180deg, transparent 0px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
+    background: var(--panel-bg-color) var(--lighting-effect-background-3);
     transition: 250ms var(--ease-out-quint) 200ms;
 }
 
@@ -167,13 +166,44 @@ watch(() => expanded.value, (newVal, oldVal) => {
 .collapse-title:not(.title-background) {
     background: none !important;
     padding: 0 !important;
+    border: none !important;
 }
 
 .collapse-content:not(.content-background) {
     background: none !important;
+    border: none !important;
 }
 
 .collapse-content:not(.content-background) > .collapse-content-inner {
     padding: 0 !important;
+}
+</style>
+
+<style>
+.action-button i {
+    transition: transform 300ms var(--ease-in-out-quint);
+}
+.action-button:active i {
+    transform: translateY(4px);
+}
+
+.collapse.expanded > .collapse-title .action-button-pointer > i {
+    animation: pointerBounceDown 350ms var(--ease-out-quint);
+}
+
+.collapse:not(.expanded) > .collapse-title .action-button-pointer > i {
+    animation: pointerBounceUp 350ms var(--ease-out-quint);
+}
+
+@keyframes pointerBounceDown {
+    40% {
+        transform: translateY(4px);
+    }
+}
+
+@keyframes pointerBounceUp {
+    40% {
+        transform: translateY(4px);
+    }
 }
 </style>

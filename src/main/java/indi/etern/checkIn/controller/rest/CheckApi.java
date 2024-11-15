@@ -1,21 +1,8 @@
 package indi.etern.checkIn.controller.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.entities.traffic.UserTraffic;
-import indi.etern.checkIn.entities.user.User;
-import indi.etern.checkIn.service.dao.SettingService;
-import indi.etern.checkIn.service.dao.UserService;
-import indi.etern.checkIn.service.dao.UserTrafficService;
-import indi.etern.checkIn.service.exam.ExamResult;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
-
-@RestController
+//@RestController
 public class CheckApi {
+/*
     private final UserTrafficService userTrafficService;
     private final ObjectMapper objectMapper;
     private final SettingService settingService;
@@ -55,4 +42,5 @@ public class CheckApi {
             }
         }
     }
+*/
 }

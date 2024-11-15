@@ -18,7 +18,7 @@ const onConfirmCreating = () => {
         PartitionCache.create(createdPartitionName.value).then((resp) => {
             console.log(resp)
         });
-        /*allPartitions.value.push({name: createdPartitionName.value});*/
+        /*allPartitions.value.push({value: createdPartitionName.value});*/
         emits("onConfirm", createdPartitionName.value);
         createdPartitionName.value = "";
     }

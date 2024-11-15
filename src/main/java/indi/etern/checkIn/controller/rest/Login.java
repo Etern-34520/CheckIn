@@ -1,6 +1,7 @@
 package indi.etern.checkIn.controller.rest;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
@@ -20,15 +21,15 @@ public class Login {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
     final JwtTokenProvider jwtTokenProvider;
     final UserService userService;
-    final Gson gson;
+    final ObjectMapper objectMapper;
     final PasswordEncoder passwordEncoder;
     private final String nameOrQQOrPasswordWrongStr = "{\"result\":\"fail\",\"message\":\"用户名 QQ 或 密码 错误\"}";
     private final String userDisabledStr = "{\"result\":\"fail\",\"message\":\"用户已禁用\"}";
 
-    public Login(JwtTokenProvider jwtTokenProvider, UserService userService, Gson gson, PasswordEncoder passwordEncoder) {
+    public Login(JwtTokenProvider jwtTokenProvider, UserService userService, ObjectMapper objectMapper, PasswordEncoder passwordEncoder) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
-        this.gson = gson;
+        this.objectMapper = objectMapper;
         this.passwordEncoder = passwordEncoder;
     }
     
@@ -36,7 +37,7 @@ public class Login {
         return str != null && NUMBER_PATTERN.matcher(str).matches();
     }
     
-    private String checkWithUserName(String name, String password) {
+    private String checkWithUserName(String name, String password) throws JsonProcessingException {
         final List<User> users = userService.findAllByName(name);
         for (User user : users) {
             if (checkPassword(user, password)) {
@@ -48,14 +49,14 @@ public class Login {
                 dataMap.put("qq", user.getQQNumber());
                 dataMap.put("name", user.getName());
                 dataMap.put("token", jwtTokenProvider.generateToken(user));
-                return gson.toJson(dataMap);
+                return objectMapper.writeValueAsString(dataMap);
             }
         }
         return nameOrQQOrPasswordWrongStr;
     }
     
-    @PostMapping(path = "/login/")
-    public String login(@RequestBody Map<String,Object> body) {
+    @PostMapping(path = "/login/api")
+    public String login(@RequestBody Map<String,Object> body) throws JsonProcessingException {
         String usernameOrQQ = (String) body.get("usernameOrQQ");
         String password = (String) body.get("password");
         if (usernameOrQQ == null || password == null) {
@@ -75,7 +76,7 @@ public class Login {
                     dataMap.put("qq", qq);
                     dataMap.put("name", user.getName());
                     dataMap.put("token", jwtTokenProvider.generateToken(user));
-                    return gson.toJson(dataMap);
+                    return objectMapper.writeValueAsString(dataMap);
                 } else {
                     return nameOrQQOrPasswordWrongStr;
                 }

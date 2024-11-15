@@ -10,7 +10,7 @@ import QuestionCache from "@/data/QuestionCache.js";
 import Waterfall from "@/components/common/Waterfall.vue";
 import router from "@/router/index.js";
 import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 const route = useRoute();
 const user = ref(undefined);
@@ -94,6 +94,27 @@ const confirmMoveUserGroup = () => {
         })
     });
 }
+
+const deleteUser = () => {
+    ElMessageBox.confirm(
+            "用户删除后不可恢复",
+            "确认删除用户",
+            {
+                type: "warning",
+                draggable: true,
+                showClose: false,
+                confirmButtonText: "确认删除",
+                cancelButtonText: "取消操作"
+            },
+    ).then(() => {
+        router.back();
+        WebSocketConnector.send({
+            type: "deleteUser",
+            qq: Number(route.params.id)
+        });
+    }).catch(() => {
+    });
+}
 </script>
 
 <template>
@@ -112,7 +133,7 @@ const confirmMoveUserGroup = () => {
                     </div>
                     <div class="flex-blank-1"></div>
                     <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 8px">
-                        <el-popover trigger="click" width="400px" @before-enter="newName = user.name">
+                        <el-popover trigger="click" :width="400" @before-enter="newName = user.name">
                             <template #reference>
                                 <!--suppress JSValidateTypes -->
                                 <el-button :icon="HarmonyOSIcon_Rename" style="margin-right: 0">
@@ -135,17 +156,18 @@ const confirmMoveUserGroup = () => {
                                 </div>
                             </template>
                         </el-popover>
-                        <el-popover v-if="UserDataInterface.currentUser.qq!==user.qq" :visible="moveGroupVisible" width="400px" @before-enter="newUserGroupName = user.role">
+                        <el-popover :visible="moveGroupVisible" v-if="UserDataInterface.currentUser.qq!==user.qq"
+                                    :width="400" @before-enter="newUserGroupName = user.role">
                             <template #reference>
                                 <el-button @click="moveGroupVisible = !moveGroupVisible">修改用户组</el-button>
                             </template>
                             <template #default>
-                                <div style="display: flex;flex-direction: row">
+                                <div style="display: flex;flex-direction: row;align-items: end">
                                     <el-select
                                             filterable
                                             v-model="newUserGroupName"
                                             style="flex:1;margin-right: 4px"
-                                            placeholder="用户名称">
+                                            placeholder="用户组">
                                         <template v-for="(userGroup,i) in UserDataInterface.userGroups">
                                             <el-option :value="userGroup.type" :label="userGroup.type"></el-option>
                                         </template>
@@ -159,8 +181,11 @@ const confirmMoveUserGroup = () => {
                                 </div>
                             </template>
                         </el-popover>
-<!--                        <el-button>修改特有权限</el-button>-->
-<!--                        TODO-->
+                        <el-button v-if="UserDataInterface.currentUser.qq!==user.qq">
+                            <el-text type="danger" @click="deleteUser">删除</el-text>
+                        </el-button>
+                        <!--                        <el-button>修改特有权限</el-button>-->
+                        <!--                        TODO-->
                         <div style="margin-left: 12px">
                             <el-text style="line-height: 20px;margin-right: 4px">启用</el-text>
                             <el-switch v-model="user.enabled"/>

@@ -1,16 +1,16 @@
 package indi.etern.checkIn.action.question;
 
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.question.utils.Utils;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "getQuestionInfo")
+@Action("getQuestionInfo")
 public class GetQuestionInfoAction extends TransactionalAction {
     private String questionId;
 
@@ -20,28 +20,28 @@ public class GetQuestionInfoAction extends TransactionalAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         Optional<Question> questionOptional = QuestionService.singletonInstance.findById(questionId);
         if (questionOptional.isEmpty()) {
-            JsonObject notFound = new JsonObject();
-            notFound.addProperty("type", "question not found");
+            LinkedHashMap<String,Object> notFound = new LinkedHashMap<>();
+            notFound.put("type", "question not found");
             return Optional.of(notFound);
         } else {
-            return Optional.of(Utils.getJsonObjectOf(questionOptional.get()));
+            return Optional.of(Utils.getMapOfQuestion(questionOptional.get()));
         }
     }
 
     /*@Override
-    public Optional<JsonObject> getLogMessage(Optional<JsonObject> result) {
+    public Optional<LinkedHashMap<String,Object>> getLogMessage(Optional<LinkedHashMap<String,Object>> result) {
 *//*
         //noinspection OptionalGetWithoutIsPresent Impossible to be null
-        JsonObject jsonObject = result.get();
+        LinkedHashMap<String,Object> jsonObject = result.get();
         JsonElement images1 = jsonObject.get("images");
-        if (images1 instanceof JsonArray images) {
+        if (images1 instanceof ArrayList<Object> images) {
             for (JsonElement image : images) {
-                JsonObject imageObject = (JsonObject) image;
+                LinkedHashMap<String,Object> imageObject = (LinkedHashMap<String,Object>) image;
 //                imageObject.remove("url");
-//                imageObject.addProperty("url", "[ image base64 url (masked due to length) ]");
+//                imageObject.put("url", "[ image base64 url (masked due to length) ]");
             }
         }
         return Optional.of(jsonObject);

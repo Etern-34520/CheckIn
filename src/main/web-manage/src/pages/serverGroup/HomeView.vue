@@ -6,7 +6,6 @@ import router from "@/router/index.js";
 
 const user = UserDataInterface.getCurrentUser();
 const animate = ref(false);
-console.log(router.options.history.state.back);
 if (router.options.history.state.back === "/login/") {
     animate.value = true;
 }

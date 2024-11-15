@@ -1,17 +1,17 @@
 package indi.etern.checkIn.action.question;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.PartitionService;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "getQuestionIdAndContentList")
+@Action("getQuestionIdAndContentList")
 public class GetQuestionIdAndContentListAction extends TransactionalAction {
     private int partitionId;
     private boolean shouldLogging = true;
@@ -28,22 +28,22 @@ public class GetQuestionIdAndContentListAction extends TransactionalAction {
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        partitionId = ((Double) dataMap.get("partitionId")).intValue();
+        partitionId = ((Number) dataMap.get("partitionId")).intValue();
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         Optional<Partition> optionalPartition = PartitionService.singletonInstance.findById(partitionId);
         if (optionalPartition.isPresent()) {
-            JsonObject result = new JsonObject();
-            JsonArray questionList = new JsonArray();
-            result.add("questionList", questionList);
+            LinkedHashMap<String,Object> result = new LinkedHashMap<>();
+            ArrayList<Object> questionList = new ArrayList<>();
+            result.put("questionList", questionList);
             for (var questionLink : optionalPartition.get().getQuestionLinks()) {
                 Question question = questionLink.getSource();
-                JsonObject questionInfo = new JsonObject();
-                questionInfo.addProperty("id", question.getId());
-                questionInfo.addProperty("content", question.getContent());
-                questionInfo.addProperty("type", question.getClass().getSimpleName());
+                LinkedHashMap<String,Object> questionInfo = new LinkedHashMap<>();
+                questionInfo.put("id", question.getId());
+                questionInfo.put("content", question.getContent());
+                questionInfo.put("type", question.getClass().getSimpleName());
                 questionList.add(questionInfo);
             }
             if (questionList.size() > 20) shouldLogging = false;

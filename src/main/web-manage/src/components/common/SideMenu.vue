@@ -64,17 +64,22 @@ const props = defineProps({
 
 <template>
     <div id="menu-container" :class="{'menu-container-inline': inlineBool}">
-        <div id="menu" class="container border"
+        <div id="menu" class="container"
              :class="{'menu-inline': inlineBool,'menu-expand': expandBool || inlineBool}" @mouseenter="expandMenu"
              @mouseleave="shrinkMenu" @click.stop>
-            <div class="menuGroup" v-for="(group,$index) in pageGroups">
-                <el-button v-for="pageItem of group.paths" text :icon="pageItem.icon"
-                           @click="routeTo(pageItem.path)"
-                           @mouseenter="expandMenu">
-                    {{ pageItem.name }}
-                </el-button>
-                <el-divider v-if="$index!==pageGroups.length-1" style="margin-top: 2px;margin-bottom: 2px"></el-divider>
-            </div>
+            <el-scrollbar view-style="overflow-x: hidden;">
+                <div class="menu-group" v-for="(group,$index) in pageGroups">
+                    <el-button v-for="pageItem of group.paths" text
+                               @click="routeTo(pageItem.path)"
+                               @mouseenter="expandMenu">
+                        <el-icon :size="16" style="margin-right: 12px;margin-left: 2px;">
+                            <Component :is="pageItem.icon"/>
+                        </el-icon>
+                        {{ pageItem.name }}
+                    </el-button>
+                    <!--                <el-divider v-if="$index!==pageGroups.length-1" style="margin-top: 2px;margin-bottom: 2px"></el-divider>-->
+                </div>
+            </el-scrollbar>
             <div style="flex: 1"></div>
             <div style="display: flex;flex-direction: row" class="default-hidden-menu">
                 <el-button-group style="display:flex;flex-direction: row;align-items: stretch">
@@ -92,7 +97,9 @@ const props = defineProps({
                     </el-button>
                     <el-button style="width: 50px;height: 52px" @click="UserDataInterface.logout()" text>
                         <div style="display: flex;flex-direction: column">
-                            <el-icon size="20" style="align-self:center"><HarmonyOSIcon_Quit/></el-icon>
+                            <el-icon size="20" style="align-self:center">
+                                <HarmonyOSIcon_Quit/>
+                            </el-icon>
                             <div>
                                 退出
                             </div>
@@ -108,7 +115,7 @@ const props = defineProps({
 #menu-container {
     transition: all 300ms var(--ease-in-bounce-1);
     transition-delay: 100ms;
-    margin-right: 44px;
+    margin-right: 46px;
 }
 
 .menu-container-inline {
@@ -125,11 +132,11 @@ const props = defineProps({
 
 #menu {
     background: rgba(0, 0, 0, 0);
-    border: 1px solid rgba(0, 0, 0, 0);
+    border: 1px solid rgba(0, 0, 0, 0) !important;
     position: absolute;
     height: calc(100% - 44px);
-    width: 32px;
-    padding: 4px;
+    width: 36px;
+    padding: 0 4px 4px;
     transition: all 300ms var(--ease-in-bounce-1);
     transition-delay: 100ms;
     overflow-x: hidden;
@@ -139,18 +146,31 @@ const props = defineProps({
     z-index: 2001;
 }
 
-.menuGroup {
-    margin-bottom: 4px;
+.menu-group {
+    display: flex;
+    flex-direction: column;
+    transition: margin-bottom 200ms var(--ease-in-out-quint);
+    margin-bottom: 12px;
 }
 
-.menuGroup button {
+.menu-group button {
+    transition: background var(--ease-in-out-quint) 300ms, padding var(--ease-in-out-quint) 500ms !important;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     margin: 0;
     padding: 8px;
-    height: 32px;
+    height: 36px;
     overflow: hidden;
+}
+
+.menu-expand .menu-group button {
+    transition: background var(--ease-in-out-quint) 300ms, padding var(--ease-in-out-quint) 500ms 800ms !important;
+    padding-left: 16px;
+}
+
+.menu-inline .menu-group button {
+    transition: background var(--ease-in-out-quint) 300ms, padding var(--ease-in-out-quint) 400ms !important;
 }
 
 /*.menuGroup .current {
@@ -159,14 +179,6 @@ const props = defineProps({
 
 #menu button {
     transition: 0.2s var(--ease-in-out-quint);
-}
-
-#closeMenuButton {
-    width: 32px;
-    height: 32px;
-    margin: -14px 0 0 -14px;
-    padding: 8px;
-    transition: all 0.2s var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -185,11 +197,11 @@ const props = defineProps({
 }
 
 .menu-expand {
-    background: var(--bg-color-alpha) !important;
+    background: var(--menu-bg-color-alpha) !important;
     width: 200px !important;
     backdrop-filter: blur(32px);
     transition-delay: 900ms !important;
-    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.7);
+    box-shadow: var(--menu-shadow);
     border-radius: 8px !important;
 }
 
@@ -203,18 +215,27 @@ const props = defineProps({
     border-radius: 0;
 }
 
-#menu .default-hidden-menu {
+.default-hidden-menu {
     opacity: 0;
-    transition: all 150ms var(--ease-in-out-quint);
+    transition: transform 200ms ease-in-out 0ms, all 300ms var(--ease-in-out-quint) 0ms;
+    transform: translateX(-100px);
 }
 
 .menu-expand .default-hidden-menu {
-    opacity: 1 !important;
-    transition-delay: 970ms !important;
+    opacity: 1;
+    transition: transform 150ms var(--ease-out-quint) 0ms, all 300ms var(--ease-in-out-quint) 900ms;
+    transform: translateX(0);
 }
 
 .menu-inline .default-hidden-menu {
-    opacity: 1 !important;
-    transition-delay: 200ms !important;
+    opacity: 1;
+    transition: transform 150ms var(--ease-in-quint), all 300ms var(--ease-in-out-quint);
+    transform: translateX(0);
+}
+</style>
+<style>
+.menu-group .el-button .el-icon {
+    margin-left: 1px;
+    margin-right: 5px;
 }
 </style>

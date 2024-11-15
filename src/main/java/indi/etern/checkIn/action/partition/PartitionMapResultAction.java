@@ -1,13 +1,13 @@
 package indi.etern.checkIn.action.partition;
 
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 
-public abstract class PartitionJsonResultAction extends TransactionalAction {
+public abstract class PartitionMapResultAction extends TransactionalAction {
     protected void sendUpdatePartitionToAll(Partition partition) {
         sendPartitionActionToAll("updatePartition", partition);
     }
@@ -20,13 +20,13 @@ public abstract class PartitionJsonResultAction extends TransactionalAction {
         sendPartitionActionToAll("addPartition", partition);
     }
     private static void sendPartitionActionToAll(String updatePartition, Partition partition) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", updatePartition);
-        JsonObject partitionJsonObj = new JsonObject();
-        partitionJsonObj.addProperty("id", partition.getId());
-        partitionJsonObj.addProperty("name", partition.getName());
-        jsonObject.add("partition", partitionJsonObj);
-        WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        map.put("type", updatePartition);
+        LinkedHashMap<String,Object> partitionMap = new LinkedHashMap<>();
+        partitionMap.put("id", partition.getId());
+        partitionMap.put("name", partition.getName());
+        map.put("partition", partitionMap);
+        WebSocketService.singletonInstance.sendMessageToAll(map);
     }
     protected void sendUpdatePartitionsToAll(Collection<Partition> partition) {
         sendPartitionsActionToAll(partition, "updatePartitions");
@@ -39,13 +39,13 @@ public abstract class PartitionJsonResultAction extends TransactionalAction {
     }
 
     private void sendPartitionsActionToAll(Collection<Partition> partition, String type) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", type);
-        JsonObject partitionIdNameJsonObj = new JsonObject();
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        map.put("type", type);
+        LinkedHashMap<String,Object> partitionIdNameMap = new LinkedHashMap<>();
         for (Partition p : partition) {
-            partitionIdNameJsonObj.addProperty(String.valueOf(p.getId()), p.getName());
+            partitionIdNameMap.put(String.valueOf(p.getId()), p.getName());
         }
-        jsonObject.add("partitions", partitionIdNameJsonObj);
-        WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
+        map.put("partitions", partitionIdNameMap);
+        WebSocketService.singletonInstance.sendMessageToAll(map);
     }
 }

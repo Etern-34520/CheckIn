@@ -617,15 +617,4 @@ html.dark {
         outline: none;
         cursor: pointer
     }
-
-    .v-md-mermaid g.root g.edgePaths path {
-        stroke: var(--stroke) !important;
-        color: var(--stroke) !important;
-    }
-
-    .v-md-mermaid g .marker.flowchart>path {
-        stroke: var(--stroke) !important;
-        fill: var(--stroke) !important;
-        color: var(--stroke) !important;
-    }
 }

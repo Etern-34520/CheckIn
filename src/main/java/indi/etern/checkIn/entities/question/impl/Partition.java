@@ -45,7 +45,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
     
     @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @SequenceGenerator(name = "partitions_SEQ", sequenceName = "partitions_SEQ", allocationSize = 1)
+//    @SequenceGenerator(value = "partitions_SEQ", sequenceName = "partitions_SEQ", allocationSize = 1)
     private int id;
     
     public Integer getId() {

@@ -1,6 +1,9 @@
 package indi.etern.checkIn.auth;
 
+import indi.etern.checkIn.entities.user.Permission;
+import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.dao.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -8,8 +11,7 @@ import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +21,8 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
-
+    public static JwtTokenProvider singletonInstance;
+    
     @Value("${jwt-secret}")
     private String jwtSecret;
 
@@ -27,9 +30,13 @@ public class JwtTokenProvider {
     private long jwtExpirationDate;
 
     private final UserService userService;
+    
+    final RoleService roleService;
 
-    public JwtTokenProvider(UserService userService) {
+    public JwtTokenProvider(UserService userService, RoleService roleService) {
         this.userService = userService;
+        this.roleService = roleService;
+        singletonInstance = this;
     }
 
     // 生成 JWT token
@@ -55,7 +62,7 @@ public class JwtTokenProvider {
     }
 
     // 从 Jwt token 获取用户
-    @Cacheable(value = "token", key = "#token")
+//    @Cacheable(value = "token", key = "#token")
     public User getUser(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key())
@@ -85,11 +92,22 @@ public class JwtTokenProvider {
         }
         return false;
     }
+    
+    /*public void invalidateToken(String token) {
+        //noinspection unchecked
+        Jwt<?, Map<String,String>> jwt = Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parse(token);
+        jwt.getBody().get("exp");
+    }*/
 
-    public static boolean currentUserHasPermission(String permissionName) {
-        for (GrantedAuthority grantedAuthority : SecurityContextHolder.getContext().getAuthentication().getAuthorities()) {
-            Authority authority = (Authority) grantedAuthority;
-            if (authority.getName().equals(permissionName)/*&&authority.getPermissionType().equals(permissionType)*/) {
+    public boolean currentUserHasPermission(String permissionName) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final User user = (User) authentication.getPrincipal();
+        final Role role = roleService.findByType(user.getRole().getType()).orElseThrow();
+        for (Permission permission : role.getPermissions()) {
+            if (permission.getName().equals(permissionName)/*&&authority.getPermissionType().equals(permissionType)*/) {
                 return true;
             }
         }

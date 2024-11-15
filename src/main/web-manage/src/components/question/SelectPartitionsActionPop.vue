@@ -1,12 +1,16 @@
 <script setup>
 // import {ref,defineEmits,defineProps} from "vue";
 import PartitionCache from "@/data/PartitionCache.js";
-import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionDialog.vue";
+import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionPop.vue";
 
 const props = defineProps({
     size: {
         type: String,
         default: "default",
+    },
+    showCreatePartition: {
+        type: Boolean,
+        default: true
     }
 })
 
@@ -17,6 +21,11 @@ const partitionIds = ref([]);
 const partitions = ref([]);
 PartitionCache.getRefPartitionsAsync().then((resp) => {
     partitions.value = resp.value;
+});
+defineExpose({
+    "clear": () => {
+        partitionIds.value = [];
+    }
 });
 </script>
 <template>
@@ -32,7 +41,7 @@ PartitionCache.getRefPartitionsAsync().then((resp) => {
         >
             <el-option v-for="partition of partitions" :key="partition.id"
                        :label="partition.name" :value="partition.id"></el-option>
-            <template #footer>
+            <template #footer v-if="showCreatePartition">
                 <transition name="creatingPartition" mode="out-in">
                     <el-button v-if="!isCreating" text bg size="small" style="width: 100%"
                                @click="isCreating = true">

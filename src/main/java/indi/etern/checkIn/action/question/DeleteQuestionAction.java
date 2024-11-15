@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-@Action(name = "deleteQuestion")
+@Action("deleteQuestion")
 public class DeleteQuestionAction extends BaseAction<String, String> {
     private String questionId;
     private Logger logger = LoggerFactory.getLogger(DeleteQuestionAction.class);
