@@ -33,7 +33,7 @@ const doFilter = (userGroup) => {
         for (const filterTextItem of filterTextItems) {
             if (filterTextItem.length === 0) continue;
             if (userGroup.type.includes(filterTextItem)) {
-                return true;
+                return true;//FIXME
             }
         }
         return false;
@@ -68,7 +68,7 @@ const switchChangingLevel = () => {
         for (const userGroup of userGroupsArray.value) {
             levels[index] = userGroup.type;
             index++;
-        }//TODO Test
+        }
         WebSocketConnector.send({
             type: "updateRoleLevels",
             levels: levels
@@ -147,7 +147,7 @@ const cancelCreating = () => {
                                                               :size="18"/>
                                     </div>
                                 </transition>
-                                <user-group-card class="clickable no-init-animate" :user-group="userGroup"
+                                <user-group-card class="clickable disable-init-animate" :user-group="userGroup"
                                                  @click="openView(userGroup)" style="flex: 1"/>
                             </div>
                         </template>

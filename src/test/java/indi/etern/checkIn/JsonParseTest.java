@@ -1,6 +1,6 @@
 package indi.etern.checkIn;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.Choice;
@@ -24,14 +24,15 @@ import java.util.Map;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class JsonParseTest {
     @Autowired
-    Gson gson;// = new Gson();
+    ObjectMapper objectMapper;
     @Autowired
     QuestionService multiPartitionableQuestionService;
+    @SuppressWarnings("unchecked")
     @Test
     public void parse() throws IOException {
         Path jsonPath = Paths.get("questions.json");
         String content = Files.readString(jsonPath);
-        List<Map<String,Object>> questions = gson.fromJson(content, List.class);
+        List<Map<String,Object>> questions = objectMapper.readValue(content, List.class);
         for (Map<String,Object> questionMap : questions) {
             MultipleChoicesQuestion.Builder multipleQuestionBuilder = new MultipleChoicesQuestion.Builder();
             String questionContent = (String) questionMap.get("question_content");

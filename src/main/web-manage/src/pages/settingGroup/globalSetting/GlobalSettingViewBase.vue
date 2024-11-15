@@ -12,7 +12,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="panel" style="padding: 32px;height: 100%">
+    <div class="panel" style="padding: 32px;flex: 1;width: 0;">
         <div class="slide-switch-base" :class="{'left-to-right':switchType}">
             <router-view v-slot="{ Component }">
                 <transition :name="switchType?'slide-left-to-right':'slide-right-to-left'">

@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.user;
 
-import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
@@ -8,8 +8,8 @@ import indi.etern.checkIn.service.dao.UserService;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "changeUserName")
-public class ChangeUserNameAction extends UserJsonResultAction {
+@Action("changeUs erName")
+public class ChangeUserNameAction extends UserMapResultAction {
     private long qqNumber;
     private String name;
 
@@ -19,13 +19,13 @@ public class ChangeUserNameAction extends UserJsonResultAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
         User user = optionalUser.orElseThrow();
         user.setName(name);
         UserService.singletonInstance.saveAndFlush(user);
         sendUpdateUserToAll(user);
-        return successOptionalJsonObject;
+        return successOptionalMap;
     }
 
     @Override

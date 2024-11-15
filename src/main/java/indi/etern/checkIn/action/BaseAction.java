@@ -5,6 +5,7 @@ import indi.etern.checkIn.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
@@ -15,14 +16,14 @@ public abstract class BaseAction<Res, InitDataType> implements Callable<Optional
     final User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
     protected boolean logging = true;
-
+    
     @Override
     public Optional<Res> call() throws Exception {
         try {
             String requiredPermissionName = requiredPermissionName();
             if (requiredPermissionName != null && !requiredPermissionName.isEmpty())
                 for (String s : requiredPermissionName.split(",")) {
-                    if (!JwtTokenProvider.currentUserHasPermission(s)) {
+                    if (!JwtTokenProvider.singletonInstance.currentUserHasPermission(s)) {
                         throw new PermissionDeniedException("权限不足，需要" + s,s);
                     }
                 }

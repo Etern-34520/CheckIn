@@ -1,18 +1,14 @@
 package indi.etern.checkIn.action.partition;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@Action(name = "getPartitionsByIds")
-public class GetPartitionsByIdsAction extends PartitionJsonResultAction {
+@Action("getPartitionsByIds")
+public class GetPartitionsByIdsAction extends PartitionMapResultAction {
     private final PartitionService partitionService;
     private List<Integer> partitionIds;
 
@@ -26,18 +22,18 @@ public class GetPartitionsByIdsAction extends PartitionJsonResultAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         List<Partition> partitions = partitionService.findAllById(partitionIds);
-        JsonObject jsonObject = new JsonObject();
-        JsonArray partitionsJson = new JsonArray();
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        ArrayList<Object> partitionsList = new ArrayList<>();
         for (Partition partition : partitions) {
-            JsonObject partitionJson = new JsonObject();
-            partitionJson.addProperty("id", partition.getId());
-            partitionJson.addProperty("name", partition.getName());
-            partitionsJson.add(partitionJson);
+            LinkedHashMap<String,Object> partitionMap = new LinkedHashMap<>();
+            partitionMap.put("id", partition.getId());
+            partitionMap.put("name", partition.getName());
+            partitionsList.add(partitionMap);
         }
-        jsonObject.add("partitions", partitionsJson);
-        return Optional.of(jsonObject);
+        map.put("partitions", partitionsList);
+        return Optional.of(map);
     }
 
     @Override

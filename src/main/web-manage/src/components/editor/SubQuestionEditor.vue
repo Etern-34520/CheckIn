@@ -6,17 +6,21 @@ import WebSocketConnector from "@/api/websocket.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
 import PartitionCache from "@/data/PartitionCache.js";
-import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionDialog.vue";
+import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionPop.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
 import Collapse from "@/components/common/Collapse.vue";
 import MultipleChoicesEditorPlugin from "@/components/editor/module/MultipleChoicesEditorModule.vue";
 import QuestionCache from "@/data/QuestionCache.js";
 import toolbar from "@/data/MarkdownEditorToolbar.js";
+import ImageViewer from "@/components/editor/ImagesViewer.vue";
+import UIMeta from "@/utils/UI_Meta.js";
+import {MdEditor} from "md-editor-v3";
+import "vditor/dist/index.css"
 
 const {proxy} = getCurrentInstance();
 const imageDialogVisible = ref(false);
-const image = ref({name: "", data: ""});
+const viewerIndex = ref(0);
 const upload = ref();
 
 const allUsers = ref({});
@@ -32,16 +36,16 @@ const questionInfo = defineModel("questionInfo", {
 
 const group = questionInfo.value.getGroup();
 if (group) {
-    group.check();
+    group.verify();
 } else {
     watch(() => questionInfo.value.getGroup(), (newVal, oldVal) => {
-        questionInfo.value.getGroup().check();
+        questionInfo.value.getGroup().verify();
     }, {once: true});
 }
 
 watch(() => questionInfo.value.question, (newVal, oldVal) => {
     const groupInfo = questionInfo.value.getGroup();
-    groupInfo.check();
+    groupInfo.verify();
     QuestionCache.update(groupInfo);
 }, {deep: true});
 
@@ -149,6 +153,11 @@ const switchDisLike = () => {
         questionInfo.value.question.upVoters.delete(currentUserQQ);
     }
 }
+
+const onPreview = (file) => {
+    viewerIndex.value = questionInfo.value.question.images.findIndex(item => item.uid === file.uid);
+    imageDialogVisible.value = true;
+}
 </script>
 
 <template>
@@ -188,27 +197,26 @@ const switchDisLike = () => {
                     </transition-group>
                 </div>
                 <div style="display: flex;flex-direction: row">
-                    <div class="panel-1">
-
-                    </div>
-                    <!--
-                                        <el-input class="question-content-input"
-                                                  :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}"
-                                                  type="textarea" style="flex:4"
-                                                  placeholder="内容" v-model="questionInfo.question.content"
-                                                  autosize></el-input>
-                    -->
-                    <div class="panel-1" style="flex: 4;max-height: 80px;padding:8px 16px">
+                    <div class="panel-1 question-input disable-init-animate" :class="'TODO'"
+                         style="flex: 4;max-height: 80px;padding:8px 16px;margin: 0">
                         <el-scrollbar>
+                            <el-text type="info">字数 {{questionInfo.question.content.length}}</el-text>
+                            <br/>
                             <el-text>
                                 {{ questionInfo.question.content }}
                             </el-text>
                         </el-scrollbar>
                     </div>
-                    <div
-                        style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column;justify-content: stretch">
+                    <div style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column;justify-content: stretch">
                         <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"
-                                   :class="{warning:questionInfo.question.authorQQ===undefined||questionInfo.question.authorQQ===null}">
+                                   :class="'TODO'">
+                            <template #label="{ label, value }">
+                                <div style="display: flex;align-items: center;justify-items: stretch">
+                                    <el-avatar shape="circle" :size="24" style="margin: 4px" fit="cover"
+                                               :src="getAvatarUrlOf(value)"></el-avatar>
+                                    <span>{{ label }}</span>
+                                </div>
+                            </template>
                             <el-option v-for="(user,i) in allUsers" :key="user.qq" :label="user.name" :value="user.qq">
                                 <div style="display: flex;align-items: stretch;justify-items: stretch">
                                     <el-avatar shape="circle" :size="28" style="margin: 4px" fit="cover"
@@ -220,16 +228,16 @@ const switchDisLike = () => {
                                 </div>
                             </el-option>
                         </el-select>
-                        <div class="panel-1"
+                        <div class="panel-1 disable-init-animate"
                              style="padding: 2px;display: flex;flex-direction: row;align-items: center;flex:1">
                             <el-button-group>
-                                <el-button link @click="switchLike"
+                                <el-button link @click="switchLike" class="disable-init-animate"
                                            :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
                                     <like :filled="questionInfo.question.upVoters.has(currentUserQQ)"/>
                                     <el-text style="margin-left: 4px;">{{ questionInfo.question.upVoters.size }}
                                     </el-text>
                                 </el-button>
-                                <el-button link @click="switchDisLike"
+                                <el-button link @click="switchDisLike" class="disable-init-animate"
                                            :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
                                     <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
                                     <el-text style="margin-left: 4px;">{{ questionInfo.question.downVoters.size }}
@@ -242,18 +250,18 @@ const switchDisLike = () => {
             </div>
         </template>
         <template #content>
-            <div style="margin-right: 32px;">
-<!--                <div class="question-content-input el-input" :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}">-->
+            <div style="margin-right: 30px;">
+                <image-viewer v-if="questionInfo.question.images" :images="questionInfo.question.images" v-model="imageDialogVisible" v-model:index="viewerIndex"/>
                 <div style="position: relative;">
-                    <div class="question-content-input" style="display: flex;max-height: 800px;min-height: 200px !important;"
-                         :class="{error:questionInfo.question.content===''||questionInfo.question.content===undefined}">
-                        <v-md-editor placeholder="内容" v-model="questionInfo.question.content" :toolbar="toolbar"
-                                     left-toolbar="undo redo clear | h bold italic strikethrough quote tip | ul ol table hr | link code mermaid"
-                        ></v-md-editor >
+                    <div class="question-input" style="display: flex;max-height: 800px;min-height: 200px !important;"
+                         :class="'TODO'">
+                        <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
+                                   :key="UIMeta.colorScheme" preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
+                                   :theme="UIMeta.colorScheme.value"/>
                     </div>
                 </div>
 <!--                </div>-->
-                <collapse :content-background="false">
+                <collapse :content-background="false" class="question-input" :class="'TODO'">
                     <template #title>
                         <el-text style="line-height: 32px;margin-left: 8px;">图片</el-text>
                     </template>
@@ -266,7 +274,7 @@ const switchDisLike = () => {
                                        :auto-upload="false"
                                        action="ignore"
                                        :on-change="filter"
-                                       :on-preview="file => {image.name = file.name;image.data = file.url;imageDialogVisible = true}">
+                                       :on-preview="onPreview">
                                 <HarmonyOSIcon_Plus :size="32"/>
                             </el-upload>
                         </div>
@@ -277,13 +285,6 @@ const switchDisLike = () => {
             </div>
         </template>
     </collapse>
-    <el-dialog
-        v-model="imageDialogVisible"
-        :title="image.name"
-        width="500"
-        align-center>
-        <el-image :src="image.data"/>
-    </el-dialog>
 </template>
 
 <style scoped>

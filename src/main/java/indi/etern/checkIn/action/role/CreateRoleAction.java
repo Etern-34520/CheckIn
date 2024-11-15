@@ -1,16 +1,16 @@
 package indi.etern.checkIn.action.role;
 
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.web.WebSocketService;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "createRole")
+@Action("createRole")
 public class CreateRoleAction extends TransactionalAction {
     private final WebSocketService webSocketService;
     Role role;
@@ -27,18 +27,18 @@ public class CreateRoleAction extends TransactionalAction {
     }
     
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         roleService.save(role);
         
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type","addRole");
-        JsonObject role = new JsonObject();
-        role.addProperty("type",this.role.getType());
-        role.addProperty("level",this.role.getLevel());
-        jsonObject.add("role",role);
-        webSocketService.sendMessageToAll(jsonObject);
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        map.put("type","addRole");
+        LinkedHashMap<String,Object> role = new LinkedHashMap<>();
+        role.put("type",this.role.getType());
+        role.put("level",this.role.getLevel());
+        map.put("role",role);
+        webSocketService.sendMessageToAll(map);
         
-        return successOptionalJsonObject;
+        return successOptionalMap;
     }
 
     @Override

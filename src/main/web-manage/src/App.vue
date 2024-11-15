@@ -7,18 +7,18 @@ import Router from "@/router/index.js";
 const {proxy} = getCurrentInstance();
 
 function loginAs(user) {
-    if (window.location.pathname === "/checkIn/login/")
-        Router.push("/manage/");
     proxy.$cookies.set("name", user.name);
     proxy.$cookies.set("qq", user.qq);
     WebSocketConnector.connect(user.qq, user.token);
+    if (window.location.pathname === "/checkIn/login/")
+        Router.push({name: "home"});
 }
 
 onMounted(() => {
     if (proxy.$cookies.get("token") !== null) {
         loginAs({name: proxy.$cookies.get("name"), qq: proxy.$cookies.get("qq"), token: proxy.$cookies.get("token")});
     } else {
-        Router.push("/login/");
+        Router.push({name: "login"});
     }
 });
 </script>

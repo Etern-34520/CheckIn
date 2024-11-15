@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.partition;
 
-import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
@@ -8,8 +8,8 @@ import indi.etern.checkIn.service.dao.PartitionService;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "deletePartition")
-public class DeletePartitionAction extends PartitionJsonResultAction {
+@Action("deletePartition")
+public class DeletePartitionAction extends PartitionMapResultAction {
 
     private int partitionId;
 
@@ -19,12 +19,12 @@ public class DeletePartitionAction extends PartitionJsonResultAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         Partition partition = PartitionService.singletonInstance.findById(partitionId).orElseThrow();
         if (partition.getQuestionLinks().isEmpty()) {
             PartitionService.singletonInstance.delete(partition);
         } else {
-            return getOptionalErrorJsonObject("partition \"" + partition.getName() + "\" is not empty");
+            return getOptionalErrorMap("partition \"" + partition.getName() + "\" is not empty");
         }
         sendDeletePartitionToAll(partition);
         return Optional.empty();

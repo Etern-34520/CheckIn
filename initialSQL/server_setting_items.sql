@@ -2,17 +2,18 @@ create table server_setting_items
 (
     setting_key   varchar(255) not null
         primary key,
-    setting_value varchar(255) null
+    setting_value mediumtext   null,
+    clazz         text         null
 );
 
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('checking.enableAutoCreateUser', 'true');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('checking.notPassMessage', 'message: not passed');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('checking.passMessage', 'message: passed');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('checking.passScore', '60');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('exam.description', 'test');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('exam.partitionCountMax', '1');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('exam.partitionCountMin', '1');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('exam.questionCount', '0');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('exam.title', 'HELLO');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('other.defaultPartitionName', 'undefined');
-INSERT INTO checkin.server_setting_items (setting_key, setting_value) VALUES ('other.robotToken', '46246323-D671-0BEB-1615-5936CE68721A');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('drawing.completingPartitions', '[]', 'java.util.ArrayList');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('drawing.completingStrategy', '"selected"', 'java.lang.String');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('drawing.drawingStrategy', '"weighted"', 'java.lang.String');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('drawing.partitionRange', '[]', 'java.util.ArrayList');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('drawing.questionAmount', '0', 'java.lang.Integer');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('drawing.requiredPartitions', '[]', 'java.util.ArrayList');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('drawing.specialPartitionLimits', '{}', 'java.util.LinkedHashMap');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('facade.description', '""', 'java.lang.String');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('facade.icon', '""', 'java.lang.String');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('facade.subTitle', '"check in"', 'java.lang.String');
+INSERT INTO check_in.server_setting_items (setting_key, setting_value, clazz) VALUES ('facade.title', '"CHECK IN"', 'java.lang.String');

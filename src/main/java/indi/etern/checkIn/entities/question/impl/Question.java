@@ -51,6 +51,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     }, fetch = FetchType.EAGER)
     protected Set<User> upVoters = new HashSet<>();
     
+    
     @Getter
     @ManyToMany(cascade = {
             CascadeType.REFRESH

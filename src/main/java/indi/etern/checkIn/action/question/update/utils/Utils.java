@@ -30,23 +30,28 @@ public class Utils {
         }
         builder.setId(id);
 
-        Object o = questionDataMap.get("content");
-        if (o instanceof String) {
-            String content = (String) o;
+        Object content1 = questionDataMap.get("content");
+        if (content1 instanceof String) {
+            String content = (String) content1;
             builder.setQuestionContent(content);
         }
-
-        Object o1 = questionDataMap.get("enabled");
-        if (o1 instanceof Boolean) {
-            boolean enabled = (boolean) o1;
+        
+        Object randomOrdered = questionDataMap.get("randomOrdered");
+        if (randomOrdered != null) {
+            builder.setRandomOrdered((boolean) randomOrdered);
+        }
+        
+        Object enabled1 = questionDataMap.get("enabled");
+        if (enabled1 instanceof Boolean) {
+            boolean enabled = (boolean) enabled1;
             builder.setEnable(enabled);
         }
 
-        Object o2 = questionDataMap.get("choices");
-        if (o2 instanceof List) {
+        Object choices1 = questionDataMap.get("choices");
+        if (choices1 instanceof List) {
             builder.getChoices().clear();
             //noinspection unchecked
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) o2;
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) choices1;
             for (Map<String, Object> choice : choices) {
                 String choiceContent = (String) choice.get("content");
                 boolean correct = (boolean) choice.get("correct");
@@ -115,6 +120,11 @@ public class Utils {
         Object contentObj = questionDataMap.get("content");
         if (contentObj != null) {
             builder.setContent((String) contentObj);
+        }
+        
+        Object randomOrdered = questionDataMap.get("randomOrdered");
+        if (randomOrdered != null) {
+            builder.setRandomOrdered((boolean) randomOrdered);
         }
 
         Object partitionIdsObj = questionDataMap.get("partitionIds");

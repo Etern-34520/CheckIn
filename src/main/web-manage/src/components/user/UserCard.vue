@@ -2,6 +2,9 @@
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import {MoreFilled} from "@element-plus/icons-vue";
 import WebSocketConnector from "@/api/websocket.js";
+import router from "@/router/index.js";
+import UserDataInterface from "@/data/UserDataInterface.js";
+import {ElMessageBox} from "element-plus";
 
 const props = defineProps({
     user: {
@@ -11,10 +14,26 @@ const props = defineProps({
 });
 
 const deleteUser = () => {
-    WebSocketConnector.send({
-        type: "deleteUser",
-        qq: props.user.qq
-    })
+    ElMessageBox.confirm(
+            "用户删除后不可恢复",
+            "确认删除用户",
+            {
+                type: "warning",
+                draggable: true,
+                showClose: false,
+                confirmButtonText: "确认删除",
+                cancelButtonText: "取消操作"
+            },
+    ).then(() => {
+        if (Number(router.currentRoute.value.params.id) === props.user.qq) {
+            router.back();
+        }
+        WebSocketConnector.send({
+            type: "deleteUser",
+            qq: props.user.qq
+        });
+    }).catch(() => {
+    });
 }
 </script>
 
@@ -41,7 +60,7 @@ const deleteUser = () => {
             </el-button>
             <template #dropdown>
                 <el-dropdown-item>修改用户组</el-dropdown-item>
-                <el-dropdown-item @click="deleteUser">
+                <el-dropdown-item v-if="UserDataInterface.getCurrentUser().qq !== user.qq" @click="deleteUser">
                     <el-text type="danger">删除</el-text>
                 </el-dropdown-item>
             </template>

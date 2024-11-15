@@ -19,7 +19,6 @@ class ExecutablePromiseWrapper {
 
 const LockUtil = {
     synchronizeExecute: (lockName,executablePromise) => {
-        let promise;
         if (locks[lockName] instanceof Array) {
             locks[lockName].push(executablePromise);
         } else {
@@ -27,20 +26,32 @@ const LockUtil = {
             executablePromise.then(() => {
                 let index = 0;
                 const doLoop = () => {
-                    if (locks[lockName][index]) {
-                        locks[lockName][index].then(() => {
+                    const nextPromise = locks[lockName][index];
+                    if (nextPromise) {
+                        nextPromise.then(() => {
                             index++;
                             doLoop();
                         });
-                        locks[lockName][index].execute();
+                        nextPromise.execute(nextPromise.resolve,nextPromise.reject);
                     } else {
                         locks[lockName] = undefined;
                     }
                 }
                 doLoop();
             });
-            executablePromise.execute();
+            executablePromise.execute(executablePromise.resolve,executablePromise.reject);
         }
+    },
+    buildExecutablePromise: (executeFunc) => {
+        let resolveFunc;
+        let rejectFunc;
+        const promise = new Promise((resolve, reject) => {
+            resolveFunc = resolve;
+            rejectFunc = reject;
+        });
+        promise.resolve = resolveFunc;
+        promise.reject = rejectFunc;
+        promise.execute = executeFunc;
         return promise;
     }
 };

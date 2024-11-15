@@ -2,7 +2,6 @@ package indi.etern.checkIn.action;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
 import lombok.AccessLevel;
@@ -12,13 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class JsonResultAction extends BaseAction<JsonObject, Map<String, Object>> /*Callable<Optional<JsonObject>>*/ {
+public abstract class MapResultAction extends BaseAction<LinkedHashMap<String,Object>, Map<String, Object>> /*Callable<Optional<LinkedHashMap<String,Object>>>*/ {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    protected static final Optional<JsonObject> successOptionalJsonObject;
-    protected Logger logger = LoggerFactory.getLogger(JsonResultAction.class);
+    protected static final Optional<LinkedHashMap<String,Object>> successOptionalMap;
+    protected Logger logger = LoggerFactory.getLogger(MapResultAction.class);
     @Autowired
     ObjectMapper objectMapper;
 
@@ -26,31 +26,31 @@ public abstract class JsonResultAction extends BaseAction<JsonObject, Map<String
     final User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
     static {
-        JsonObject successJsonObject = new JsonObject();
-        successJsonObject.addProperty("type", "success");
-        successOptionalJsonObject = Optional.of(successJsonObject);
+        LinkedHashMap<String,Object> successLinkedHashMap = new LinkedHashMap<>();
+        successLinkedHashMap.put("type", "success");
+        successOptionalMap = Optional.of(successLinkedHashMap);
     }
 
     protected boolean logging = true;
     private Map<String, Object> dataObj;
 
-    protected Optional<JsonObject> getOptionalErrorJsonObject(String message) {
-        return Optional.of(getErrorJsonObject(message));
+    protected Optional<LinkedHashMap<String,Object>> getOptionalErrorMap(String message) {
+        return Optional.of(getErrorMap(message));
     }
 
-    protected JsonObject getErrorJsonObject(String message) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "error");
-        jsonObject.addProperty("message", message);
-        return jsonObject;
+    protected LinkedHashMap<String,Object> getErrorMap(String message) {
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        map.put("type", "error");
+        map.put("message", message);
+        return map;
     }
 
     @Override
-    public Optional<JsonObject> call() throws Exception {
+    public Optional<LinkedHashMap<String,Object>> call() throws Exception {
         try {
             return super.call();
         } catch (PermissionDeniedException e) {
-            return getOptionalErrorJsonObject("权限不足，需要" + e.getRequiredPermissionName());
+            return getOptionalErrorMap("权限不足，需要" + e.getRequiredPermissionName());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -58,9 +58,9 @@ public abstract class JsonResultAction extends BaseAction<JsonObject, Map<String
 
     abstract public String requiredPermissionName();
 
-    abstract protected Optional<JsonObject> doAction() throws Exception;
+    abstract protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception;
 
-    /*public Optional<JsonObject> logMessage(Optional<JsonObject> result) {
+    /*public Optional<LinkedHashMap<String,Object>> logMessage(Optional<LinkedHashMap<String,Object>> result) {
         return result;
     }*/
 
@@ -73,10 +73,10 @@ public abstract class JsonResultAction extends BaseAction<JsonObject, Map<String
         return logging;
     }
 
-    protected JsonObject getSuccessJsonObject() {
-        JsonObject successJsonObject = new JsonObject();
-        successJsonObject.addProperty("type", "success");
-        return successJsonObject;
+    protected LinkedHashMap<String,Object> getSuccessMap() {
+        LinkedHashMap<String,Object> successLinkedHashMap = new LinkedHashMap<>();
+        successLinkedHashMap.put("type", "success");
+        return successLinkedHashMap;
     }
 
     protected void preLog() {

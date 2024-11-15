@@ -20,7 +20,7 @@ const emits = defineEmits(["onOver"]);
 const onConfirmCreating = () => {
     if (newName.value) {
         PartitionCache.rename(props.partition,newName.value);
-        /*allPartitions.value.push({name: createdPartitionName.value});*/
+        /*allPartitions.value.push({value: createdPartitionName.value});*/
         // emits("onConfirm", createdPartitionName.value);
         emits("onOver");
         // newName.value = "";

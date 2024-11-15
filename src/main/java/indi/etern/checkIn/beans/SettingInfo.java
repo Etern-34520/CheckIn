@@ -1,14 +1,12 @@
 package indi.etern.checkIn.beans;
 
-import indi.etern.checkIn.service.dao.SettingService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
 @Getter
 public class SettingInfo {
+/*
     private final SettingService settingService;
     private final PartitionInfo partitionInfo;
     private int partitionCountMin;
@@ -102,4 +100,5 @@ public class SettingInfo {
         if (defaultPartitionName.isEmpty()) defaultPartitionName = settingService.set("other.defaultPartitionName", "undefined");
         return defaultPartitionName;
     }
+*/
 }

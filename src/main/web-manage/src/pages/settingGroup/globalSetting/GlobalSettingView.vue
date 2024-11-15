@@ -10,6 +10,8 @@ import {
 } from "@element-plus/icons-vue";
 import LinkPanel from "@/components/common/LinkPanel.vue";
 import Waterfall from "@/components/common/Waterfall.vue";
+import router from "@/router/index.js";
+import HarmonyOSIcon_InfoCircle from "@/components/icons/HarmonyOSIcon_InfoCircle.vue";
 
 defineExpose({
     name: "Base"
@@ -20,27 +22,30 @@ const groups = [
         name: "答题设置",
         items: [
             {
-                name: "首页自定义 TODO", description: "图标 问候语 描述", icon: Postcard, action: () => {
+                name: "首页自定义", description: "图标 问候语 描述", icon: Postcard, action: () => {
+                    router.push({name: "facade-setting"});
                 }
             },
             {
-                name: "抽取设置 TODO",
+                name: "抽取设置",
                 description: "题量 分区数 必选分区 抽取策略 补足策略",
                 icon: Files,
                 action: () => {
+                    router.push({name: "drawing-setting"});
                 }
             },
             {
                 name: "批改设置 TODO", description: "分数线 分级 消息", icon: Check, action: () => {
+                    router.push({name: "facade-setting"});
                 }
             },
             {
                 name: "高级设置 TODO", description: "外部API 自动创建用户", icon: MoreFilled, action: () => {
+                    router.push({name: "facade-setting"});
                 }
             }
         ]
-    },
-    {
+    }, {
         name: "题库设置",
         items: [
             {
@@ -48,16 +53,22 @@ const groups = [
                 }
             },
             {
-                name: "上传校验 TODO", description: "错误 警告", icon: CircleCheck, action: () => {
+                name: "上传校验", description: "上限 下限 警告 错误", icon: CircleCheck, action: () => {
+                    router.push({name: "verification-setting"});
                 }
             },
+        ]
+    }, {
+        name: "其它",
+        items: [
             {
-                name: "上传限制 TODO",
-                description: "分区题目数上限 题目图片上限 题目内容长度上限 题组子题目上限",
-                icon: Upload,
+                name: "关于",
+                description: "作者 使用到的开源项目 Github",
+                icon: HarmonyOSIcon_InfoCircle,
                 action: () => {
+                    router.push({name: "verification-setting"});
                 }
-            },
+            }
         ]
     }
 ]

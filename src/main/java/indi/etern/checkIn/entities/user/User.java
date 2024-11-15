@@ -1,9 +1,7 @@
 package indi.etern.checkIn.entities.user;
 
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.auth.Authority;
-import indi.etern.checkIn.auth.PermissionType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +28,18 @@ public class User implements UserDetails {
     @JoinColumn(name = "ROLE_TYPE")
 //    @NotFound(action = NotFoundAction.IGNORE)
     protected Role role;
-
+/*
+    @PostLoad
+    private void postLoad() {
+        final Role role1 = Role.roleMap.get(role.getType());
+        if (role1 != null) {
+            role = role1;
+        } else {
+            Role.roleMap.put(role.getType(), role);
+        }
+    }
+*/
+    
     @Setter
     protected boolean enabled = true;
     
@@ -38,8 +47,8 @@ public class User implements UserDetails {
         this.name = name;
         this.QQNumber = QQNumber;
         PasswordEncoder encoder = CheckInApplication.applicationContext.getBean(PasswordEncoder.class);
-        this.password = password==null?null:encoder.encode(password);
-        role = Role.getInstance("user",null);
+        this.password = password == null ? null : encoder.encode(password);
+//        role = Role.getInstance("user",null);
     }
     
     public User() {
@@ -67,7 +76,8 @@ public class User implements UserDetails {
         if (role == null) {
             this.role = null;
         } else {
-            this.role.getUsers().remove(this);
+            if (this.role != null)
+                this.role.getUsers().remove(this);
             this.role = role;
             role.getUsers().add(this);
         }
@@ -75,7 +85,7 @@ public class User implements UserDetails {
     
     @Override
     public String toString() {
-        return "{name:\"" + name + "\",QQ:\"" + QQNumber + "\",password:\"" + password + "\",role:\"" + role.getType() + "\"}";
+        return "{value:\"" + name + "\",QQ:\"" + QQNumber + "\",password:\"" + password + "\",role:\"" + role.getType() + "\"}";
     }
     
     public Map<String, Object> toDataMap() {
@@ -88,13 +98,13 @@ public class User implements UserDetails {
         return dataMap;
     }
     
-    public JsonObject toJsonObject() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("name", name);
-        jsonObject.addProperty("qq", QQNumber);
-        jsonObject.addProperty("role", role.getType());
-        jsonObject.addProperty("enabled", enabled);
-        return jsonObject;
+    public LinkedHashMap<String,Object> toMap() {
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        map.put("name", name);
+        map.put("qq", QQNumber);
+        map.put("role", role.getType());
+        map.put("enabled", enabled);
+        return map;
     }
     
     @Override
@@ -124,7 +134,7 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<Authority> authorities = new ArrayList<>();
         for (Permission permission : role.getPermissions()) {
-            authorities.add(new Authority(permission.getName(), PermissionType.WEB));//FIXME
+            authorities.add(new Authority(permission.getName()/*, PermissionType.WEB*/));//FIXME
         }
         return authorities;
     }

@@ -1,7 +1,6 @@
 package indi.etern.checkIn;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +13,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
 public class MVCConfig implements WebMvcConfigurer {
-@Getter
-    private static Gson gson;
+    @Getter
+    private static ObjectMapper objectMapper;
     
     @Bean
     public ViewResolver viewResolver() {
@@ -34,14 +33,9 @@ public class MVCConfig implements WebMvcConfigurer {
     }
     
     @Bean
-    public Gson gson(){
-        gson = new Gson();
-        return gson;
-    }
-    
-    @Bean
     public ObjectMapper objectMapper(){
-        return new ObjectMapper();
+        objectMapper = new ObjectMapper();
+        return objectMapper;
     }
 
     @Override

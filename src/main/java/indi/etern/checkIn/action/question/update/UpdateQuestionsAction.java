@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question.update;
 
-import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
@@ -19,7 +19,7 @@ import java.util.Optional;
 import static indi.etern.checkIn.action.question.utils.Utils.sendDeleteQuestionsToAll;
 
 
-@Action(name = "updateQuestions")
+@Action("updateQuestions")
 public class UpdateQuestionsAction extends TransactionalAction {
     boolean allOwned = true;
     boolean switchEnabled = false;
@@ -47,15 +47,15 @@ public class UpdateQuestionsAction extends TransactionalAction {
             }
         }
 */
-
-
+    
+    
     @Override
     public String requiredPermissionName() {
         return allOwned ? "create and edit owns question" : "edit others question" + (switchEnabled ? ",enable and disable question" : "");
     }
-
+    
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         List<Question> succeedQuestions = new ArrayList<>();
         if (questions != null)
             for (Object questionObj : questions) {
@@ -100,23 +100,29 @@ public class UpdateQuestionsAction extends TransactionalAction {
         }
         QuestionService.singletonInstance.flush();
         Utils.sendUpdateQuestionsToAll(succeedQuestions);
-        return Optional.ofNullable(getSuccessJsonObject());
+        return Optional.ofNullable(getSuccessMap());
     }
-
+    
     private Question createQuestionGroup(Map<?, ?> questionDataMap) {
         return null;
     }
-
+    
     @Override
     public boolean shouldLogging() {
         return false;
     }
-
+    
     @Override
     public void initData(Map<String, Object> dataMap) {
-        //noinspection unchecked
-        questions = (List<Object>) dataMap.get("updatedQuestions");
-        //noinspection unchecked
-        deletedQuestionIds = (List<String>) dataMap.get("deletedQuestionIds");
+        final Object updatedQuestions = dataMap.get("updatedQuestions");
+        if (updatedQuestions instanceof List<?>) {
+            //noinspection unchecked
+            questions = (List<Object>) updatedQuestions;
+        }
+        final Object deletedQuestionIds1 = dataMap.get("deletedQuestionIds");
+        if (deletedQuestionIds1 instanceof List<?>) {
+            //noinspection unchecked
+            deletedQuestionIds = (List<String>) deletedQuestionIds1;
+        }
     }
 }

@@ -6,7 +6,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
-//@SpringBootApplication(exclude= {SecurityAutoConfiguration.class })//TODO
 @EnableCaching
 public class CheckInApplication {
 	public static ConfigurableApplicationContext applicationContext;

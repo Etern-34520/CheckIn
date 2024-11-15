@@ -1,6 +1,7 @@
 package indi.etern.checkIn.action.interfaces;
 
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -13,5 +14,8 @@ import java.lang.annotation.Target;
 @Component
 @Scope("prototype")
 public @interface Action {
-    String name();
+    @AliasFor(annotation = Component.class)
+    String value();
+    //TODO
+    boolean exposed() default true;
 }

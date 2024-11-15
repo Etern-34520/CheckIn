@@ -2,11 +2,10 @@
 <script setup>
 import {Pane, Splitpanes} from "splitpanes"
 import "splitpanes/dist/splitpanes.css"
-// import {getCurrentInstance, ref, watch} from "vue";
 import router from "@/router/index.js";
 import QuestionCache from "@/data/QuestionCache.js";
 import PartitionCache from "@/data/PartitionCache.js";
-import randomUUID from "@/utils/UUID.js";
+import randomUUIDv4 from "@/utils/UUID.js";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import HarmonyOSIcon_CheckBox from "@/components/icons/HarmonyOSIcon_CheckBox.vue";
 import EditPartitionNameDialog from "@/components/question/EditPartitionNameDialog.vue";
@@ -16,9 +15,10 @@ import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
 import {ArrowLeftBold, List} from "@element-plus/icons-vue";
 import CreatePartitionButton from "@/components/question/CreatePartitionButton.vue";
 import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
-import SelectPartitionsActionDialog from "@/components/question/SelectMoveToPartitionDialog.vue";
-import Responsive from "@/utils/Responsive.js";
+import SelectPartitionsActionPop from "@/components/question/SelectPartitionsActionPop.vue";
+import UIMeta from "@/utils/UI_Meta.js";
 import ResponsiveSplitpane from "@/components/common/ResponsiveDoubleSplitpane.vue";
+import {ElMessageBox} from "element-plus";
 
 const {proxy} = getCurrentInstance();
 
@@ -91,7 +91,7 @@ function loadPartitionChildrenNode(partitionId, isPartitionEmpty, resolve, rejec
                         }
                     }
                 }
-                // questionInfo.name = questionInfo.content;
+                // questionInfo.value = questionInfo.content;
                 const questionNode = QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId);
                 data.push(questionNode);
             }
@@ -211,7 +211,7 @@ QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
         return;
     }
     if (router.currentRoute.value.params.id === id) {
-        router.push("/manage/questions/");
+        router.push({name: "questions"});
     }
     for (let partition of PartitionCache.reactivePartitions.value) {
         let questionNode = tree.value.getNode(partition.id + "/" + id);
@@ -293,13 +293,14 @@ const onDragEnd = (node, dropNode, event) => {
 const createQuestionGroup = (partitionId) => {
     const authorQQ = Number(proxy.$cookies.get("qq"));
     let question = {
-        id: randomUUID(),
+        id: randomUUIDv4(),
         content: "",
         enabled: false,
         partitionIds: [partitionId],
         authorQQ: authorQQ,
         upVoters: new Set(),
         downVoters: new Set(),
+        localNew: true,
     };
     const questionInfo = QuestionCache.createQuestionGroup(question, undefined, authorQQ);
     tree.value.append(QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
@@ -307,7 +308,7 @@ const createQuestionGroup = (partitionId) => {
 
 const createMultipleChoiceQuestion = (partitionId) => {
     let question = {
-        id: randomUUID(),
+        id: randomUUIDv4(),
         content: "",
         type: "MultipleChoicesQuestion",
         enabled: false,
@@ -315,12 +316,13 @@ const createMultipleChoiceQuestion = (partitionId) => {
         authorQQ: Number(proxy.$cookies.get("qq")),
         upVoters: new Set(),
         downVoters: new Set(),
+        localNew: true,
         choices: [{
-            id: randomUUID(),
+            id: randomUUIDv4(),
             correct: true,
             content: ""
         }, {
-            id: randomUUID(),
+            id: randomUUIDv4(),
             correct: false,
             content: ""
         }]
@@ -403,7 +405,7 @@ function batchDo(questionInfoAction, questionNodeAction) {
     const checkedQuestionIds = new Set();
     const checkedQuestionNodes = new Set();
     for (const node of checkedNodes) {
-        if (node.data.type === "Question") {
+        if (node.data.type === "Question" || node.data.type === "QuestionGroup") {
             let split = node.treeId.split("/");
             const questionId = split[1];
             if (questionId === "createQuestion") continue;
@@ -412,7 +414,7 @@ function batchDo(questionInfoAction, questionNodeAction) {
         } else if (node.data.type === "partition") {
             let zones = node.zones;
             for (const questionNode of zones) {
-                if (questionNode.data.type === "Question") {
+                if (questionNode.data.type === "Question" || questionNode.data.type === "QuestionGroup") {
                     checkedQuestionIds.add(questionNode.data.question.id);
                     checkedQuestionNodes.add(questionNode);
                 }
@@ -439,6 +441,13 @@ function batchSetEnable(enable) {
     });
 }
 
+function batchSetEnableRandom(enable) {
+    batchDo((questionInfo) => {
+        questionInfo.question.randomOrdered = enable;
+        QuestionCache.update(questionInfo);
+    });
+}
+
 const batchActionSelectPartitionMenuButtons = ref([
     {
         name: "移动题目从所选分区到...",
@@ -452,7 +461,7 @@ const batchActionSelectPartitionMenuButtons = ref([
                 const partitionId = Number(questionNode.treeId.split("/")[0]);
                 questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId && !partitionIdsSet.has(id));
                 questionNode.data.question.partitionIds.push(...partitionIds);
-                QuestionCache.update(questionNode.data.question);
+                QuestionCache.update(questionNode.data);
             });
         },
         menuVisible: false
@@ -506,6 +515,22 @@ const batchActionButtons = ref([
         },
         action: () => {
             batchSetEnable(false);
+        },
+    }, {
+        name: "启用乱序",
+        show: () => {
+            return true;
+        },
+        action: () => {
+            batchSetEnableRandom(true);
+        },
+    }, {
+        name: "禁用乱序",
+        show: () => {
+            return true;
+        },
+        action: () => {
+            batchSetEnableRandom(false);
         },
     }]
 );
@@ -567,11 +592,59 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 }
 
 function onDeleteNode(nodeObj) {
-    nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup' ?
-            (nodeObj.data.question.localDeleted ?
-                    QuestionCache.restore(nodeObj.data.question.id) :
-                    QuestionCache.delete(nodeObj.data.question.id)) :
-            PartitionCache.deleteRemote(nodeObj.id)
+    if (nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup') {
+
+        if (nodeObj.data.question.localDeleted) {
+            QuestionCache.restore(nodeObj.data.question.id);
+        } else {
+            QuestionCache.delete(nodeObj.data.question.id);
+        }
+    } else {
+        // PartitionCache.getSync(nodeObj.id).then((partition) => {
+        const partition = tree.value.getNode(nodeObj.id);
+        const alartNotEmpty = () => {
+            ElMessageBox.confirm(
+                    "删除分区时将把所属的所有题目从分区中移除，若题目无其他隶属分区，则将被删除",
+                    "该分区非空",
+                    {
+                        showClose: false,
+                        draggable: true,
+                        confirmButtonText: "确定",
+                        cancelButtonText: "取消",
+                        type: "warning"
+                    }
+            ).then(() => {
+                QuestionCache.getContentsAndIdsAsyncByPartitionId(nodeObj.id).then((questionInfos) => {
+                    const deletedQuestionIds = [];
+                    for (const questionInfo of questionInfos) {
+                        deletedQuestionIds.push(questionInfo.question.id);
+                    }
+                    QuestionCache.deleteAllById(deletedQuestionIds).then(() => {
+                        tryDelete();
+                    }, () => {
+                        ElMessage({
+                            type: "error",
+                            message: "删除分区题目时出错"
+                        });
+                    });
+                });
+            }).catch(() => {
+            });
+        }
+        const tryDelete = () => {
+            PartitionCache.tryDeleteRemote(nodeObj.id).then((res) => {
+            }, (error) => {
+                error.disableNotification();
+                alartNotEmpty();
+            });
+        };
+        if (partition.childNodes.length > 1/*create button counts 1*/) {
+            alartNotEmpty();
+        } else {
+            tryDelete();
+        }
+        // });
+    }
 }
 
 const currentButton = ref({
@@ -614,14 +687,16 @@ router.afterEach((to, from) => {
                                 <el-text v-else>取消批量</el-text>
                             </el-button>
                             <transition-group name="batch-buttons">
-                                <el-button text v-show="showCheckBox&&button.show()" class="action-button no-init-animate"
+                                <el-button text v-show="showCheckBox&&button.show()"
+                                           class="action-button disable-init-animate"
                                            :class="{selected:button.menuVisible}"
                                            v-for="button in batchActionSelectPartitionMenuButtons" :key="button"
                                            :disabled="disabled"
                                            @click="currentButton=button;switchMenuVisible(button);">
                                     <el-text>{{ button.name }}</el-text>
                                 </el-button>
-                                <el-button text v-show="showCheckBox&&button.show()" class="action-button no-init-animate"
+                                <el-button text v-show="showCheckBox&&button.show()"
+                                           class="action-button disable-init-animate"
                                            v-for="button in batchActionButtons"
                                            :key="button" :disabled="disabled" @click="button.action">
                                     <el-text>{{ button.name }}</el-text>
@@ -629,7 +704,7 @@ router.afterEach((to, from) => {
                             </transition-group>
                         </el-button-group>
                         <transition name="batch-buttons">
-                            <select-partitions-action-dialog
+                            <select-partitions-action-pop
                                     v-show="currentButton.menuVisible"
                                     @on-confirm="currentButton.action"/>
                         </transition>
@@ -650,11 +725,10 @@ router.afterEach((to, from) => {
                                         </template>
                                         <template v-else-if="nodeObj.data.type==='createQuestion'">
                                             <!--                                            TODO component-->
-                                            <el-popover trigger="click" width="271">
+                                            <el-popover trigger="click" width="auto">
                                                 <template #reference>
-                                                    <el-button text size="small"
+                                                    <el-button text size="small" :icon="HarmonyOSIcon_Plus"
                                                                class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus disable-tree-checkbox">
-                                                        <HarmonyOSIcon_Plus style="margin: 8px"/>
                                                         <el-text>创建题目</el-text>
                                                     </el-button>
                                                 </template>
@@ -696,13 +770,13 @@ router.afterEach((to, from) => {
                                                         }}
                                                     </el-text>
                                                 </div>
-                                                <el-button-group>
+                                                <el-button-group class="node-buttons">
                                                     <el-popover trigger="click"
                                                                 v-model:visible="nodeObj.data.editing"
                                                                 width="400"
                                                                 v-if="nodeObj.data.type === 'partition'">
                                                         <template #reference>
-                                                            <el-button class="node-button" link
+                                                            <el-button class="node-button" size="small"
                                                                        @click.stop="nodeObj.data.editing = false"
                                                                        v-if="nodeObj.data.type === 'partition'">
                                                                 <HarmonyOSIcon_Rename/>
@@ -716,7 +790,7 @@ router.afterEach((to, from) => {
                                                                     size="default"/>
                                                         </template>
                                                     </el-popover>
-                                                    <el-button class="node-button" link
+                                                    <el-button class="node-button" size="small"
                                                                @click.stop="onDeleteNode(nodeObj)">
                                                         <HarmonyOSIcon_Remove/>
                                                         <el-text
@@ -748,11 +822,11 @@ router.afterEach((to, from) => {
                         </el-alert>
                         <div>
                             <transition-group name="slide-hide">
-                                <question-info-panel class="no-init-animate"
-                                        v-for="questionInfo of QuestionCache.getErrorQuestions()"
-                                        :key="questionInfo.question.id"
-                                        @click="openEdit(questionInfo.question.id)"
-                                        :question-info="questionInfo"/>
+                                <question-info-panel class="disable-init-animate"
+                                                     v-for="questionInfo of QuestionCache.getErrorQuestions()"
+                                                     :key="questionInfo.question.id"
+                                                     @click="openEdit(questionInfo.question.id)"
+                                                     :question-info="questionInfo"/>
                             </transition-group>
                         </div>
                         <transition name="empty">
@@ -773,7 +847,13 @@ router.afterEach((to, from) => {
         <template #right>
             <router-view v-slot="{ Component }">
                 <transition mode="out-in" name="question-editor">
-                    <component :is="Component"/>
+                    <div v-if="!Component"
+                         style="width: 100%;height: 100%;display: flex;flex-direction: column;align-items: center;justify-content: center">
+                        <el-text type="info" size="large">
+                            选择题目以编辑
+                        </el-text>
+                    </div>
+                    <component v-else :is="Component"/>
                 </transition>
             </router-view>
         </template>
@@ -794,6 +874,7 @@ router.afterEach((to, from) => {
     flex: 1;
     transition: 200ms var(--ease-in-out-quint);
     border-radius: 4px;
+    height: 100%;
 }
 
 .question-tree-node-content {
@@ -802,7 +883,8 @@ router.afterEach((to, from) => {
 }
 
 .node-button {
-    border: 2px var(--panel-bg-color-overlay) !important;
+    margin-top: 1px;
+    /*border: 2px var(--panel-bg-color-overlay) !important;*/
     overflow: hidden;
     @media (prefers-color-scheme: dark) {
         background: #1b1b1b !important;
@@ -810,6 +892,10 @@ router.afterEach((to, from) => {
     @media (prefers-color-scheme: light) {
         background: #e4e4e4 !important;
     }
+}
+
+.node-button:hover {
+    background: var(--el-color-primary-1) !important;
 }
 
 .point {
@@ -1000,5 +1086,25 @@ router.afterEach((to, from) => {
     width: 98%;
     left: 1%;
     filter: none;
+}
+</style>
+<style>
+.mobile .node-buttons,
+.el-tree-node__content:not(.is-disabled):hover .node-buttons {
+    opacity: 1 !important;
+}
+
+.el-tree-node__content .node-buttons {
+    transition: 300ms var(--ease-in-out-quint);
+    opacity: 0;
+}
+
+#app .node-button:hover {
+    @media (prefers-color-scheme: dark) {
+        background: #262626 !important;
+    }
+    @media (prefers-color-scheme: light) {
+        background: #d9d9d9 !important;
+    }
 }
 </style>

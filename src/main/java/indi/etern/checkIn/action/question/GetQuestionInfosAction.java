@@ -1,21 +1,16 @@
 package indi.etern.checkIn.action.question;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.question.utils.Utils;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-@Action(name = "getQuestionInfos")
+@Action("getQuestionInfos")
 public class GetQuestionInfosAction extends TransactionalAction {
-    private final List<String> questionIds = new ArrayList<>();
+    private final List<String> questionIds = new java.util.ArrayList<>();
 
     @Override
     public String requiredPermissionName() {
@@ -34,23 +29,23 @@ public class GetQuestionInfosAction extends TransactionalAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         var questions = QuestionService.singletonInstance.findAllById(questionIds);
-        JsonObject result = new JsonObject();
-        JsonArray questionArray = new JsonArray(questions.size());
+        LinkedHashMap<String,Object> result = new LinkedHashMap<>();
+        ArrayList<Object> questionArray = new ArrayList<>(questions.size());
         for (Question question : questions) {
             questionIds.remove(question.getId());
-            questionArray.add(Utils.getJsonObjectOf(question));
+            questionArray.add(Utils.getMapOfQuestion(question));
         }
         if (!questionIds.isEmpty()) {
             for (String questionId : questionIds) {
-                JsonObject notFound = new JsonObject();
-                notFound.addProperty("type", "question not found");
-                notFound.addProperty("id", questionId);
+                LinkedHashMap<String,Object> notFound = new LinkedHashMap<>();
+                notFound.put("type", "question not found");
+                notFound.put("id", questionId);
                 questionArray.add(notFound);
             }
         }
-        result.add("questions", questionArray);
+        result.put("questions", questionArray);
         return Optional.of(result);
     }
 }

@@ -1,8 +1,7 @@
 package indi.etern.checkIn.api.webSocket;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import indi.etern.checkIn.MVCConfig;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.Result;
 import indi.etern.checkIn.auth.JwtTokenProvider;
@@ -13,6 +12,7 @@ import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,46 +37,41 @@ public class Connector implements SubProtocolCapable {
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
     private static WebSocketService webSocketService;
     private static JwtTokenProvider jwtTokenProvider;
-    private static Gson gson;
     private static ActionExecutor actionExecutor;
     private String token;
     private Session session;
     @Getter
     private String sid = "";
     private User sessionUser;
-
+    private final ObjectMapper objectMapper = MVCConfig.getObjectMapper();
+    
     public Connector() {
 //        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);
     }
-
+    
     public static void addOnlineCount() {
         onlineCount.getAndIncrement();
     }
-
+    
     public static void subOnlineCount() {
         onlineCount.getAndDecrement();
     }
-
+    
     @Autowired
     public void setWebSocketService(WebSocketService webSocketService) {
         Connector.webSocketService = webSocketService;
     }
-
+    
     @Autowired
     public void setJwtTokenProvider(JwtTokenProvider jwtTokenProvider) {
         Connector.jwtTokenProvider = jwtTokenProvider;
     }
-
-    @Autowired
-    public void setGson(Gson gson) {
-        Connector.gson = gson;
-    }
-
+    
     @Autowired
     public void set(ActionExecutor actionExecutor) {
         Connector.actionExecutor = actionExecutor;
     }
-
+    
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) {
         this.session = session;
@@ -87,7 +82,8 @@ public class Connector implements SubProtocolCapable {
         addOnlineCount();
         logger.info("sid_" + sid + ":connected");
     }
-
+    
+    @SneakyThrows
     @OnClose
     public void onClose() {
         CONNECTORS.remove(this);
@@ -98,17 +94,17 @@ public class Connector implements SubProtocolCapable {
             Map<String, String> dataMap = new HashMap<>();
             dataMap.put("type", "userOffline");
             dataMap.put("qq", String.valueOf(sessionUser.getQQNumber()));
-            webSocketService.sendMessageToAll(gson.toJson(dataMap));
+            webSocketService.sendMessageToAll(objectMapper.writeValueAsString(dataMap));
         }
     }
-
+    
     private final Map<String, PartMessage> partMessageMap = new HashMap<>();
-
+    
     @SuppressWarnings("unchecked")
     @OnMessage
     public void onMessage(String message) {
         try {
-            Map<String, Object> contentMap = gson.fromJson(message, HashMap.class);
+            Map<String, Object> contentMap = objectMapper.readValue(message, HashMap.class);
             if (checkToken(contentMap)) return;//TODO TIP
             String messageId = contentMap.get("messageId").toString();
             if (contentMap.get("type").equals("partMessage")) {
@@ -132,13 +128,26 @@ public class Connector implements SubProtocolCapable {
                     partMessageMap.remove(partId);
                 }
             } else {
-                Result result = actionExecutor.executeByMap(contentMap);
                 String logMessage = message.length() > 65535 ? message.substring(0, 4096) : message;
-                logger.info("{}({}):{}", sessionUser.getName(), sid, logMessage);
-                if (result.getResult().isPresent()) {
-                    JsonObject jsonObject = result.getResult().get();
-                    jsonObject.addProperty("messageId", messageId);
-                    sendMessage(jsonObject);
+                try {
+                    Result result = actionExecutor.executeByMap(contentMap);
+                    logger.info("{}({}):{}", sessionUser.getName(), sid, logMessage);
+                    if (result.getResult().isPresent()) {
+                        LinkedHashMap<String,Object> map = result.getResult().get();
+                        map.put("messageId", messageId);
+                        sendMessage(map);
+                    }
+                } catch (Exception e) {
+                    if (logger.isDebugEnabled()) {
+                        e.printStackTrace();
+                    }
+                    logger.error("{} : {}", e.getClass().getName(), e.getMessage());
+                    logger.info("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, logMessage);
+                    final String[] split = e.getMessage().split("PermissionDeniedException: ");
+                    if (split.length >= 2)
+                        sendError(messageId, split[1]);
+                    else
+                        sendError(messageId, e.getMessage());
                 }
             }
 /*
@@ -155,7 +164,7 @@ public class Connector implements SubProtocolCapable {
                 }
 */
                 logger.error("{}:{}", e.getClass().getName(), e.getMessage());
-                String messageId = gson.fromJson(message, HashMap.class).get("messageId").toString();
+                String messageId = objectMapper.readValue(message, HashMap.class).get("messageId").toString();
                 sendError(messageId, e.getClass().getSimpleName() + ":" + e.getMessage());
             } catch (IOException exception) {
                 logger.error("while sending message:{}to {}({}):{}", message, sessionUser.getName(), sid, exception.getMessage());
@@ -163,58 +172,59 @@ public class Connector implements SubProtocolCapable {
             e.printStackTrace();
         }
     }
-
+    
+    @SneakyThrows
     private void sendUpdateUser(User user) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("type", "updateUser");
         dataMap.put("user", user.toDataMap());
-        webSocketService.sendMessageToAll(gson.toJson(dataMap));
+        webSocketService.sendMessageToAll(objectMapper.writeValueAsString(dataMap));
     }
-
+    
     private void sendUserIsOnlineError() throws IOException {
         /*sendError(messageId,"user is online");*/
     }
-
+    
     private void sendError(String messageId, String data) throws IOException {
         Map<String, String> dataMap = new HashMap<>();
         dataMap.put("type", "error");
         dataMap.put("message", data);
         dataMap.put("messageId", messageId);
-        sendMessage(gson.toJson(dataMap));
+        sendMessage(objectMapper.writeValueAsString(dataMap));
     }
-
+    
     private boolean checkToken(Map<String, Object> contentMap) throws IOException {
         if (contentMap.get("type").equals("token")) {
             token = (String) contentMap.get("token");
             sessionUser = jwtTokenProvider.getUser(token);
-
+            
             Map<String, String> dataMap = new HashMap<>();
             dataMap.put("type", "userOnline");
             dataMap.put("qq", String.valueOf(sessionUser.getQQNumber()));
-            webSocketService.sendMessageToAll(gson.toJson(dataMap));
-
-            JsonObject message = new JsonObject();
-            message.addProperty("messageId", contentMap.get("messageId").toString());
-            JsonArray permissions = new JsonArray();
+            webSocketService.sendMessageToAll(objectMapper.writeValueAsString(dataMap));
+            
+            LinkedHashMap<String,Object> message = new LinkedHashMap<>();
+            message.put("messageId", contentMap.get("messageId").toString());
+            ArrayList<Object> permissions = new ArrayList<>();
             sessionUser.getRole().getPermissions().forEach(permission -> {
                 permissions.add(permission.getName());
             });
-            message.add("permissions", permissions);
-            sendMessage(gson.toJson(message));
+            message.put("permissions", permissions);
+            sendMessage(objectMapper.writeValueAsString(message));
             return true;
         } else if (token == null || token.isEmpty()) {
             Map<String, String> dataMap = new HashMap<>();
             dataMap.put("type", "error");
             dataMap.put("data", "token is empty");
             dataMap.put("messageId", contentMap.get("messageId").toString());
-            sendMessage(gson.toJson(dataMap));
+            sendMessage(objectMapper.writeValueAsString(dataMap));
             return true;
         } else if (!jwtTokenProvider.validateToken(token)) {
             Map<String, String> dataMap = new HashMap<>();
             dataMap.put("type", "error");
             dataMap.put("data", "token is invalid");
             dataMap.put("messageId", contentMap.get("messageId").toString());
-            sendMessage(gson.toJson(dataMap));
+            sendMessage(objectMapper.writeValueAsString(dataMap));
             return true;
         } else if (sessionUser != null) {
             if (sessionUser.isEnabled()) {
@@ -230,44 +240,44 @@ public class Connector implements SubProtocolCapable {
                 dataMap.put("type", "error");
                 dataMap.put("data", "user is disabled");
                 dataMap.put("messageId", contentMap.get("messageId").toString());
-                sendMessage(gson.toJson(dataMap));
+                sendMessage(objectMapper.writeValueAsString(dataMap));
             }
             return !sessionUser.isEnabled();
         } else {
             return true;
         }
     }
-
+    
     @OnError
     public void onError(Session session, Throwable error) {
         logger.error(session.getBasicRemote().toString());
         error.printStackTrace();
     }
-
-    public void sendMessage(JsonObject jsonObject) throws IOException {
-        sendMessage(jsonObject.toString());
+    
+    public void sendMessage(LinkedHashMap<String,Object> map) throws IOException {
+        sendMessage(objectMapper.writeValueAsString(map));
     }
-
-    public void sendMessageWithOutLog(JsonObject jsonObject) throws IOException {
-        sendMessageWithOutLog(jsonObject.toString());
+    
+    public void sendMessageWithOutLog(LinkedHashMap<String,Object> map) throws IOException {
+        sendMessage(objectMapper.writeValueAsString(map));
     }
-
+    
     public void sendMessageWithOutLog(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
     }
-
+    
     public void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
         if (message.length() > 65535) message = message.substring(0, 4096) + "...";
         logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, message);
     }
-
+    
     @NonNull
     @Override
     public List<String> getSubProtocols() {
-        return new ArrayList<>();
+        return new java.util.ArrayList<>();
     }
-
+    
     public boolean isOpen() {
         return session.isOpen();
     }

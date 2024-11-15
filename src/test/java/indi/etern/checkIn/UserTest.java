@@ -88,7 +88,7 @@ public class UserTest {
                 "create edit and delete owns question",
                 "create partition",
                 "delete partition",
-                "edit partition name"
+                "edit partition value"
         };
         String[] permissionDescription = {
                 "启/禁用题目",

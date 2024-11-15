@@ -25,7 +25,7 @@ onMounted(() => {
             observer = new ResizeObserver((entries) => {
                 for (const entry of entries) {
                     const width = entry.contentRect.width;
-                    rowCount.value = Math.max(1,Math.min(Math.floor(width / props.minRowWidth), props.data.length));
+                    rowCount.value = Math.max(1, Math.min(Math.floor(width / props.minRowWidth), props.data.length));
                 }
             });
             observer.observe(waterfall.value);
@@ -54,6 +54,7 @@ onDeactivated(() => {
 .waterfall {
     display: flex;
 }
+
 .waterfall > div {
     flex: 1;
 }

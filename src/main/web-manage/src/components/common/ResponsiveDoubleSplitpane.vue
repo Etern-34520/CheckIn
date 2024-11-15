@@ -1,7 +1,7 @@
 <script setup>
 import {ArrowLeftBold, List} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
-import Responsive from "@/utils/Responsive.js";
+import UIMeta from "@/utils/UI_Meta.js";
 import {Splitpanes, Pane} from 'splitpanes'
 
 defineProps({
@@ -36,7 +36,7 @@ const mobile = ref(false);
 const mobileShowLeftView = ref(Object.keys(router.currentRoute.value.params).length === 0);
 const noTreeViewTransition = ref(true);
 
-watch(Responsive.mobile, (val) => {
+watch(UIMeta.mobile, (val) => {
     mobile.value = val;
     if (val) {
         noTreeViewTransition.value = true;
@@ -90,7 +90,7 @@ watch(Responsive.mobile, (val) => {
     position: fixed;
     backdrop-filter: blur(32px) brightness(0.5);
     height: 100%;
-    width: 70%;
+    width: 80%;
     z-index: 2003;
     transform: translateX(calc(-100% - 500px));
     transition: transform 300ms var(--ease-in-out-quint);
@@ -116,6 +116,6 @@ watch(Responsive.mobile, (val) => {
 
 <style>
 .mobile > .splitpanes .splitpanes__splitter {
-    display: none;
+    display: none !important;
 }
 </style>

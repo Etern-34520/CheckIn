@@ -1,18 +1,14 @@
 package indi.etern.checkIn.action.traffic;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.traffic.UserTraffic;
 import indi.etern.checkIn.service.dao.UserTrafficService;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-@Action(name = "getTrafficByDate")
+@Action("getTrafficByDate")
 public class GetTrafficByDateAction extends TransactionalAction {
     private LocalDate localDate;
 
@@ -22,22 +18,22 @@ public class GetTrafficByDateAction extends TransactionalAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         List<UserTraffic> userTrafficList = UserTrafficService.singletonInstance.findAllByDate(localDate);
-        JsonObject base = new JsonObject();
-        base.addProperty("type","traffics");
-        JsonArray array = new JsonArray();
+        LinkedHashMap<String,Object> base = new LinkedHashMap<>();
+        base.put("type","traffics");
+        ArrayList<Object> array = new ArrayList<>();
         userTrafficList.stream().forEachOrdered(userTraffic -> {
-            JsonObject element = new JsonObject();
-            element.addProperty("id",userTraffic.getId());
-            element.addProperty("ip",userTraffic.getIP());
-            element.addProperty("qqNumber",userTraffic.getQQNumber());
-            element.addProperty("localDateTime",userTraffic.getLocalDateTime().toString());
-            element.addProperty("localTime",userTraffic.getLocalTime().toString());
-            element.addProperty("localDate",userTraffic.getLocalDate().toString());
+            LinkedHashMap<String,Object> element = new LinkedHashMap<>();
+            element.put("id",userTraffic.getId());
+            element.put("ip",userTraffic.getIP());
+            element.put("qqNumber",userTraffic.getQQNumber());
+            element.put("localDateTime",userTraffic.getLocalDateTime().toString());
+            element.put("localTime",userTraffic.getLocalTime().toString());
+            element.put("localDate",userTraffic.getLocalDate().toString());
             array.add(element);
         });
-        base.add("traffics",array);
+        base.put("traffics",array);
         return Optional.of(base);
     }
 

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.*;
 
-@Action(name = "createOrUpdateQuestionGroup")
+@Action("createOrUpdateQuestionGroup")
 public class CreateOrUpdateQuestionGroup extends BaseAction<Object, Map<String,Object>> {
     private final ObjectMapper objectMapper;
     Map<String,Object> data;

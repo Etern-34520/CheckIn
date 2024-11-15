@@ -42,7 +42,7 @@ public class PartitionService {
     public Optional<Partition> findByName(String name) {
         return partitionRepository.findByName(name);
 /*
-        Partition examplePartition = Partition.getExample(name);
+        Partition examplePartition = Partition.getExample(value);
         ExampleMatcher exampleMatcher = ExampleMatcher
                 .matching()
                 .withIgnorePaths("id");
@@ -88,9 +88,9 @@ public class PartitionService {
 
     public List<Question> generateExam(List<Integer> partitionIds, Random random) throws Exception {
         List<Question> multiPartitionableQuestions = new ArrayList<>();
-        int questionCount = Integer.parseInt(SettingService.singletonInstance.get("exam.questionCount"));
-        int partitionCountMin = Integer.parseInt(SettingService.singletonInstance.get("exam.partitionCountMin"));
-        int partitionCountMax = Integer.parseInt(SettingService.singletonInstance.get("exam.partitionCountMax"));
+        int questionCount = Integer.parseInt(SettingService.singletonInstance.getItem("exam.questionCount").getValue().toString());
+        int partitionCountMin = Integer.parseInt(SettingService.singletonInstance.getItem("exam.partitionCountMin").getValue().toString());
+        int partitionCountMax = Integer.parseInt(SettingService.singletonInstance.getItem("exam.partitionCountMax").getValue().toString());
         if (partitionCountMin > partitionIds.size()) {
             throw new BadRequestException("partition count cannot smaller than min count(" + partitionCountMin + ")");
         } else if (partitionIds.size() > partitionCountMax) {
@@ -99,7 +99,7 @@ public class PartitionService {
         /*transactionTemplate.execute((callback) -> {
             partitionIds.forEach(partitionName -> {
                 final Partition partition = findByName(partitionName);
-                final List<Question> questions = new ArrayList<>();
+                final List<Question> questions = new ArrayList<Object><>();
                 Random random = new Random();
                 int quantity = Math.min(questionCount+1, partition.getQuestions().size());
                 while (questions.size() < quantity) {

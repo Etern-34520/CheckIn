@@ -1,16 +1,16 @@
 package indi.etern.checkIn.action.role;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.action.user.UserJsonResultAction;
+import indi.etern.checkIn.action.user.UserMapResultAction;
 import indi.etern.checkIn.service.dao.UserService;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "getUsersOfRole")
-public class GetUsersOfRoleAction extends UserJsonResultAction {
+@Action("getUsersOfRole")
+public class GetUsersOfRoleAction extends UserMapResultAction {
     String roleType;
 
     @Override
@@ -19,18 +19,18 @@ public class GetUsersOfRoleAction extends UserJsonResultAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
-        JsonObject result = new JsonObject();
-        JsonArray userList = new JsonArray();
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
+        LinkedHashMap<String,Object> result = new LinkedHashMap<>();
+        ArrayList<Object> userList = new ArrayList<>();
         UserService.singletonInstance.findAllByRoleType(roleType).forEach(user -> {
-            JsonObject userInfo = new JsonObject();
-            userInfo.addProperty("qq", user.getQQNumber());
-            userInfo.addProperty("name", user.getName());
-            userInfo.addProperty("role", user.getRole().getType());
-            userInfo.addProperty("enabled", user.isEnabled());
+            LinkedHashMap<String,Object> userInfo = new LinkedHashMap<>();
+            userInfo.put("qq", user.getQQNumber());
+            userInfo.put("name", user.getName());
+            userInfo.put("role", user.getRole().getType());
+            userInfo.put("enabled", user.isEnabled());
             userList.add(userInfo);
         });
-        result.add("users", userList);
+        result.put("users", userList);
         return Optional.of(result);
     }
     

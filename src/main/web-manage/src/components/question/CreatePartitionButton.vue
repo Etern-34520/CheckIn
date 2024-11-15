@@ -1,5 +1,5 @@
 <script setup>
-import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionDialog.vue";
+import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionPop.vue";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 
 const createPartitionVisible = ref(false);
@@ -8,9 +8,8 @@ const createPartitionVisible = ref(false);
     <el-popover trigger="click" v-model:visible="createPartitionVisible"
                 width="400">
         <template #reference>
-            <el-button text size="small"
+            <el-button text size="small" :icon="HarmonyOSIcon_Plus"
                        class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus disable-tree-checkbox">
-                <HarmonyOSIcon_Plus/>
                 <el-text>创建分区</el-text>
             </el-button>
         </template>

@@ -1,12 +1,5 @@
 package indi.etern.checkIn.controller.rest;
 
-import com.google.gson.Gson;
-import indi.etern.checkIn.auth.AuthException;
-import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.traffic.DateTraffic;
-import indi.etern.checkIn.entities.traffic.UserTraffic;
-import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.DateTrafficService;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
@@ -14,19 +7,8 @@ import indi.etern.checkIn.service.dao.UserTrafficService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(path = "manage/data")
@@ -37,17 +19,16 @@ public class ManageData {
     final QuestionService multiPartitionableQuestionService;
     final WebSocketService webSocketService;
     final UserService userService;
-    final Gson gson;
     
-    public ManageData(DateTrafficService dateTrafficService, UserTrafficService userTrafficService, QuestionService multiPartitionableQuestionService, WebSocketService webSocketService, UserService userService, Gson gson) {
+    public ManageData(DateTrafficService dateTrafficService, UserTrafficService userTrafficService, QuestionService multiPartitionableQuestionService, WebSocketService webSocketService, UserService userService) {
         this.dateTrafficService = dateTrafficService;
         this.userTrafficService = userTrafficService;
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
         this.webSocketService = webSocketService;
         this.userService = userService;
-        this.gson = gson;
     }
     
+/*
     @GetMapping(params = "type=traffic")
     public String getTrafficJsonData() {
         final LocalDate now = LocalDate.now();
@@ -61,8 +42,9 @@ public class ManageData {
         }
         return gson.toJson(jsonData);
     }
+*/
     
-    @GetMapping(params = {"type=trafficDetail", "pageIndex"})
+    /*@GetMapping(params = {"type=trafficDetail", "pageIndex"})
     public String getTrafficItemDataByPage(int pageIndex) {
         Sort sort = Sort.by(Sort.Direction.DESC, "localDate").and(Sort.by(Sort.Direction.DESC, "localTime"));
         Pageable pageable = PageRequest.of(pageIndex, 20, sort);
@@ -79,7 +61,7 @@ public class ManageData {
     
     private String getJson(Page<UserTraffic> userTrafficPage) {
         List<Map<String, String>> jsonData = new ArrayList<>();
-        for (UserTraffic userTraffic : /*dateTraffic.getUserTraffics()*/ userTrafficPage.getContent()) {
+        for (UserTraffic userTraffic : *//*dateTraffic.getUserTraffics()*//* userTrafficPage.getContent()) {
             Map<String, String> userTrafficDataMap = userTraffic.getHeaderMap();
             userTrafficDataMap.put("ip", userTraffic.getIP());
             userTrafficDataMap.put("qq", String.valueOf(userTraffic.getQQNumber()));
@@ -91,7 +73,7 @@ public class ManageData {
             jsonData.add(userTrafficDataMap);
         }
         return gson.toJson(jsonData);
-    }
+    }*/
     
 /*
     @PostMapping(path = "/updateQuestion/")
@@ -133,7 +115,7 @@ public class ManageData {
     }
 */
 
-    private static void checkPermission(Question oldQuestion,User currectUser, User author, boolean enabled) {
+    /*private static void checkPermission(Question oldQuestion,User currectUser, User author, boolean enabled) {
         if (oldQuestion != null && oldQuestion.getAuthor() != null && !oldQuestion.getAuthor().equals(currectUser) &&
                 !JwtTokenProvider.currentUserHasPermission("edit others question")) {
             throw new AuthException("permission denied: edit others question");
@@ -147,6 +129,6 @@ public class ManageData {
                 && !JwtTokenProvider.currentUserHasPermission("enable and disable question")) {
             throw new AuthException("permission denied: enable and disable question");
         }
-    }
+    }*/
     
 }

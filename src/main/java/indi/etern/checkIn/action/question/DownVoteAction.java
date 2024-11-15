@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question;
 
-import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Question;
@@ -10,7 +10,7 @@ import javax.management.InstanceNotFoundException;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "downVote")
+@Action("downVote")
 public class DownVoteAction extends TransactionalAction {
     private String questionId;
     
@@ -20,7 +20,7 @@ public class DownVoteAction extends TransactionalAction {
     }
     
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         Optional<Question> optionalQuestion = QuestionService.singletonInstance.findById(questionId);
         if (optionalQuestion.isPresent()) {
             Question question = optionalQuestion.get();

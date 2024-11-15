@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.user;
 
-import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.User;
@@ -10,26 +10,32 @@ import indi.etern.checkIn.service.web.WebSocketService;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "deleteUser")
+@Action("deleteUser")
 public class DeleteUserAction extends TransactionalAction {
+    private final WebSocketService webSocketService;
     private long qqNumber;
-
+    
+    public DeleteUserAction(WebSocketService webSocketService) {
+        super();
+        this.webSocketService = webSocketService;
+    }
+    
     @Override
     public String requiredPermissionName() {
         return qqNumber == getCurrentUser().getQQNumber() ? null : "delete user";
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             UserService.singletonInstance.unbindAndDelete(user);
             {
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("type", "deleteUser");
-                jsonObject.addProperty("qq", qqNumber);
-                WebSocketService.singletonInstance.sendMessageToAll(jsonObject);
+                LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+                map.put("type", "deleteUser");
+                map.put("qq", qqNumber);
+                webSocketService.sendMessageToAll(map);
             }
         }
         return Optional.empty();

@@ -29,7 +29,7 @@ public class Choice implements Serializable {
 /*
     @Setter
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id",referencedColumnName = "id")
+    @JoinColumn(value = "question_id",referencedColumnName = "id")
     private MultipleChoicesQuestion question;
 */
     protected Choice() {

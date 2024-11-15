@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.role;
 
-import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.Permission;
@@ -12,10 +12,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "savePermissionsOfRole")
+@Action("savePermissionsOfRole")
 public class SavePermissionAction extends TransactionalAction {
+    final RoleService roleService;
     Role role;
     List<String> enables;
+    
+    public SavePermissionAction(RoleService roleService) {
+        this.roleService = roleService;
+    }
     
     @Override
     public String requiredPermissionName() {
@@ -23,23 +28,25 @@ public class SavePermissionAction extends TransactionalAction {
     }
     
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
-        List<Permission> enabled = new ArrayList<>();
-        for (String permissionName : enables) {
-            enabled.add(RoleService.singletonInstance.findPermission(permissionName).orElseThrow());
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
+        synchronized (roleService) {
+            List<Permission> enabled = new ArrayList<>();
+            for (String permissionName : enables) {
+                enabled.add(roleService.findPermission(permissionName).orElseThrow());
+            }
+            role.getPermissions().clear();
+            role.getPermissions().addAll(enabled);
+            roleService.save(role);
+            LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+            map.put("type", "savePermissionCallback");
+            map.put("message", "success");
+            return Optional.of(map);
         }
-        role.getPermissions().clear();
-        role.getPermissions().addAll(enabled);
-        RoleService.singletonInstance.save(role);
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type","savePermissionCallback");
-        jsonObject.addProperty("message","success");
-        return Optional.of(jsonObject);
     }
-
+    
     @Override
     public void initData(Map<String, Object> dataMap) {
-        role = RoleService.singletonInstance.findByType((String) dataMap.get("roleType")).orElseThrow();
+        role = roleService.findByType((String) dataMap.get("roleType")).orElseThrow();
         //noinspection unchecked
         enables = (List<String>) dataMap.get("enables");
     }

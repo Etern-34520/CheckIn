@@ -5,7 +5,7 @@ import {DArrowRight, Loading} from "@element-plus/icons-vue";
 /*import WebSocketConnector from "@/websocket/websocket.js";*/
 const usernameOrQQ = ref('');
 const password = ref('');
-const { proxy } = getCurrentInstance();
+const {proxy} = getCurrentInstance();
 
 const loginMessage = ref('');
 const key = ref(true);
@@ -14,15 +14,17 @@ const emit = defineEmits(["loginAs"]);
 
 function login() {
     requesting.value = true;
-    proxy.$http.post("", {
+    proxy.$http.post("api", {
         usernameOrQQ: usernameOrQQ.value,
         password: password.value
     }).then(response => {
         console.log(response);
         if (response.result === "success") {
             proxy.$cookies.set("token", response.token);
+            proxy.$cookies.set("name", response.name);
+            proxy.$cookies.set("qq", response.qq);
             loginMessage.value = "";
-            emit("loginAs",{name:response.name,qq:response.qq,token:response.token});
+            emit("loginAs", {name: response.name, qq: response.qq, token: response.token});
         } else if (response.result === "fail") {
             requesting.value = false;
             loginMessage.value = response.message;
@@ -42,10 +44,13 @@ function login() {
 <template>
     <div style="width: 100%;height:100%;display: flex;align-items: center;align-content:center;justify-content: center;overflow: hidden">
         <div id="login" style="z-index:2;width: 300px;display: flex;flex-direction: column;justify-content: stretch;">
-            <el-input v-model="usernameOrQQ" autofocus placeholder="用户名或QQ" type="text" size="large"></el-input>
-            <el-input v-model="password" placeholder="密码" type="password" show-password clearable
+            <el-input v-model="usernameOrQQ" autofocus placeholder="用户名 / QQ" class="login-input"
+                      type="text" size="large"></el-input>
+            <el-input v-model="password" placeholder="密码" type="password" show-password clearable class="login-input"
                       size="large"></el-input>
-            <el-button text bg :disabled="requesting" :loading="requesting" loading-icon="_Loading_" :icon="DArrowRight" @click="login">登录</el-button>
+            <el-button text bg :disabled="requesting" :loading="requesting" loading-icon="_Loading_" :icon="DArrowRight"
+                       @click="login">登录
+            </el-button>
             <div style="height: 30px;display: flex;place-items: stretch;place-content: center;">
                 <Transition name="message" mode="out-in">
                     <el-text :key="key">{{ loginMessage }}</el-text>
@@ -53,7 +58,7 @@ function login() {
             </div>
         </div>
         <div class="background-font">
-            <div style="font-size: 256px;color: var(--el-color-primary-3);opacity: 0.1;filter: blur(8px)">
+            <div style="font-size: 256px;filter: blur(8px)">
                 CHECKIN
             </div>
             <div style="font-size: 200px;margin-top: -200px;filter: blur(8px)">
@@ -77,19 +82,37 @@ function login() {
     justify-content: center;
     width: 100%;
     height: 100%;
-    color: var(--el-bg-color);
+    color: var(--text-color);
+    opacity: 0.07;
     user-select: none;
     overflow: hidden;
 }
 
 /*noinspection CssUnusedSymbol*/
-.message-enter-active , .message-leave-active {
+.message-enter-active, .message-leave-active {
     transition: all 0.2s;
 }
 
 /*noinspection CssUnusedSymbol*/
-.message-enter-from , .message-leave-to {
+.message-enter-from, .message-leave-to {
     filter: blur(8px);
     opacity: 0;
+}
+</style>
+
+<style>
+.login-input input {
+    text-align: center;
+}
+
+.login-input .el-input__suffix {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+
+.login-input .el-input__suffix-inner {
+    position: absolute !important;
 }
 </style>

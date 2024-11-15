@@ -24,7 +24,7 @@ const deleteGroup = () => {
             <el-text style="font-size: 16px;align-self: baseline;max-height:21px;overflow: hidden;">{{ userGroup.type }}</el-text>
         <div class="flex-blank-1"></div>
         <el-dropdown trigger="click">
-            <el-button link @click.stop class="no-init-animate">
+            <el-button link @click.stop class="disable-init-animate">
                 <el-icon>
                     <more-filled/>
                 </el-icon>

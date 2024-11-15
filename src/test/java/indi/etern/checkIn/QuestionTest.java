@@ -113,7 +113,7 @@ public class QuestionTest {
 
 /*
 //    Dao dao = new Dao("indi.etern.checkIn.beans");
-    List<Choice> choices1 = new ArrayList<>();
+    List<Choice> choices1 = new ArrayList<Object><>();
     {
         choices1.add(new Choice("A", true));
         choices1.add(new Choice("B", false));
@@ -121,7 +121,7 @@ public class QuestionTest {
         choices1.add(new Choice("D", false));
     }
     Question question1;
-    List<Choice> choices2 = new ArrayList<>();
+    List<Choice> choices2 = new ArrayList<Object><>();
     {
         choices2.add(new Choice("A1", true));
         choices2.add(new Choice("B1", true));
@@ -163,7 +163,7 @@ public class QuestionTest {
     @Test
 //    @Transactional
     public void testExceptions(){
-        List<Choice> choices = new ArrayList<>();
+        List<Choice> choices = new ArrayList<Object><>();
         {
             choices.add(new Choice("A2", false));
             choices.add(new Choice("B2", false));

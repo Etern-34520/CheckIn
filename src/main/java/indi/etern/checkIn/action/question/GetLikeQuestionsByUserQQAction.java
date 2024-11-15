@@ -1,7 +1,5 @@
 package indi.etern.checkIn.action.question;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.question.utils.Utils;
@@ -10,10 +8,12 @@ import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Action(name = "getLikeQuestionsByUserQQ")
+@Action("getLikeQuestionsByUserQQ")
 public class GetLikeQuestionsByUserQQAction extends TransactionalAction {
     private long userQQ;
     @Autowired
@@ -26,18 +26,18 @@ public class GetLikeQuestionsByUserQQAction extends TransactionalAction {
     }
 
     @Override
-    protected Optional<JsonObject> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         Optional<User> optionalUser = userService.findByQQNumber(userQQ);
-        JsonObject result;
+        LinkedHashMap<String,Object> result;
         if (optionalUser.isPresent()) {
-            result = new JsonObject();
-            JsonArray questions = new JsonArray();
+            result = new LinkedHashMap<>();
+            ArrayList<Object> questions = new ArrayList<>();
             questionService.findAllByUpVotersContains(optionalUser.get()).forEach(question -> {
-                questions.add(Utils.getJsonObjectOf(question));
+                questions.add(Utils.getMapOfQuestion(question));
             });
-            result.add("questions", questions);
+            result.put("questions", questions);
         } else {
-            result = getErrorJsonObject("user not exist");
+            result = getErrorMap("user not exist");
         }
         return Optional.of(result);
     }

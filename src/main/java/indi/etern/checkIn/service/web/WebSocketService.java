@@ -1,7 +1,6 @@
 package indi.etern.checkIn.service.web;
 
-import com.google.gson.JsonObject;
-import indi.etern.checkIn.CheckInApplication;
+import java.util.LinkedHashMap;
 import indi.etern.checkIn.api.webSocket.Connector;
 import indi.etern.checkIn.entities.user.User;
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ import static indi.etern.checkIn.api.webSocket.Connector.CONNECTORS;
 
 @Service
 public class WebSocketService {
-    private static final Logger logger = LoggerFactory.getLogger(CheckInApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketService.class);
     public static WebSocketService singletonInstance;
     protected WebSocketService() {
         singletonInstance = this;
@@ -27,7 +26,6 @@ public class WebSocketService {
         logger.info("webSocket to:{}, msg:{}", toSids, message);
         for (Connector item : CONNECTORS) {
             try {
-                //这里可以设定只推送给传入的sid，为null则全部推送
                 if (toSids.isEmpty()) {
                     item.sendMessage(message);
                 } else if (toSids.contains(item.getSid())) {
@@ -40,7 +38,6 @@ public class WebSocketService {
     
     public void sendMessage(String message, String sid) {
         logger.info("webSocket to:{}, msg:{}", sid, message);
-
         for (Connector item : CONNECTORS) {
             try {
                 if (item.getSid().equals(sid)) {
@@ -71,12 +68,12 @@ public class WebSocketService {
         return isOnline(String.valueOf(user.getQQNumber()));
     }
     
-    public void sendMessageToAll(JsonObject jsonObject) {
-        sendMessageToAll(jsonObject.toString());
+    public void sendMessageToAll(LinkedHashMap<String,Object> map) {
+        sendMessageToAll(map.toString());
     }
 
-    public void sendMessageToAllWithoutLog(JsonObject jsonObject) {
-        sendMessageToAllWithoutLog(jsonObject.toString());
+    public void sendMessageToAllWithoutLog(LinkedHashMap<String,Object> map) {
+        sendMessageToAllWithoutLog(map.toString());
     }
 
     public void sendMessageToAllWithoutLog(String message) {

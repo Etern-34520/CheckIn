@@ -11,8 +11,8 @@
     width: 16px !important;
     aspect-ratio: 1;
     border-radius: 50%;
-    border: 2px solid;
-    border-color: var(--front-color) #0000;
+    border: 2px solid !important;
+    border-color: var(--front-color) #0000 !important;
     animation: l1 0.8s var(--ease-in-bounce-1) infinite;
 }
 @keyframes l1 {to{transform: rotate(.5turn)}}

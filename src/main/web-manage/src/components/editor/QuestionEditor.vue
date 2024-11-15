@@ -2,7 +2,7 @@
 // import {nextTick, onBeforeMount, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import QuestionCache from "@/data/QuestionCache.js";
-import randomUUID from "@/utils/UUID.js";
+import randomUUIDv4 from "@/utils/UUID.js";
 import {VueDraggable} from "vue-draggable-plus";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
@@ -21,7 +21,10 @@ const errorMessage = ref("");
 const ready = ref(false);
 const loading = ref(false);
 let requested = false;
-import Responsive from "@/utils/Responsive.js";
+import UIMeta from "@/utils/UI_Meta.js";
+import Like from "@/components/icons/Like.vue";
+import DisLike from "@/components/icons/DisLike.vue";
+import WebSocketConnector from "@/api/websocket.js";
 
 let update = (newVal, oldVal) => {
     requested = false;
@@ -55,12 +58,12 @@ watch(() => questionInfo.value.question, (newVal, oldVal) => {
     if (newVal && oldVal && oldVal.id === newVal.id) {
         QuestionCache.update(questionInfo);
     }
-    questionInfo.value.check();
+    questionInfo.value.verify();
 }, {deep: true});
 
 watch(() => questionInfo.value.questionInfos, (newVal, oldVal) => {
     QuestionCache.update(questionInfo);
-    questionInfo.value.check();
+    questionInfo.value.verify();
 });
 
 onBeforeMount(() => {
@@ -69,26 +72,26 @@ onBeforeMount(() => {
 
 const createQuestion = () => {
     QuestionCache.appendToGroup(
-        questionInfo,
-        QuestionCache.create({
-            id: randomUUID(),
-            content: "",
-            type: "MultipleChoicesQuestion",
-            enabled: false,
-            partitionIds: null,
-            authorQQ: Number(proxy.$cookies.get("qq")),
-            upVoters: new Set(),
-            downVoters: new Set(),
-            choices: [{
-                id: randomUUID(),
-                correct: true,
-                content: ""
-            }, {
-                id: randomUUID(),
-                correct: false,
-                content: ""
-            }]
-        }, false)
+            questionInfo,
+            QuestionCache.create({
+                id: randomUUIDv4(),
+                content: "",
+                type: "MultipleChoicesQuestion",
+                enabled: false,
+                partitionIds: null,
+                authorQQ: Number(proxy.$cookies.get("qq")),
+                upVoters: new Set(),
+                downVoters: new Set(),
+                choices: [{
+                    id: randomUUIDv4(),
+                    correct: true,
+                    content: ""
+                }, {
+                    id: randomUUIDv4(),
+                    correct: false,
+                    content: ""
+                }]
+            }, false)
     );
 }
 
@@ -113,19 +116,115 @@ watch(() => view.value, () => {
     })
 })
 const view1 = ref(true);
-const forceMobilePreview = ref(Responsive.mobile.value);
+const forceMobilePreview = ref(UIMeta.mobile.value);
+
+const switchLike = () => {
+    const like = questionInfo.value.question.upVoters.has(currentUserQQ);
+    if (like) {
+        questionInfo.value.question.upVoters.delete(currentUserQQ);
+        WebSocketConnector.send({
+            type: "restoreVote",
+            questionId: questionInfo.value.question.id
+        });
+    } else {
+        WebSocketConnector.send({
+            type: "upVote",
+            questionId: questionInfo.value.question.id
+        });
+        questionInfo.value.question.upVoters.add(currentUserQQ);
+        questionInfo.value.question.downVoters.delete(currentUserQQ);
+    }
+}
+
+const switchDisLike = () => {
+    const disLike = questionInfo.value.question.downVoters.has(currentUserQQ);
+    if (disLike) {
+        WebSocketConnector.send({
+            type: "restoreVote",
+            questionId: questionInfo.value.question.id
+        });
+        questionInfo.value.question.downVoters.delete(currentUserQQ);
+    } else {
+        WebSocketConnector.send({
+            type: "downVote",
+            questionId: questionInfo.value.question.id
+        });
+        questionInfo.value.question.downVoters.add(currentUserQQ);
+        questionInfo.value.question.upVoters.delete(currentUserQQ);
+    }
+}
+const currentUserQQ = Number(proxy.$cookies.get("qq"));
 </script>
 
 <template>
     <div v-loading="loading" style="height: 100%;display: flex;flex-direction: column;">
-        <div style="display: flex;margin-left: 8px;margin-top: 8px;margin-bottom:4px;flex: none">
-            <el-segmented v-model="view" :options="['编辑','预览']" block/>
-            <transition name="preview-type-switch">
-                <div style="display: flex;margin-left: 16px" v-if="view==='预览'">
-                    <el-text style="margin-right: 4px;">移动端预览</el-text>
-                    <el-switch v-model="forceMobilePreview"/>
+        <div style="display: flex;align-items: center;margin: 8px 8px 4px 2px;flex-wrap: wrap" v-if="questionInfo.question">
+            <div style="display: flex;margin-left: 8px;margin-right:40px;flex: none;justify-content:stretch;flex-wrap: wrap">
+                <el-segmented v-model="view" :options="['编辑','预览']" block style="margin-right: 16px"/>
+                <transition name="preview-type-switch">
+                    <div style="display: flex;margin-left: 16px" v-if="view==='预览'">
+                        <el-text style="margin-right: 4px;">移动端预览</el-text>
+                        <el-switch v-model="forceMobilePreview"/>
+                    </div>
+                </transition>
+            </div>
+            <div class="flex-blank-1"></div>
+            <div style="display: flex;margin: 4px 8px">
+                <div style="display: flex;align-items: center;margin-right: 24px">
+                    <el-tag type="info">评价</el-tag>
+                    <el-button-group>
+                        <el-button link @click="switchLike" style="margin: 4px 0" :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
+                            <like :filled="questionInfo.question.upVoters.has(currentUserQQ)"/>
+                            <el-text style="margin-left: 4px;">{{ questionInfo.question.upVoters.size }}
+                            </el-text>
+                        </el-button>
+                        <el-button link @click="switchDisLike" style="margin: 4px 0"
+                                   :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
+                            <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
+                            <el-text style="margin-left: 4px;">{{ questionInfo.question.downVoters.size }}
+                            </el-text>
+                        </el-button>
+                    </el-button-group>
                 </div>
-            </transition>
+                <div style="display: flex;align-items: center">
+                    <el-tag type="info">最后编辑时间</el-tag>
+                    <el-text>
+                        {{ questionInfo.question.lastModifiedTime }}
+                    </el-text>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex;justify-self: stretch;flex-wrap: wrap;margin-left: 8px;margin-right: 8px" class="alerts">
+            <transition-group name="alert">
+                <el-tag v-for="(error,id) in questionInfo.errors" :key="'error-'+id" type="danger"
+                        :closable="false">
+                    <div style="display: flex;flex-direction: row;align-items: center;">
+                        <el-text type="danger" style="margin: 4px">
+                            {{ error.content }}
+                        </el-text>
+                        <el-button-group>
+                            <el-button v-for="errorButton of error.buttons" link
+                                       @click="errorButton.action" :type="errorButton.type">
+                                {{ errorButton.content }}
+                            </el-button>
+                        </el-button-group>
+                    </div>
+                </el-tag>
+                <el-tag v-for="(warning,id) in questionInfo.warnings" :key="'warning-'+id" type="warning"
+                        :closable="false">
+                    <div style="display: flex;flex-direction: row;align-items: center;">
+                        <el-text type="warning" style="margin: 4px">
+                            {{ warning.content }}
+                        </el-text>
+                        <el-button-group>
+                            <el-button v-for="warningButton of warning.buttons" link
+                                       @click="warningButton.action" :type="warningButton.type">
+                                {{ warningButton.content }}
+                            </el-button>
+                        </el-button-group>
+                    </div>
+                </el-tag>
+            </transition-group>
         </div>
         <el-scrollbar style="flex: 1">
             <div class="slide-switch-base" :class="{
@@ -140,10 +239,16 @@ const forceMobilePreview = ref(Responsive.mobile.value);
                                 <basic-question-editor v-model:question-info="questionInfo"/>
                                 <transition name="page-content" mode="out-in">
                                     <multiple-choices-editor-plugin
-                                        v-if="questionInfo.question.type === 'MultipleChoicesQuestion'"
-                                        :question-info="questionInfo" :key="'multipleChoice'"/>
-                                    <div v-else-if="questionInfo.type === 'QuestionGroup'" :key="'questionGroup'"
-                                         style="display: flex;flex-direction:column;justify-items: stretch">
+                                            v-if="questionInfo.question.type === 'MultipleChoicesQuestion'"
+                                            :question-info="questionInfo" :key="'multipleChoice'"/>
+                                    <div class="panel-1" v-else-if="questionInfo.type === 'QuestionGroup'" :key="'questionGroup'"
+                                         style="display: flex;flex-direction:column;justify-items: stretch;padding: 12px 20px">
+                                        <div style="display: flex;flex-direction: row;align-items: center">
+                                            <el-text>子题目</el-text>
+                                            <div class="flex-blank-1"></div>
+                                            <el-text type="info" style="margin-right: 8px;">启用乱序子题目</el-text>
+                                            <el-switch v-model="questionInfo.question.randomOrdered"/>
+                                        </div>
                                         <VueDraggable ref="draggable"
                                                       v-model="questionInfo.questionInfos"
                                                       :animation="150"
@@ -169,9 +274,10 @@ const forceMobilePreview = ref(Responsive.mobile.value);
                                                             </el-button>
                                                         </transition>
                                                     </div>
-                                                    <div style="min-height: 0;grid-column: 2;">
+                                                    <div style="min-height: 0;grid-column: 2" class="question-input"
+                                                         :class="'TODO'">
                                                         <sub-question-editor
-                                                            v-model:question-info="questionInfo.questionInfos[$index]"/>
+                                                                v-model:question-info="questionInfo.questionInfos[$index]"/>
                                                     </div>
                                                 </div>
                                             </transition-group>
@@ -184,12 +290,21 @@ const forceMobilePreview = ref(Responsive.mobile.value);
                                         </el-button>
                                     </div>
                                 </transition>
+                                <div class="panel-1" style="padding: 12px 20px;margin-top: 40px">
+                                    <el-text>
+                                        统计信息
+                                    </el-text>
+<!--                                    TODO-->
+                                    <el-empty/>
+                                </div>
                             </div>
                         </transition>
                     </div>
                     <div v-else>
                         <transition name="switch-preview" mode="out-in">
-                            <question-preview :key="questionInfo.question.id" :questionInfo="questionInfo" :force-mobile="forceMobilePreview"/>
+                            <question-preview v-if="questionInfo.question" :key="questionInfo.question.id"
+                                              :questionInfo="questionInfo" :force-mobile="forceMobilePreview"/>
+                            <el-empty v-else/>
                         </transition>
                     </div>
                 </transition>
@@ -280,5 +395,52 @@ const forceMobilePreview = ref(Responsive.mobile.value);
     filter: blur(32px);
     opacity: 0;
     transform: scale(0.98);
+}
+
+
+/*noinspection CssUnusedSymbol*/
+.alert-enter-active {
+    transition: all 300ms var(--ease-in-bounce-1) 300ms,
+    grid-template-columns 200ms var(--ease-in-out-quint),
+    max-height 200ms var(--ease-in-out-quint),
+    padding 200ms var(--ease-in-out-quint);
+}
+
+/*noinspection CssUnusedSymbol*/
+.alert-leave-active {
+    transition: all 300ms var(--ease-in-bounce-1) 0ms,
+    grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
+    max-height 200ms var(--ease-in-out-quint) 350ms,
+    padding 200ms var(--ease-in-out-quint) 350ms;
+}
+
+/*noinspection CssUnusedSymbol*/
+.alert-enter-from, .alert-leave-to {
+    opacity: 0;
+    /*    margin-top: -40px;*/
+    overflow: hidden;
+    filter: blur(16px);
+    grid-template-columns: 0fr !important;
+    /*    max-width: 0 !important;*/
+    max-height: 0 !important;
+    padding: 0;
+}
+
+.alerts > * {
+    max-height: 24px;
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+    display: grid;
+    grid-template-columns: 1fr;
+    /*    max-width: 500px;*/
+}
+
+.alerts > *:not(:last-child) {
+    margin-right: 4px;
+}
+</style>
+<style>
+.alerts > * > * {
+    min-width: 0;
 }
 </style>

@@ -5,7 +5,7 @@ create table permission_groups
     description varchar(255) null
 );
 
-INSERT INTO checkin.permission_groups (name, description) VALUES ('manage user', '管理用户');
-INSERT INTO checkin.permission_groups (name, description) VALUES ('question', '题目');
-INSERT INTO checkin.permission_groups (name, description) VALUES ('role', '管理用户组');
-INSERT INTO checkin.permission_groups (name, description) VALUES ('setting', '修改设置');
+INSERT INTO check_in.permission_groups (name, description) VALUES ('manage user', '管理用户');
+INSERT INTO check_in.permission_groups (name, description) VALUES ('question', '题目');
+INSERT INTO check_in.permission_groups (name, description) VALUES ('role', '管理用户组');
+INSERT INTO check_in.permission_groups (name, description) VALUES ('setting', '修改设置');
