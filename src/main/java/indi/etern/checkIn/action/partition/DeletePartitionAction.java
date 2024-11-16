@@ -32,6 +32,6 @@ public class DeletePartitionAction extends PartitionMapResultAction {
 
     @Override
     public void initData(Map<String, Object> dataMap) {
-        partitionId = (int) dataMap.get("id");
+        partitionId = ((Number) dataMap.get("id")).intValue();
     }
 }

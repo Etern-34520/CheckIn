@@ -169,7 +169,7 @@ const updateLimits = (partitionIds) => {
                                 :disabled="!editing"
                         >
                             <el-option v-for="partition of refPartitions" :key="partition.id"
-                                       :label="partition.name" :value="partition.id.toString()"></el-option>
+                                       :label="partition.name" :value="partition.id"></el-option>
                         </el-select>
                         <el-text size="large" class="field-label">抽取策略</el-text>
                         <el-radio-group v-model="data.drawingStrategy" size="large" style="padding: 4px 20px"
@@ -190,7 +190,7 @@ const updateLimits = (partitionIds) => {
                                         style="margin: 8px 0;"
                                         :disabled="!editing">
                                     <el-option v-for="partition of refPartitions" :key="partition.id"
-                                               :label="partition.name" :value="partition.id.toString()"></el-option>
+                                               :label="partition.name" :value="partition.id"></el-option>
                                 </el-select>
                                 <waterfall :data="data.specialLimitsEnabledPartitions" :min-row-width="600">
                                     <template #item="{item,index}">
@@ -220,7 +220,7 @@ const updateLimits = (partitionIds) => {
                                         :class="{error:(editing && data.completingStrategy==='selected') && (!data.completingPartitions || data.completingPartitions.length===0)}"
                                         :disabled="!(editing && data.completingStrategy==='selected')">
                                     <el-option v-for="partition of refPartitions" :key="partition.id"
-                                               :label="partition.name" :value="partition.id.toString()"></el-option>
+                                               :label="partition.name" :value="partition.id"></el-option>
                                 </el-select>
                             </el-radio>
                         </el-radio-group>

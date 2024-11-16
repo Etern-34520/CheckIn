@@ -15,6 +15,7 @@ const data = ref([]);
 const loading = ref(true);
 const error = ref(false);
 let backup = [];
+let backupJSON;
 const addRule = () => {
     data.value.push({id: randomUUIDv4()});
 };
@@ -24,22 +25,25 @@ const cancel = () => {
 }
 const startEditing = () => {
     backup = JSON.parse(JSON.stringify(data.value));
+    backupJSON = JSON.stringify(data.value);
     editing.value = true;
 }
 const finishEditing = () => {
     editing.value = false;
-    WebSocketConnector.send({
-        type: "saveVerificationSetting",
-        data: data.value
-    }).then(() => {
-        ElMessage({
-            type: "success", message: "保存成功"
+    if (backupJSON !== JSON.stringify(data.value)) {
+        WebSocketConnector.send({
+            type: "saveVerificationSetting",
+            data: data.value
+        }).then(() => {
+            ElMessage({
+                type: "success", message: "保存成功"
+            })
+        }, (err) => {
+            ElMessage({
+                type: "error", message: "保存失败"
+            })
         })
-    }, (err) => {
-        ElMessage({
-            type: "error", message: "保存失败"
-        })
-    })
+    }
 }
 const hasError = ref(false);
 watch(() => data.value, () => {

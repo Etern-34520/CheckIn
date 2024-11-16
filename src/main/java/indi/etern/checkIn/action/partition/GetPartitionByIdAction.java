@@ -12,34 +12,34 @@ import java.util.Optional;
 public class GetPartitionByIdAction extends PartitionMapResultAction {
     private final PartitionService partitionService;
     private Integer partitionId;
-
+    
     public GetPartitionByIdAction(PartitionService partitionService) {
         this.partitionService = partitionService;
     }
-
+    
     @Override
     public String requiredPermissionName() {
         return "";
     }
-
+    
     @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
+    protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
         Optional<Partition> optionalPartition = partitionService.findById(partitionId);
         if (optionalPartition.isPresent()) {
             Partition partition = optionalPartition.get();
-            LinkedHashMap<String,Object> result = new LinkedHashMap<>();
-            LinkedHashMap<String,Object> partition1 = new LinkedHashMap<>();
+            LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+            LinkedHashMap<String, Object> partition1 = new LinkedHashMap<>();
             partition1.put("id", partition.getId());
             partition1.put("name", partition.getName());
-            result.put("partition",partition1);
+            result.put("partition", partition1);
             return Optional.of(result);
         } else {
             return getOptionalErrorMap("Partition not found");
         }
     }
-
+    
     @Override
     public void initData(Map<String, Object> dataMap) {
-        partitionId = (int) dataMap.get("id");
+        partitionId = ((Number) dataMap.get("id")).intValue();
     }
 }

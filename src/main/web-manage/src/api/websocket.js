@@ -34,10 +34,11 @@ const WebSocketConnector = {
             ws.onclose = function () {
                 if (!normallyClose && autoRetriedTimes < 3) {
                     autoRetriedTimes++;
-                    WebSocketConnector.reconnect().then(() => {
-                        autoRetriedTimes = 0;
-                    }, () => {
-                    });
+                    setTimeout(() => {
+                        WebSocketConnector.reconnect().then(() => {
+                            autoRetriedTimes = 0;
+                        }, () => {});
+                    },3000);
                 } else {
                     autoRetriedTimes = 0;
                     if (!normallyClose) {
