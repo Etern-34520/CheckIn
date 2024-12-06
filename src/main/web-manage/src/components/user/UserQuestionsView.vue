@@ -41,7 +41,7 @@ onBeforeMount(() => {
             <waterfall :data="questionInfos" :min-row-width="400">
                 <template #item="{item,index}">
                     <question-info-panel :question-info="item" disable-error-and-warning
-                                         @click="router.push('/manage/questions/'+item.question.id+'/')"/>
+                                         @click="router.push({name:'question-detail',params: {id:item.question.id}})"/>
                 </template>
             </waterfall>
         </el-scrollbar>

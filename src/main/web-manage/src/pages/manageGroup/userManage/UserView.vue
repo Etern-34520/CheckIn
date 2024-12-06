@@ -115,6 +115,31 @@ const deleteUser = () => {
     }).catch(() => {
     });
 }
+
+const switching = ref(false);
+const switchEnableUser = () => {
+    switching.value = true;
+    return new Promise ((resolve, reject) => {
+        WebSocketConnector.send({
+            type: "setEnableUser",
+            qq: user.value.qq,
+            enable: !user.value.enabled
+        }).then(() => {
+            ElMessage({
+                type: 'success',
+                message: '修改成功',
+            });
+            switching.value = false;
+            resolve();
+        }, () => {
+            ElMessage({
+                type: 'error',
+                message: '修改失败',
+            });
+            reject();
+        });
+    });
+}
 </script>
 
 <template>
@@ -186,19 +211,19 @@ const deleteUser = () => {
                         </el-button>
                         <!--                        <el-button>修改特有权限</el-button>-->
                         <!--                        TODO-->
-                        <div style="margin-left: 12px">
+                        <div style="margin-left: 12px" v-if="UserDataInterface.currentUser.qq!==user.qq">
                             <el-text style="line-height: 20px;margin-right: 4px">启用</el-text>
-                            <el-switch v-model="user.enabled"/>
+                            <el-switch v-model="user.enabled" :loading="switching" :before-change="switchEnableUser"/>
                         </div>
                     </div>
                 </div>
                 <link-panel description="" name="TA的更多题目" :icon="Finished"
-                            @click="router.push({name: 'user-questions',id: user.qq})"/>
+                            @click="router.push({name: 'user-questions',params: {id: user.qq}})"/>
                 <div class="panel-1" v-loading="questionLoading">
                     <waterfall :data="questions" :min-row-width="400" style="padding: 8px 12px">
                         <template #item="{item,index}">
                             <question-info-panel :question-info="item"
-                                                 @click="router.push('/manage/questions/'+item.question.id+'/')"/>
+                                                 @click="router.push({name:'question-detail',params: {id:item.question.id}})"/>
                         </template>
                     </waterfall>
                     <!--                    <question-info-panel v-for="questionInfo of questions" :question-info="QuestionCache.wrapToQuestionInfo(questionInfo)"/>-->

@@ -40,7 +40,9 @@ UserDataInterface.getUsersAsync().then((users1) => {
 });
 
 const openView = (user) => {
-    router.push("/manage/manage-user/" + user.qq + "/");
+    router.push({name:'user-detail',params:{
+        id:user.qq
+    }});
 }
 
 const doFilter = (user) => {

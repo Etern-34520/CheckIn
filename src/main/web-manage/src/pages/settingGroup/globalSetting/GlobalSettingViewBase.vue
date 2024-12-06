@@ -16,7 +16,6 @@ const stop = router.beforeEach((to, from) => {
         className.value = "";
         transitionName.value = "blur-scale";
     }
-    console.log(to);
 });
 onUnmounted(() => {
     stop();

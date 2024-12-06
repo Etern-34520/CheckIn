@@ -59,24 +59,4 @@ public class CreateOrUpdateQuestionAction extends BaseAction<Question, Map<?, ?>
     public void initData(Map<?, ?> questionMap) {
         this.questionDataMap = questionMap;
     }
-    
-    @Override
-    protected void preLog() {
-        try {
-            //noinspection unchecked
-            Map<String, Object> copy = (Map<String, Object>) new HashMap<>(questionDataMap);
-            //noinspection unchecked
-            List<Map<String, Object>> images = (List<Map<String, Object>>) copy.getOrDefault("images", List.of());
-            List<Map<String, Object>> images1 = new ArrayList<>();
-            for (Map<String, Object> i : images) {
-                HashMap<String, Object> e = new HashMap<>(i);
-                e.put("url", "[ masked due to length ]");
-                images1.add(e);
-            }
-            copy.put("images", images1);
-            logger.info(objectMapper.writeValueAsString(copy));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

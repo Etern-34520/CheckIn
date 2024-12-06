@@ -6,19 +6,32 @@ import VueDevTools from 'vite-plugin-vue-devtools'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import ElementPlus from 'unplugin-element-plus/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    port: 5172, host: '0.0.0.0', // 配置项目可以局域网访问
+    cors: true, // 默认启用并允许任何源
+    proxy: {
+      '/checkIn/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      }
+    }
+  },
   base: '/checkIn/',
   plugins: [
     vue(),
     VueDevTools(),
     AutoImport({
+      imports: ['vue', 'vue-router'],
       resolvers: [ElementPlusResolver()],
     }),
     Components({
       resolvers: [ElementPlusResolver()],
-    })
+    }),
+    ElementPlus({})
   ],
   resolve: {
     alias: {
@@ -27,5 +40,6 @@ export default defineConfig({
   },
   build: {
     outDir:"../resources/static/view/exam",
+    emptyOutDir: true,
   }
 })

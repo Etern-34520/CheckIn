@@ -11,8 +11,6 @@ import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -102,10 +100,8 @@ public class JwtTokenProvider {
         jwt.getBody().get("exp");
     }*/
 
-    public boolean currentUserHasPermission(String permissionName) {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        final User user = (User) authentication.getPrincipal();
-        final Role role = roleService.findByType(user.getRole().getType()).orElseThrow();
+    public boolean isUserHasPermission(User user ,String permissionName) {
+        final Role role = roleService.findByType(user.getRole().getType()).orElse(Role.ANONYMOUS);
         for (Permission permission : role.getPermissions()) {
             if (permission.getName().equals(permissionName)/*&&authority.getPermissionType().equals(permissionType)*/) {
                 return true;

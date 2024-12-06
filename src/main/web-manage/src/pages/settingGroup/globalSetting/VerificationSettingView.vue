@@ -83,12 +83,12 @@ const varietiesData = [
         <div style="display: flex;margin-top: 16px;margin-left: 8px">
             <transition-group name="blur-scale">
                 <el-button class="disable-init-animate" style="margin-right: 12px;" @click="editing ? finishEditing():startEditing()"
-                           :disabled="(editing && hasError) || error" key="edit">
+                           :disabled="loading || (editing && hasError) || error" key="edit">
                     {{ editing ? '完成' : '编辑' }}
                 </el-button>
                 <div style="display: flex;flex-direction: row" v-if="editing" key="action">
                     <el-button class="disable-init-animate" @click="cancel">取消</el-button>
-                    <el-button class="disable-init-animate" @click="addRule" style="margin-right: 12px;"
+                    <el-button class="disable-init-animate" @click="addRule" link style="margin-right: 12px;"
                                :icon="HarmonyOSIcon_Plus">
                         添加规则
                     </el-button>
@@ -111,8 +111,8 @@ const varietiesData = [
                 </div>
             </transition-group>
         </div>
-        <el-scrollbar>
-            <div v-loading="loading" style="padding-bottom: 100px">
+        <el-scrollbar v-loading="loading">
+            <div style="padding-bottom: 100px">
                 <transition name="blur-scale" mode="out-in">
                     <el-empty v-if="!loading && data.length===0"></el-empty>
                     <vue-draggable

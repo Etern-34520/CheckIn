@@ -2,7 +2,7 @@ package indi.etern.checkIn.action.setting;
 
 import indi.etern.checkIn.action.MapResultAction;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.entities.verification.VerificationRule;
+import indi.etern.checkIn.entities.setting.verification.VerificationRule;
 import indi.etern.checkIn.service.dao.VerificationRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,6 +38,7 @@ public class GetVerificationSettingAction extends MapResultAction {
             propertyMap.put("verificationTypeName",verificationRule.getVerificationType());
             verificationRuleMap.put("property",propertyMap);
             verificationRuleMap.put("level",verificationRule.getLevel());
+            verificationRuleMap.put("targetInputName",verificationRule.getTargetInputName());
             verificationRuleMap.put("tipTemplate",verificationRule.getTipTemplate());
             final List<Object> values = verificationRule.getValues();
             ArrayList<Object> valuesList = new ArrayList<>(values.size());

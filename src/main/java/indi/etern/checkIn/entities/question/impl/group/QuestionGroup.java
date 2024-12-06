@@ -4,7 +4,7 @@ import indi.etern.checkIn.entities.convertor.MapConverter;
 import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.LinkTarget;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
-import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionLink;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
@@ -100,7 +100,7 @@ public class QuestionGroup extends Question implements LinkTarget, LinkSource<Qu
                     .setRandomOrdered(previousQuestionGroup.isRandomOrdered())
                     .setId(previousQuestionGroup.getId());
             builder.getPartitions().clear();
-            builder.getPartitions().addAll(((ToPartitionLink) previousQuestionGroup.getLinkWrapper()).getTargets());
+            builder.getPartitions().addAll(((ToPartitionsLink) previousQuestionGroup.getLinkWrapper()).getTargets());
             builder.getQuestions().clear();
             builder.getQuestions().addAll(previousQuestionGroup.getQuestionLinks().stream().map(ToQuestionGroupLink::getSource).toList());
             return builder;
@@ -134,11 +134,11 @@ public class QuestionGroup extends Question implements LinkTarget, LinkSource<Qu
         public QuestionGroup build() {
             if (id == null) id = UUID.randomUUID().toString();
             QuestionGroup questionGroup;
-            ToPartitionLink link;
+            ToPartitionsLink link;
             if (partitions.isEmpty()) {
                 throw new QuestionException("link to partitions is not set");
             } else {
-                link = new ToPartitionLink();
+                link = new ToPartitionsLink();
                 Set<Partition> targets = link.getTargets();
                 targets.clear();
                 targets.addAll(partitions);

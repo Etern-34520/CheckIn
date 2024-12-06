@@ -1,6 +1,6 @@
 create table permissions
 (
-    id          varchar(255) not null
+    id          varchar(36)  not null
         primary key,
     description varchar(255) null,
     name        varchar(255) not null,

@@ -47,6 +47,7 @@
     --icon-color-reverse: var(--icon-color-light);
     --icon-color-reverse-1: var(--icon-color-light-1);
     --front-color: var(--front-color-dark);
+    --front-color-reserse: var(--front-color-light);
     --slider-button-color: rgb(255, 255, 255);
     --dialog-bg-color: rgba(255, 255, 255, 0.6);
     --dialog-footer-color: rgba(200, 200, 200, 0.6);
@@ -62,7 +63,7 @@
     --el-color-primary-1: #aac7ce !important;
     --el-color-primary-2: #94acb2 !important;
     --el-color-primary-3: #7d9398 !important;
-    --html-bg: rgb(20, 20, 20);
+    --html-bg: rgb(13, 15, 20);
     --menu-shadow: 4px 0 32px rgba(0, 0, 0, 0.7);
     --menu-bg-color-alpha: rgba(20, 20, 20, 0.6);
     --panel-bg-color: rgba(35, 35, 35, 0.3);
@@ -75,6 +76,7 @@
     --icon-color-reverse: var(--icon-color-dark);
     --icon-color-reverse-1: var(--icon-color-dark-1);
     --front-color: var(--front-color-light);
+    --front-color-reserse: var(--front-color-dark);
     --slider-button-color: rgb(60, 60, 60);
     --dialog-bg-color: rgba(30, 30, 30, 0.6);
     --dialog-footer-color: rgba(10, 10, 10, 0.6);
@@ -98,13 +100,18 @@
     transition: 0.2s var(--ease-in-out-quint);
 }
 
+.el-breadcrumb__inner.is-link {
+    font-weight: normal !important;
+}
+
 .el-button {
+    transform: scale(1);
     transition: all 200ms var(--ease-in-out-quint) !important;
 }
 
 .el-button:not(.disable-init-animate) {
     animation: var(--init-animation);
-    animation-fill-mode: both;
+    animation-fill-mode: backwards;
 }
 
 .el-button:active,
@@ -121,12 +128,12 @@
 
 .el-input:not(.disable-init-animate) {
     animation: var(--init-animation);
-    animation-fill-mode: both;
+    animation-fill-mode: backwards;
 }
 
 .el-input-number:not(.disable-init-animate) {
     animation: var(--init-animation);
-    animation-fill-mode: both;
+    animation-fill-mode: backwards;
 }
 
 .el-input-number > .el-input {
@@ -139,7 +146,7 @@
 
 .el-slider {
     animation: var(--init-animation);
-    animation-fill-mode: both;
+    animation-fill-mode: backwards;
 }
 
 .md-editor-resize-operate {
@@ -383,7 +390,7 @@
 }
 
 .el-notification-fade-leave-active {
-    transition: transform 200ms 80ms var(--ease-in-quint), scale 100ms 0ms var(--ease-in-out-quint) !important;
+    transition: transform 200ms 80ms var(--ease-in-quint), scale 100ms 0ms var(--ease-in-out-quint), bottom 100ms 0ms var(--ease-in-out-quint) !important;
 }
 
 .el-notification-fade-leave-to {
@@ -441,7 +448,7 @@
 
 .el-tree-node:not(.disable-init-animate) {
     animation: var(--init-animation);
-    animation-fill-mode: both;
+    animation-fill-mode: backwards;
     animation-delay: 100ms;
 }
 
@@ -596,9 +603,9 @@
 .el-textarea:not(.is-disabled):hover,
 .el-input:not(.is-disabled):hover,
     /*.el-input-number:not(.is-disabled):has(:hover),*/
-.el-select:not(.is-disabled):hover,
+.el-select:not(.is-disabled):hover/*,
 *:not(.el-tabs__nav):has(> .is-focused),
-*:not(.el-checkbox):not(.el-radio-group):not(.el-tabs__nav):has(> .is-focus) {
+*:not(.el-checkbox):not(.el-radio-group):not(.el-tabs__nav):has(> .is-focus)*/ {
     background: var(--panel-bg-color-overlay);
 }
 
@@ -660,6 +667,7 @@
 
 .question-input.warning::after, .question-input.error::after,
 .el-input:has(.is-focus)::after, .el-textarea:has(textarea:focus)::after, .el-select:has(.is-focused)::after,
+.el-input-number.error > .el-input::after, .el-input-number.warning > .el-input::after,
 .el-input.warning::after, .el-textarea.warning::after, .el-select.warning::after, .el-checkbox.warning::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
     opacity: 1;
@@ -673,6 +681,13 @@
 .el-input-number .el-input.error::after {
     width: calc(98% - 70px);
     left: calc(1% + 35px);
+}
+
+.el-input-number.is-without-controls .el-input:has(.is-focus)::after,
+.el-input-number.is-without-controls .el-input.warning::after,
+.el-input-number.is-without-controls .el-input.error::after {
+    width: 98%;
+    left: 1%;
 }
 
 .el-input-number .el-input-number__decrease,
@@ -692,11 +707,13 @@
 }
 
 .question-input.error::after,
+.el-input-number.error > .el-input::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
     background: var(--el-color-danger);
 }
 
 .question-input.warning::after,
+.el-input-number.warning > .el-input::after,
 .el-input.warning::after, .el-textarea.warning::after, .el-select.warning::after, .el-checkbox.warning::after {
     background: var(--el-color-warning);
 }
@@ -1140,9 +1157,22 @@ input::-webkit-inner-spin-button {
 }
 
 .el-radio__inner:after {
-    background-color: var(--icon-color-dark) !important;
+    background-color: var(--front-color-reserse) !important;
     width: 8px !important;
     height: 8px !important;
+}
+
+.el-color-dropdown__btns {
+    display: flex;
+    align-items: center;
+}
+
+.el-color-dropdown__btn {
+    margin-left: auto !important;
+}
+
+.el-color-picker__mask {
+    background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
 /*noinspection CssInvalidPseudoSelector*//*

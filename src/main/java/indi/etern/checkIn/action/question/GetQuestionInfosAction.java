@@ -16,12 +16,7 @@ public class GetQuestionInfosAction extends TransactionalAction {
     public String requiredPermissionName() {
         return "";
     }
-
-    @Override
-    public boolean shouldLogging() {
-        return false;
-    }
-
+    
     @Override
     public void initData(Map<String, Object> dataMap) {
         //noinspection unchecked

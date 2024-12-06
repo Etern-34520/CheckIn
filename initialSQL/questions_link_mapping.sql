@@ -1,7 +1,7 @@
 create table questions_link_mapping
 (
-    question_id  varchar(255) not null,
-    partition_id int          not null,
+    question_id  varchar(36) not null,
+    partition_id int         not null,
     primary key (question_id, partition_id)
 );
 

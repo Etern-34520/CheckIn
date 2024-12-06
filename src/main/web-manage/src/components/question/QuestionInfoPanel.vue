@@ -36,9 +36,9 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
         <div class="grid1">
             <div class="padding">
                 <div class="question-content panel-1 flex-blank-1 disable-init-animate">
-                    <el-scrollbar :max-height="120" style="padding: 4px 16px">
+                    <el-scrollbar :max-height="120" style="padding: 4px 16px;flex: 1">
                         <el-text>
-                            {{ questionInfo.question.content }}
+                            <pre>{{ questionInfo.question.content }}</pre>
                         </el-text>
                     </el-scrollbar>
                 </div>

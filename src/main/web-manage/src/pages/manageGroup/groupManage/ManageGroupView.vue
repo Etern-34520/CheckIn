@@ -61,7 +61,9 @@ UserDataInterface.getReactiveUserGroupsAsync().then((userGroups1) => {
 });
 
 const openView = (userGroup) => {
-    router.push("/manage/manage-group/" + userGroup.type + "/");
+    router.push({name:'group-detail', params:{
+        type:userGroup.type
+    }});
 }
 
 const switchChangingLevel = () => {
@@ -192,7 +194,7 @@ const cancelCreating = () => {
 
 /*noinspection CssUnusedSymbol*/
 .filter-leave-from, .filter-enter-to {
-    max-height: 38px;
+    max-height: 40px;
     transform: translateX(0);
 }
 

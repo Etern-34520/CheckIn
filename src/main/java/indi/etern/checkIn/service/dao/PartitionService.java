@@ -1,6 +1,6 @@
 package indi.etern.checkIn.service.dao;
 
-import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionLink;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.repositories.PartitionRepository;
@@ -80,7 +80,7 @@ public class PartitionService {
         transactionTemplate.execute((callback) -> {
             final Optional<Partition> partitionOptional = partitionRepository.findById(partition.getId());
             Partition partition1 = partitionOptional.orElse(partition);
-            partition1.getQuestionLinks().add((ToPartitionLink) multipleQuestion.getLinkWrapper());
+            partition1.getQuestionLinks().add((ToPartitionsLink) multipleQuestion.getLinkWrapper());
             partitionRepository.save(partition1);
             return Boolean.TRUE;
         });

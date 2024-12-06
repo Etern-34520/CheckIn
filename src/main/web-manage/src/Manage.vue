@@ -17,12 +17,14 @@ const breadcrumbMap = {
     "manage-user": "用户管理",
     "manage-group": "组管理",
     "global-setting": "服务器设置",
-    "user-setting": "用户设置",
+    "account": "用户设置",
     "user-questions": "用户题目",
     "my-data": "我的",
     "verification-setting": "上传校验设置",
     "facade-setting": "首页设置",
-    "drawing-setting": "抽取设置"
+    "drawing-setting": "抽取设置",
+    "grading-setting": "评级设置",
+    "about": "关于"
 }
 
 let breadcrumbPathArray = reactive([]);
@@ -60,10 +62,10 @@ const user = UserDataInterface.getCurrentUser();
     <div id="manageMain" style="display: flex;flex-direction: column;flex: 1;width: 100%;height: 100%">
         <top-bar v-model:menu-inline-style="menuInlineStyle" :user="user"
                  :breadcrumb-path-array="breadcrumbPathArray"></top-bar>
-        <div id="manageBase">
+        <div id="manage-base">
             <side-menu v-model:inlineStyle="menuInlineStyle" :user="user"/>
             <router-view class="manage-page-router" v-slot="{ Component }">
-                <transition name="routePage" mode="out-in">
+                <transition name="route-page" mode="out-in">
                     <component :is="Component"/>
                 </transition>
             </router-view>
@@ -73,37 +75,32 @@ const user = UserDataInterface.getCurrentUser();
 
 <style scoped>
 /*noinspection CssUnusedSymbol*/
-/*.routePage-enter-active {
-    transition: all 0.8s var(--ease-in-bounce-1);
-}*/
-
-/*noinspection CssUnusedSymbol*/
-.routePage-enter-active {
+.route-page-enter-active {
     transition: all 0.4s var(--ease-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
-.routePage-leave-active {
+.route-page-leave-active {
     transition: all 0.4s var(--ease-in-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
-.routePage-enter-from, .routePage-leave-to {
+.route-page-enter-from, .route-page-leave-to {
     filter: blur(32px);
     opacity: 0;
 }
 
 /*noinspection CssUnusedSymbol*/
-.routePage-enter-from {
+.route-page-enter-from {
     scale: 0.95;
 }
 
 /*noinspection CssUnusedSymbol*/
-.routePage-leave-to {
+.route-page-leave-to {
     scale: 1.05;
 }
 
-#manageBase {
+#manage-base {
     display: flex;
     flex-direction: row;
     align-items: stretch;
@@ -112,7 +109,7 @@ const user = UserDataInterface.getCurrentUser();
     height: 0;
 }
 
-#manageBase > *:nth-of-type(2) {
+#manage-base > *:nth-of-type(2) {
     flex: 1;
 }
 </style>

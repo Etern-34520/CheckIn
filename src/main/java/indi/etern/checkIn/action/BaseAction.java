@@ -5,7 +5,6 @@ import indi.etern.checkIn.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
@@ -13,17 +12,23 @@ import java.util.concurrent.Callable;
 
 public abstract class BaseAction<Res, InitDataType> implements Callable<Optional<Res>> {
     @Getter(AccessLevel.PROTECTED)
-    final User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    final User currentUser;
+    {
+        Object object = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (object instanceof User user) {
+            currentUser = user;
+        } else {
+            currentUser = User.ANONYMOUS;
+        }
+    }
 
-    protected boolean logging = true;
-    
     @Override
     public Optional<Res> call() throws Exception {
         try {
             String requiredPermissionName = requiredPermissionName();
             if (requiredPermissionName != null && !requiredPermissionName.isEmpty())
                 for (String s : requiredPermissionName.split(",")) {
-                    if (!JwtTokenProvider.singletonInstance.currentUserHasPermission(s)) {
+                    if (!JwtTokenProvider.singletonInstance.isUserHasPermission(currentUser,s)) {
                         throw new PermissionDeniedException("权限不足，需要" + s,s);
                     }
                 }
@@ -36,16 +41,6 @@ public abstract class BaseAction<Res, InitDataType> implements Callable<Optional
     abstract public String requiredPermissionName();
 
     abstract protected Optional<Res> doAction() throws Exception;
-
-    /*public Optional<Res> getLogMessage(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Res> result) {
-        return result;
-    }*/
-
-    public boolean shouldLogging() {
-        return logging;
-    }
-
+    
     public void initData(InitDataType initData) {}
-
-    protected abstract void preLog();
 }

@@ -48,7 +48,7 @@ function switchMenuStyle() {
             </TransitionGroup>
         </el-breadcrumb>
         <div class="flex-blank-1"></div>
-        <el-button @click="router.push('/manage/user-setting/')" text
+        <el-button @click="router.push({name:'account-base'})" text
                    style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
             <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
                        style="margin-right: 4px"></el-avatar>

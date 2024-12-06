@@ -147,7 +147,7 @@ const reload = () => {
 <template>
     <image-viewer v-if="questionInfo.question.images" :images="questionInfo.question.images"
                   v-model="imageViewerVisible" v-model:index="viewerIndex"/>
-    <collapse :content-background="false" class="question-input" expanded><!--TODO input warning and error-->
+    <collapse :content-background="false" class="question-input" :class="questionInfo.inputMeta['content-0']" expanded>
         <template #title>
             <div style="padding: 8px 16px;display: flex;flex-wrap: wrap">
                 <el-text style="margin-right: 24px">题目内容</el-text>
@@ -172,7 +172,7 @@ const reload = () => {
         </template>
     </collapse>
     <collapse :content-background="false" :expanded="true"
-              class="question-input"> <!--TODO input warning and error-->
+              class="question-input" :class="questionInfo.inputMeta['images-0']">
         <template #title>
             <div style="display: flex;flex-direction: row;align-items: center">
                 <el-text style="line-height: 32px;margin-left: 16px;margin-right: 8px">图片</el-text>
@@ -199,7 +199,7 @@ const reload = () => {
     </collapse>
     <div style="display: flex;flex-direction: row;margin-bottom: 8px">
         <el-select
-                class="not-empty"
+                class="not-empty" :class="questionInfo.inputMeta['partitions-0']"
                 v-model="questionInfo.question.partitionIds"
                 placeholder="分区"
                 multiple
@@ -207,8 +207,7 @@ const reload = () => {
                 @focusout="hideCreating"
                 @remove-tag="preventEmptyPartition"
                 @change="onPartitionChange"
-                style="flex:4;width:0"
-        ><!--TODO input warning and error-->
+                style="flex:4;width:0">
             <el-option v-for="partition of partitions" :key="partition.id"
                        :label="partition.name" :value="partition.id"></el-option>
             <template #footer>
@@ -224,7 +223,7 @@ const reload = () => {
             </template>
         </el-select>
         <div style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column">
-            <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"><!--TODO input warning and error-->
+            <el-select v-model="questionInfo.question.authorQQ" :class="questionInfo.inputMeta['author-0']" filterable clearable placeholder="作者">
                 <template #label="{ label, value }">
                     <div style="display: flex;align-items: center;justify-items: stretch">
                         <el-avatar shape="circle" :size="24" style="margin: 4px" fit="cover"

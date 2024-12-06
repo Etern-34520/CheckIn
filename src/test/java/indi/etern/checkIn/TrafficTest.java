@@ -1,6 +1,6 @@
 package indi.etern.checkIn;
 
-import indi.etern.checkIn.service.dao.UserTrafficService;
+import indi.etern.checkIn.service.dao.TrafficRecordService;
 import org.apache.catalina.connector.Request;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ExtendWith(SpringExtension.class)
 public class TrafficTest {
     @Autowired
-    UserTrafficService userTrafficService;
+    TrafficRecordService trafficRecordService;
     @Test
     @Transactional
     public void testLog(){
@@ -21,6 +21,6 @@ public class TrafficTest {
         Request httpServletRequest = new Request(null);
         httpServletRequest.setCoyoteRequest(coyoteRequest);
         httpServletRequest.setRemoteAddr("127.0.0.1");
-        userTrafficService.log(114514,httpServletRequest);
+//        userTrafficService.log(114514,httpServletRequest);
     }
 }

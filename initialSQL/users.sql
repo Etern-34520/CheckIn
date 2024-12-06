@@ -11,4 +11,5 @@ create table users
 create index FK5djdw2lhplctx421luvv17icu
     on users (role_type);
 
-INSERT INTO check_in.users (qqnumber, enabled, name, password, role_type) VALUES (114514, true, '田所浩二', '$2a$10$Ve6WIqVRVN5zPXzMssxE0.cyD6XuTa2PMwOss9q7QC/RrAtWXit1C', 'super admin');
+INSERT INTO check_in.users (qqnumber, enabled, name, password, role_type) VALUES (114514, false, '田所浩二', '$2a$10$Ve6WIqVRVN5zPXzMssxE0.cyD6XuTa2PMwOss9q7QC/RrAtWXit1C', 'user');
+/*password 114514*/

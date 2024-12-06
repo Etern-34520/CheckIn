@@ -22,7 +22,6 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "questions")
-@Embeddable
 public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<String> {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
     @Column(name = "content")
@@ -30,12 +29,12 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
 
 //    protected int hashcode;
     
-    @JoinColumn(name = "AUTHOR_QQNUMBER")
+    @JoinColumn(name = "author_qqnumber")
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @NotFound(action = NotFoundAction.IGNORE)
     protected User author = null;// = User.exampleOfName("unknown");
     
-    @Column(name = "LAST_MODIFIED_TIME")
+    @Column(name = "last_modified_time")
     protected LocalDateTime lastModifiedTime;
     
     @Getter

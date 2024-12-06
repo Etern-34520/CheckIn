@@ -5,6 +5,7 @@ import indi.etern.checkIn.MVCConfig;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.Result;
 import indi.etern.checkIn.auth.JwtTokenProvider;
+import indi.etern.checkIn.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.websocket.*;
@@ -105,7 +106,9 @@ public class Connector implements SubProtocolCapable {
     public void onMessage(String message) {
         try {
             Map<String, Object> contentMap = objectMapper.readValue(message, HashMap.class);
-            if (checkToken(contentMap)) return;//TODO TIP
+            if (tokenIsInvalid(contentMap)) {
+                return;
+            }
             String messageId = contentMap.get("messageId").toString();
             if (contentMap.get("type").equals("partMessage")) {
                 PartMessage partMessage;
@@ -120,7 +123,7 @@ public class Connector implements SubProtocolCapable {
                     partMessage = partMessageMap.get(partId);
                     partMessage.put(messageId, (String) contentMap.get("messagePart"));
                 } else {
-                    //TODO Tip
+                    sendMessage("{\"type\":\"error\",\"message\":\"not supported message format\",\"messageId\":\"" + messageId + "\"}");
                     return;
                 }
                 if (partMessage.isComplete()) {
@@ -143,26 +146,14 @@ public class Connector implements SubProtocolCapable {
                     }
                     logger.error("{} : {}", e.getClass().getName(), e.getMessage());
                     logger.info("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, logMessage);
-                    final String[] split = e.getMessage().split("PermissionDeniedException: ");
-                    if (split.length >= 2)
-                        sendError(messageId, split[1]);
-                    else
+                    if (e instanceof PermissionDeniedException permissionDeniedException) {
+                        sendError(messageId, permissionDeniedException.getDescription());
+                    } else
                         sendError(messageId, e.getMessage());
                 }
             }
-/*
-            if (result.isShouldLogging()) {
-                logger.info("{}({}):{}", sessionUser.getName(), sid, result.getLoggingMessage());
-            }
-*/
-//            return result.isShouldLogging();
         } catch (Exception e) {
             try {
-/*
-                if (message.length() < 65535) {
-                    logger.info("{}({}):{}", sessionUser.getName(), sid, message);
-                }
-*/
                 logger.error("{}:{}", e.getClass().getName(), e.getMessage());
                 String messageId = objectMapper.readValue(message, HashMap.class).get("messageId").toString();
                 sendError(messageId, e.getClass().getSimpleName() + ":" + e.getMessage());
@@ -193,7 +184,7 @@ public class Connector implements SubProtocolCapable {
         sendMessage(objectMapper.writeValueAsString(dataMap));
     }
     
-    private boolean checkToken(Map<String, Object> contentMap) throws IOException {
+    private boolean tokenIsInvalid(Map<String, Object> contentMap) throws IOException {
         if (contentMap.get("type").equals("token")) {
             token = (String) contentMap.get("token");
             sessionUser = jwtTokenProvider.getUser(token);
@@ -250,8 +241,7 @@ public class Connector implements SubProtocolCapable {
     
     @OnError
     public void onError(Session session, Throwable error) {
-        logger.error(session.getBasicRemote().toString());
-        error.printStackTrace();
+        logger.error(session.getBasicRemote().toString(),error);
     }
     
     public void sendMessage(LinkedHashMap<String,Object> map) throws IOException {

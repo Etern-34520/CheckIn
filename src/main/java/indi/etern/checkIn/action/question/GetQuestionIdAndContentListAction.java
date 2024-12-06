@@ -14,18 +14,11 @@ import java.util.Optional;
 @Action("getQuestionIdAndContentList")
 public class GetQuestionIdAndContentListAction extends TransactionalAction {
     private int partitionId;
-    private boolean shouldLogging = true;
-
     @Override
     public String requiredPermissionName() {
         return null;
     }
-
-    @Override
-    public boolean shouldLogging() {
-        return shouldLogging;
-    }
-
+    
     @Override
     public void initData(Map<String, Object> dataMap) {
         partitionId = ((Number) dataMap.get("partitionId")).intValue();
@@ -46,7 +39,6 @@ public class GetQuestionIdAndContentListAction extends TransactionalAction {
                 questionInfo.put("type", question.getClass().getSimpleName());
                 questionList.add(questionInfo);
             }
-            if (questionList.size() > 20) shouldLogging = false;
             return Optional.of(result);
         }
         return Optional.empty();

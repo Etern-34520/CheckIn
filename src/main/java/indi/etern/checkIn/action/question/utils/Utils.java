@@ -1,7 +1,7 @@
 package indi.etern.checkIn.action.question.utils;
 
 import indi.etern.checkIn.entities.linkUtils.Link;
-import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionLink;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
 import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.entities.question.impl.Partition;
@@ -36,7 +36,7 @@ public class Utils {
             questionObj.put("lastModifiedTime", question.getLastModifiedTimeString());
             ArrayList<Object> partitions = new ArrayList<>();
             final Link<?, ?> link = question.getLinkWrapper();
-            if (link instanceof ToPartitionLink linkWrapper1) {
+            if (link instanceof ToPartitionsLink linkWrapper1) {
                 linkWrapper1.getTargets().forEach(partition -> partitions.add(partition.getId()));
             }
 //            link.getPartitions().forEach(partition -> partitions.add(partition.getId()));
@@ -113,8 +113,8 @@ public class Utils {
             result.put("images", images);
         }
         final Link<?, ?> link = question.getLinkWrapper();
-        if (link instanceof ToPartitionLink toPartitionLinkWrapper) {
-            Set<Partition> partitions1 = toPartitionLinkWrapper.getTargets();
+        if (link instanceof ToPartitionsLink toPartitionsLinkWrapper) {
+            Set<Partition> partitions1 = toPartitionsLinkWrapper.getTargets();
             ArrayList<Object> partitionIds = new ArrayList<>(partitions1.size());
             for (Partition partition : partitions1) {
                 partitionIds.add(partition.getId());

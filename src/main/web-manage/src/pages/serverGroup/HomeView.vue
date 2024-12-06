@@ -53,7 +53,7 @@ if (router.options.history.state.back === "/login/") {
 .welcome.animate {
     animation: welcomeAnimation 4s var(--ease-in-out-quint);
     animation-delay: 600ms;
-    animation-fill-mode: both;
+    animation-fill-mode: backwards;
 }
 
 @keyframes welcomeAnimation {

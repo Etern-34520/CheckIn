@@ -88,10 +88,10 @@ public class Utils {
             if (o3 instanceof List) {
                 builder.getPartitions().clear();
                 //noinspection unchecked
-                List<Double> partitionIds = (List<Double>) o3;
-                for (Double partitionId : partitionIds) {
+                List<Number> partitionIds = (List<Number>) o3;
+                for (Number partitionId : partitionIds) {
                     builder.usePartitionLinks(linkWrapper -> {
-                        linkWrapper.getTargets().add(Partition.getInstance((int) partitionId.longValue()));
+                        linkWrapper.getTargets().add(Partition.getInstance(partitionId.intValue()));
                     });
                 }
             }

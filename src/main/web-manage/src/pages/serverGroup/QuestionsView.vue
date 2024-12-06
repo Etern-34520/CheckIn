@@ -223,7 +223,9 @@ QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
 
 const openEdit = (questionId) => {
     responsiveSplitpane.value.hideLeft();
-    router.push("/manage/questions/" + questionId + "/");
+    router.push({name:'question-detail',params: {
+        id: questionId
+    }});
 }
 
 const onEdit = (nodeObj, nodeItem, node, event) => {

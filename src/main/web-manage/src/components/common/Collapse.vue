@@ -145,7 +145,6 @@ watch(() => expanded.value, (newVal, oldVal) => {
     max-height: 0;
     overflow: hidden;
     transition: 250ms var(--ease-in-quint) 0ms;
-    border: var(--border-1);
 }
 
 .collapse.expanded .collapse-content {
@@ -157,6 +156,8 @@ watch(() => expanded.value, (newVal, oldVal) => {
 
 .collapse-content-inner {
     padding: 4px 8px;
+    border: var(--border-1);
+    border-top: 0;
 }
 
 .collapse.expanded > .collapse-title .action-button-pointer {

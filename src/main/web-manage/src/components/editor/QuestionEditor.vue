@@ -170,7 +170,15 @@ const currentUserQQ = Number(proxy.$cookies.get("qq"));
             </div>
             <div class="flex-blank-1"></div>
             <div style="display: flex;margin: 4px 8px">
-                <div style="display: flex;align-items: center;margin-right: 24px">
+                <transition name="blur-scale">
+                    <div style="display: flex;align-items: center;margin-right: 24px" v-if="questionInfo.question.lastModifiedTime">
+                        <el-tag type="info">最后编辑时间</el-tag>
+                        <el-text>
+                            {{ questionInfo.question.lastModifiedTime }}
+                        </el-text>
+                    </div>
+                </transition>
+                <div style="display: flex;align-items: center;">
                     <el-tag type="info">评价</el-tag>
                     <el-button-group>
                         <el-button link @click="switchLike" style="margin: 4px 0" :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
@@ -185,12 +193,6 @@ const currentUserQQ = Number(proxy.$cookies.get("qq"));
                             </el-text>
                         </el-button>
                     </el-button-group>
-                </div>
-                <div style="display: flex;align-items: center">
-                    <el-tag type="info">最后编辑时间</el-tag>
-                    <el-text>
-                        {{ questionInfo.question.lastModifiedTime }}
-                    </el-text>
                 </div>
             </div>
         </div>
@@ -241,8 +243,8 @@ const currentUserQQ = Number(proxy.$cookies.get("qq"));
                                     <multiple-choices-editor-plugin
                                             v-if="questionInfo.question.type === 'MultipleChoicesQuestion'"
                                             :question-info="questionInfo" :key="'multipleChoice'"/>
-                                    <div class="panel-1" v-else-if="questionInfo.type === 'QuestionGroup'" :key="'questionGroup'"
-                                         style="display: flex;flex-direction:column;justify-items: stretch;padding: 12px 20px">
+                                    <div class="panel-1 question-input" :class="questionInfo.inputMeta['subquestions-0']" v-else-if="questionInfo.type === 'QuestionGroup'" :key="'questionGroup'"
+                                         style="display: flex;flex-direction:column;justify-items: stretch;padding: 12px 20px;position: relative">
                                         <div style="display: flex;flex-direction: row;align-items: center">
                                             <el-text>子题目</el-text>
                                             <div class="flex-blank-1"></div>

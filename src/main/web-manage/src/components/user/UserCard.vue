@@ -4,7 +4,8 @@ import {MoreFilled} from "@element-plus/icons-vue";
 import WebSocketConnector from "@/api/websocket.js";
 import router from "@/router/index.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
-import {ElMessageBox} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
+import CustomDialog from "@/components/common/CustomDialog.vue";
 
 const props = defineProps({
     user: {
@@ -35,11 +36,129 @@ const deleteUser = () => {
     }).catch(() => {
     });
 }
+
+const showEditUserGroup = ref(false);
+const showEditUserName = ref(false);
+const newUserGroupName = ref(props.user.role);
+const newUserName = ref(props.user.name);
+
+const onClose = () => {
+    showEditUserGroup.value = false;
+    showEditUserName.value = false;
+    delete editGroupButtonOption.value[0].loading;
+    delete editNameButtonOption.value[0].loading;
+}
+const editGroupButtonOption = ref([{
+    content: "确定",
+    type: "primary",
+    onclick: () => {
+        editGroupButtonOption.value[0].loading = true;
+        WebSocketConnector.send({
+            type: "changeUserRole",
+            qq: props.user.qq,
+            roleType: newUserGroupName.value
+        }).then(() => {
+            showEditUserGroup.value = false;
+            ElMessage({
+                type: 'success',
+                message: '修改成功',
+            });
+            delete editGroupButtonOption.value[0].loading;
+        }, () => {
+            ElMessage({
+                type: 'error',
+                message: '修改失败',
+            });
+            delete editGroupButtonOption.value[0].loading;
+        });
+    }
+},{
+    content: "关闭",
+    type: "info",
+    onclick: onClose
+}]);
+const editNameButtonOption = ref([{
+    content: "确定",
+    type: "primary",
+    onclick: () => {
+        editNameButtonOption.value[0].loading = true;
+        WebSocketConnector.send({
+            type: "changeUserName",
+            qq: props.user.qq,
+            newName: newUserName.value
+        }).then(() => {
+            showEditUserName.value = false;
+            ElMessage({
+                type: 'success',
+                message: '修改成功',
+            });
+            delete editNameButtonOption.value[0].loading;
+        }, () => {
+            ElMessage({
+                type: 'error',
+                message: '修改失败',
+            });
+            delete editNameButtonOption.value[0].loading;
+        });
+    }
+},{
+    content: "关闭",
+    type: "info",
+    onclick: onClose
+}]);
+const editUserGroup = () => {
+    showEditUserGroup.value = true;
+}
+const editUserName = () => {
+    showEditUserName.value = true;
+}
 </script>
 
 <template>
     <div class="panel-1"
          style="display: flex;flex-direction: row;padding: 8px 12px;align-items: center;margin-bottom: 2px">
+        <custom-dialog v-model="showEditUserGroup" title="修改用户组" :buttons-option="editGroupButtonOption" @close="onClose">
+            <div style="display: flex;align-items: center;margin-bottom: 16px;">
+                <el-avatar shape="circle" style="width: 36px;height: 36px;margin-right: 8px;flex: none;"
+                           :src="getAvatarUrlOf(user.qq)"/>
+                <div style="line-height: 16px;">
+                    <el-text style="font-size: 16px;align-self: baseline;max-height:21px;text-wrap: wrap">{{
+                            user.name
+                        }}
+                    </el-text>
+                    <br/>
+                    <el-text style="font-size: 12px;align-self: baseline" type="info">{{ user.qq }}</el-text>
+                </div>
+            </div>
+            <el-select
+                    filterable
+                    v-model="newUserGroupName"
+                    style="flex:1;margin-right: 4px"
+                    placeholder="用户组">
+                <template v-for="(userGroup,i) in UserDataInterface.userGroups">
+                    <el-option :value="userGroup.type" :label="userGroup.type"></el-option>
+                </template>
+            </el-select>
+        </custom-dialog>
+        <custom-dialog v-model="showEditUserName" title="修改用户名" :buttons-option="editNameButtonOption" @close="onClose">
+            <div style="display: flex;align-items: center;margin-bottom: 16px;">
+                <el-avatar shape="circle" style="width: 36px;height: 36px;margin-right: 8px;flex: none;"
+                           :src="getAvatarUrlOf(user.qq)"/>
+                <div style="line-height: 16px;">
+                    <el-text style="font-size: 16px;align-self: baseline;max-height:21px;text-wrap: wrap">{{
+                            user.name
+                        }}
+                    </el-text>
+                    <br/>
+                    <el-text style="font-size: 12px;align-self: baseline" type="info">{{ user.qq }}</el-text>
+                </div>
+            </div>
+            <el-input
+                    v-model="newUserName"
+                    style="flex:1;margin-right: 4px"
+                    placeholder="用户名称"
+            />
+        </custom-dialog>
         <el-avatar shape="circle" style="width: 36px;height: 36px;margin-right: 8px;flex: none;"
                    :src="getAvatarUrlOf(user.qq)"/>
         <div style="line-height: 16px;">
@@ -59,7 +178,8 @@ const deleteUser = () => {
                 </el-icon>
             </el-button>
             <template #dropdown>
-                <el-dropdown-item>修改用户组</el-dropdown-item>
+                <el-dropdown-item @click="editUserName">修改用户名</el-dropdown-item>
+                <el-dropdown-item @click="editUserGroup">修改用户组</el-dropdown-item>
                 <el-dropdown-item v-if="UserDataInterface.getCurrentUser().qq !== user.qq" @click="deleteUser">
                     <el-text type="danger">删除</el-text>
                 </el-dropdown-item>

@@ -25,7 +25,7 @@ const pageGroups = [
         groupName: "设置",
         paths: [
             {path: 'global-setting/', name: '服务器设置', icon: "Tools"},
-            {path: 'user-setting/', name: '用户设置', icon: "SetUp"},
+            {path: 'account/', name: '用户设置', icon: "SetUp"},
         ]
     }
 ]
@@ -83,7 +83,7 @@ const props = defineProps({
             <div style="flex: 1"></div>
             <div style="display: flex;flex-direction: row" class="default-hidden-menu">
                 <el-button-group style="display:flex;flex-direction: row;align-items: stretch">
-                    <el-button id="menu-avatar-button" @click="routeTo('user-setting/')" text
+                    <el-button id="menu-avatar-button" @click="router.push({name: 'account-base'})" text
                                style="width: 150px;height: 52px;display: flex;flex-direction: row;padding: 4px;">
                         <div>
                             <el-avatar shape="circle" size="default"

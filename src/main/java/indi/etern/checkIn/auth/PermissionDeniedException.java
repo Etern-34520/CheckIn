@@ -6,8 +6,10 @@ import lombok.Getter;
 public class PermissionDeniedException extends RuntimeException {
     public PermissionDeniedException(String s, String requiredPermissionName) {
         super(s);
+        this.description = s;
         this.requiredPermissionName = requiredPermissionName;
     }
 
+    protected String description;
     protected String requiredPermissionName;
 }

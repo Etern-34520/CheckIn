@@ -2,7 +2,7 @@ package indi.etern.checkIn.entities.question.impl;
 
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.linkUtils.LinkTarget;
-import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionLink;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -36,7 +36,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
     @JoinTable(name = "questions_link_mapping",
             joinColumns = @JoinColumn(name = "partition_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id"))
-    Set<ToPartitionLink> questionLinks;
+    Set<ToPartitionsLink> questionLinks;
     
 /*
     @Transient
@@ -127,7 +127,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
     
     public Set<Question> getEnabledQuestions() {
         Set<Question> questionSet = new HashSet<>();
-        for (ToPartitionLink questionLink : questionLinks) {
+        for (ToPartitionsLink questionLink : questionLinks) {
             Question question = questionLink.getSource();
             if (question.isEnabled()) {
                 questionSet.add(question);

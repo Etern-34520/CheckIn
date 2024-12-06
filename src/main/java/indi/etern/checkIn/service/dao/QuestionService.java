@@ -1,6 +1,6 @@
 package indi.etern.checkIn.service.dao;
 
-import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionLink;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.QuestionRepository;
@@ -188,7 +188,7 @@ public class QuestionService {
 
     public List<Question> findAllByAuthor(User author) {
         return questionRepository.findAllByAuthor(author)
-                .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionLink)
+                .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink)
                 .toList();
     }
 
@@ -197,16 +197,16 @@ public class QuestionService {
     }
 
     public List<Question> findAllByUpVotersContains(User user) {
-        return questionRepository.findAllByUpVotersContains(user).stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionLink).toList();
+        return questionRepository.findAllByUpVotersContains(user).stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink).toList();
     }
 
     public List<Question> findAllByDownVotersContains(User user) {
-        return questionRepository.findAllByDownVotersContains(user).stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionLink).toList();
+        return questionRepository.findAllByDownVotersContains(user).stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink).toList();
     }
 
     public List<Question> findFirstLimitByUser(User user, int limit) {
         return questionRepository.findAllByAuthor(user, PageRequest.of(0, limit))
-                .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionLink)
+                .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink)
                 .toList();
     }
 }

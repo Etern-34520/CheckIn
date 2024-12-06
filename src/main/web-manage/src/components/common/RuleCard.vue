@@ -3,8 +3,8 @@
  * 规则配置逻辑：
  * 根属性名与 questionInfo(.value).question.type相同
  * 子属性名可嵌套，与对应子属性名相同，如
- *     "content" 对应 questionInfo(.value).question.content
- *     "content.size" 对应 questionInfo(.value).question.content.size
+ *     "question" 对应 questionInfo(.value).question
+ *     "question.content.size" 对应 questionInfo(.value).question.content.size
  * 若父属性为数组，子属性需要区分是数组的属性还是子元素的属性
  * 1.“$...”为子元素属性，可以添加”*“进行总和统计，如 "$..." "$*..."
  *     特殊逻辑：若出现形如 "$xxx=xxx" 时，根据判断条件（===）过滤，若出现"&count"、"&min"、"&max"立刻终止并校对次数/最小值/最大值
@@ -43,7 +43,7 @@ const optionNames = {
 }
 
 const propertySelector = ref();
-const emptyVerification = (type, label, defaultTip) => {
+const emptyVerification = (type, label, defaultTip, targetInputName) => {
     return {
         type: type,
         inputType: {
@@ -54,10 +54,11 @@ const emptyVerification = (type, label, defaultTip) => {
                 }
             }
         },
+        targetInputName: targetInputName,
         defaultTip: defaultTip
     }
 }
-const contentVerification = (type, defaultTip) => {
+const contentVerification = (type, defaultTip, targetInputName) => {
     return {
         type: type,
         inputType: {
@@ -75,10 +76,11 @@ const contentVerification = (type, defaultTip) => {
                 {
                     default: 400,
                     min: 1,
-                    max: 1000,
+                    max: 21845,
                 }
             ]
         },
+        targetInputName: targetInputName,
         defaultTip: defaultTip
     };
 }
@@ -88,14 +90,14 @@ const contentOption = {
         length: {
             name: "长度",
             verificationTypes: {
-                max: contentVerification("上限", "内容长度超过${limit}"),
-                min: contentVerification("下限", "内容长度低于${limit}"),
-                empty: emptyVerification("无内容", "当内容为空时", "无内容")
+                max: contentVerification("上限", "内容长度超过${limit}", "content"),
+                min: contentVerification("下限", "内容长度低于${limit}", "content"),
+                empty: emptyVerification("无内容", "当内容为空时", "无内容", "content")
             }
         }
     }
 };
-const singleImageSizeVerification = (type, defaultTip) => {
+const singleImageSizeVerification = (type, defaultTip, targetInputName) => {
     return {
         type: type,
         inputType: {
@@ -115,10 +117,11 @@ const singleImageSizeVerification = (type, defaultTip) => {
                 }
             ]
         },
+        targetInputName: targetInputName,
         defaultTip: defaultTip
     }
 };
-const allImagesSizeVerification = (type, defaultTip) => {
+const allImagesSizeVerification = (type, defaultTip, targetInputName) => {
     return {
         type: type,
         inputType: {
@@ -138,10 +141,11 @@ const allImagesSizeVerification = (type, defaultTip) => {
                 }
             ]
         },
+        targetInputName: targetInputName,
         defaultTip: defaultTip
     }
 };
-const imagesQuantityVerification = (type, defaultTip) => {
+const imagesQuantityVerification = (type, defaultTip, targetInputName) => {
     return {
         type: type,
         inputType: {
@@ -161,6 +165,7 @@ const imagesQuantityVerification = (type, defaultTip) => {
                 }
             ]
         },
+        targetInputName: targetInputName,
         defaultTip: defaultTip
     }
 };
@@ -170,28 +175,28 @@ const imageOption = {
         "$size": {
             name: "单张大小",
             verificationTypes: {
-                max: singleImageSizeVerification("上限", "第${order}张图片大小超过${limit}"),
-                min: singleImageSizeVerification("下限", "第${order}张图片大小低于${limit}")
+                max: singleImageSizeVerification("上限", "第${order}张图片大小超过${limit}", "images"),
+                min: singleImageSizeVerification("下限", "第${order}张图片大小低于${limit}", "images")
             }
         },
         "$*size": {
             name: "总大小",
             verificationTypes: {
-                max: allImagesSizeVerification("上限", "图片总大小超过${limit}"),
-                min: allImagesSizeVerification("下限", "图片总大小低于${limit}")
+                max: allImagesSizeVerification("上限", "图片总大小超过${limit}", "images"),
+                min: allImagesSizeVerification("下限", "图片总大小低于${limit}", "images")
             }
         },
         length: {
             name: "数量",
             verificationTypes: {
-                max: imagesQuantityVerification("上限", "图片数量超过${limit}"),
-                min: imagesQuantityVerification("下限", "图片数量少于${limit}"),
-                empty: emptyVerification("无图片", "无图片时", "无图片")
+                max: imagesQuantityVerification("上限", "图片数量超过${limit}", "images"),
+                min: imagesQuantityVerification("下限", "图片数量少于${limit}", "images"),
+                empty: emptyVerification("无图片", "无图片时", "无图片", "images")
             }
         }
     }
 };
-const choiceLengthVerification = (type, defaultTip) => {
+const choiceLengthVerification = (type, defaultTip, targetInputName) => {
     return {
         type: type,
         inputType: {
@@ -207,14 +212,15 @@ const choiceLengthVerification = (type, defaultTip) => {
                 {
                     default: 100,
                     min: 1,
-                    max: 1000,
+                    max: 2566,
                 }
             ]
         },
+        targetInputName: targetInputName,
         defaultTip: defaultTip
     }
 };
-const quantityVerification = (type, default1, min, max, defaultTip) => {
+const quantityVerification = (type, default1, min, max, defaultTip, targetInputName) => {
     return {
         type: type,
         inputType: {
@@ -236,6 +242,7 @@ const quantityVerification = (type, default1, min, max, defaultTip) => {
                 }
             ]
         },
+        targetInputName: targetInputName,
         defaultTip: defaultTip
     }
 };
@@ -248,9 +255,9 @@ const choiceOption = {
                 length: {
                     name: "长度",
                     verificationTypes: {
-                        max: choiceLengthVerification("上限", "第${order}选项内容长度超过${limit}"),
-                        min: choiceLengthVerification("下限", "第${order}选项内容长度低于${limit}"),
-                        empty: emptyVerification("无内容", "当内容为空时", "第${order}选项内容为空")
+                        max: choiceLengthVerification("上限", "第${order}选项内容长度超过${limit}", "choice$content"),
+                        min: choiceLengthVerification("下限", "第${order}选项内容长度低于${limit}", "choice$content"),
+                        empty: emptyVerification("无内容", "当内容为空时", "第${order}选项内容为空", "choice$content")
                     }
                 }
             }
@@ -261,9 +268,9 @@ const choiceOption = {
                 "&count": {
                     name: "数量",
                     verificationTypes: {
-                        max: quantityVerification("上限", 5, 1, 20, "正确选项数量超过${limit}"),
-                        min: quantityVerification("下限", 1, 1, 20, "正确选项数量少于${limit}"),
-                        empty: emptyVerification("无正确选项", "没有正确选项时", "无正确选项"),
+                        max: quantityVerification("上限", 5, 1, 20, "正确选项数量超过${limit}", "choices"),
+                        min: quantityVerification("下限", 1, 1, 20, "正确选项数量少于${limit}", "choices"),
+                        empty: emptyVerification("无正确选项", "没有正确选项时", "无正确选项", "choices"),
                     }
                 }
             }
@@ -273,9 +280,9 @@ const choiceOption = {
             properties: {
                 "&count": {
                     name: "数量", verificationTypes: {
-                        max: quantityVerification("上限", 5, 1, 20, "错误选项数量超过${limit}"),
-                        min: quantityVerification("下限", 5, 1, 20, "错误选项数量少于${limit}"),
-                        empty: emptyVerification("无错误选项", "无正确选项时", "无错误选项时"),
+                        max: quantityVerification("上限", 5, 1, 20, "错误选项数量超过${limit}", "choices"),
+                        min: quantityVerification("下限", 5, 1, 20, "错误选项数量少于${limit}", "choices"),
+                        empty: emptyVerification("无错误选项", "无正确选项时", "无错误选项时", "choices"),
                     }
                 }
             }
@@ -283,8 +290,8 @@ const choiceOption = {
         length: {
             name: "数量",
             verificationTypes: {
-                max: quantityVerification("上限", 10, 2, 20, "选项数量超过${limit}"),
-                min: quantityVerification("下限", 2, 2, 20, "选项数量少于${limit}"),
+                max: quantityVerification("上限", 10, 2, 20, "选项数量超过${limit}", "choices"),
+                min: quantityVerification("下限", 2, 2, 20, "选项数量少于${limit}", "choices"),
             }
         }
     }
@@ -295,9 +302,9 @@ const partitionOption = {
         length: {
             name: "数量",
             verificationTypes: {
-                max: quantityVerification("上限", 10, 1, 30, "分区数量超过${limit}"),
-                min: quantityVerification("下限", 10, 1, 30, "分区数量少于${limit}"),
-                empty: emptyVerification("无分区", "没有所属分区时", "没有所属分区")
+                max: quantityVerification("上限", 10, 1, 30, "分区数量超过${limit}", "partitions"),
+                min: quantityVerification("下限", 10, 1, 30, "分区数量少于${limit}", "partitions"),
+                empty: emptyVerification("无分区", "没有所属分区时", "没有所属分区", "partitions")
             }
         }
     }
@@ -308,9 +315,9 @@ const subQuestionOption = {
         length: {
             name: "数量",
             verificationTypes: {
-                max: quantityVerification("上限", 10, 1, 30, "子题目数量超过${limit}"),
-                min: quantityVerification("下限", 10, 1, 30, "子题目数量少于${limit}"),
-                empty: emptyVerification("无子题目", "没有子题目时", "没有子题目")
+                max: quantityVerification("上限", 10, 1, 30, "子题目数量超过${limit}", "subquestions"),
+                min: quantityVerification("下限", 10, 1, 30, "子题目数量少于${limit}", "subquestions"),
+                empty: emptyVerification("无子题目", "没有子题目时", "没有子题目", "subquestions")
             }
         }
     }
@@ -318,26 +325,26 @@ const subQuestionOption = {
 const authorOption = {
     name: "作者",
     verificationTypes: {
-        empty: emptyVerification("无作者", "作者字段为空时", "无作者")
+        empty: emptyVerification("无作者", "作者字段为空时", "无作者", "author")
     }
 }
 const objectMap = {
     MultipleChoicesQuestion: {
         properties: {
-            content: contentOption,
-            partitionIds: partitionOption,
-            images: imageOption,
-            authorQQ: authorOption,
-            choices: choiceOption,
+            "question.content": contentOption,
+            "question.partitionIds": partitionOption,
+            "question.images": imageOption,
+            "question.authorQQ": authorOption,
+            "question.choices": choiceOption,
         }
     },
     QuestionGroup: {
         properties: {
-            content: contentOption,
-            partitionIds: partitionOption,
-            images: imageOption,
-            authorQQ: authorOption,
-            subQuestions: subQuestionOption,
+            "question.content": contentOption,
+            "question.partitionIds": partitionOption,
+            "question.images": imageOption,
+            "question.authorQQ": authorOption,
+            "questionInfos": subQuestionOption,
         },
     }
 }
@@ -355,6 +362,7 @@ watch(() => model.value.property.verificationTypeName, (value, oldValue, onClean
         }
         const lastVerificationOption = verificationOption.value;
         verificationOption.value = currentOption.verificationTypes[model.value.property.verificationTypeName];
+        model.value.targetInputName = verificationOption.value.targetInputName;
         if (!firstWatch) {
             model.value.values = [];
             if (verificationOption.value.inputType.dataOption && verificationOption.value.inputType.types) {
@@ -435,9 +443,11 @@ const addToValues = (datum, index) => {
                         style="display: flex;padding: 0 12px;margin-right: 8px">
                     {{ "级别：" + model.level }}
                 </el-tag>
-                <el-tag type="info" style="margin-right: 4px;display: flex;padding: 0 12px;" size="large">提示信息
-                </el-tag>
-                <el-text type="info">{{ model.tipTemplate }}</el-text>
+                <div style="display: flex;flex-direction: row;align-items:center">
+                    <el-tag type="info" style="margin-right: 4px;display: flex;padding: 0 12px;" size="large">提示信息
+                    </el-tag>
+                    <el-text type="info">{{ model.tipTemplate }}</el-text>
+                </div>
             </template>
         </div>
         <transition name="blur-scale" mode="out-in">

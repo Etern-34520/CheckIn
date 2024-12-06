@@ -1,6 +1,6 @@
 package indi.etern.checkIn.service.dao;
 
-import indi.etern.checkIn.entities.verification.VerificationRule;
+import indi.etern.checkIn.entities.setting.verification.VerificationRule;
 import indi.etern.checkIn.repositories.VerificationRuleRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;

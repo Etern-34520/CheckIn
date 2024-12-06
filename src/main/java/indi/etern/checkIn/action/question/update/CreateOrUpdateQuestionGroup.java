@@ -43,23 +43,4 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<Object, Map<String,O
         data = dataMap;
         questionGroup = Utils.createQuestionGroup(data);
     }
-
-    @Override
-    protected void preLog() {
-        try {
-            Map<String,Object> copy = new HashMap<>(data);
-            //noinspection unchecked
-            List<Map<String,Object>> images = (List<Map<String,Object>>) copy.getOrDefault  ("images",List.of());
-            List<Map<String,Object>> images1 = new ArrayList<>();
-            for (Map<String,Object> i:images) {
-                HashMap<String, Object> e = new HashMap<>(i);
-                e.put("url","[ masked due to length ]");
-                images1.add(e);
-            }
-            copy.put("images",images1);
-            logger.info(objectMapper.writeValueAsString(copy));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

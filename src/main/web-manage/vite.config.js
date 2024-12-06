@@ -25,12 +25,20 @@ export default defineConfig({
                 ws: true
             }
         }
-    }, base: '/checkIn/'
-    , plugins: [vue(), VueDevTools(), AutoImport({
-        imports: ['vue', 'vue-router'], resolvers: [ElementPlusResolver()],
-    }), Components({
-        resolvers: [ElementPlusResolver()],
-    }), ElementPlus({})], resolve: {
+    },
+    base: '/checkIn/',
+    plugins: [
+        vue(),
+        VueDevTools(),
+        AutoImport({
+            imports: ['vue', 'vue-router'],
+            resolvers: [ElementPlusResolver()],
+        }),
+        Components({
+            resolvers: [ElementPlusResolver()],
+        }),
+        ElementPlus({})
+    ], resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }

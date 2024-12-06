@@ -50,9 +50,13 @@ export default {
         return new Promise((resolve, reject) => {
             axios.post(url, data).then(
                     response => {
-                        try {
-                            resolve(response.data)
-                        } catch (e) {
+                        if (response.data) {
+                            try {
+                                resolve(response.data)
+                            } catch (e) {
+                                reject(response)
+                            }
+                        } else {
                             reject(response)
                         }
                     },
@@ -65,7 +69,15 @@ export default {
         return new Promise((resolve, reject) => {
             axios.get(url, data).then(
                 response => {
-                    resolve(response.data)
+                    if (response.data) {
+                        try {
+                            resolve(response.data)
+                        } catch (e) {
+                            reject(response)
+                        }
+                    } else {
+                        reject(response)
+                    }
                 },
                 error => {
                     reject(err)

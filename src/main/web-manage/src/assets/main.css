@@ -18,7 +18,7 @@
 
 *.init-animate {
     animation: var(--init-animation);
-    animation-fill-mode: both;
+    animation-fill-mode: backwards;
 }
 
 *::selection {
@@ -52,7 +52,7 @@ div.panel {
 
 *.panel-1:not(.disable-init-animate) {
     animation: var(--init-animation);
-    animation-fill-mode: both;
+    animation-fill-mode: backwards;
     animation-delay: 100ms;
 }
 
@@ -181,12 +181,18 @@ div.panel {
     display: none !important;
 }
 
-.slide-hide-base {
+.slide-hide-base,
+.smooth-height-base {
     display: grid;
     overflow: hidden;
     gap: 0;
     outline: 0;
     grid-template-rows: 1fr;
+}
+
+.smooth-height-base > *,
+.slide-hide-base > * {
+    min-height: 0 !important;
 }
 
 .slide-hide-leave-active {
@@ -219,6 +225,40 @@ div.panel {
     transform: translateX(100%);
     grid-template-rows: 0fr !important;
 }
+
+.smooth-height-enter-active {
+    transition:
+            grid-template-rows 300ms var(--ease-in-out-quint),
+            transform 200ms var(--ease-in-out-quint) 300ms,
+            opacity 200ms var(--ease-in-out-quint) 300ms,
+            filter 200ms var(--ease-in-out-quint) 300ms;
+}
+
+.smooth-height-leave-active {
+    transition:
+            grid-template-rows 300ms var(--ease-in-out-quint) 300ms,
+            transform 200ms var(--ease-in-out-quint),
+            opacity 200ms var(--ease-in-out-quint),
+            filter 200ms var(--ease-in-out-quint);
+}
+
+.smooth-height-enter-from,
+.smooth-height-leave-to {
+    grid-template-rows: 0fr !important;
+    transform: translateY(-20%);
+    opacity: 0;
+    filter: blur(32px);
+}
+
+.smooth-height-enter-to,
+.smooth-height-leave-from {
+    grid-template-rows: 1fr !important;
+    transform: translateY(0);
+    scale: 1;
+    opacity: 1;
+    filter: none;
+}
+
 /*
 #app .v-md-textarea-editor textarea {
     color: var(--text-color);

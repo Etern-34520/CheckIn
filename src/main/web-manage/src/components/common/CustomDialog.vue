@@ -1,4 +1,6 @@
 <script setup>
+import _Loading_ from "@/components/common/_Loading_.vue";
+
 const tip = ref({});
 const tipTransitionCaller = ref(false);
 const buttonsOption1 = ref([]);
@@ -54,8 +56,8 @@ if (props.buttonsOption.length > 0) {
             <transition-group name="button-hide">
                 <template v-for="buttonOption of buttonsOption1" :key="buttonOption.id?buttonOption.id:buttonOption.content">
                     <el-button v-if="buttonOption.hidden?(!buttonOption.hidden):true"
-                               :type="buttonOption.type" @click="buttonOption.onclick"
-                               :disabled="buttonOption.disabled">
+                               :type="buttonOption.type" @click="buttonOption.onclick" :loading-icon="_Loading_"
+                               :disabled="buttonOption.disabled" :loading="buttonOption.loading">
                         {{ buttonOption.content }}
                     </el-button>
                 </template>

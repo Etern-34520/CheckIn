@@ -50,6 +50,7 @@ const WebSocketConnector = {
                                 position: 'bottom-right',
                                 type: 'warning',
                                 duration: 0,
+                                showClose: false
                             });
                         reject();
                     } else {
@@ -67,7 +68,6 @@ const WebSocketConnector = {
                             message: '请检查网络连接',
                             position: 'bottom-right',
                             type: 'error',
-                            duration: 0
                         });
                     }
                 reject();

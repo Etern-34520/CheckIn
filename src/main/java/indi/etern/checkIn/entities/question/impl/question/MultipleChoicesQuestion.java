@@ -1,14 +1,12 @@
 package indi.etern.checkIn.entities.question.impl.question;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
-import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionLink;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
 import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
-import indi.etern.checkIn.entities.serializer.ExamQuestionSerializer;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.SettingService;
 import jakarta.persistence.*;
@@ -18,7 +16,7 @@ import org.hibernate.annotations.FetchMode;
 
 import java.util.*;
 
-@JsonSerialize(using = ExamQuestionSerializer.class)
+//@JsonSerialize(using = ExamQuestionSerializer.class)
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
@@ -128,11 +126,11 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
                     .setEnable(multiPartitionableQuestion.isEnabled())
                     .setRandomOrdered(multiPartitionableQuestion.isRandomOrdered())
                     .setId(multiPartitionableQuestion.getId());
-            if (multiPartitionableQuestion.getLinkWrapper() instanceof ToPartitionLink toPartitionLinkWrapper) {
+            if (multiPartitionableQuestion.getLinkWrapper() instanceof ToPartitionsLink toPartitionsLinkWrapper) {
                 builder.usePartitionLinks(toPartitionLinkWrapper1 -> {
                     Set<Partition> targets = toPartitionLinkWrapper1.getTargets();
                     targets.clear();
-                    targets.addAll(toPartitionLinkWrapper.getTargets());
+                    targets.addAll(toPartitionsLinkWrapper.getTargets());
                 });
             } else if (multiPartitionableQuestion.getLinkWrapper() instanceof ToQuestionGroupLink toQuestionGroupLinkWrapper) {
                 toQuestionGroupLinkWrapper.getTarget().getQuestionLinks().clear();
@@ -143,9 +141,9 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             return builder;
         }
         
-        public Builder usePartitionLinks(ToPartitionLink.Configurator configurator) {
-            linkWrapper = new ToPartitionLink();
-            configurator.configure((ToPartitionLink) linkWrapper);
+        public Builder usePartitionLinks(ToPartitionsLink.Configurator configurator) {
+            linkWrapper = new ToPartitionsLink();
+            configurator.configure((ToPartitionsLink) linkWrapper);
             return this;
         }
         

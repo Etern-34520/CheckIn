@@ -2,7 +2,7 @@ package indi.etern.checkIn.action.setting;
 
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.entities.verification.VerificationRule;
+import indi.etern.checkIn.entities.setting.verification.VerificationRule;
 import indi.etern.checkIn.service.dao.VerificationRuleService;
 
 import java.util.LinkedHashMap;
@@ -38,6 +38,7 @@ public class SaveVerificationSetting extends TransactionalAction {
                     .trace(trace)
                     .verificationType(verificationTypeName)
                     .level((String) data.get("level"))
+                    .targetInputName((String) data.get("targetInputName"))
                     .values((List<Object>) data.get("values"))
                     .tipTemplate((String) data.get("tipTemplate"))
                     .index(dataList.indexOf(data))

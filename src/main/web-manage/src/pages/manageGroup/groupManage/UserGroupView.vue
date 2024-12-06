@@ -111,27 +111,30 @@ const onPermissionCardClick = (permission) => {
                                         <div style="margin: 4px">
                                             <div style="display: flex;margin: 0 8px;">
                                                 <el-text size="large">{{ permissionGroup.name }}</el-text>
-                                                <el-text type="info" style="margin-left: 8px">{{ permissionGroup.description }}</el-text>
+                                                <el-text type="info" style="margin-left: 8px">
+                                                    {{ permissionGroup.description }}
+                                                </el-text>
                                             </div>
-<!--                                            <waterfall :data="permissionGroup.permissions" :min-row-width="300">-->
-<!--                                                <template #item="{item:permission,index}">-->
-                                                    <div class="panel-1 permission-card" v-for="permission of permissionGroup.permissions"
-                                                         @click="onPermissionCardClick(permission)">
-                                                        <div class="permission-card-top">
-                                                            <el-text size="large">
-                                                                {{ permission.name }}
-                                                            </el-text>
-                                                            <div class="flex-blank-1"></div>
-                                                            <el-switch :disabled="!editing" style="max-height: 20px;"
-                                                                       @click.stop
-                                                                       v-model="permission.enabled"/>
-                                                        </div>
-                                                        <el-text type="info">
-                                                            {{ permission.description }}
-                                                        </el-text>
-                                                    </div>
-<!--                                                </template>-->
-<!--                                            </waterfall>-->
+                                            <!--                                            <waterfall :data="permissionGroup.permissions" :min-row-width="300">-->
+                                            <!--                                                <template #item="{item:permission,index}">-->
+                                            <div class="panel-1 permission-card"
+                                                 v-for="permission of permissionGroup.permissions"
+                                                 @click="onPermissionCardClick(permission)">
+                                                <div class="permission-card-top">
+                                                    <el-text size="large">
+                                                        {{ permission.name }}
+                                                    </el-text>
+                                                    <div class="flex-blank-1"></div>
+                                                    <el-switch :disabled="!editing" style="max-height: 20px;"
+                                                               @click.stop
+                                                               v-model="permission.enabled"/>
+                                                </div>
+                                                <el-text type="info">
+                                                    {{ permission.description }}
+                                                </el-text>
+                                            </div>
+                                            <!--                                                </template>-->
+                                            <!--                                            </waterfall>-->
                                         </div>
                                     </template>
                                 </waterfall>
@@ -148,10 +151,13 @@ const onPermissionCardClick = (permission) => {
                         </div>
                         <waterfall :data="users">
                             <template #item="{item,index}">
-                                <transition name="blur-scale">
-                                    <user-card class="clickable" :user="item" style="animation-delay: 0ms!important;"
-                                               v-if="doFilter(item)"
-                                               @click="router.push(`/manage/manage-user/${item.qq}/`)"/>
+                                <transition name="smooth-height">
+                                    <div class="smooth-height-base" v-if="doFilter(item)">
+                                        <div style="overflow: hidden">
+                                            <user-card class="clickable" :user="item" style="animation-delay: 0ms!important;"
+                                                       @click="router.push({name:'user-detail',id:item.qq})"/>
+                                        </div>
+                                    </div>
                                 </transition>
                             </template>
                         </waterfall>

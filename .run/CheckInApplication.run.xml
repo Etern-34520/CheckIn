@@ -18,6 +18,7 @@
     <option name="SHORTEN_COMMAND_LINE" value="ARGS_FILE" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="indi.etern.checkIn.CheckInApplication" />
     <option name="UPDATE_ACTION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <option name="VM_PARAMETERS" value="-ea -Xmx512m" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="indi.etern.checkIn.*" />

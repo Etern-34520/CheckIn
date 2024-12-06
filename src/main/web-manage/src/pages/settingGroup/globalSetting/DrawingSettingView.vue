@@ -48,7 +48,7 @@ const finishEditing = () => {
     }
 }
 
-const optionalPartitionCount = computed(() => refPartitions.value.length - (data.value.requiredPartitions ? data.value.requiredPartitions.length : 0));
+const partitionCount = computed(() => refPartitions.value.length - (data.value.requiredPartitions ? data.value.requiredPartitions.length : 0));
 
 const getData = () => {
     loading.value = true;
@@ -74,7 +74,7 @@ const getData = () => {
                 if (!data.value.specialLimitsEnabledPartitions) data.value.specialLimitsEnabledPartitions = ref([]);
                 if (response.data.specialPartitionLimits) {
                     for (const key in response.data.specialPartitionLimits) {
-                        data.value.specialLimitsEnabledPartitions.push(key);
+                        data.value.specialLimitsEnabledPartitions.push(Number(key));
                     }
                 }
                 resolve()
@@ -93,6 +93,13 @@ const getData = () => {
 getData();
 
 const updateLimits = (partitionIds) => {
+    const removedIds = [];
+    for (const partitionIdString in data.value.specialPartitionLimits) {
+        removedIds.push(Number(partitionIdString));
+    }
+    for (const removedId of removedIds) {
+        delete data.value.specialPartitionLimits[removedId];
+    }
     for (const partitionId of partitionIds) {
         data.value.specialPartitionLimits[partitionId] = {
             partitionId: partitionId,
@@ -125,8 +132,8 @@ const updateLimits = (partitionIds) => {
                 </el-button-group>
             </transition-group>
         </div>
-        <el-scrollbar>
-            <div v-loading="loading" style="min-height:128px;display: flex;flex-direction: column;align-items: center">
+        <el-scrollbar v-loading="loading">
+            <div style="display: flex;flex-direction: column;align-items: center">
                 <transition name="blur-scale" mode="out-in">
                     <div v-if="!loading && !error"
                          style="max-width: 1280px;width: min(70vw,1280px);display: flex;flex-direction: column">
@@ -137,24 +144,24 @@ const updateLimits = (partitionIds) => {
                         <div class="field-label" style="display: flex;flex-direction: row">
                             <el-text size="large" style="margin-right: 8px">可选分区数</el-text>
                             <el-text size="small" type="warning"
-                                     v-if="optionalPartitionCount===0">
+                                     v-if="partitionCount===0">
                                 无可选分区
                             </el-text>
                         </div>
                         <div style="display: flex;padding: 8px 0;flex-wrap: wrap">
                             <el-slider range v-model="data.partitionRange" style="margin-right: 20px;"
-                                       :max="optionalPartitionCount"
-                                       :disabled="!editing || optionalPartitionCount === 0">
+                                       :max="partitionCount"
+                                       :disabled="!editing || partitionCount === 0">
                             </el-slider>
                             <div style="display: flex;padding: 8px 0">
                                 <el-input-number v-model="data.partitionRange[0]"
-                                                 :disabled="!editing || optionalPartitionCount === 0"
-                                                 :max="Math.min(optionalPartitionCount,data.partitionRange[1])"
+                                                 :disabled="!editing || partitionCount === 0"
+                                                 :max="Math.min(partitionCount,data.partitionRange[1])"
                                                  style="margin-right: 8px"></el-input-number>
                                 <el-text style="margin-right: 8px;font-size: 24px">~</el-text>
                                 <el-input-number v-model="data.partitionRange[1]"
-                                                 :disabled="!editing || optionalPartitionCount === 0"
-                                                 :max="optionalPartitionCount">
+                                                 :disabled="!editing || partitionCount === 0"
+                                                 :max="partitionCount">
                                 </el-input-number>
                             </div>
                         </div>
@@ -204,11 +211,12 @@ const updateLimits = (partitionIds) => {
                                 </waterfall>
                             </div>
                         </div>
-                        <el-text size="large" class="field-label">补足策略</el-text>
+                        <el-text size="large" class="field-label">补全策略</el-text>
                         <el-radio-group v-model="data.completingStrategy" size="large" style="padding: 4px 20px"
                                         :disabled="!editing">
                             <el-radio value="none">不补全</el-radio>
                             <el-radio value="required">尝试用必选分区补全</el-radio>
+                            <el-radio value="all">用所有分区补全</el-radio>
                             <el-radio value="selected">
                                 尝试用以下分区补全
                                 <el-select

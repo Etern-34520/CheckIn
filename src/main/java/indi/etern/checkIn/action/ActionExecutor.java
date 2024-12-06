@@ -2,6 +2,7 @@ package indi.etern.checkIn.action;
 
 import indi.etern.checkIn.action.interfaces.Action;
 import jakarta.annotation.Resource;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -86,7 +87,6 @@ public class ActionExecutor {
                 result.setResult(Optional.of(value));
                 return result;
             }
-            mapResultAction.preLog();
             
             Result result = new Result();
             Optional<LinkedHashMap<String,Object>> optionalResult = mapResultAction.call();
@@ -103,6 +103,11 @@ public class ActionExecutor {
         }
     }
 
+    @SneakyThrows
+    public Optional<?> executeByTypeClass(Class<? extends BaseAction<?, ?>> clazz) {
+        BaseAction<?, ?> action = applicationContext.getBean(clazz);
+        return action.call();
+    }
     public Optional<?> executeByTypeClass(Class<? extends BaseAction<?, ?>> clazz, Object dataObj) {
         BaseAction<?, ?> action = applicationContext.getBean(clazz);
         Method[] methods = action.getClass().getMethods();
@@ -118,7 +123,6 @@ public class ActionExecutor {
                     }
                 }
             }
-            action.preLog();
             logger.debug("Execute by type class and data object: {}", clazz.getName());
             return action.call();
         } catch (Exception e) {

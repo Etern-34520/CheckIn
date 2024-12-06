@@ -11,6 +11,11 @@ import java.util.*;
 @Entity
 @Table(name = "ROLE")
 public class Role {
+    public static final Role ANONYMOUS;
+    static {
+        ANONYMOUS = new Role();
+        ANONYMOUS.type = "";
+    }
     protected static Map<String, Role> roleMap = new HashMap<>();
     @Id
     private String type;

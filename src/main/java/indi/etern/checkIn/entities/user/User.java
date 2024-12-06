@@ -14,6 +14,13 @@ import java.util.*;
 @Entity
 @Table(name = "Users")
 public class User implements UserDetails {
+    public static final User ANONYMOUS;
+    static {
+        ANONYMOUS = new User();
+        ANONYMOUS.name = "anontmous";
+        ANONYMOUS.QQNumber = 0;
+        ANONYMOUS.role = Role.ANONYMOUS;
+    }
     @Setter
     @Getter
     protected String name;

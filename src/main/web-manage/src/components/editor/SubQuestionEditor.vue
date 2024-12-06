@@ -16,7 +16,6 @@ import toolbar from "@/data/MarkdownEditorToolbar.js";
 import ImageViewer from "@/components/editor/ImagesViewer.vue";
 import UIMeta from "@/utils/UI_Meta.js";
 import {MdEditor} from "md-editor-v3";
-import "vditor/dist/index.css"
 
 const {proxy} = getCurrentInstance();
 const imageDialogVisible = ref(false);
@@ -197,7 +196,7 @@ const onPreview = (file) => {
                     </transition-group>
                 </div>
                 <div style="display: flex;flex-direction: row">
-                    <div class="panel-1 question-input disable-init-animate" :class="'TODO'"
+                    <div class="panel-1 question-input disable-init-animate" :class="questionInfo.inputMeta['content-0']"
                          style="flex: 4;max-height: 80px;padding:8px 16px;margin: 0">
                         <el-scrollbar>
                             <el-text type="info">字数 {{questionInfo.question.content.length}}</el-text>
@@ -209,7 +208,7 @@ const onPreview = (file) => {
                     </div>
                     <div style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column;justify-content: stretch">
                         <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"
-                                   :class="'TODO'">
+                                   :class="questionInfo.inputMeta['author-0']">
                             <template #label="{ label, value }">
                                 <div style="display: flex;align-items: center;justify-items: stretch">
                                     <el-avatar shape="circle" :size="24" style="margin: 4px" fit="cover"
@@ -254,14 +253,14 @@ const onPreview = (file) => {
                 <image-viewer v-if="questionInfo.question.images" :images="questionInfo.question.images" v-model="imageDialogVisible" v-model:index="viewerIndex"/>
                 <div style="position: relative;">
                     <div class="question-input" style="display: flex;max-height: 800px;min-height: 200px !important;"
-                         :class="'TODO'">
+                         :class="questionInfo.inputMeta['content-0']">
                         <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
                                    :key="UIMeta.colorScheme" preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
                                    :theme="UIMeta.colorScheme.value"/>
                     </div>
                 </div>
 <!--                </div>-->
-                <collapse :content-background="false" class="question-input" :class="'TODO'">
+                <collapse :content-background="false" class="question-input" :class="questionInfo.inputMeta['images-0']">
                     <template #title>
                         <el-text style="line-height: 32px;margin-left: 8px;">图片</el-text>
                     </template>

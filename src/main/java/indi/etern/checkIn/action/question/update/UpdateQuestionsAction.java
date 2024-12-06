@@ -1,6 +1,5 @@
 package indi.etern.checkIn.action.question.update;
 
-import java.util.LinkedHashMap;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
@@ -11,10 +10,7 @@ import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static indi.etern.checkIn.action.question.utils.Utils.sendDeleteQuestionsToAll;
 
@@ -105,11 +101,6 @@ public class UpdateQuestionsAction extends TransactionalAction {
     
     private Question createQuestionGroup(Map<?, ?> questionDataMap) {
         return null;
-    }
-    
-    @Override
-    public boolean shouldLogging() {
-        return false;
     }
     
     @Override

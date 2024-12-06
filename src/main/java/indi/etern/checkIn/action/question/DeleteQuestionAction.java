@@ -41,9 +41,5 @@ public class DeleteQuestionAction extends BaseAction<String, String> {
     public void initData(String questionId) {
         this.questionId = questionId;
     }
-
-    @Override
-    protected void preLog() {
-        logger.info("delete {}",questionId);
-    }
+    
 }

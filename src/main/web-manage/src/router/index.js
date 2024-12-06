@@ -62,7 +62,7 @@ const router = createRouter({
                     children: [
                         {
                             path: ':type/',
-                            name: 'group-view',
+                            name: 'group-detail',
                             component: () => import('../pages/manageGroup/groupManage/UserGroupView.vue'),
                         }
                     ]
@@ -91,17 +91,27 @@ const router = createRouter({
                             path: "drawing-setting/",
                             name: "drawing-setting",
                             component: () => import('../pages/settingGroup/globalSetting/DrawingSettingView.vue')
+                        },
+                        {
+                            path: "grading-setting/",
+                            name: "grading-setting",
+                            component: () => import('../pages/settingGroup/globalSetting/GradingSettingView.vue')
+                        },
+                        {
+                            path: "about/",
+                            name: "about",
+                            component: () => import('../pages/settingGroup/globalSetting/AboutView.vue')
                         }
                     ]
                 },
                 {
-                    path: 'user-setting/',
-                    name: 'user-setting',
+                    path: 'account/',
+                    name: 'account',
                     component: () => import('../pages/settingGroup/userSetting/UserSettingViewBase.vue'),
                     children: [
                         {
                             path: "",
-                            name: "user-setting-base",
+                            name: "account-base",
                             component: () => import('../pages/settingGroup/userSetting/UserSettingView.vue')
                         },
                         {
