@@ -1,6 +1,7 @@
 package indi.etern.checkIn.service.exam;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import indi.etern.checkIn.entities.exam.ExamData;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,19 +16,20 @@ public final class ExamResult {
     private int correctCount;
     private int questionCount;
     private String message;
-    private boolean passed;
+    private String level;
+    private ExamData examData;
     @JsonIgnore
     private List<String> questionIds;
 
-    protected ExamResult() {}
+    public ExamResult() {}
 
-    public ExamResult(long qq, int score, int correctCount, int questionCount, String message, boolean passed) {
+    public ExamResult(long qq, int score, int correctCount, int questionCount, String message, String level) {
         this.qq = qq;
         this.score = score;
         this.correctCount = correctCount;
         this.questionCount = questionCount;
         this.message = message;
-        this.passed = passed;
+        this.level = level;
     }
 
     @Override
@@ -39,22 +41,13 @@ public final class ExamResult {
                 this.score == that.score &&
                 this.correctCount == that.correctCount &&
                 this.questionCount == that.questionCount &&
+                Objects.equals(this.level, that.level) &&
                 Objects.equals(this.message, that.message);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(qq, score, correctCount, questionCount, message);
+        return Objects.hash(qq, score, correctCount, questionCount, message, level);
     }
-
-    @Override
-    public String toString() {
-        return "ExamResult[" +
-                "qq=" + qq + ", " +
-                "score=" + score + ", " +
-                "correctCount=" + correctCount + ", " +
-                "questionCount=" + questionCount + ", " +
-                "message=" + message + ']';
-    }
-
+    
 }

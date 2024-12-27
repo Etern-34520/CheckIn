@@ -11,7 +11,6 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -144,18 +143,5 @@ public class UserService implements UserDetailsService {
     
     public Set<User> findAllByRoleType(String roleType) {
         return roleRepository.findById(roleType).orElseThrow().getUsers();
-    }
-    
-    public static class CustomPasswordEncoder implements PasswordEncoder {
-        
-        @Override
-        public String encode(CharSequence charSequence) {
-            return charSequence.toString();
-        }
-        
-        @Override
-        public boolean matches(CharSequence charSequence, String s) {
-            return s.equals(charSequence.toString());
-        }
     }
 }

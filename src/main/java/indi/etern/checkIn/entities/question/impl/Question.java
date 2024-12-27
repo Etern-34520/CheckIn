@@ -95,6 +95,11 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
         return id.hashCode();
     }
     
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" + id + ")";
+    }
+    
     @SuppressWarnings("unused")
     public String getLastModifiedTimeString() {
         return dateTimeFormatter.format(lastModifiedTime);

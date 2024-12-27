@@ -2,43 +2,41 @@ package indi.etern.checkIn.action.question;
 
 import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-@Action("deleteQuestion")
-public class DeleteQuestionAction extends BaseAction<String, String> {
+@Action(value = "deleteQuestion", exposed = false)
+public class DeleteQuestionAction extends BaseAction<Question, String> {
+    private final QuestionService questionService;
     private String questionId;
-    private Logger logger = LoggerFactory.getLogger(DeleteQuestionAction.class);
-
-    protected DeleteQuestionAction() {
+    private Question question;
+    
+    protected DeleteQuestionAction(QuestionService questionService) {
+        this.questionService = questionService;
     }
 
     @Override
     public String requiredPermissionName() {
-//        final User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return null;
-/*
-        if (question == null) {
-            return null;
-        } else if (currentUser.equals(question.getAuthor())) {
+        final User currentUser = getCurrentUser();
+        if (currentUser.equals(question.getAuthor())) {
             return "delete owns question";
         } else {
             return "delete others question";
         }
-*/
     }
 
     @Override
-    protected Optional<String> doAction() throws Exception {
-        QuestionService.singletonInstance.deleteById(questionId);
-        return Optional.of(questionId);
+    protected Optional<Question> doAction() throws Exception {
+        questionService.delete(question);
+        return Optional.of(question);
     }
 
     @Override
     public void initData(String questionId) {
+        question = questionService.findById(questionId).orElseThrow();
         this.questionId = questionId;
     }
     

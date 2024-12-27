@@ -3,6 +3,7 @@ package indi.etern.checkIn.entities.question.impl;
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.linkUtils.LinkTarget;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
+import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
      * but the partition refers to the unsaved question
      * don't worry about the sync
      * jpa will save the question at last*/
-    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @NotFound(action = NotFoundAction.IGNORE)
     @JoinTable(name = "questions_link_mapping",
@@ -107,7 +108,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
     
     @Override
     public String toString() {
-        return name;
+        return name + "(" + id + ")";
     }
     //    @Override
     
@@ -135,6 +136,23 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
         }
         return questionSet;
     }
+    
+    public int getEnabledQuestionCount() {
+        return questionLinks.stream().filter(questionLink -> questionLink.getSource().isEnabled())
+                .mapToInt(questionLink -> questionLink.getSource() instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size():1)
+                .sum();
+    }
+    
+    public List<Question> getEnabledQuestionsList() {
+        List<Question> questionList = new ArrayList<>();
+        for (ToPartitionsLink questionLink : questionLinks) {
+            Question question = questionLink.getSource();
+            if (question.isEnabled()) {
+                questionList.add(question);
+            }
+        }
+        return questionList;
+    }
 
     @Override
     public int hashCode() {
@@ -148,5 +166,15 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
         } else {
             return false;
         }
+    }
+    
+    public Map<String,Object> toInfoMap() {
+        Map<String,Object> partitionInfo = new LinkedHashMap<>();
+        partitionInfo.put("id", id);
+        partitionInfo.put("name", name);
+        partitionInfo.put("empty", getEnabledQuestionCount() == 0);
+        partitionInfo.put("enabledQuestionCount", getEnabledQuestionCount());
+        partitionInfo.put("questionAmount", questionLinks.size());
+        return partitionInfo;
     }
 }

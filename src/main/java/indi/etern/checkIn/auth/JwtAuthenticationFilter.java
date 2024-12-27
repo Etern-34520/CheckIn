@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.util.StringUtils;
 
@@ -34,14 +33,14 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 //        String token = request.getParameter("token");
         // 校验 token
         if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
-            UserDetails userDetails;
+            User userDetails;
             
             // 加载与令 token 关联的用户
             try {
                 userDetails = jwtTokenProvider.getUser(token);
                 if (!userDetails.isEnabled()) {
                     response.addCookie(new Cookie("name", userDetails.getUsername()));
-                    response.addCookie(new Cookie("qq", String.valueOf(((User)userDetails).getQQNumber())));
+                    response.addCookie(new Cookie("qq", String.valueOf(userDetails.getQQNumber())));
 //                    response.sendRedirect("/checkIn/login/");
                     return;
                 }
@@ -66,16 +65,16 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearerTokenFromParameter = request.getParameter("token");
-        String bearerTokenFromHeader = request.getHeader("Authorization");
-        String bearerTokenFromWebSocketHeader = request.getHeader("Sec-WebSocket-Protocol");
+//        String bearerTokenFromHeader = request.getHeader("Authorization");
+//        String bearerTokenFromWebSocketHeader = request.getHeader("Sec-WebSocket-Protocol");
         
         if (StringUtils.hasText(bearerTokenFromParameter) && bearerTokenFromParameter.startsWith("Bearer ")) {
             return bearerTokenFromParameter.substring(7);
-        } else if (StringUtils.hasText(bearerTokenFromHeader) && bearerTokenFromHeader.startsWith("Bearer ")) {
+        }/* else if (StringUtils.hasText(bearerTokenFromHeader) && bearerTokenFromHeader.startsWith("Bearer ")) {
             return bearerTokenFromHeader.substring(7);
         } else if (StringUtils.hasText(bearerTokenFromWebSocketHeader)) {
             return bearerTokenFromWebSocketHeader;
-        } else {
+        } */else {
             final Cookie[] cookies = request.getCookies();
             if (cookies != null)
                 for (Cookie cookie : cookies) {

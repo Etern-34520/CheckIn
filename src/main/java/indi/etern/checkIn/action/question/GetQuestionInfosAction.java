@@ -2,7 +2,7 @@ package indi.etern.checkIn.action.question;
 
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.action.question.utils.Utils;
+import indi.etern.checkIn.action.question.utils.QuestionUpdateUtils;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
 
@@ -30,7 +30,7 @@ public class GetQuestionInfosAction extends TransactionalAction {
         ArrayList<Object> questionArray = new ArrayList<>(questions.size());
         for (Question question : questions) {
             questionIds.remove(question.getId());
-            questionArray.add(Utils.getMapOfQuestion(question));
+            questionArray.add(QuestionUpdateUtils.getMapOfQuestion(question));
         }
         if (!questionIds.isEmpty()) {
             for (String questionId : questionIds) {

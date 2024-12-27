@@ -18,7 +18,12 @@ const upload = ref();
 
 const allUsers = ref({});
 
-let partitions = PartitionCache.reactivePartitions;
+let partitions = PartitionCache.refPartitions;
+/*
+PartitionCache.getRefPartitionsAsync().then((refPartitions1) => {
+    partitions = refPartitions1;
+});
+*/
 
 import 'md-editor-v3/lib/style.css';
 // import 'md-editor-v3/lib/preview.css';
@@ -208,7 +213,7 @@ const reload = () => {
                 @remove-tag="preventEmptyPartition"
                 @change="onPartitionChange"
                 style="flex:4;width:0">
-            <el-option v-for="partition of partitions" :key="partition.id"
+            <el-option v-for="(partition,id) in partitions" :key="partition.id"
                        :label="partition.name" :value="partition.id"></el-option>
             <template #footer>
                 <transition name="creatingPartition" mode="out-in">

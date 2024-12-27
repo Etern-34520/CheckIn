@@ -51,9 +51,10 @@ public class ActionExecutor {
                 String name = actionAnnotation.value();
                 if (actionMap.containsKey(name)) {
                     throw new RuntimeException("Action name conflict: " + name);
+                } else if (actionAnnotation.exposed()) {
+                    //noinspection unchecked
+                    actionMap.put(name, (Class<? extends BaseAction<?, ?>>) clazz);
                 }
-                //noinspection unchecked
-                actionMap.put(name, (Class<? extends BaseAction<?, ?>>) clazz);
             }
         }
     }
@@ -104,11 +105,11 @@ public class ActionExecutor {
     }
 
     @SneakyThrows
-    public Optional<?> executeByTypeClass(Class<? extends BaseAction<?, ?>> clazz) {
-        BaseAction<?, ?> action = applicationContext.getBean(clazz);
+    public <T> Optional<T> executeByTypeClass(Class<? extends BaseAction<T, ?>> clazz) {
+        BaseAction<T, ?> action = applicationContext.getBean(clazz);
         return action.call();
     }
-    public Optional<?> executeByTypeClass(Class<? extends BaseAction<?, ?>> clazz, Object dataObj) {
+    public <T> Optional<T> executeByTypeClass(Class<? extends BaseAction<T, ?>> clazz, Object dataObj) {
         BaseAction<?, ?> action = applicationContext.getBean(clazz);
         Method[] methods = action.getClass().getMethods();
         try {
@@ -124,13 +125,10 @@ public class ActionExecutor {
                 }
             }
             logger.debug("Execute by type class and data object: {}", clazz.getName());
-            return action.call();
+            //noinspection unchecked
+            return (Optional<T>) action.call();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public Optional<?> executeByTypeString(String type, Object dataObj) {
-        return executeByTypeClass(actionMap.get(type), dataObj);
     }
 }

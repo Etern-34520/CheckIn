@@ -2,7 +2,7 @@ package indi.etern.checkIn.action.question;
 
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.action.question.utils.Utils;
+import indi.etern.checkIn.action.question.utils.QuestionUpdateUtils;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
@@ -33,7 +33,7 @@ public class GetLikeQuestionsByUserQQAction extends TransactionalAction {
             result = new LinkedHashMap<>();
             ArrayList<Object> questions = new ArrayList<>();
             questionService.findAllByUpVotersContains(optionalUser.get()).forEach(question -> {
-                questions.add(Utils.getMapOfQuestion(question));
+                questions.add(QuestionUpdateUtils.getMapOfQuestion(question));
             });
             result.put("questions", questions);
         } else {

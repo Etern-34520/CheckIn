@@ -38,6 +38,10 @@ public class SettingService {
         return settingRepository.findById(key).orElseThrow();
     }
     
+    public SettingItem getItem(String root,String name) {
+        return settingRepository.findById(root+"."+name).orElseThrow();
+    }
+    
     public List<SettingItem> findAllByKeys(Collection<String> keys) {
         return settingRepository.findAllById(keys);
     }

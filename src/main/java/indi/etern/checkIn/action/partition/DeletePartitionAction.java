@@ -1,15 +1,18 @@
 package indi.etern.checkIn.action.partition;
 
 import java.util.LinkedHashMap;
+
+import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
+import indi.etern.checkIn.utils.PartitionUpdateUtils;
 
 import java.util.Map;
 import java.util.Optional;
 
 @Action("deletePartition")
-public class DeletePartitionAction extends PartitionMapResultAction {
+public class DeletePartitionAction extends TransactionalAction {
 
     private int partitionId;
 
@@ -26,7 +29,7 @@ public class DeletePartitionAction extends PartitionMapResultAction {
         } else {
             return getOptionalErrorMap("partition \"" + partition.getName() + "\" is not empty");
         }
-        sendDeletePartitionToAll(partition);
+        PartitionUpdateUtils.sendDeletePartitionToAll(partition);
         return Optional.empty();
     }
 

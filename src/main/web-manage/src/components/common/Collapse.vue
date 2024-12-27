@@ -54,7 +54,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
         setTimeout(() => {
             if (!expanded.value)
                 showContent.value = false;
-        }, 400);
+        }, 600);
     }
 });
 </script>
@@ -91,7 +91,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
 .collapse {
     display: grid;
     grid-template-rows: 0fr 0fr;
-    transition: 400ms var(--ease-in-out-quint) 100ms;
+    transition: 400ms var(--ease-in-out-quint) 300ms;
 }
 
 .collapse.expanded {
@@ -135,23 +135,24 @@ watch(() => expanded.value, (newVal, oldVal) => {
     background-color: var(--panel-bg-color-overlay) !important;
 }
 
+/*noinspection CssRedundantUnit*/
 .collapse-content {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     justify-content: end;
     height: fit-content;
-    min-height: 0;
-    max-height: 0;
+    min-height: 0%;
+    max-height: 0%;
     overflow: hidden;
-    transition: 250ms var(--ease-in-quint) 0ms;
+    transition: 250ms var(--ease-in-quint);
 }
 
 .collapse.expanded .collapse-content {
     max-height: 100%;
     border-radius: 0 0 4px 4px;
     background: var(--panel-bg-color) var(--lighting-effect-background-3);
-    transition: 250ms var(--ease-out-quint) 200ms;
+    transition: max-height 250ms var(--ease-out-quint) 600ms;
 }
 
 .collapse-content-inner {

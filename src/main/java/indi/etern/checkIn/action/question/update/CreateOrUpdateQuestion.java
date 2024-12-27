@@ -1,38 +1,32 @@
 package indi.etern.checkIn.action.question.update;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.question.update.utils.Utils;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
-import static indi.etern.checkIn.action.question.update.utils.Utils.createMultipleChoicesQuestion;
-
-@Action("createOrUpdateQuestion")
-public class CreateOrUpdateQuestionAction extends BaseAction<Question, Map<?, ?>> {
+@Action(value = "createOrUpdateQuestion", exposed = false)
+public class CreateOrUpdateQuestion extends BaseAction<Question, Map<?, ?>> {
     final QuestionService multiPartitionableQuestionService;
-    private final ObjectMapper objectMapper;
-    private final Logger logger = LoggerFactory.getLogger(CreateOrUpdateQuestionAction.class);
     
     private Map<?, ?> questionDataMap;
     private Question multiPartitionableQuestion = null;
     
-    public CreateOrUpdateQuestionAction(QuestionService multiPartitionableQuestionService, @Qualifier("objectMapper") ObjectMapper objectMapper) {
+    public CreateOrUpdateQuestion(QuestionService multiPartitionableQuestionService) {
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
-        this.objectMapper = objectMapper;
     }
     
     @Override
     public String requiredPermissionName() {
         Set<String> requiredPermissionNames = new HashSet<>();
         Optional<Question> previousQuestion = multiPartitionableQuestionService.findById(questionDataMap.get("id").toString());
-        multiPartitionableQuestion = createMultipleChoicesQuestion(questionDataMap);
+        multiPartitionableQuestion = Utils.createMultipleChoicesQuestion(questionDataMap);
         if (questionDataMap.containsKey("authorQQ")) {
             requiredPermissionNames.add("change author");
         }

@@ -6,6 +6,7 @@ import indi.etern.checkIn.entities.convertor.ClassConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
 @Entity
 @Table(name = "SERVER_SETTING_ITEMS")
@@ -22,7 +23,6 @@ public class SettingItem {
     private String stringValue;
     
     @Transient
-    @Getter
     @Setter
     private Object value;
     
@@ -36,8 +36,18 @@ public class SettingItem {
         stringValue = "";
     }
     
+    @SuppressWarnings("unchecked")
+    public <T> T getValue(Class<T> clazz) {
+        return (T) value;
+    }
+    
     public boolean isPresent() {
         return !key.isEmpty();
+    }
+    
+    @SneakyThrows
+    public <T> T readAs(Class<T> clazz) {
+        return MVCConfig.getObjectMapper().readValue(stringValue, clazz);
     }
     
     @PostLoad

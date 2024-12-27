@@ -45,7 +45,7 @@ const WebSocketConnector = {
                         console.log('WebSocket Closed');
                         if (!notifications["closed"])
                             notifications["closed"] = ElNotification({
-                                title: 'Websocket已关闭',
+                                title: '与服务器的连接已断开',
                                 message: h(Reconnect, {}, {}),
                                 position: 'bottom-right',
                                 type: 'warning',
@@ -64,7 +64,7 @@ const WebSocketConnector = {
                 if (!notifications["error"])
                     if (autoRetriedTimes === 3) {
                         notifications["error"] = ElNotification({
-                            title: 'Websocket连接失败',
+                            title: '连接服务器失败',
                             message: '请检查网络连接',
                             position: 'bottom-right',
                             type: 'error',

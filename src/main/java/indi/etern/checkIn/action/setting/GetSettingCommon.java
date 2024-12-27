@@ -29,7 +29,7 @@ public class GetSettingCommon {
         }
         List<SettingItem> settingItems = SettingService.singletonInstance.findAllByKeys(keysWithRoot);
         for (SettingItem settingItem : settingItems) {
-            result.put(settingItem.getKey().split("\\.")[1],settingItem.getValue());
+            result.put(settingItem.getKey().split("\\.")[1],settingItem.getValue(Object.class));
         }
         return result;
     }

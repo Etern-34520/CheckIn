@@ -110,8 +110,6 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
         String id;
         String questionContent;
         @Getter
-        final Set<Partition> partitions = new HashSet<>();
-        @Getter
         final Map<String, String> imageBase64Strings = new LinkedHashMap<>();
         User author;
         boolean enable = false;
@@ -214,13 +212,11 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             if (choices.size() < 2) {
                 throw new QuestionException("Less than two choices");
             }
-            if (!manualLink && linkWrapper == null) {
-                throw new QuestionException("link not set");
-            }
-            if (partitions.isEmpty()) {
-                String string = SettingService.singletonInstance.getItem("other.defaultPartitionName").getValue().toString();
+            if (linkWrapper == null) {
+                String string = SettingService.singletonInstance.getItem("other.defaultPartitionName").getValue(String.class);
                 if (string == null) string = "undefined";
-                partitions.add(Partition.getInstance(string));
+                String finalString = string;
+                usePartitionLinks(partitionLink -> partitionLink.getTargets().add(Partition.getInstance(finalString)));
             }
             multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, /*partitions,*/ author);
             multipleQuestion.setEnabled(enable);
@@ -233,6 +229,11 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             if (!manualLink) {
                 multipleQuestion.setLinkWrapper(linkWrapper);
             }
+/*
+            if (!manualLink && linkWrapper == null) {
+                throw new QuestionException("link not set");
+            }
+*/
 /*
             if (id != null) {
                 try {

@@ -2,7 +2,7 @@ package indi.etern.checkIn.action.question;
 
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.action.question.utils.Utils;
+import indi.etern.checkIn.action.question.utils.QuestionUpdateUtils;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
 
@@ -27,7 +27,7 @@ public class GetQuestionInfoAction extends TransactionalAction {
             notFound.put("type", "question not found");
             return Optional.of(notFound);
         } else {
-            return Optional.of(Utils.getMapOfQuestion(questionOptional.get()));
+            return Optional.of(QuestionUpdateUtils.getMapOfQuestion(questionOptional.get()));
         }
     }
 

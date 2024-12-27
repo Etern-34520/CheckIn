@@ -1,7 +1,6 @@
 package indi.etern.checkIn.entities.record;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.MVCConfig;
+import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.convertor.MapConverter;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Entity
 @Table(name = "records")
@@ -19,14 +19,19 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class TrafficRecord {
+public class TrafficRecord implements BaseEntity<String> {
     @Id
     protected String id;
     protected String sessionId;
     @Column(name = "record_time")
     protected LocalDateTime time;
-    protected long qq;
+    
+    @Setter
+    @Column(name = "qq")
+    protected long QQNumber;
     protected String ipString;
+    
+    @Setter
     protected Type type;
     
     @Convert(converter = MapConverter.class)
@@ -39,13 +44,20 @@ public class TrafficRecord {
     
     @Convert(converter = MapConverter.class)
     @Lazy
-    protected Map<String,String> extraData;
+    protected Map<String,Object> extraData;
+    
+    public Map<String,Object> getExtraData() {
+        if (extraData == null) extraData = new HashMap<>();
+        return extraData;
+    }
+    
     public enum Type {
-        VISIT,GENERATE,SUBMIT,GET_RESULT
+        VISIT,GENERATE,SUBMIT, LOAD_LAST, GET_RESULT
     }
     
     public static TrafficRecord from(HttpServletRequest httpServletRequest) {
         TrafficRecord trafficRecord = new TrafficRecord();
+        trafficRecord.id = UUID.randomUUID().toString();
         trafficRecord.sessionId = httpServletRequest.getSession().getId();
         trafficRecord.time = LocalDateTime.now();
         trafficRecord.ipString = httpServletRequest.getRemoteAddr();
@@ -63,7 +75,6 @@ public class TrafficRecord {
                 attributesMap.put(name, s);
             }
         });
-        ObjectMapper objectMapper = MVCConfig.getObjectMapper();
         trafficRecord.header = headerMap;
         trafficRecord.attributes = attributesMap;
         return trafficRecord;

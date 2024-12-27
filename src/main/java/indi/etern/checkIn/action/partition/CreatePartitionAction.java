@@ -1,15 +1,17 @@
 package indi.etern.checkIn.action.partition;
 
+import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
+import indi.etern.checkIn.utils.PartitionUpdateUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Action("createPartition")
-public class CreatePartitionAction extends PartitionMapResultAction {
+public class CreatePartitionAction extends TransactionalAction {
     private String partitionName;
     private Partition createdPartition;
 
@@ -33,7 +35,7 @@ public class CreatePartitionAction extends PartitionMapResultAction {
         map.put("type", "addPartitionCallBack");
         map.put("id", partition.getId());
         if (createdPartition != null) {
-            sendAddPartitionToAll(createdPartition);
+            PartitionUpdateUtils.sendAddPartitionToAll(createdPartition);
         }
         return Optional.of(map);
     }

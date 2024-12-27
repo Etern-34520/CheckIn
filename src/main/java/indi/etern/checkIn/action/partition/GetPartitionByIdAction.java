@@ -1,5 +1,6 @@
 package indi.etern.checkIn.action.partition;
 
+import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Action("getPartitionById")
-public class GetPartitionByIdAction extends PartitionMapResultAction {
+public class GetPartitionByIdAction extends TransactionalAction {
     private final PartitionService partitionService;
     private Integer partitionId;
     
@@ -28,10 +29,7 @@ public class GetPartitionByIdAction extends PartitionMapResultAction {
         if (optionalPartition.isPresent()) {
             Partition partition = optionalPartition.get();
             LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-            LinkedHashMap<String, Object> partition1 = new LinkedHashMap<>();
-            partition1.put("id", partition.getId());
-            partition1.put("name", partition.getName());
-            result.put("partition", partition1);
+            result.put("partition", partition.toInfoMap());
             return Optional.of(result);
         } else {
             return getOptionalErrorMap("Partition not found");

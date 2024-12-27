@@ -115,8 +115,8 @@ const loadNode = (node, resolve, reject) => {
         };
         PartitionCache.getRefPartitionsAsync().then((partitions) => {
             let data = [createPartitionButtonData];
-            for (const partitionInfo of partitions.value) {
-                data.push(getTreeNodeDataOfPartition(partitionInfo));
+            for (const [id,partition] of Object.entries(partitions.value)) {
+                data.push(getTreeNodeDataOfPartition(partition));
             }
             loading.value = false;
             resolve(data);
@@ -177,7 +177,7 @@ QuestionCache.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) =
             }
         }
     }
-    for (const partition of PartitionCache.reactivePartitions.value) {
+    for (const [id,partition] of Object.entries(PartitionCache.refPartitions.value)) {
         if (questionInfo.question.partitionIds && questionInfo.question.partitionIds.includes(partition.id)) {
             continue;
         }
@@ -213,7 +213,7 @@ QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
     if (router.currentRoute.value.params.id === id) {
         router.push({name: "questions"});
     }
-    for (let partition of PartitionCache.reactivePartitions.value) {
+    for (let partition of PartitionCache.refPartitions.value) {
         let questionNode = tree.value.getNode(partition.id + "/" + id);
         if (questionNode !== null) {
             tree.value.remove(questionNode);

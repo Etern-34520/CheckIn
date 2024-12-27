@@ -56,7 +56,7 @@ const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 1000
         <div class="panel" style="padding: 16px 24px;margin-top: 24px">
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
                 <el-text size="large" style="margin-right: 8px;">可选分区</el-text>
-                {{ selectedPartitions.length }}
+                <el-text>{{ selectedPartitions.length }} / {{ selectablePartitions.length }}</el-text>
                 <el-text style="margin-left: 8px;"
                          :type="validate1?'info':'danger'">
                     请选择 {{ drawingData.partitionRange[0] }} ~ {{ drawingData.partitionRange[1] }} 个
@@ -84,7 +84,7 @@ const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 1000
         </div>
         <div style="display: flex;flex-direction: row;align-items: center;margin-top: 16px;margin-left: 16px;">
             <el-avatar style="width: 64px;height: 64px;margin-right: 16px" :src="getAvatarUrlOf(qqNumber)"/>
-            <el-input-number :class="{error: validate2}" v-model="qqNumber"
+            <el-input-number :class="{error: !validate2}" v-model="qqNumber"
                              :controls="false" style="min-width: min(70vw,200px)"/>
         </div>
         <el-button type="primary" size="large" style="margin-top: 36px;align-self: center" @click="startExam" :disabled="!(validate1 && validate2)">开始答题</el-button>

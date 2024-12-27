@@ -446,11 +446,11 @@
     background: var(--panel-bg-color-overlay) var(--lighting-effect-background-2) !important;
 }
 
-.el-tree-node:not(.disable-init-animate) {
+/*.el-tree-node:not(.disable-init-animate) {
     animation: var(--init-animation);
     animation-fill-mode: backwards;
     animation-delay: 100ms;
-}
+}*/
 
 .el-tree-node__content:has(.disable-tree-item-hover), .el-tree-node__content:has(.disable-tree-item-focus) {
     background: transparent !important;
@@ -727,6 +727,7 @@
     background: var(--el-tag-bg-color) var(--lighting-effect-background-3);
     border: var(--border-1) !important;
     transition: background-color 200ms var(--ease-in-out-quint);
+    font-weight: normal !important;
 }
 
 .el-check-tag--primary {

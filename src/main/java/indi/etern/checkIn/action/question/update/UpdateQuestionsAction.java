@@ -4,16 +4,18 @@ import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.question.DeleteQuestionAction;
-import indi.etern.checkIn.action.question.utils.Utils;
-import indi.etern.checkIn.api.webSocket.Connector;
+import indi.etern.checkIn.action.question.utils.QuestionUpdateUtils;
+import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
+import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
+import indi.etern.checkIn.utils.PartitionUpdateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
-
-import static indi.etern.checkIn.action.question.utils.Utils.sendDeleteQuestionsToAll;
-
 
 @Action("updateQuestions")
 public class UpdateQuestionsAction extends TransactionalAction {
@@ -23,27 +25,7 @@ public class UpdateQuestionsAction extends TransactionalAction {
     @Autowired
     ActionExecutor actionExecutor;
     private List<String> deletedQuestionIds;
-
-/*
-        for (Object questionObj : questions) {
-            if (questionObj instanceof @SuppressWarnings("rawtypes")Map questionDataMap) {
-                if (allOwned && questionDataMap.get("authorQQ") != null) {
-                    long authorQQ1 = ((Double) questionDataMap.get("authorQQ")).longValue();
-                    if (authorQQ1 != authorQQ) {
-                        allOwned = false;
-                        break;
-                    }
-                }
-                if (!switchEnabled) {
-                    Optional<Question> formerQuestion = QuestionService.singletonInstance.findById(((Map<?, ?>) questionObj).get("id").toString());
-                    if (formerQuestion.isPresent() && ((boolean) ((Map<?, ?>) questionObj).get("enabled")) != formerQuestion.get().isEnabled()) {
-                        switchEnabled = true;
-                    }
-                }
-            }
-        }
-*/
-    
+    private final Logger logger = LoggerFactory.getLogger(UpdateQuestionsAction.class);
     
     @Override
     public String requiredPermissionName() {
@@ -53,54 +35,55 @@ public class UpdateQuestionsAction extends TransactionalAction {
     @Override
     protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         List<Question> succeedQuestions = new ArrayList<>();
+        Set<Partition> infectedPartitions = new HashSet<>();
         if (questions != null)
             for (Object questionObj : questions) {
                 if (questionObj instanceof @SuppressWarnings("rawtypes")Map questionDataMap) {
                     try {
-//                String type = questionDataMap.get("type").toString();
-//                if (type.startsWith("SingleCorrectQuestion") ||
-//                        type.startsWith("MultipleCorrectQuestion")) {
                         String type = (String) questionDataMap.get("type");
-                        Question multiPartitionableQuestion;
+                        Question question;
                         switch (type) {
                             case "MultipleChoicesQuestion" -> {
-//                            multiPartitionableQuestion = createMultipleChoicesQuestion(questionDataMap);
-                                @SuppressWarnings("unchecked") Optional<Question> result =
-                                        (Optional<Question>) actionExecutor.executeByTypeClass(CreateOrUpdateQuestionAction.class, questionDataMap);
-                                multiPartitionableQuestion = result.orElse(null);
+                                Optional<Question> result = actionExecutor.executeByTypeClass(CreateOrUpdateQuestion.class, questionDataMap);
+                                question = result.orElse(null);
                             }
                             case "QuestionGroup" -> {
-//                            multiPartitionableQuestion = createQuestionGroup(questionDataMap);
-                                @SuppressWarnings("unchecked") Optional<Question> result =
-                                        (Optional<Question>) actionExecutor.executeByTypeClass(CreateOrUpdateQuestionGroup.class, questionDataMap);
-                                multiPartitionableQuestion = result.orElse(null);
+                                Optional<Question> result = actionExecutor.executeByTypeClass(CreateOrUpdateQuestionGroup.class, questionDataMap);
+                                question = result.orElse(null);
                             }
                             default -> throw new UnsupportedOperationException("type not supported: " + type);
                         }
-//                    QuestionService.singletonInstance.unbindAndDeleteById(multiPartitionableQuestion.getId());
-//                    QuestionService.singletonInstance.update(multiPartitionableQuestion);
-                        succeedQuestions.add(multiPartitionableQuestion);
+                        succeedQuestions.add(question);
+                        
+                        if (question != null) {
+                            final QuestionLinkImpl<?> linkWrapper = question.getLinkWrapper();
+                            if (linkWrapper instanceof ToPartitionsLink link) {
+                                infectedPartitions.addAll(link.getTargets());
+                            }
+                        }
                     } catch (Exception e) {
-                        Connector.logger.error("UpdateQuestionsAction.doAction", e);
+                        logger.error("UpdateQuestionsAction.doAction", e);
                     }
                 }
             }
         if (deletedQuestionIds != null) {
-            List<String> succeedDeletedQuestions = new ArrayList<>();
+            List<Question> succeedDeletedQuestions = new ArrayList<>();
             for (String deletedQuestionId : deletedQuestionIds) {
-                @SuppressWarnings("unchecked") Optional<String> result =
-                        (Optional<String>) actionExecutor.executeByTypeClass(DeleteQuestionAction.class, deletedQuestionId);
+                Optional<Question> result = actionExecutor.executeByTypeClass(DeleteQuestionAction.class, deletedQuestionId);
                 succeedDeletedQuestions.add(result.orElse(null));
+                if (result.isPresent()) {
+                    final QuestionLinkImpl<?> linkWrapper = result.get().getLinkWrapper();
+                    if (linkWrapper instanceof ToPartitionsLink link) {
+                        infectedPartitions.addAll(link.getTargets());
+                    }
+                }
             }
-            sendDeleteQuestionsToAll(succeedDeletedQuestions);
+            QuestionUpdateUtils.sendDeleteQuestionsToAll(succeedDeletedQuestions);
         }
         QuestionService.singletonInstance.flush();
-        Utils.sendUpdateQuestionsToAll(succeedQuestions);
+        QuestionUpdateUtils.sendUpdateQuestionsToAll(succeedQuestions);
+        PartitionUpdateUtils.sendUpdatePartitionsToAll(infectedPartitions);
         return Optional.ofNullable(getSuccessMap());
-    }
-    
-    private Question createQuestionGroup(Map<?, ?> questionDataMap) {
-        return null;
     }
     
     @Override

@@ -18,9 +18,9 @@ const emits = defineEmits(["onConfirm"]);
 
 const isCreating = ref(false);
 const partitionIds = ref([]);
-const partitions = ref([]);
+let partitions = null;
 PartitionCache.getRefPartitionsAsync().then((resp) => {
-    partitions.value = resp.value;
+    partitions = resp;
 });
 defineExpose({
     "clear": () => {
@@ -29,17 +29,18 @@ defineExpose({
 });
 </script>
 <template>
-    <div style="display: flex;flex-direction: row">
+    <div style="display: flex;flex-direction: row" v-loading="partitions === null">
         <el-select
             class="not-empty"
             v-model="partitionIds"
+            v-if="partitions !== null"
             placeholder="选择分区"
             multiple
             filterable
             @focusout="isCreating = false"
             style="flex:4;width:0"
         >
-            <el-option v-for="partition of partitions" :key="partition.id"
+            <el-option v-for="(partition,id) in partitions" :key="partition.id"
                        :label="partition.name" :value="partition.id"></el-option>
             <template #footer v-if="showCreatePartition">
                 <transition name="creatingPartition" mode="out-in">

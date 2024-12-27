@@ -86,7 +86,6 @@ public class Utils {
         return create(questionDataMap,(questionDataMap1,builder) -> {
             Object o3 = questionDataMap1.get("partitionIds");
             if (o3 instanceof List) {
-                builder.getPartitions().clear();
                 //noinspection unchecked
                 List<Number> partitionIds = (List<Number>) o3;
                 for (Number partitionId : partitionIds) {
@@ -129,10 +128,11 @@ public class Utils {
 
         Object partitionIdsObj = questionDataMap.get("partitionIds");
         if (partitionIdsObj instanceof List) {
+            builder.getPartitions().clear();
             //noinspection unchecked
-            List<Double> partitionIds = (List<Double>) partitionIdsObj;
-            for (Double partitionId : partitionIds) {
-                builder.addPartition(Partition.getInstance((int) partitionId.longValue()));
+            List<Integer> partitionIds = (List<Integer>) partitionIdsObj;
+            for (Integer partitionId : partitionIds) {
+                builder.addPartition(Partition.getInstance(partitionId));
             }
         }
 

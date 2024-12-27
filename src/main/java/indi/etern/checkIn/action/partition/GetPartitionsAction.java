@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Optional;
 
 @Action("getPartitions")
-public class GetPartitions extends TransactionalAction {
+public class GetPartitionsAction extends TransactionalAction {
     @Override
     public String requiredPermissionName() {
         return null;
@@ -23,11 +23,7 @@ public class GetPartitions extends TransactionalAction {
             ArrayList<Object> partitionList = new ArrayList<>();
             result.put("partitions", partitionList);
             PartitionService.singletonInstance.findAll().forEach(partition -> {
-                LinkedHashMap<String,Object> partitionInfo = new LinkedHashMap<>();
-                partitionInfo.put("id", partition.getId());
-                partitionInfo.put("name", partition.getName());
-                partitionInfo.put("empty", partition.getQuestionLinks().isEmpty());
-                partitionList.add(partitionInfo);
+                partitionList.add(partition.toInfoMap());
             });
             return null;
         });

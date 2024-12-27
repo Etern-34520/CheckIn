@@ -88,9 +88,9 @@ public class PartitionService {
 
     public List<Question> generateExam(List<Integer> partitionIds, Random random) throws Exception {
         List<Question> multiPartitionableQuestions = new ArrayList<>();
-        int questionCount = Integer.parseInt(SettingService.singletonInstance.getItem("exam.questionCount").getValue().toString());
-        int partitionCountMin = Integer.parseInt(SettingService.singletonInstance.getItem("exam.partitionCountMin").getValue().toString());
-        int partitionCountMax = Integer.parseInt(SettingService.singletonInstance.getItem("exam.partitionCountMax").getValue().toString());
+        int questionCount = Integer.parseInt(SettingService.singletonInstance.getItem("exam.questionCount").getValue(String.class));
+        int partitionCountMin = Integer.parseInt(SettingService.singletonInstance.getItem("exam.partitionCountMin").getValue(String.class));
+        int partitionCountMax = Integer.parseInt(SettingService.singletonInstance.getItem("exam.partitionCountMax").getValue(String.class));
         if (partitionCountMin > partitionIds.size()) {
             throw new BadRequestException("partition count cannot smaller than min count(" + partitionCountMin + ")");
         } else if (partitionIds.size() > partitionCountMax) {
@@ -153,7 +153,7 @@ public class PartitionService {
         return multiPartitionableQuestions;
     }
 
-    public List<Partition> findAllById(Collection<Integer> partitionId) {
+    public List<Partition> findAllByIds(Collection<Integer> partitionId) {
         return partitionRepository.findAllById(partitionId);
     }
 

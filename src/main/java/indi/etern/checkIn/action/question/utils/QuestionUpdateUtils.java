@@ -14,7 +14,7 @@ import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.*;
 
-public class Utils {
+public class QuestionUpdateUtils {
     public static void sendDeleteQuestionToAll(String questionID) {
         LinkedHashMap<String,Object> map = new LinkedHashMap<>();
 //        Map<String, Object> dataMap = new HashMap<>();
@@ -49,14 +49,10 @@ public class Utils {
         WebSocketService.singletonInstance.sendMessageToAllWithoutLog(map);
     }
 
-    public static void sendDeleteQuestionsToAll(List<String> questionIds) {
+    public static void sendDeleteQuestionsToAll(List<Question> questions) {
         LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-        ArrayList<Object> arrayList = new ArrayList<>();
-        for (String questionId : questionIds) {
-            arrayList.add(questionId);
-        }
         map.put("type", "deleteQuestions");
-        map.put("ids", arrayList);
+        map.put("ids", questions.stream().map(Question::getId).toList());
         WebSocketService.singletonInstance.sendMessageToAllWithoutLog(map);
     }
 

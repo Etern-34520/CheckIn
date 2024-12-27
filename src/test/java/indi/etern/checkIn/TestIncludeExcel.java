@@ -1,13 +1,12 @@
-/*
 package indi.etern.checkIn;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.entities.question.impl.multipleQuestion.MultipleChoicesQuestion.MultipleQuestionBuilder;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.Choice;
+import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
 import indi.etern.checkIn.service.dao.QuestionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -16,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList<Object>;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -32,11 +31,11 @@ public class TestIncludeExcel {
     @Test
     void include() {
         String fileName = ".\\question.xlsx";
-        List<Question> multiPartitionableQuestionList = new ArrayList<Object><>(250);
+        List<Question> multiPartitionableQuestionList = new ArrayList<>(250);
         // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
         EasyExcel.read(fileName, ExcelQuestion.class, new ReadListener<ExcelQuestion>() {
             public static final int BATCH_COUNT = 100;
-            private List<ExcelQuestion> cachedDataList = new ArrayList<Object><>(BATCH_COUNT);
+            private List<ExcelQuestion> cachedDataList = new ArrayList<>(BATCH_COUNT);
 
             @Override
             public void invoke(ExcelQuestion data, AnalysisContext context) {
@@ -44,7 +43,7 @@ public class TestIncludeExcel {
                 if (cachedDataList.size() >= BATCH_COUNT) {
                     saveData();
                     // 存储完成清理 list
-                    cachedDataList = new ArrayList<Object><>(BATCH_COUNT);
+                    cachedDataList = new ArrayList<>(BATCH_COUNT);
                 }
             }
 
@@ -53,15 +52,14 @@ public class TestIncludeExcel {
                 saveData();
             }
 
-            */
-/**
+            /**
              * 加上存储数据库
-             *//*
+             */
 
             private void saveData() {
                 for (ExcelQuestion excelQuestion : cachedDataList) {
                     try {
-                        MultipleQuestionBuilder multipleQuestionBuilder = new MultipleQuestionBuilder();
+                        MultipleChoicesQuestion.Builder multipleQuestionBuilder = new MultipleChoicesQuestion.Builder();
                         multipleQuestionBuilder.setQuestionContent(excelQuestion.content.replace(" [单选题]","").replace("[单选题]",""));
                         List<String> choicesString = objectMapper.readValue(excelQuestion.choiceJsonArray.replace("，",",").replace("“","\""), List.class);
                         List<Integer> correctIndexes = objectMapper.readValue(excelQuestion.correctChoiceIndexJsonArray, List.class);
@@ -98,4 +96,3 @@ public class TestIncludeExcel {
         System.out.println(multiPartitionableQuestionService.count());
     }
 }
-*/

@@ -36,7 +36,7 @@ public class QuestionGroup extends Question implements LinkTarget, LinkSource<Qu
         questionLinks.add(link);
     }
     
-    @OneToMany(mappedBy = "target", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "target", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @OrderBy("orderIndex")
 //    @JoinTable(value = "question_group_list",

@@ -1,6 +1,5 @@
 package indi.etern.checkIn.controller.html;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -17,7 +16,7 @@ public class MainController {
     }
 
     @GetMapping("/exam/**")
-    public String exam(HttpServletRequest request) {
+    public String exam() {
         return "exam/index";
     }
 }

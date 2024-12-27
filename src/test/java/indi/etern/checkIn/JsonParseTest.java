@@ -37,13 +37,14 @@ public class JsonParseTest {
             MultipleChoicesQuestion.Builder multipleQuestionBuilder = new MultipleChoicesQuestion.Builder();
             String questionContent = (String) questionMap.get("question_content");
             questionContent = questionContent.replace(" [单选题]","");
+            questionContent = questionContent.replace(" [多选题]","");
             multipleQuestionBuilder.setQuestionContent(questionContent.split("\\.",2)[1]);
             List<Double> correctIndex = (List<Double>) questionMap.get("correct_options");
             int index = 0;
             for (String choiceStr : (List<String>)questionMap.get("options")) {
 //                String pattern = "^[A-Z]\\.\\s.*$";
 //                if (choiceStr.startsWith()
-                if (choiceStr.getBytes()[1] == '.') {
+                if (choiceStr.charAt(1) == '.') {
                     choiceStr = choiceStr.substring(2);
                 }
                 Choice choice = new Choice(choiceStr,correctIndex.contains((double) index));

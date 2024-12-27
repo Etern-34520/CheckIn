@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Slf4j
 @ServerEndpoint("/api/websocket/{sid}")
+@ConditionalOnWebApplication
 public class Connector implements SubProtocolCapable {
     public static final HashSet<String> ALL = new HashSet<>(0);
     public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
