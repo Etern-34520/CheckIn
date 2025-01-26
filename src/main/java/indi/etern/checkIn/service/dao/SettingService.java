@@ -72,7 +72,7 @@ public class SettingService {
     
     public void setAll(Map<String, Object> dataMap) {
         for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            save(new SettingItem(entry.getKey(), entry.getValue().toString(), entry.getValue().getClass()));
+            save(new SettingItem(entry.getKey(), entry.getValue(), entry.getValue().getClass()));
         }
     }
     

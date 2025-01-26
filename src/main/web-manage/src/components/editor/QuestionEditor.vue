@@ -25,6 +25,8 @@ import UIMeta from "@/utils/UI_Meta.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
 import WebSocketConnector from "@/api/websocket.js";
+import LinkPanel from "@/components/common/LinkPanel.vue";
+import {ArrowRightBold, Check} from "@element-plus/icons-vue";
 
 let update = (newVal, oldVal) => {
     requested = false;
@@ -292,12 +294,32 @@ const currentUserQQ = Number(proxy.$cookies.get("qq"));
                                         </el-button>
                                     </div>
                                 </transition>
-                                <div class="panel-1" style="padding: 12px 20px;margin-top: 40px">
+                                <div class="panel-1" style="padding: 12px 20px;margin-top: 40px;min-height: 320px">
                                     <el-text>
                                         统计信息
                                     </el-text>
-<!--                                    TODO-->
-                                    <el-empty/>
+                                    <transition name="blur-scale" mode="out-in">
+                                        <div v-if="questionInfo.question.statistic" style="margin-top: 12px">
+                                            <!--                                        TODO-->
+                                            <div class="panel-1" style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 8px;">
+                                                <el-statistic style="margin: 16px 32px;"  title="抽取次数" :value="questionInfo.question.statistic.drewCount"></el-statistic>
+                                                <el-statistic style="margin: 16px 32px;"  title="提交次数" :value="questionInfo.question.statistic.submittedCount"></el-statistic>
+                                                <el-statistic style="margin: 16px 32px;"  title="答对次数" :value="questionInfo.question.statistic.correctCount"></el-statistic>
+                                                <el-statistic style="margin: 16px 48px 16px 32px;" title="答错次数" :value="questionInfo.question.statistic.wrongCount"></el-statistic>
+                                                <div class="flex-blank-1"></div>
+                                                <el-button link size="large" style="margin: 8px 16px;min-height: 48px">
+                                                    <el-text size="large" style="margin-right: 8px;">
+                                                        查看作答详情
+                                                    </el-text>
+                                                    <el-icon size="large">
+                                                        <ArrowRightBold/>
+                                                    </el-icon>
+                                                </el-button>
+                                            </div>
+                                            <link-panel :description="'共 ' + (questionInfo.question.statistic.examDataCount?questionInfo.question.statistic.examDataCount:0) + ' 个'" name="使用了该题的测试" :icon="Check"></link-panel>
+                                        </div>
+                                        <el-empty v-else/>
+                                    </transition>
                                 </div>
                             </div>
                         </transition>

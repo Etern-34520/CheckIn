@@ -1,5 +1,6 @@
 <script setup>
 import {RouterView} from "vue-router";
+import router from "@/router/index.js";
 
 const {proxy} = getCurrentInstance();
 const facadeData = ref({});
@@ -13,42 +14,33 @@ const getData = () => {
     loading.value = true;
     error.value = false;
     const phrase = proxy.$cookies.get("phrase");
-    if (phrase) {
-        if (phrase === "generate") {//TODO
-            proxy.$http.get("examData").then((response) => {
-                facadeData.value = response.facadeData.data;
-                gradingData.value = response.gradingData.data;
-                drawingData.value = response.drawingData.data;
-                partitions.value = response.partitions;
+    proxy.$http.get("examData").then((response) => {
+        facadeData.value = response.facadeData.data;
+        gradingData.value = response.gradingData.data;
+        drawingData.value = response.drawingData.data;
+        partitions.value = response.partitions;
+        console.log(phrase);
+        if (phrase === "examining") {
+            router.push({name: "examining"}).then(() => {
                 loading.value = false;
-            }, () => {
-                loading.value = false;
-                error.value = true;
             });
-        } else if (phrase === "exam") {
-            proxy.$http.get("examData").then((response) => {
-                facadeData.value = response.facadeData.data;
-                gradingData.value = response.gradingData.data;
-                drawingData.value = response.drawingData.data;
-                partitions.value = response.partitions;
+        } else if (phrase === "generating") {
+            router.push({name: "generating"}).then(() => {
                 loading.value = false;
-            }, () => {
+            });
+        } else if (phrase === "result") {
+            router.push({name: "result"}).then(() => {
                 loading.value = false;
-                error.value = true;
+            });
+        } else {
+            router.push({name: "facade"}).then(() => {
+                loading.value = false;
             });
         }
-    } else {
-        proxy.$http.get("examData").then((response) => {
-            facadeData.value = response.facadeData.data;
-            gradingData.value = response.gradingData.data;
-            drawingData.value = response.drawingData.data;
-            partitions.value = response.partitions;
-            loading.value = false;
-        }, () => {
-            loading.value = false;
-            error.value = true;
-        });
-    }
+    }, () => {
+        loading.value = false;
+        error.value = true;
+    })
 }
 getData();
 </script>
@@ -66,9 +58,10 @@ getData();
                     </router-view>
                 </template>
                 <div v-else-if="error"
-                     style="display:flex;flex-direction: column;min-width: 100vw;min-height: 100vh;align-items: center;justify-content: center">
+                     style="display:flex;flex-direction: column;flex: 1;align-items: center;justify-content: center">
                     <el-empty description="加载失败"></el-empty>
-                    <el-button link type="primary" @click="getData" size="large">重试</el-button>
+                    <el-button link type="primary" class="disable-init-animate" @click="getData" size="large">重试
+                    </el-button>
                 </div>
             </div>
         </el-scrollbar>

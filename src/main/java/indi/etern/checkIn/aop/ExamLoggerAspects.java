@@ -1,8 +1,11 @@
 package indi.etern.checkIn.aop;
 
+import indi.etern.checkIn.controller.rest.Exam;
+import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.record.TrafficRecord;
 import indi.etern.checkIn.service.dao.TrafficRecordService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -10,8 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 
 @Component
 @Aspect
@@ -46,21 +48,20 @@ public class ExamLoggerAspects {
         record(TrafficRecord.Type.VISIT,null);
     }
     
-    @Pointcut("execution(* indi.etern.checkIn.controller.rest.Exam.generateExam())")
+    @Pointcut("execution(* indi.etern.checkIn.controller.rest.Exam.generateExam(..))")
     public void generateExam() {}
     
     @Before("generateExam()")
-    public void beforeGenerate() {
-        record(TrafficRecord.Type.GENERATE,((httpServletRequest, trafficRecord) -> {
-            long qq = Long.parseLong(httpServletRequest.getParameter("qq"));
+    public void beforeGenerate(JoinPoint joinPoint) {
+        record(TrafficRecord.Type.GENERATE,(httpServletRequest, trafficRecord) -> {
+            Exam.GenerateRequest generateRequest = (Exam.GenerateRequest) joinPoint.getArgs()[0];
+            long qq = generateRequest.qq();
             trafficRecord.setQQNumber(qq);
-            String[] partitionIdsString = httpServletRequest.getParameterValues("partitionIds");
-            List<Integer> partitionIds = Arrays.stream(partitionIdsString).map(Integer::parseInt).toList();
-            trafficRecord.getExtraData().put("partitionIds",partitionIds);
-        }));
+            trafficRecord.getExtraData().put("partitionIds",generateRequest.partitionIds());
+        });
     }
     
-    @Pointcut("execution(* indi.etern.checkIn.controller.rest.Exam.loadLastExam())")
+    /*@Pointcut("execution(* indi.etern.checkIn.controller.rest.Exam.loadLastExam())")
     public void loadLastExam() {}
     
     @Before("loadLastExam()")
@@ -69,13 +70,19 @@ public class ExamLoggerAspects {
             long qq = Long.parseLong(httpServletRequest.getParameter("qq"));
             trafficRecord.setQQNumber(qq);
         }));
-    }
+    }*/
     
-    @Pointcut("execution(* indi.etern.checkIn.controller.rest.Exam.submit())")
+    @Pointcut("execution(* indi.etern.checkIn.service.dao.ExamDataService.handleSubmit(..))")
     public void submit() {}
     
     @Before("submit()")
-    public void beforeSubmit() {
-        //TODO
+    public void beforeSubmit(JoinPoint joinPoint) {
+        record(TrafficRecord.Type.SUBMIT, (httpServletRequest, trafficRecord) -> {
+            ExamData examData = (ExamData) joinPoint.getArgs()[0];
+            //noinspection unchecked
+            Map<String,Object> answerData = (Map<String, Object>) joinPoint.getArgs()[1];
+            trafficRecord.setQQNumber(examData.getQqNumber());
+            trafficRecord.getExtraData().put("answerData",answerData);
+        });
     }
 }

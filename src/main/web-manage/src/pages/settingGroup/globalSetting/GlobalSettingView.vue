@@ -1,12 +1,9 @@
 <script setup>
 import {
-    ArrowRightBold,
     Check,
     CircleCheck,
     Files,
-    MoreFilled, Open,
     Postcard,
-    Upload
 } from "@element-plus/icons-vue";
 import LinkPanel from "@/components/common/LinkPanel.vue";
 import Waterfall from "@/components/common/Waterfall.vue";

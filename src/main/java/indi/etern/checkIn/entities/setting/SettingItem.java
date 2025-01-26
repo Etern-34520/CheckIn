@@ -6,7 +6,6 @@ import indi.etern.checkIn.entities.convertor.ClassConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 
 @Entity
 @Table(name = "SERVER_SETTING_ITEMS")
@@ -19,7 +18,7 @@ public class SettingItem {
     @Getter
     private String key;
     
-    @Column(name = "SETTING_VALUE")
+    @Column(name = "SETTING_VALUE", columnDefinition = "MEDIUMTEXT")
     private String stringValue;
     
     @Transient
@@ -45,14 +44,20 @@ public class SettingItem {
         return !key.isEmpty();
     }
     
+/*
     @SneakyThrows
     public <T> T readAs(Class<T> clazz) {
         return MVCConfig.getObjectMapper().readValue(stringValue, clazz);
     }
+*/
     
     @PostLoad
     private void postLoad() throws JsonProcessingException {
-        value = stringValue == null ? null : MVCConfig.getObjectMapper().readValue(stringValue, clazz);
+        if (clazz != null) {
+            value = stringValue == null ? null : MVCConfig.getObjectMapper().readValue(stringValue, clazz);
+        } else {
+            value = null;
+        }
     }
     
     public SettingItem(String key, Object value, Class<?> clazz) {
@@ -61,6 +66,21 @@ public class SettingItem {
             this.value = value;
             stringValue = value == null ? null : MVCConfig.getObjectMapper().writeValueAsString(value);
             this.clazz = clazz;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public SettingItem(String key, Object value) {
+        try {
+            this.key = key;
+            this.value = value;
+            stringValue = value == null ? null : MVCConfig.getObjectMapper().writeValueAsString(value);
+            if (value != null) {
+                this.clazz = value.getClass();
+            } else {
+                this.clazz = null;
+            }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

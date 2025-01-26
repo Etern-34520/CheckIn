@@ -27,9 +27,14 @@ const router = createRouter({
                     component: HomeView
                 },
                 {
-                    path: 'traffic/',
-                    name: 'traffic',
-                    component: () => import('../pages/serverGroup/TrafficView.vue')
+                    path: 'request-record/',
+                    name: 'request-record',
+                    component: () => import('../pages/serverGroup/RequestRecordView.vue')
+                },
+                {
+                    path: 'exam-record/',
+                    name: 'exam-record',
+                    component: () => import('../pages/serverGroup/ExamRecordView.vue')
                 },
                 {
                     path: 'manage-user/',

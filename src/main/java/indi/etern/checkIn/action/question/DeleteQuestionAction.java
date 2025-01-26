@@ -5,6 +5,8 @@ import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
+import lombok.SneakyThrows;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,7 +23,9 @@ public class DeleteQuestionAction extends BaseAction<Question, String> {
     @Override
     public String requiredPermissionName() {
         final User currentUser = getCurrentUser();
-        if (currentUser.equals(question.getAuthor())) {
+        if (question == null) {
+            return "";
+        } if (currentUser.equals(question.getAuthor())) {
             return "delete owns question";
         } else {
             return "delete others question";
@@ -30,13 +34,24 @@ public class DeleteQuestionAction extends BaseAction<Question, String> {
 
     @Override
     protected Optional<Question> doAction() throws Exception {
-        questionService.delete(question);
-        return Optional.of(question);
+        if (question != null) {
+            questionService.delete(question);
+            return Optional.of(question);
+        } else {
+            return Optional.empty();
+        }
+    }
+    
+    @SneakyThrows
+    @Override
+    @Transactional
+    public Optional<Question> call() {
+        return super.call();
     }
 
     @Override
     public void initData(String questionId) {
-        question = questionService.findById(questionId).orElseThrow();
+        question = questionService.findById(questionId).orElse(null);
         this.questionId = questionId;
     }
     

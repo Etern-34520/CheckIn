@@ -19,7 +19,7 @@ public class SaveDrawingSetting extends MapResultAction {
     @Override
     protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
         saveSettingCommon.doSave();
-        return Optional.of(getSuccessMap());//TODO
+        return Optional.of(getSuccessMap());
     }
     
     @Override

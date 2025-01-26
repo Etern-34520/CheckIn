@@ -1,9 +1,11 @@
 package indi.etern.checkIn.action.question.update;
 
+import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.question.update.utils.Utils;
 import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.QuestionService;
 
 import java.util.HashSet;
@@ -14,12 +16,16 @@ import java.util.Set;
 @Action(value = "createOrUpdateQuestion", exposed = false)
 public class CreateOrUpdateQuestion extends BaseAction<Question, Map<?, ?>> {
     final QuestionService multiPartitionableQuestionService;
+    private final PartitionService partitionService;
+    private final ActionExecutor actionExecutor;
     
     private Map<?, ?> questionDataMap;
     private Question multiPartitionableQuestion = null;
     
-    public CreateOrUpdateQuestion(QuestionService multiPartitionableQuestionService) {
+    public CreateOrUpdateQuestion(QuestionService multiPartitionableQuestionService, PartitionService partitionService, PartitionService partitionService1, ActionExecutor actionExecutor) {
         this.multiPartitionableQuestionService = multiPartitionableQuestionService;
+        this.partitionService = partitionService1;
+        this.actionExecutor = actionExecutor;
     }
     
     @Override

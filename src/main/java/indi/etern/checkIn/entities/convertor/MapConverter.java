@@ -2,12 +2,14 @@ package indi.etern.checkIn.entities.convertor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @Component
+@Converter
 public class MapConverter implements AttributeConverter<Map<?,?>,String> {
     final ObjectMapper objectMapper;
     

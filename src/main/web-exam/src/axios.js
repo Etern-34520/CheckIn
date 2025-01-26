@@ -31,6 +31,7 @@ axios.interceptors.response.use(
     },
     error => {
         console.error(error);
+        return Promise.reject(error)
     }
 );
 export default {
@@ -50,7 +51,7 @@ export default {
                         }
                     },
                     error => {
-                        reject(err)
+                        reject(error)
                     });
         })
     },
@@ -61,7 +62,7 @@ export default {
                     resolve(response)
                 },
                 error => {
-                    reject(err)
+                    reject(error)
                 });
         })
     }

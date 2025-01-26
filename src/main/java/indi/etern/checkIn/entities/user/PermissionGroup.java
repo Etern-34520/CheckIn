@@ -17,7 +17,7 @@ public class PermissionGroup {
     public String description;
     
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST,  CascadeType.REFRESH, CascadeType.MERGE})
-    @JoinColumn(name = "group_name", referencedColumnName = "name")
+    @JoinColumn(name = "group_name", referencedColumnName = "name", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
     private List<Permission> permissions;
     
     public PermissionGroup(String name) {

@@ -9,6 +9,7 @@ import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
 import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
+import indi.etern.checkIn.entities.question.statistic.QuestionStatistic;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.web.WebSocketService;
 
@@ -50,10 +51,7 @@ public class QuestionUpdateUtils {
     }
 
     public static void sendDeleteQuestionsToAll(List<Question> questions) {
-        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-        map.put("type", "deleteQuestions");
-        map.put("ids", questions.stream().map(Question::getId).toList());
-        WebSocketService.singletonInstance.sendMessageToAllWithoutLog(map);
+        sendDeleteQuestionIdsToAll(questions.stream().map(Question::getId).toList());
     }
 
     public static LinkedHashMap<String,Object> getMapOfQuestion(Question question) {
@@ -134,7 +132,29 @@ public class QuestionUpdateUtils {
 
         User author = question.getAuthor();
         result.put("authorQQ", author == null ? null : author.getQQNumber());
+        
+        final Map<String, Number> statisticMap = getStatisticMap(question);
+        result.put("statistic", statisticMap);
         return result;
 //        }
+    }
+    
+    private static Map<String, Number> getStatisticMap(Question question) {
+        QuestionStatistic questionStatistic = question.getQuestionStatistic();
+        if (questionStatistic == null) return null;
+        Map<String,Number> statisticMap = new LinkedHashMap<>();
+        statisticMap.put("drewCount",questionStatistic.getDrewCount());
+        statisticMap.put("submittedCount",questionStatistic.getSubmittedCount());
+        statisticMap.put("correctCount",questionStatistic.getCorrectCount());
+        statisticMap.put("wrongCount",questionStatistic.getWrongCount());
+        statisticMap.put("examDataCount",questionStatistic.getDrewExamData().size());
+        return statisticMap;
+    }
+    
+    public static void sendDeleteQuestionIdsToAll(List<String> succeedDeletedQuestionIds) {
+        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+        map.put("type", "deleteQuestions");
+        map.put("ids", succeedDeletedQuestionIds);
+        WebSocketService.singletonInstance.sendMessageToAllWithoutLog(map);
     }
 }

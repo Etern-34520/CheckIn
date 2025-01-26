@@ -126,7 +126,7 @@ public class UserService implements UserDetailsService {
         template.execute(status -> {
             Role role = roleService.findByType(roleType).orElseThrow();
             user[0] = userRepository.findById(qq).orElseThrow();
-            user[0].setRole(role);//TODO
+            user[0].setRole(role);
             userRepository.save(user[0]);
             return Boolean.TRUE;
         });

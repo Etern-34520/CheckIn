@@ -9,11 +9,11 @@ import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.utils.PartitionUpdateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
@@ -22,10 +22,17 @@ public class UpdateQuestionsAction extends TransactionalAction {
     boolean allOwned = true;
     boolean switchEnabled = false;
     List<Object> questions;
-    @Autowired
-    ActionExecutor actionExecutor;
+    final ActionExecutor actionExecutor;
+    final QuestionService questionService;
+    final PartitionService partitionService;
     private List<String> deletedQuestionIds;
     private final Logger logger = LoggerFactory.getLogger(UpdateQuestionsAction.class);
+    
+    public UpdateQuestionsAction(ActionExecutor actionExecutor, QuestionService questionService, PartitionService partitionService) {
+        this.actionExecutor = actionExecutor;
+        this.questionService = questionService;
+        this.partitionService = partitionService;
+    }
     
     @Override
     public String requiredPermissionName() {
@@ -67,20 +74,22 @@ public class UpdateQuestionsAction extends TransactionalAction {
                 }
             }
         if (deletedQuestionIds != null) {
-            List<Question> succeedDeletedQuestions = new ArrayList<>();
+            List<String> succeedDeletedQuestionIds = new ArrayList<>();
             for (String deletedQuestionId : deletedQuestionIds) {
                 Optional<Question> result = actionExecutor.executeByTypeClass(DeleteQuestionAction.class, deletedQuestionId);
-                succeedDeletedQuestions.add(result.orElse(null));
                 if (result.isPresent()) {
+                    succeedDeletedQuestionIds.add(result.get().getId());
                     final QuestionLinkImpl<?> linkWrapper = result.get().getLinkWrapper();
                     if (linkWrapper instanceof ToPartitionsLink link) {
                         infectedPartitions.addAll(link.getTargets());
                     }
+                } else {
+                    succeedDeletedQuestionIds.add(deletedQuestionId);
                 }
             }
-            QuestionUpdateUtils.sendDeleteQuestionsToAll(succeedDeletedQuestions);
+            QuestionUpdateUtils.sendDeleteQuestionIdsToAll(succeedDeletedQuestionIds);
         }
-        QuestionService.singletonInstance.flush();
+        questionService.flush();
         QuestionUpdateUtils.sendUpdateQuestionsToAll(succeedQuestions);
         PartitionUpdateUtils.sendUpdatePartitionsToAll(infectedPartitions);
         return Optional.ofNullable(getSuccessMap());

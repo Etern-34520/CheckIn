@@ -30,25 +30,7 @@ public class GetQuestionInfoAction extends TransactionalAction {
             return Optional.of(QuestionUpdateUtils.getMapOfQuestion(questionOptional.get()));
         }
     }
-
-    /*@Override
-    public Optional<LinkedHashMap<String,Object>> getLogMessage(Optional<LinkedHashMap<String,Object>> result) {
-*//*
-        //noinspection OptionalGetWithoutIsPresent Impossible to be null
-        LinkedHashMap<String,Object> jsonObject = result.get();
-        JsonElement images1 = jsonObject.get("images");
-        if (images1 instanceof ArrayList<Object> images) {
-            for (JsonElement image : images) {
-                LinkedHashMap<String,Object> imageObject = (LinkedHashMap<String,Object>) image;
-//                imageObject.remove("url");
-//                imageObject.put("url", "[ image base64 url (masked due to length) ]");
-            }
-        }
-        return Optional.of(jsonObject);
-*//*
-        return result;
-    }*/
-
+    
     @Override
     public void initData(Map<String, Object> dataMap) {
         questionId = (String) dataMap.get("questionId");

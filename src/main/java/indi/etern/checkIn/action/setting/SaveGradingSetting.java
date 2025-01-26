@@ -45,6 +45,7 @@ public class SaveGradingSetting extends MapResultAction {
             GradingLevel gradingLevel = gradingLevelBuilder.build();
             gradingLevels.add(gradingLevel);
         });
+        gradingLevelService.deleteAll();
         gradingLevelService.saveAll(gradingLevels);
         return Optional.of(getSuccessMap());
     }

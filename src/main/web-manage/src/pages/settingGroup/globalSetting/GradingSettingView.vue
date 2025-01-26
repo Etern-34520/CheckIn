@@ -189,7 +189,8 @@ const removeLevel = (index) => {
                                         </div>
                                         <grading-level-card :disabled="!editing" v-model="data.levels[$index]"
                                                             v-model:split="data.splits"
-                                                            :score="data.questionScore * drawingData.questionAmount"
+                                                            :min="0"
+                                                            :max="data.questionScore * drawingData.questionAmount"
                                                             :predefine="predefine" :index="$index"></grading-level-card>
                                         <transition name="remove-button">
                                             <el-button class="disable-init-animate" style="margin-left: 16px;"

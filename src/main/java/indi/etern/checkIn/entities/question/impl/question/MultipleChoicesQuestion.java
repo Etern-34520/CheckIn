@@ -7,8 +7,11 @@ import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
+import indi.etern.checkIn.entities.question.interfaces.answer.Answerable;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.SettingService;
+import indi.etern.checkIn.throwable.entity.QuestionBuilderException;
+import indi.etern.checkIn.throwable.entity.QuestionException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.Fetch;
@@ -20,12 +23,12 @@ import java.util.*;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
-public class MultipleChoicesQuestion extends Question implements RandomOrderable {
+public class MultipleChoicesQuestion extends Question implements RandomOrderable, Answerable<List<String>> {
     protected boolean randomOrdered;
     
     protected MultipleChoicesQuestion() {
     }
-
+    
     public MultipleChoicesQuestion(String questionContent, List<Choice> choices/*, Set<Partition> partitions*/, User author) {
         content = questionContent;
         this.choices = choices;
@@ -43,35 +46,43 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             }
             index++;
         }
-        if (singleCorrect) type = Type.SINGLE_CORRECT;
-        else if (multipleCorrect) type = Type.MULTIPLE_CORRECT;
+        if (singleCorrect) multipleChoiceType = Type.SINGLE_CORRECT;
+        else if (multipleCorrect) multipleChoiceType = Type.MULTIPLE_CORRECT;
         else throw new QuestionException("No correct choice found");
     }
-
+    
+    boolean checkAnswer(MultipleChoiceAnswer answer) {
+        if (answer instanceof MultipleChoiceAnswer multipleChoiceAnswer) {
+            final Set<Choice> correctChoices = multipleChoiceType.getCorrectChoices(this);
+            return multipleChoiceAnswer.getSelectedChoices().containsAll(correctChoices) &&
+                    correctChoices.containsAll(multipleChoiceAnswer.getSelectedChoices());
+        } else {
+            throw new ClassCastException("MultipleChoiceAnswer type not match");
+        }
+    }
+    
+    @Override
+    public MultipleChoiceAnswer newAnswerFrom(List<String> choiceIds) {
+        final MultipleChoiceAnswer multipleChoiceAnswer = new MultipleChoiceAnswer();
+        multipleChoiceAnswer.initFromSource(this,choiceIds);
+        return multipleChoiceAnswer;
+    }
+    
     public enum Type {
-        SINGLE_CORRECT("single_correct") {
-            private Choice correctChoice;
-
-            public Choice getCorrectChoice(List<Choice> choices) {
-                if (correctChoice != null) {
-                    return correctChoice;
-                }
+        SINGLE_CORRECT() {
+            public Set<Choice> getCorrectChoices(MultipleChoicesQuestion question) {
+                List<Choice> choices = question.getChoices();
                 for (Choice choice : choices) {
                     if (choice.isCorrect()) {
-                        correctChoice = choice;
-                        return choice;
+                        return Collections.singleton(choice);
                     }
                 }
                 throw new QuestionException("No correct choice found");
             }
-        }, MULTIPLE_CORRECT("multiple_correct") {
-            private List<Choice> correctChoices;
-
-            public List<Choice> getCorrectChoices(List<Choice> choices) {
-                if (correctChoices != null) {
-                    return correctChoices;
-                }
-                List<Choice> correctChoices = new ArrayList<>();
+        }, MULTIPLE_CORRECT() {
+            public Set<Choice> getCorrectChoices(MultipleChoicesQuestion question) {
+                List<Choice> choices = question.getChoices();
+                Set<Choice> correctChoices = new HashSet<>();
                 for (Choice choice : choices) {
                     if (choice.isCorrect()) {
                         correctChoices.add(choice);
@@ -80,28 +91,31 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
                 if (correctChoices.isEmpty()) {
                     throw new QuestionException("No correct choice found");
                 }
-                this.correctChoices = correctChoices;
                 return correctChoices;
             }
         };
-
-        private final String name;
-
-        Type(String name) {
-            this.name = name;
-        }
+        
+        abstract Set<Choice> getCorrectChoices(MultipleChoicesQuestion question);
     }
-
-    @Column(name = "sub_type", nullable = false)
+    
+    @Column(name = "sub_type")
 //    @Enumerated(EnumType.STRING)
-    MultipleChoicesQuestion.Type type;
-
+    MultipleChoicesQuestion.Type multipleChoiceType;
+    
     @OrderBy("orderIndex")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Fetch(value = FetchMode.SUBSELECT)
-    @JoinColumn(name = "question_id", referencedColumnName = "id")
+    @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
     List<Choice> choices;
-
+    
+    private void setRandomOrdered(boolean randomOrdered) {
+        this.randomOrdered = randomOrdered;
+    }
+    
+    private void setId(String id) {
+        this.id = id;
+    }
+    
     @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
         MultipleChoicesQuestion multipleQuestion;
@@ -202,15 +216,15 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
                     singleCorrect = false;
                 }
             }
-
+            
             if (!singleCorrect && !multipleCorrect) {
-                throw new MultipleQuestionBuilderException("No correct choice found");
+                throw new QuestionBuilderException("No correct choice found");
             }
             if (questionContent == null) {
-                throw new MultipleQuestionBuilderException("Question content not set");
+                throw new QuestionBuilderException("Question content not set");
             }
             if (choices.size() < 2) {
-                throw new QuestionException("Less than two choices");
+                throw new QuestionBuilderException("Less than two choices");
             }
             if (linkWrapper == null) {
                 String string = SettingService.singletonInstance.getItem("other.defaultPartitionName").getValue(String.class);
@@ -226,52 +240,22 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             } else {
                 multipleQuestion.initId();
             }
+            if (singleCorrect) {
+                multipleQuestion.multipleChoiceType = Type.SINGLE_CORRECT;
+            } else {
+                multipleQuestion.multipleChoiceType = Type.MULTIPLE_CORRECT;
+            }
             if (!manualLink) {
                 multipleQuestion.setLinkWrapper(linkWrapper);
             }
-/*
-            if (!manualLink && linkWrapper == null) {
-                throw new QuestionException("link not set");
-            }
-*/
-/*
-            if (id != null) {
-                try {
-                    final Field idField = Question.class.getDeclaredField("id");
-                    idField.setAccessible(true);
-                    idField.set(multipleQuestion, id);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new MultipleQuestionBuilderException("editing id");
-                }
-            } else {
-                multipleQuestion.initId();
-            }
-*/
-/*
-            if (!questionContent.isEmpty()) {//非模板题目
-                for (Partition partition : partitions) {
-    //                final PartitionService partitionService = (PartitionService) CheckInApplication.applicationContext.getBean("partitionService");
-                    PartitionService.singletonInstance.addQuestionOf(partition, multipleQuestion);
-    //                partition.addQuestion(multipleQuestion);
-                }
-            }
-*/
-//            if (multipleQuestion instanceof ImagesWith imagesWith)
             multipleQuestion.setImageBase64Strings(imageBase64Strings);
             return multipleQuestion;
         }
-
+        
         public Builder setId(String id) {
             this.id = id;
             return this;
         }
     }
     
-    private void setRandomOrdered(boolean randomOrdered) {
-        this.randomOrdered = randomOrdered;
-    }
-    
-    private void setId(String id) {
-        this.id = id;
-    }
 }

@@ -1,7 +1,7 @@
 package indi.etern.checkIn.action;
 
 import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.auth.PermissionDeniedException;
+import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
 import lombok.AccessLevel;
 import lombok.Getter;

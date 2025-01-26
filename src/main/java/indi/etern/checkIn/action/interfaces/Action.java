@@ -16,6 +16,5 @@ import java.lang.annotation.Target;
 public @interface Action {
     @AliasFor(annotation = Component.class)
     String value();
-    //TODO
     boolean exposed() default true;
 }

@@ -26,9 +26,7 @@ const WebSocketConnector = {
     connect: function (qq, token) {
         qq1 = qq;
         token1 = token;
-        // let url = "localhost:8080"//TODO window.location.host;
         let url = window.location.host;
-        // let url = window.location.hostname + ":8080";
         return new Promise((resolve, reject) => {
             const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
             ws.onclose = function () {
@@ -114,7 +112,7 @@ const WebSocketConnector = {
                                 delete message.disableNotification;
                                 if (showNotification) {
                                     ElNotification({
-                                        title: 'Websocket错误',
+                                        title: '执行操作时出错',
                                         message: message.message,
                                         position: 'bottom-right',
                                         type: 'error',

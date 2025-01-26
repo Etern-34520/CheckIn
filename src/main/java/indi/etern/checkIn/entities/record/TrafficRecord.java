@@ -21,7 +21,9 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class TrafficRecord implements BaseEntity<String> {
     @Id
+    @Column(columnDefinition = "char(36)")
     protected String id;
+    @Column(columnDefinition = "char(32)")
     protected String sessionId;
     @Column(name = "record_time")
     protected LocalDateTime time;
@@ -36,14 +38,17 @@ public class TrafficRecord implements BaseEntity<String> {
     
     @Convert(converter = MapConverter.class)
     @Lazy
+    @Column(columnDefinition = "text")
     protected Map<String,String> header;
     
     @Convert(converter = MapConverter.class)
     @Lazy
+    @Column(columnDefinition = "text")
     protected Map<String,String> attributes;
     
     @Convert(converter = MapConverter.class)
     @Lazy
+    @Column(columnDefinition = "text")
     protected Map<String,Object> extraData;
     
     public Map<String,Object> getExtraData() {
@@ -52,7 +57,7 @@ public class TrafficRecord implements BaseEntity<String> {
     }
     
     public enum Type {
-        VISIT,GENERATE,SUBMIT, LOAD_LAST, GET_RESULT
+        VISIT,GENERATE,SUBMIT
     }
     
     public static TrafficRecord from(HttpServletRequest httpServletRequest) {

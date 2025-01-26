@@ -5,7 +5,7 @@ import indi.etern.checkIn.MVCConfig;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.Result;
 import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.auth.PermissionDeniedException;
+import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.websocket.*;

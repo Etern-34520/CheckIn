@@ -2,23 +2,23 @@ package indi.etern.checkIn.service.exam;
 
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.service.exam.throwable.NotEnoughQuestionsForExamException;
-import indi.etern.checkIn.service.exam.throwable.PartitionEmptiedException;
-import indi.etern.checkIn.service.exam.throwable.PartitionMaxLimitReachedException;
+import indi.etern.checkIn.throwable.exam.generate.NotEnoughQuestionsForExamException;
+import indi.etern.checkIn.throwable.exam.generate.PartitionEmptiedException;
+import indi.etern.checkIn.throwable.exam.generate.PartitionMaxLimitReachedException;
 import indi.etern.checkIn.utils.QuestionRealCountCounter;
 import indi.etern.checkIn.utils.WeightRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public enum DrawingStrategy {
     WEIGHTED {
         @Override
-        public void drawQuestions(LinkedHashSet<Question> questions , Map<Partition, PartitionQuestionDrawer> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
+        public void drawQuestions(Set<Question> questions , Map<Partition, PartitionQuestionDrawer> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
             WeightRandom<PartitionQuestionDrawer> partitionQuestionDrawerWeightRandom = new WeightRandom<>(random);
             final List<WeightRandom.Part<PartitionQuestionDrawer>> weightedParts =
                     map.values().stream().map(partitionQuestionDrawer ->
@@ -35,7 +35,7 @@ public enum DrawingStrategy {
                     throw new IndexOutOfBoundsException(count + " > " + targetQuestionAmount);
                 }
                 WeightRandom.Part<PartitionQuestionDrawer> partitionQuestionDrawerPart;
-                try {//FIXME
+                try {
                     partitionQuestionDrawerPart = partitionQuestionDrawerWeightRandom.weightedRandomPart();
                 } catch (IllegalStateException|ArrayIndexOutOfBoundsException e) {
                     throw new NotEnoughQuestionsForExamException(e);
@@ -56,7 +56,7 @@ public enum DrawingStrategy {
     },
     RANDOM {
         @Override
-        public void drawQuestions(LinkedHashSet<Question> questions, Map<Partition, PartitionQuestionDrawer> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
+        public void drawQuestions(Set<Question> questions, Map<Partition, PartitionQuestionDrawer> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
             while (true) {
                 final int count = QuestionRealCountCounter.count(questions);
                 if (count == targetQuestionAmount) {
@@ -85,5 +85,5 @@ public enum DrawingStrategy {
     };
     final Logger logger = LoggerFactory.getLogger(getClass());
     
-    public abstract void drawQuestions(LinkedHashSet<Question> questions, Map<Partition, PartitionQuestionDrawer> map, Random random, int questionAmount) throws NotEnoughQuestionsForExamException;
+    public abstract void drawQuestions(Set<Question> questions, Map<Partition, PartitionQuestionDrawer> map, Random random, int questionAmount) throws NotEnoughQuestionsForExamException;
 }

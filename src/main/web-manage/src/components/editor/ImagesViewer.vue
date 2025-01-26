@@ -27,6 +27,8 @@ const onKeyDown1 = (event) => {
         if (index.value < props.images.length - 1) index.value = index.value + 1;
     } else if (event.code === "ArrowLeft") {
         if (index.value > 0) index.value = index.value - 1;
+    } else if (event.code === "Escape") {
+        model.value = false;
     }
 }
 onMounted(() => {

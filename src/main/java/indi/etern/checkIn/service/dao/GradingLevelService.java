@@ -4,6 +4,8 @@ import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.repositories.GradingLevelRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class GradingLevelService {
     private final GradingLevelRepository gradingLevelRepository;
@@ -25,7 +27,7 @@ public class GradingLevelService {
         gradingLevelRepository.deleteAll();
     }
     
-    public Iterable<GradingLevel> findAll() {
+    public List<GradingLevel> findAll() {
         return gradingLevelRepository.findAll();
     }
     

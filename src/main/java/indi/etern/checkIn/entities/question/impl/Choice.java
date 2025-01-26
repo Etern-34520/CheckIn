@@ -1,5 +1,6 @@
 package indi.etern.checkIn.entities.question.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -13,17 +14,16 @@ import java.io.Serializable;
 @Table(name = "choices")
 public class Choice implements Serializable {
     @Id
-    @Column(name = "ID")
+    @Column(columnDefinition = "char(36)")
     private String id;
     
-    @Column(name = "CONTENT")
     private String content;
     
-    @Column(name = "IS_CORRECT")
+    @JsonIgnore
     private Boolean isCorrect;
     
     @Setter
-    @Column(name = "ORDER_INDEX")
+    @JsonIgnore
     private int orderIndex;
     
 /*
@@ -41,6 +41,7 @@ public class Choice implements Serializable {
         id = String.valueOf(super.hashCode());
     }
     
+    @JsonIgnore
     public boolean isCorrect() {
         return isCorrect;
     }

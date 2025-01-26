@@ -20,7 +20,7 @@ public class Permission {
     protected PermissionGroup group;
 */
     @Id
-    @Column(name = "ID")
+    @Column(name = "ID", columnDefinition = "char(36)")
     private String id;
     @Column(name = "description")
     @Setter

@@ -34,6 +34,7 @@
     --el-color-primary-1: #859ba6 !important;
     --el-color-primary-2: #7a8a99 !important;
     --el-color-primary-3: #707e8c !important;
+    /*--el-color-primary: AccentColor !important;*/
     --html-bg: rgb(240, 245, 245);
     --menu-shadow: 4px 0 32px rgba(0, 0, 0, 0.1);
     --menu-bg-color-alpha: rgba(240, 240, 240, 0.6);
@@ -121,11 +122,13 @@
     transform: scale(0.98);
 }
 
+.el-date-editor--daterange,
 .el-input {
     background: var(--el-bg-color);
     border: var(--border-1) !important;
 }
 
+.el-date-editor--daterange:not(.disable-init-animate),
 .el-input:not(.disable-init-animate) {
     animation: var(--init-animation);
     animation-fill-mode: backwards;
@@ -509,6 +512,15 @@
     top: 7px !important;
 }
 
+.el-date-editor--daterange {
+    border-radius: 4px;
+    margin: 0;
+    background: var(--lighting-effect-background-2);
+    transition-delay: 50ms;
+    height: 100%;
+    place-items: baseline !important;
+}
+
 .el-input > *, .el-textarea > *, .el-select__wrapper {
     border-radius: 4px;
     margin: 0;
@@ -556,6 +568,7 @@
     background: linear-gradient(180deg, transparent calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
 }*/
 
+.el-date-editor--daterange,
 .el-input:not(.is-focus) > div,
 .el-textarea,
 .el-textarea > textarea,
@@ -582,6 +595,7 @@
     min-height: 22px !important;
 }
 
+.el-date-editor--daterange,
 .el-textarea, .el-input, .el-select {
     box-sizing: border-box;
     border-radius: 4px !important;
@@ -600,12 +614,15 @@
     background: var(--lighting-effect-background-2);
 }
 
+.el-date-editor--daterange:not(.is-disabled):hover,
+.el-date-editor--daterange:not(.is-disabled).is-active,
 .el-textarea:not(.is-disabled):hover,
 .el-input:not(.is-disabled):hover,
     /*.el-input-number:not(.is-disabled):has(:hover),*/
-.el-select:not(.is-disabled):hover/*,
+.el-select:not(.is-disabled):hover /*,
 *:not(.el-tabs__nav):has(> .is-focused),
-*:not(.el-checkbox):not(.el-radio-group):not(.el-tabs__nav):has(> .is-focus)*/ {
+*:not(.el-checkbox):not(.el-radio-group):not(.el-tabs__nav):has(> .is-focus)*/
+{
     background: var(--panel-bg-color-overlay);
 }
 
@@ -641,6 +658,7 @@
     margin-bottom: 8px;
 }
 
+.el-date-editor--daterange::after,
 .question-input::after,
 .el-input::after, .el-textarea::after, .el-select::after, .el-checkbox::after {
     content: "";
@@ -665,10 +683,16 @@
     top: calc(100% - 4px);
 }
 
-.question-input.warning::after, .question-input.error::after,
+.el-date-editor--daterange.is-active::after,
 .el-input:has(.is-focus)::after, .el-textarea:has(textarea:focus)::after, .el-select:has(.is-focused)::after,
 .el-input-number.error > .el-input::after, .el-input-number.warning > .el-input::after,
+
+.question-input.warning::after,
+.el-date-editor--daterange.warning::after,
 .el-input.warning::after, .el-textarea.warning::after, .el-select.warning::after, .el-checkbox.warning::after,
+
+.question-input.error::after,
+.el-date-editor--daterange.error::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
     opacity: 1;
     width: 98%;
@@ -676,6 +700,7 @@
     filter: none;
 }
 
+.el-date-editor--daterange.warning::after,
 .el-input-number .el-input:has(.is-focus)::after,
 .el-input-number .el-input.warning::after,
 .el-input-number .el-input.error::after {
@@ -683,6 +708,7 @@
     left: calc(1% + 35px);
 }
 
+.el-date-editor--daterange.error::after,
 .el-input-number.is-without-controls .el-input:has(.is-focus)::after,
 .el-input-number.is-without-controls .el-input.warning::after,
 .el-input-number.is-without-controls .el-input.error::after {
@@ -701,6 +727,7 @@
     border-radius: 4px;
 }
 
+.el-date-editor--daterange:hover,
 .el-input-number .el-input-number__decrease:hover,
 .el-input-number .el-input-number__increase:hover {
     background: var(--panel-bg-color-overlay);

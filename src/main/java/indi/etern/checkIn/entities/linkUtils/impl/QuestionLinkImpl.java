@@ -3,10 +3,7 @@ package indi.etern.checkIn.entities.linkUtils.impl;
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.linkUtils.Link;
 import indi.etern.checkIn.entities.question.impl.Question;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +15,7 @@ public class QuestionLinkImpl<T extends BaseEntity<?>> implements Link<Question,
     @OneToOne(mappedBy = "linkWrapper")
     protected Question source;
     @Id
+    @Column(columnDefinition = "char(36)")
     protected String id;
     
     public void setSource(Question source) {

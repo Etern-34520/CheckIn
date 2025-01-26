@@ -1,6 +1,7 @@
 package indi.etern.checkIn;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,9 @@ public class MVCConfig implements WebMvcConfigurer {
     @Bean
     public ObjectMapper objectMapper(){
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+//        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+//        objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
         return objectMapper;
     }
 

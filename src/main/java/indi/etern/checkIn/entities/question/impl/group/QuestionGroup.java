@@ -8,9 +8,11 @@ import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.question.QuestionException;
 import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
+import indi.etern.checkIn.entities.question.interfaces.answer.Answerable;
+import indi.etern.checkIn.entities.question.interfaces.answer.SingleQuestionAnswer;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.throwable.entity.QuestionBuilderException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +23,9 @@ import java.util.*;
 
 @Getter
 @Entity
-public class QuestionGroup extends Question implements LinkTarget, LinkSource<QuestionLinkImpl<?>>, RandomOrderable {
+public class QuestionGroup extends Question implements
+        LinkTarget, LinkSource<QuestionLinkImpl<?>>,
+        RandomOrderable, Answerable<List<SingleQuestionAnswer>> {
     @Setter
     protected boolean randomOrdered;
     
@@ -136,7 +140,7 @@ public class QuestionGroup extends Question implements LinkTarget, LinkSource<Qu
             QuestionGroup questionGroup;
             ToPartitionsLink link;
             if (partitions.isEmpty()) {
-                throw new QuestionException("link to partitions is not set");
+                throw new QuestionBuilderException("link to partitions is not set");
             } else {
                 link = new ToPartitionsLink();
                 Set<Partition> targets = link.getTargets();
@@ -171,5 +175,12 @@ public class QuestionGroup extends Question implements LinkTarget, LinkSource<Qu
             imageBase64Strings.put(name, base64String);
             return this;
         }
+    }
+    
+    @Override
+    public QuestionGroupAnswer newAnswerFrom(List<SingleQuestionAnswer> singleQuestionAnswers) {
+        final QuestionGroupAnswer questionGroupAnswer = new QuestionGroupAnswer();
+        questionGroupAnswer.initFromSource(this,singleQuestionAnswers);
+        return questionGroupAnswer;
     }
 }

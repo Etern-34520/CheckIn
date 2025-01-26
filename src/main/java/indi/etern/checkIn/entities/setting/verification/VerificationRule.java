@@ -1,6 +1,6 @@
 package indi.etern.checkIn.entities.setting.verification;
 
-import indi.etern.checkIn.entities.convertor.ListJsonConvertor;
+import indi.etern.checkIn.entities.convertor.ListJsonConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,16 +15,17 @@ import java.util.List;
 @Getter
 public class VerificationRule {
     @Id
+    @Column(columnDefinition = "char(36)")
     String id;
     String objectName;
-    @Convert(converter = ListJsonConvertor.class)
+    @Convert(converter = ListJsonConverter.class)
     List<String> trace;
     String verificationType;
     String targetInputName;
     String level;
     @Column(name = "order_index")
     int index;
-    @Convert(converter = ListJsonConvertor.class)
+    @Convert(converter = ListJsonConverter.class)
     @Column(name = "data_values")
     List<Object> values;
     String tipTemplate;

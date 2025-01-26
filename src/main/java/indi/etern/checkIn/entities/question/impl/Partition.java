@@ -9,8 +9,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 
 import java.io.Serializable;
 import java.util.*;
@@ -21,32 +19,14 @@ import java.util.*;
 public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> {
     private static final Map<String, Partition> partitionMap = new HashMap<>();
     private static final Map<Integer, Partition> partitionIdMap = new HashMap<>();
-    @Column(name = "name", unique = true, length = 191, nullable = false)//max 767 bytes
+    @Column(name = "name", unique = true, nullable = false)
     String name;
     
-    /*To fix not found question id
-     * caused by:
-     * before the question save
-     * jpa must save the partition
-     * but the partition refers to the unsaved question
-     * don't worry about the sync
-     * jpa will save the question at last*/
-    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "targets")
     @Fetch(value = FetchMode.SUBSELECT)
-    @NotFound(action = NotFoundAction.IGNORE)
-    @JoinTable(name = "questions_link_mapping",
-            joinColumns = @JoinColumn(name = "partition_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id"))
     Set<ToPartitionsLink> questionLinks;
     
-/*
-    @Transient
-    private Set<Question> sortedQuestion;
-*/
-    
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @SequenceGenerator(value = "partitions_SEQ", sequenceName = "partitions_SEQ", allocationSize = 1)
     private int id;
     
     public Integer getId() {
@@ -172,7 +152,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
         Map<String,Object> partitionInfo = new LinkedHashMap<>();
         partitionInfo.put("id", id);
         partitionInfo.put("name", name);
-        partitionInfo.put("empty", getEnabledQuestionCount() == 0);
+        partitionInfo.put("empty", questionLinks.isEmpty());
         partitionInfo.put("enabledQuestionCount", getEnabledQuestionCount());
         partitionInfo.put("questionAmount", questionLinks.size());
         return partitionInfo;

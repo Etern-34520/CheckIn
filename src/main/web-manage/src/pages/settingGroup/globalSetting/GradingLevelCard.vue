@@ -22,11 +22,16 @@ const props = defineProps({
         type: Number,
         required: true
     },
-    score: {
-        type: Number
-    },
     disabled: {
         type: Boolean,
+        required: true
+    },
+    min: {
+        type: Number,
+        required: true
+    },
+    max: {
+        type: Number,
         required: true
     }
 });
@@ -60,10 +65,10 @@ const props = defineProps({
         </collapse>
         <el-text class="field-label disable-init-animate">分数</el-text>
         <div style="display: flex;flex-direction: row">
-            <el-input-number v-model="split[index]" :disabled="disabled" style="margin-right: 16px"></el-input-number>
+            <el-input-number class="disable-init-animate" :min="min + 1" :max="max - 1" v-model="split[index]" :disabled="disabled" style="margin-right: 16px"></el-input-number>
             <el-text size="large" style="margin-right: 16px">~</el-text>
-            <el-input-number v-if="split[index+1]" :disabled="disabled" v-model="split[index+1]"></el-input-number>
-            <el-input-number v-else :model-value="score" disabled></el-input-number>
+            <el-input-number class="disable-init-animate" :min="min + 1" :max="max - 1" v-if="split[index+1]" :disabled="disabled" v-model="split[index+1]"></el-input-number>
+            <el-input-number class="disable-init-animate" v-else :model-value="max" disabled></el-input-number>
         </div>
     </div>
 </template>

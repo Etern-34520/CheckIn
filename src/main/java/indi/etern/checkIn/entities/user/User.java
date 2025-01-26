@@ -32,7 +32,7 @@ public class User implements UserDetails {
     protected String password;
     @Getter
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "ROLE_TYPE")
+    @JoinColumn(name = "ROLE_TYPE", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
 //    @NotFound(action = NotFoundAction.IGNORE)
     protected Role role;
 /*
@@ -141,7 +141,7 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<Authority> authorities = new ArrayList<>();
         for (Permission permission : role.getPermissions()) {
-            authorities.add(new Authority(permission.getName()/*, PermissionType.WEB*/));//FIXME
+            authorities.add(new Authority(permission.getName()));
         }
         return authorities;
     }

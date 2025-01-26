@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action;
 
-import indi.etern.checkIn.auth.PermissionDeniedException;
+import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

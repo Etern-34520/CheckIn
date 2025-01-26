@@ -9,8 +9,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import _Loading_ from "@/components/common/_Loading_.vue";
 
-// noinspection ES6UnusedImports
-import UIMeta from '@/utils/UI_Meta.js';
+import '@/utils/UI_Meta.js';
 const app = createApp(App);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component);

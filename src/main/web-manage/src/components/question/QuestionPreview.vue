@@ -2,7 +2,7 @@
 import MultipleChoicesPreviewModule from "@/components/editor/module/MultipleChoicesPreviewModule.vue";
 import QuestionGroupSubQuestionPreviewModule
     from "@/components/editor/module/QuestionGroupSubQuestionPreviewModule.vue";
-import {MdCatalog, MdEditor} from "md-editor-v3";
+import {MdEditor} from "md-editor-v3";
 import UIMeta from "@/utils/UI_Meta.js";
 import ImagesViewer from "@/components/editor/ImagesViewer.vue";
 // import 'md-editor-v3/lib/preview.css';
@@ -50,7 +50,7 @@ const onPreview = (file) => {
 </script>
 
 <template>
-    <div :class="{mobile:forceMobile,desktop:!forceMobile}" class="preview-base"
+    <div :class="{mobile:forceMobile,desktop:!forceMobile}" class="question-view-base"
          ref="preview">
         <images-viewer :images="questionInfo.question.images" v-model="imageViewerVisible" v-model:index="viewerIndex"
                        v-if="questionInfo.question && questionInfo.question.images && questionInfo.question.images.length>0"/>
@@ -60,12 +60,12 @@ const onPreview = (file) => {
             <div ref="images" class="images">
                 <el-image class="image" v-for="image of questionInfo.question.images" @click="onPreview(image)" :src="image.url">
                     <template #error>
-                        <div class="image-slot">
-                            <el-icon>
-                                <Picture/>
-                            </el-icon>
-                        </div>
-                    </template>
+                    <div class="image-slot">
+                        <el-icon>
+                            <Picture/>
+                        </el-icon>
+                    </div>
+                </template>
                 </el-image>
             </div>
         </el-scrollbar>
@@ -82,7 +82,7 @@ const onPreview = (file) => {
 </template>
 
 <style scoped>
-.preview-base {
+.question-view-base {
     display: flex;
     box-sizing: border-box;
     width: 100%;
@@ -93,7 +93,7 @@ const onPreview = (file) => {
     }
 }
 
-.preview-base.desktop {
+.question-view-base.desktop {
     flex-direction: row;
 
     > .images-scrollbar {
@@ -106,7 +106,7 @@ const onPreview = (file) => {
     }
 }
 
-.preview-base.mobile {
+.question-view-base.mobile {
     flex-direction: column;
 
     > .images-scrollbar {
@@ -125,25 +125,25 @@ const onPreview = (file) => {
 }
 
 
-.preview-base > .images-scrollbar .images {
+.question-view-base > .images-scrollbar .images {
     display: flex;
 }
 
-.preview-base.desktop > .images-scrollbar .images {
+.question-view-base.desktop > .images-scrollbar .images {
     padding: 0 10px;
     flex-direction: column;
 }
 
-.preview-base.mobile > .images-scrollbar .images {
+.question-view-base.mobile > .images-scrollbar .images {
     padding: 0;
     flex-direction: row;
 }
 
-.preview-base.desktop > .images-scrollbar .images > *:not(:last-child) {
+.question-view-base.desktop > .images-scrollbar .images > *:not(:last-child) {
     margin: 0 0 12px;
 }
 
-.preview-base.mobile > .images-scrollbar .images > *:not(:last-child) {
+.question-view-base.mobile > .images-scrollbar .images > *:not(:last-child) {
     margin: 0 12px 0 0;
 }
 

@@ -8,6 +8,5 @@ import java.util.Optional;
 @org.springframework.stereotype.Repository
 public interface PartitionRepository extends JpaRepository<Partition,Integer> {
     boolean existsByName(String partitionName);
-
     Optional<Partition> findByName(String name);
 }

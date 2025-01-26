@@ -76,7 +76,7 @@
     --icon-color-reverse: var(--icon-color-dark);
     --icon-color-reverse-1: var(--icon-color-dark-1);
     --front-color: var(--front-color-light);
-    --front-color-reserse: var(--front-color-light);
+    --front-color-reserse: var(--front-color-dark);
     --slider-button-color: rgb(60, 60, 60);
     --dialog-bg-color: rgba(30, 30, 30, 0.6);
     --dialog-footer-color: rgba(10, 10, 10, 0.6);
@@ -728,6 +728,7 @@
     border: var(--border-1) !important;
     transition: background-color 200ms var(--ease-in-out-quint);
     font-weight: normal !important;
+    text-align: center;
 }
 
 .el-check-tag--primary {
@@ -752,8 +753,8 @@
 }
 
 .el-check-tag.is-checked::after {
-    width: 60% !important;
-    left: 20% !important;
+    width: max(calc(100% - 8px),60%) !important;
+    left: min(4px,20%) !important;
     opacity: 1 !important;
     margin-top: 4px !important;
 }
@@ -1185,3 +1186,7 @@ input:autofill {
 input:-webkit-autofill {
     transition: 1000000000000000000000s linear 100000000000000000000000s;
 }*/
+
+.el-anchor {
+    --el-anchor-bg-color: rgba(0,0,0,0) !important;
+}

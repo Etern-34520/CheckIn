@@ -1,10 +1,12 @@
 package indi.etern.checkIn.entities.question.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.convertor.MapConverter;
-import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.Link;
+import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
+import indi.etern.checkIn.entities.question.statistic.QuestionStatistic;
 import indi.etern.checkIn.entities.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,18 +26,24 @@ import java.util.UUID;
 @Table(name = "questions")
 public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<String> {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
-    @Column(name = "content")
+    @Column(name = "content",columnDefinition = "text")
     protected String content;
 
 //    protected int hashcode;
     
-    @JoinColumn(name = "author_qqnumber")
+    @JoinColumn(name = "author_qqnumber", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @NotFound(action = NotFoundAction.IGNORE)
+    @JsonIgnore
     protected User author = null;// = User.exampleOfName("unknown");
     
     @Column(name = "last_modified_time")
     protected LocalDateTime lastModifiedTime;
+    
+    @OneToOne(mappedBy = "question", orphanRemoval = true)
+    @JsonIgnore
+    @NotFound(action = NotFoundAction.IGNORE)
+    protected QuestionStatistic questionStatistic;
     
     @Getter
     @Setter
@@ -43,29 +51,32 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     
     @Getter
     @JoinTable(name = "upvoters_questions_mapping",
-            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber"))
+            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)))
     @ManyToMany(cascade = {
             CascadeType.REFRESH
     }, fetch = FetchType.EAGER)
+    @JsonIgnore
     protected Set<User> upVoters = new HashSet<>();
-    
     
     @Getter
     @ManyToMany(cascade = {
             CascadeType.REFRESH
     }, fetch = FetchType.EAGER)
     @JoinTable(name = "downvoters_questions_mapping",
-            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber"))
+            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)))
+    @JsonIgnore
     protected Set<User> downVoters = new HashSet<>();
     
     @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL,orphanRemoval = true)
-    @JoinColumn(name = "id", referencedColumnName = "id")
+    @JoinColumn(name = "id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnore
     protected QuestionLinkImpl<?> linkWrapper;
     
     @Id
-    @Column(name = "id")
+    @Column(columnDefinition = "char(36)")
+    @JsonIgnore
     protected String id;
     @Setter
     @Convert(converter = MapConverter.class)
@@ -115,4 +126,9 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
         this.linkWrapper = linkWrapper;
         ((Link<Question, ?>) linkWrapper).setSource(this);
     }
+    
+    /**
+     * for Jackson
+     * */
+    public String getType() {return getClass().getSimpleName();}
 }

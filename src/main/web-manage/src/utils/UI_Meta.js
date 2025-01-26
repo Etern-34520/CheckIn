@@ -18,7 +18,7 @@ const checkColorScheme = () => {
     }
 };
 const checkMobile = () => {
-    mobile.value = window.innerWidth < 960;
+    mobile.value = window.innerWidth <= 720;
     if (mobile.value) {
         if (!htmlHtmlElement.classList.contains("mobile")) {
             htmlHtmlElement.classList.add("mobile");

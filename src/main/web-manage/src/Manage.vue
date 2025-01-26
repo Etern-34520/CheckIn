@@ -12,7 +12,8 @@ onBeforeMount(() => {
 const menuInlineStyle = ref(false);
 
 const breadcrumbMap = {
-    "traffic": "流量",
+    "request-record": "请求记录",
+    "exam-record": "答题记录",
     "questions": "题库",
     "manage-user": "用户管理",
     "manage-group": "组管理",

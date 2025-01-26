@@ -115,7 +115,7 @@ const loadNode = (node, resolve, reject) => {
         };
         PartitionCache.getRefPartitionsAsync().then((partitions) => {
             let data = [createPartitionButtonData];
-            for (const [id,partition] of Object.entries(partitions.value)) {
+            for (const [id, partition] of Object.entries(partitions.value)) {
                 data.push(getTreeNodeDataOfPartition(partition));
             }
             loading.value = false;
@@ -125,7 +125,7 @@ const loadNode = (node, resolve, reject) => {
         if (node.data.data.loaded) {
             resolve(node.data.data.loadedChildren);
         } else {
-            loadPartitionChildrenNode(partitionId, node.data.empty, resolve, reject);
+            loadPartitionChildrenNode(partitionId, node.data.questionAmount === 0, resolve, reject);
         }
     }
     /*resolve(data);*/
@@ -136,7 +136,7 @@ function getTreeNodeDataOfPartition(partition) {
         id: partition.id,
         treeId: partition.id,
         zones: [],
-        empty: partition.empty,
+        // empty: partition.empty,
         data: {
             editing: false,
             partition: partition,
@@ -146,20 +146,22 @@ function getTreeNodeDataOfPartition(partition) {
 }
 
 PartitionCache.registerOnPartitionAdded((partition) => {
-    partition.empty = true;
     tree.value.append(getTreeNodeDataOfPartition(partition), tree.value.root);
 });
 PartitionCache.registerOnPartitionDeleted((partition) => {
     tree.value.remove(tree.value.getNode(partition.id));
+    QuestionCache.removePartitionFromAllQuestions(partition);
 });
 
 QuestionCache.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) => {
     for (let partitionId of questionInfo.question.partitionIds) {
         if (tree.value.getNode(partitionId + "/" + questionInfo.question.id) === null) {
             const questionNode = QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId);
-            if (localPartitionQuestionData[partitionId] === false)
-                tree.value.append(questionNode, tree.value.getNode(partitionId));
-            else {
+            if (localPartitionQuestionData[partitionId] === false) {
+                const node1 = tree.value.getNode(partitionId);
+                if (node1 !== null)
+                    tree.value.append(questionNode, node1);
+            } else {
                 if (localPartitionQuestionData[partitionId] === undefined) {
                     localPartitionQuestionData[partitionId] = []
                     localPartitionQuestionData[partitionId].push(questionNode);
@@ -177,7 +179,7 @@ QuestionCache.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) =
             }
         }
     }
-    for (const [id,partition] of Object.entries(PartitionCache.refPartitions.value)) {
+    for (const [id, partition] of Object.entries(PartitionCache.refPartitions.value)) {
         if (questionInfo.question.partitionIds && questionInfo.question.partitionIds.includes(partition.id)) {
             continue;
         }
@@ -213,7 +215,7 @@ QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
     if (router.currentRoute.value.params.id === id) {
         router.push({name: "questions"});
     }
-    for (let partition of PartitionCache.refPartitions.value) {
+    for (const [partitionId, partition] of Object.entries(PartitionCache.refPartitions.value)) {
         let questionNode = tree.value.getNode(partition.id + "/" + id);
         if (questionNode !== null) {
             tree.value.remove(questionNode);
@@ -223,9 +225,11 @@ QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
 
 const openEdit = (questionId) => {
     responsiveSplitpane.value.hideLeft();
-    router.push({name:'question-detail',params: {
-        id: questionId
-    }});
+    router.push({
+        name: 'question-detail', params: {
+            id: questionId
+        }
+    });
 }
 
 const onEdit = (nodeObj, nodeItem, node, event) => {
@@ -577,7 +581,7 @@ const rectifyCheck = (nodeObj, checkStatus) => {
     } else if (dataType === "partition") {
         //FIXME
         if (!QuestionCache.loadedPartitionIds.has(nodeObj.treeId)) {
-            loadPartitionChildrenNode(nodeObj.treeId, nodeObj.data.empty, (data) => {
+            loadPartitionChildrenNode(nodeObj.treeId, nodeObj.data.questionAmount === 0, (data) => {
                 nodeObj.data.loadedChildren = data;
                 nodeObj.data.loaded = true;
                 for (const questionNode of data) {
@@ -616,34 +620,17 @@ function onDeleteNode(nodeObj) {
                         type: "warning"
                     }
             ).then(() => {
-                QuestionCache.getContentsAndIdsAsyncByPartitionId(nodeObj.id).then((questionInfos) => {
-                    const deletedQuestionIds = [];
-                    for (const questionInfo of questionInfos) {
-                        deletedQuestionIds.push(questionInfo.question.id);
-                    }
-                    QuestionCache.deleteAllById(deletedQuestionIds).then(() => {
-                        tryDelete();
-                    }, () => {
-                        ElMessage({
-                            type: "error",
-                            message: "删除分区题目时出错"
-                        });
-                    });
-                });
+                doDelete();
             }).catch(() => {
             });
         }
-        const tryDelete = () => {
-            PartitionCache.tryDeleteRemote(nodeObj.id).then((res) => {
-            }, (error) => {
-                error.disableNotification();
-                alartNotEmpty();
-            });
-        };
-        if (partition.childNodes.length > 1/*create button counts 1*/) {
+        const doDelete = () => {
+            PartitionCache.tryDeleteRemote(nodeObj.id);
+        }
+        if (partition.questionAmount !== 0) {
             alartNotEmpty();
         } else {
-            tryDelete();
+            doDelete();
         }
         // });
     }
@@ -686,7 +673,7 @@ onUnmounted(() => {
                 <div class="question-tree-base" style="display: flex;flex-direction: column;overflow:overlay;"
                      :class="{hideLeft:!showTree}">
                     <div>
-                        <el-button-group>
+                        <el-button-group style="display: flex;flex-wrap: wrap">
                             <el-button text style="width:106px" @click="switchShowCheckBox">
                                 <HarmonyOSIcon_CheckBox style="margin: 0;margin-right: 4px"/>
                                 <el-text v-if="!showCheckBox">批量</el-text>
@@ -786,7 +773,7 @@ onUnmounted(() => {
                                                                        @click.stop="nodeObj.data.editing = false"
                                                                        v-if="nodeObj.data.type === 'partition'">
                                                                 <HarmonyOSIcon_Rename/>
-                                                                <el-text>重命名</el-text>
+                                                                <el-text v-if="!UIMeta.mobile.value">重命名</el-text>
                                                             </el-button>
                                                         </template>
                                                         <template #default>
@@ -799,11 +786,13 @@ onUnmounted(() => {
                                                     <el-button class="node-button" size="small"
                                                                @click.stop="onDeleteNode(nodeObj)">
                                                         <HarmonyOSIcon_Remove/>
-                                                        <el-text
-                                                                v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
-                                                            撤销删除
-                                                        </el-text>
-                                                        <el-text v-else>删除</el-text>
+                                                        <template v-if="!UIMeta.mobile.value">
+                                                            <el-text
+                                                                    v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
+                                                                撤销删除
+                                                            </el-text>
+                                                            <el-text v-else>删除</el-text>
+                                                        </template>
                                                     </el-button>
                                                 </el-button-group>
                                             </div>
@@ -947,15 +936,15 @@ onUnmounted(() => {
     transition: padding-top 300ms var(--ease-in-out-quint),
     padding-bottom 300ms var(--ease-in-out-quint),
     height 300ms var(--ease-in-out-quint),
-    filter 150ms var(--ease-in-out-quint) 350ms,
-    opacity 150ms var(--ease-out-quint) 350ms !important;
+    filter 150ms var(--ease-in-out-quint) 400ms,
+    opacity 150ms var(--ease-out-quint) 400ms !important;
 }
 
 /*noinspection CssUnusedSymbol*/
 .batch-buttons-leave-active {
-    transition: padding-top 300ms var(--ease-in-out-quint) 200ms,
-    padding-bottom 300ms var(--ease-in-out-quint) 200ms,
-    height 300ms var(--ease-in-out-quint) 200ms,
+    transition: padding-top 300ms var(--ease-in-out-quint) 400ms,
+    padding-bottom 300ms var(--ease-in-out-quint) 400ms,
+    height 300ms var(--ease-in-out-quint) 400ms,
     filter 150ms var(--ease-in-out-quint),
     opacity 150ms var(--ease-out-quint) !important;
 }
@@ -971,9 +960,7 @@ onUnmounted(() => {
 
 /*noinspection CssUnusedSymbol*/
 .batch-buttons-enter-to, .batch-buttons-leave-from {
-    /*padding-bottom: 8px;*/
-    /*    padding-top: 8px;*/
-    height: 32px;
+    height: 32px !important;
 }
 
 /*noinspection CssUnusedSymbol*/

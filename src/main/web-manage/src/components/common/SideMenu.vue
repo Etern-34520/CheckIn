@@ -11,21 +11,22 @@ const pageGroups = [
     {
         groupName: "服务器",
         paths: [
-            {path: '', name: '首页', icon: "House"},
-            {path: 'traffic/', name: '流量', icon: "Odometer"},
-            {path: 'questions/', name: '题库', icon: "Finished"}
+            {pathName: 'home', name: '首页', icon: "House"},
+            {pathName: 'request-record', name: '请求记录', icon: "Link"},
+            {pathName: 'exam-record', name: '答题记录', icon: "MessageBox"},
+            {pathName: 'questions', name: '题库', icon: "Finished"}
         ]
     }, {
         groupName: "管理",
         paths: [
-            {path: 'manage-user/', name: '用户管理', icon: "User"},
-            {path: 'manage-group/', name: '组管理', icon: "Files"},
+            {pathName: 'manage-user', name: '用户管理', icon: "User"},
+            {pathName: 'manage-group', name: '组管理', icon: "Files"},
         ]
     }, {
         groupName: "设置",
         paths: [
-            {path: 'global-setting/', name: '服务器设置', icon: "Tools"},
-            {path: 'account/', name: '用户设置', icon: "SetUp"},
+            {pathName: 'global-setting', name: '服务器设置', icon: "Tools"},
+            {pathName: 'account', name: '用户设置', icon: "SetUp"},
         ]
     }
 ]
@@ -48,8 +49,8 @@ function shrinkMenu() {
     expandBool.value = false;
 }
 
-function routeTo(path) {
-    router.push('/manage/' + path);
+function routeTo(name) {
+    router.push({name: name});
     shrinkMenu();
 }
 
@@ -70,7 +71,7 @@ const props = defineProps({
             <el-scrollbar view-style="overflow-x: hidden;">
                 <div class="menu-group" v-for="(group,$index) in pageGroups">
                     <el-button v-for="pageItem of group.paths" text
-                               @click="routeTo(pageItem.path)"
+                               @click="routeTo(pageItem.pathName)"
                                @mouseenter="expandMenu">
                         <el-icon :size="16" style="margin-right: 12px;margin-left: 2px;">
                             <Component :is="pageItem.icon"/>

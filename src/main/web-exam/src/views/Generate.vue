@@ -1,6 +1,8 @@
 <script setup>
 import getAvatarUrlOf from "@/Avatar.js";
 import HarmonyOSIcon_InfoCircle from "@/icons/HarmonyOSIcon_InfoCircle.vue";
+import router from "@/router/index.js";
+import {ElMessageBox} from "element-plus";
 
 const {proxy} = getCurrentInstance();
 const props = defineProps({
@@ -35,15 +37,38 @@ const selectPartition = (partitionId) => {
 
 const qqNumber = ref();
 
-const startExam = () => {}
+const startExam = () => {
+    proxy.$http.post("generate", {
+        qq: qqNumber.value,
+        partitionIds: selectedPartitions.value
+    }).then((data) => {
+        if (data.type !== "error") {
+            proxy.$cookies.set("examInfo", data, "7d");
+            proxy.$cookies.set("phrase", "examining", "7d");
+            proxy.$cookies.remove("submissions");
+            proxy.$cookies.remove("timestamps");
+            router.push({name: "examining"});
+        } else {
+            ElMessageBox.alert(
+                    data.cnDescription?data.cnDescription:data.enDescription?data.enDescription:data.exceptionType,
+                    "生成题目时出错", {
+                        type: "error",
+                        draggable: true,
+                        showClose: false,
+                        confirmButtonText: "返回修改生成选项"
+                    }
+            )
+        }
+    })
+}
 
 const validate1 = computed(() => selectedPartitions.value.length >= props.drawingData.partitionRange[0] && selectedPartitions.value.length <= props.drawingData.partitionRange[1]);
 const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 100000000000);
 </script>
 
 <template>
-    <div class="auto-padding-center">
-        <el-text style="font-size: 24px;align-self: baseline">选择分区</el-text>
+    <div class="auto-padding-center" style="flex:1">
+        <el-text style="font-size: 24px;align-self: baseline;margin-top: 64px">选择分区</el-text>
         <div class="panel" style="padding: 16px 24px;margin-top: 36px">
             <el-text size="large" style="align-self: baseline">必选分区</el-text>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
@@ -87,7 +112,10 @@ const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 1000
             <el-input-number :class="{error: !validate2}" v-model="qqNumber"
                              :controls="false" style="min-width: min(70vw,200px)"/>
         </div>
-        <el-button type="primary" size="large" style="margin-top: 36px;align-self: center" @click="startExam" :disabled="!(validate1 && validate2)">开始答题</el-button>
+        <div class="flex-blank-1"></div>
+        <el-button type="primary" size="large" style="margin-top: 36px;margin-bottom: 64px;align-self: center"
+                   @click="startExam" :disabled="!(validate1 && validate2)">开始答题
+        </el-button>
     </div>
 </template>
 

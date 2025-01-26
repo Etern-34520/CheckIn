@@ -25,8 +25,8 @@ public class Role {
 //    @JoinColumn(value = "ROLE_TYPE",referencedColumnName = "TYPE")
 //    @NotFound(action = NotFoundAction.IGNORE)
     @JoinTable(name = "ROLE_PERMISSION_MAPPING",
-            joinColumns = @JoinColumn(name = "ROLE_TYPE", referencedColumnName = "TYPE"),
-            inverseJoinColumns = @JoinColumn(name = "PERMISSION_ID", referencedColumnName = "ID"))
+            joinColumns = @JoinColumn(name = "ROLE_TYPE", referencedColumnName = "TYPE", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "PERMISSION_ID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)))
     private Set<Permission> permissions = new HashSet<>();
     @Setter
     private int level;
