@@ -34,7 +34,14 @@ const router = createRouter({
                 {
                     path: 'exam-record/',
                     name: 'exam-record',
-                    component: () => import('../pages/serverGroup/ExamRecordView.vue')
+                    component: () => import('../pages/serverGroup/examRecord/ExamRecordView.vue'),
+                    children: [
+                        {
+                            path: ":id/",
+                            name: 'exam-record-detail',
+                            component: () => import('../pages/serverGroup/examRecord/ExamRecordDetailView.vue')
+                        }
+                    ]
                 },
                 {
                     path: 'manage-user/',

@@ -1,4 +1,4 @@
-package indi.etern.checkIn.entities.convertor;
+package indi.etern.checkIn.entities.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

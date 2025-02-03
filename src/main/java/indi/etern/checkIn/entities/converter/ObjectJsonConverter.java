@@ -1,4 +1,4 @@
-package indi.etern.checkIn.entities.convertor;
+package indi.etern.checkIn.entities.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;

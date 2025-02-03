@@ -7,7 +7,8 @@ public abstract class Answer<QuestionType,Source> {
     public enum CheckedResultType {
         CORRECT,HALF_CORRECT,WRONG
     }
-    public record CheckedResult(double score,CheckedResultType checkedResultType) {}
+    public record CheckedResult(double score,double maxScore,CheckedResultType checkedResultType) {}
     protected abstract void initFromSource(QuestionType question,Source source);
     public abstract CheckedResult check();
+    public abstract QuestionType getSource();
 }

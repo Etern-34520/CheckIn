@@ -2,14 +2,9 @@
 import WebSocketConnector from "@/api/websocket.js";
 import {ElMessage} from "element-plus";
 import 'md-editor-v3/lib/style.css';
-import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import PartitionCache from "@/data/PartitionCache.js";
-import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionPop.vue";
 import SpecialPartitionRule from "@/pages/settingGroup/globalSetting/drawingSetting/SpecialPartitionRuleTag.vue";
 import Waterfall from "@/components/common/Waterfall.vue";
-import randomUUIDv4 from "@/utils/UUID.js";
-import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
-import SelectPartitionsActionPop from "@/components/question/SelectPartitionsActionPop.vue";
 
 const editing = ref(false);
 const data = ref({
@@ -48,7 +43,7 @@ const finishEditing = () => {
     }
 }
 
-const partitionCount = computed(() => Object.keys(refPartitions).length - (data.value.requiredPartitions ? data.value.requiredPartitions.length : 0));
+const partitionCount = computed(() => Object.keys(refPartitions.value).length - (data.value.requiredPartitions ? data.value.requiredPartitions.length : 0));
 
 const getData = () => {
     loading.value = true;

@@ -33,7 +33,7 @@ onBeforeMount(() => {
         <el-scrollbar v-loading="loading">
             <waterfall :data="questionInfos" :min-row-width="400">
                 <template #item="{item,index}">
-                    <question-info-panel :question-info="item" disable-error-and-warning
+                    <question-info-panel :question-info="item" class="clickable" disable-error-and-warning
                                          @click="router.push({name:'question-detail',params: {id:item.question.id}})"/>
                 </template>
             </waterfall>

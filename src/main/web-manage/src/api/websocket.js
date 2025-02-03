@@ -17,12 +17,16 @@ function getCurrentIsoTime() {
 let autoRetriedTimes = 0;
 let normallyClose = false;
 
+window.onclose = function () {
+    WebSocketConnector.close();
+}
 const WebSocketConnector = {
     ws: null,
     firstConnect: true,
     promises: {},
     waitingTasks: [],
     actions: {},
+    channels: {},
     connect: function (qq, token) {
         qq1 = qq;
         token1 = token;
@@ -35,8 +39,9 @@ const WebSocketConnector = {
                     setTimeout(() => {
                         WebSocketConnector.reconnect().then(() => {
                             autoRetriedTimes = 0;
-                        }, () => {});
-                    },3000);
+                        }, () => {
+                        });
+                    }, 3000);
                 } else {
                     autoRetriedTimes = 0;
                     if (!normallyClose) {
@@ -86,6 +91,15 @@ const WebSocketConnector = {
                     });
                     this.waitingTasks = [];
                 }
+                const channelEntries = Object.entries(this.channels);
+                if (channelEntries.length > 0) {
+                    for (const [name,channel] of channelEntries) {
+                        const actions = channel.actions;
+                        for (const action of actions) {
+                            this.subscribe(name, action);
+                        }
+                    }
+                }
                 for (const key in notifications) {
                     notifications[key].close();
                 }
@@ -99,6 +113,14 @@ const WebSocketConnector = {
                 if (WebSocketConnector.actions[message.type]) {
                     console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
                     WebSocketConnector.actions[message.type](message);
+                } else if (WebSocketConnector.channels[message.channelName]) {
+                    const channel1 = WebSocketConnector.channels[message.channelName];
+                    console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
+                    if (channel1 && channel1.actions instanceof Array) {
+                        channel1.actions.forEach((callback) => {
+                            callback(message);
+                        });
+                    }
                 } else if (message.messageId) {
                     const promise = this.promises[message.messageId];
                     if (promise && promise instanceof Promise) {
@@ -219,7 +241,37 @@ const WebSocketConnector = {
             normallyClose = true;
             this.ws.close();
             this.ws = null;
+            for (const [channelName, channel] of Object.entries(WebSocketConnector.channels)) {
+                channel.unsubscribe();
+            }
         }
-    }
+    },
+    subscribe: function (channelName, callback) {
+        console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] subscribe channel (${channelName}):`, callback);
+        const unsubscribe = () => {
+            if (WebSocketConnector.channels[channelName]) {
+                WebSocketConnector.channels[channelName].actions = WebSocketConnector.channels[channelName].actions.filter((cb) => cb !== callback);
+            }
+        };
+        WebSocketConnector.send({
+            type: "subscribe",
+            channel: channelName
+        }).then((message) => {
+            if (!this.channels[channelName]) {
+                this.channels[channelName] = {
+                    actions: [],
+                    unsubscribe: unsubscribe
+                };
+            }
+            if (message.type === "error") {
+                console.error("subscribe error", message);
+            } else {
+                if (!this.channels[channelName].actions.includes(callback)) {
+                    this.channels[channelName].actions.push(callback);
+                }
+            }
+        });
+        return {name: channelName,unsubscribe: unsubscribe};
+    },
 }
 export default WebSocketConnector

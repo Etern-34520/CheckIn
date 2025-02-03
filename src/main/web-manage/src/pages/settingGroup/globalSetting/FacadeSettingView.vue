@@ -260,7 +260,7 @@ const deleteIcon = () => {
                                            style="height: 100vh;max-width:calc(90vw - 100px);"
                                            :theme="UIMeta.colorScheme.value"
                                            :show-toolbar-name="UIMeta.mobile.value"
-                                           :preview="!UIMeta.mobile.value"/>
+                                           :preview="true"/>
                             </div>
                         </div>
                         <div v-else

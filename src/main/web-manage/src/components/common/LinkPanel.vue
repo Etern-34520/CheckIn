@@ -3,7 +3,6 @@ import {ArrowRightBold} from "@element-plus/icons-vue";
 
 defineProps({
     icon: {
-        type: Object,
         required: true
     },
     name: {

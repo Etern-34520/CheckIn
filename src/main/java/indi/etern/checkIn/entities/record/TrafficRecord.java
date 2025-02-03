@@ -1,17 +1,14 @@
 package indi.etern.checkIn.entities.record;
 
 import indi.etern.checkIn.entities.BaseEntity;
-import indi.etern.checkIn.entities.convertor.MapConverter;
+import indi.etern.checkIn.entities.converter.MapConverter;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.*;
-import org.springframework.context.annotation.Lazy;
 
 import java.time.LocalDateTime;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "records")
@@ -35,19 +32,21 @@ public class TrafficRecord implements BaseEntity<String> {
     
     @Setter
     protected Type type;
+    protected Status status;
     
     @Convert(converter = MapConverter.class)
-    @Lazy
     @Column(columnDefinition = "text")
-    protected Map<String,String> header;
+    protected Map<String,String> requestHeader;
     
     @Convert(converter = MapConverter.class)
-    @Lazy
     @Column(columnDefinition = "text")
-    protected Map<String,String> attributes;
+    protected Map<String,String> requestAttributes;
     
     @Convert(converter = MapConverter.class)
-    @Lazy
+    @Column(columnDefinition = "text")
+    protected Map<String,String> responseHeader;
+    
+    @Convert(converter = MapConverter.class)
     @Column(columnDefinition = "text")
     protected Map<String,Object> extraData;
     
@@ -57,22 +56,33 @@ public class TrafficRecord implements BaseEntity<String> {
     }
     
     public enum Type {
-        VISIT,GENERATE,SUBMIT
+        VISIT,GENERATE,SUBMIT,GET_EXAM_DATA,GET_EXAM_QUESTION
     }
     
-    public static TrafficRecord from(HttpServletRequest httpServletRequest) {
+    public enum Status {
+        SUCCESS,ERROR
+    }
+    
+    public static TrafficRecord from(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         TrafficRecord trafficRecord = new TrafficRecord();
         trafficRecord.id = UUID.randomUUID().toString();
         trafficRecord.sessionId = httpServletRequest.getSession().getId();
         trafficRecord.time = LocalDateTime.now();
         trafficRecord.ipString = httpServletRequest.getRemoteAddr();
-        Enumeration<String> headerNames = httpServletRequest.getHeaderNames();
-        Map<String, String> headerMap = new HashMap<>();
+        trafficRecord.status = Status.SUCCESS;
+        Enumeration<String> requestHeaderNames = httpServletRequest.getHeaderNames();
+        Collection<String> responseHeaderNames = httpServletResponse.getHeaderNames();
+        Map<String, String> requestHeaderMap = new HashMap<>();
+        Map<String, String> responseHeaderMap = new HashMap<>();
         Map<String, String> attributesMap = new HashMap<>();
-        while (headerNames.hasMoreElements()) {
-            String headName = headerNames.nextElement();
+        while (requestHeaderNames.hasMoreElements()) {
+            String headName = requestHeaderNames.nextElement();
             String headValue = httpServletRequest.getHeader(headName);
-            headerMap.put(headName, headValue);
+            requestHeaderMap.put(headName, headValue);
+        }
+        for (String headName : responseHeaderNames) {
+            String headValue = httpServletRequest.getHeader(headName);
+            responseHeaderMap.put(headName, headValue);
         }
         httpServletRequest.getAttributeNames().asIterator().forEachRemaining(name -> {
             final Object attribute = httpServletRequest.getAttribute(name);
@@ -80,8 +90,19 @@ public class TrafficRecord implements BaseEntity<String> {
                 attributesMap.put(name, s);
             }
         });
-        trafficRecord.header = headerMap;
-        trafficRecord.attributes = attributesMap;
+        trafficRecord.requestHeader = requestHeaderMap;
+        trafficRecord.responseHeader = responseHeaderMap;
+        trafficRecord.requestAttributes = attributesMap;
+        return trafficRecord;
+    }
+    
+    public static TrafficRecord from(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Throwable throwable) {
+        TrafficRecord trafficRecord = from(httpServletRequest, httpServletResponse);
+        trafficRecord.status = Status.ERROR;
+        Map<String, String> throwableMap = new HashMap<>();
+        throwableMap.put("name", throwable.getClass().getName());
+        throwableMap.put("message", throwable.getMessage());
+        trafficRecord.getExtraData().put("throwable", throwableMap);
         return trafficRecord;
     }
 }

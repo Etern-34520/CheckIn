@@ -174,6 +174,10 @@ watch(() => expanded.value, (newVal, oldVal) => {
 .collapse-content:not(.content-background) {
     background: none !important;
     border: none !important;
+
+    > .collapse-content-inner {
+        border: none !important;
+    }
 }
 
 .collapse-content:not(.content-background) > .collapse-content-inner {

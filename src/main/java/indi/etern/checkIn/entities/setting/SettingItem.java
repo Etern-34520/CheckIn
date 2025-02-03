@@ -2,7 +2,7 @@ package indi.etern.checkIn.entities.setting;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import indi.etern.checkIn.MVCConfig;
-import indi.etern.checkIn.entities.convertor.ClassConverter;
+import indi.etern.checkIn.entities.converter.ClassConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

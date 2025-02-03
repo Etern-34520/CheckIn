@@ -72,7 +72,7 @@ watch(UIMeta.mobile, (val) => {
                     </el-button>
                     <slot name="right-top"/>
                 </div>
-                <div class="panel" style="padding: 0" v-loading="RightLoading">
+                <div class="panel" style="padding: 0;display: flex;flex-direction: column" v-loading="RightLoading">
                     <slot name="right"/>
                 </div>
             </pane>

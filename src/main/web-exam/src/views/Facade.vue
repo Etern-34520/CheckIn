@@ -112,7 +112,7 @@ const routeGenerateExam = () => {
                        style="height: 100vh;max-width:calc(90vw - 100px);"
                        :theme="UIMeta.colorScheme.value"
                        :show-toolbar-name="UIMeta.mobile.value"
-                       :preview="!UIMeta.mobile.value"/>
+                       :preview="true"/>
             <div>
                 <el-button type="primary" size="large" @click="routeGenerateExam">生成题目</el-button>
             </div>

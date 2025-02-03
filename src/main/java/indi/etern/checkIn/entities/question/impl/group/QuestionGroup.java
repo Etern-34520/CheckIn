@@ -1,6 +1,6 @@
 package indi.etern.checkIn.entities.question.impl.group;
 
-import indi.etern.checkIn.entities.convertor.MapConverter;
+import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.LinkTarget;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;

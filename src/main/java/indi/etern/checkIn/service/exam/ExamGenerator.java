@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,15 +23,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExamGenerator {
     private final PartitionService partitionService;
     private final SettingService settingService;
-    private final ExamDataService examDataService;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final QuestionService questionService;
     private final QuestionStatisticService questionStatisticService;
     
-    public ExamGenerator(PartitionService partitionService, SettingService settingService, ExamDataService examDataService, QuestionService questionService, QuestionStatisticService questionStatisticService) {
+    public ExamGenerator(PartitionService partitionService, SettingService settingService, QuestionService questionService, QuestionStatisticService questionStatisticService) {
         this.partitionService = partitionService;
         this.settingService = settingService;
-        this.examDataService = examDataService;
         this.questionService = questionService;
         this.questionStatisticService = questionStatisticService;
     }
@@ -117,9 +116,9 @@ public class ExamGenerator {
                     .questionAmount(questionAmount)
                     .selectedPartitionIds(selectedPartitionIds)
                     .requiredPartitionIds(requiredPartitionIds)
+                    .generateTime(LocalDateTime.now())
                     .build();
-            examDataService.save(examData);
-            questionStatisticService.appendStatistic(examData);
+//            examDataService.save(examData);
             return examData;
         } catch (Exception e) {
             logger.error("generate exam failed", e);
@@ -144,7 +143,7 @@ public class ExamGenerator {
     }
     
     @SneakyThrows
-    public void remediateExam(ExamData examData) {
+    public ExamData remediateExam(ExamData examData) {
         try {
             final List<String> originalIds = examData.getQuestionIds();
             Question[] existedQuestions = new Question[originalIds.size()];
@@ -179,12 +178,12 @@ public class ExamGenerator {
             examData.getQuestionIds().clear();
             final List<String> ids = Arrays.stream(existedQuestions).map(Question::getId).toList();
             examData.getQuestionIds().addAll(ids);
-            examDataService.saveAndFlush(examData);
-            questionStatisticService.appendStatistic(examData);
+//            examDataService.saveAndFlush(examData);
         } catch (Exception e) {
             logger.error("remediate exam failed", e);
             e.printStackTrace();
             throw e;
         }
+        return examData;
     }
 }

@@ -1,9 +1,11 @@
 package indi.etern.checkIn.entities.exam;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import indi.etern.checkIn.entities.BaseEntity;
-import indi.etern.checkIn.entities.convertor.ListJsonConverter;
-import indi.etern.checkIn.entities.convertor.ObjectJsonConverter;
+import indi.etern.checkIn.entities.converter.ListJsonConverter;
+import indi.etern.checkIn.entities.converter.MapConverter;
+import indi.etern.checkIn.entities.converter.ObjectJsonConverter;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
@@ -16,10 +18,8 @@ import indi.etern.checkIn.service.exam.ExamResult;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Entity
 @Getter
@@ -38,27 +38,42 @@ public class ExamData implements BaseEntity<String> {
     long qqNumber;
     int questionAmount;
     
-    @JsonIgnore
+//    @JsonIgnore
     @Setter
     Status status;
     
     @Convert(converter = ListJsonConverter.class)
+    @Column(columnDefinition = "mediumtext")
+    @JsonIgnore
     List<Integer> requiredPartitionIds;
     
     @Convert(converter = ListJsonConverter.class)
+    @Column(columnDefinition = "mediumtext")
+    @JsonIgnore
     List<Integer> selectedPartitionIds;
     
     @Convert(converter = ListJsonConverter.class)
+    @Column(columnDefinition = "mediumtext")
+    @JsonIgnore
     List<String> questionIds;
     
-    @Convert(converter = ListJsonConverter.class)
-    @Column(columnDefinition = "mediumtext")
-    List<Answer<?,?>> answers;
+    @Convert(converter = MapConverter.class)
+    @Column(name = "answers", columnDefinition = "mediumtext")
+    @JsonIgnore
+    Map<String,Answer<?,?>> answersMap;
     
     @Setter
     @Convert(converter = ObjectJsonConverter.class)
     @Column(columnDefinition = "mediumtext")
     ExamResult examResult;
+    
+    @Setter
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    LocalDateTime generateTime;
+    
+    @Setter
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    LocalDateTime submitTime;
     
     public ExamResult checkAnswerMap(Map<String, Object> answerMap) {
         List<Question> orderedQuestions =
@@ -66,13 +81,13 @@ public class ExamData implements BaseEntity<String> {
                         .sorted((q1, q2) ->
                                 questionIds.indexOf(q1.getId()) - questionIds.indexOf(q2.getId())
                         ).toList();
-        answers = new ArrayList<>();
+        answersMap = new HashMap<>();
         handleAnswerItemMap(orderedQuestions, answerMap, null);
         final ExamResult examResult = ExamResult.from(this);
-        examResult.setCorrectCount((int) answers.stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.CORRECT).count());
-        examResult.setHalfCorrectCount((int) answers.stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.HALF_CORRECT).count());
-        examResult.setWrongCount((int) answers.stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.WRONG).count());
-        examResult.setScore((float) answers.stream().mapToDouble(answer -> answer.check().score()).sum());
+        examResult.setCorrectCount((int) answersMap.values().stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.CORRECT).count());
+        examResult.setHalfCorrectCount((int) answersMap.values().stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.HALF_CORRECT).count());
+        examResult.setWrongCount((int) answersMap.values().stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.WRONG).count());
+        examResult.setScore((float) answersMap.values().stream().mapToDouble(answer -> answer.check().score()).sum());
         return examResult;
     }
     
@@ -87,14 +102,14 @@ public class ExamData implements BaseEntity<String> {
                 //noinspection unchecked
                 var choiceAnswer = multipleChoicesQuestion.newAnswerFrom((List<String>) choiceIds);
                 if (questionGroup == null) {
-                    this.answers.add(choiceAnswer);
+                    this.answersMap.put(multipleChoicesQuestion.getId(),choiceAnswer);
                 } else {
                     questionGroupSubQuestionAnswers.add(choiceAnswer);
                 }
             } else if (value instanceof Map<?, ?> subQuestionAnswerMap && question instanceof QuestionGroup questionGroup1) {
                 List<Question> subQuestions = questionGroup1.getQuestionLinks().stream().map(QuestionLinkImpl::getSource).toList();
                 //noinspection unchecked
-                this.answers.add(handleAnswerItemMap(subQuestions,
+                this.answersMap.put(questionGroup1.getId(),handleAnswerItemMap(subQuestions,
                         (Map<String, Object>) subQuestionAnswerMap,
                         questionGroup1)
                         .orElseThrow(IllegalStateException::new));
@@ -106,5 +121,20 @@ public class ExamData implements BaseEntity<String> {
         } else {
             return Optional.empty();
         }
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof ExamData examData && examData.id.equals(this.id);
+    }
+    
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+    
+    @Override
+    public String toString() {
+        return "ExamData[" + id + "]";
     }
 }

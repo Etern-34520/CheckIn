@@ -8,11 +8,12 @@ import indi.etern.checkIn.action.setting.GetDrawingSetting;
 import indi.etern.checkIn.action.setting.GetFacadeSetting;
 import indi.etern.checkIn.action.setting.GetGradingSetting;
 import indi.etern.checkIn.entities.exam.ExamData;
-import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.ExamDataService;
 import indi.etern.checkIn.service.dao.PartitionService;
-import indi.etern.checkIn.service.dao.QuestionService;
+import indi.etern.checkIn.service.dao.QuestionStatisticService;
 import indi.etern.checkIn.service.exam.ExamGenerator;
+import indi.etern.checkIn.service.exam.ExamResult;
+import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.throwable.exam.generate.ExamGenerateFailedException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import lombok.SneakyThrows;
@@ -30,19 +31,21 @@ public class Exam {
     private final ActionExecutor actionExecutor;
     private final ExamGenerator examGenerator;
     private final ExamDataService examDataService;
-    private final QuestionService questionService;
     private final ObjectMapper objectMapper;
     private final Logger logger = LoggerFactory.getLogger(Exam.class);
     private final String EXAM_IS_NOT_EXIST_JSON = "{\"type\":\"error\",\"message\":\"Exam is not exist\"}";
     private final String EXAM_INVALIDED_JSON = "{\"type\":\"error\",\"message\":\"Exam invalided\"}";
+    private final WebSocketService webSocketService;
+    private final QuestionStatisticService questionStatisticService;
     
-    public Exam(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, QuestionService questionService, ObjectMapper objectMapper) {
+    public Exam(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, WebSocketService webSocketService, QuestionStatisticService questionStatisticService) {
         this.partitionService = partitionService;
         this.actionExecutor = actionExecutor;
         this.examGenerator = examGenerator;
         this.examDataService = examDataService;
-        this.questionService = questionService;
         this.objectMapper = objectMapper;
+        this.webSocketService = webSocketService;
+        this.questionStatisticService = questionStatisticService;
     }
     
     public record GenerateRequest(long qq, List<String> partitionIds) {
@@ -53,9 +56,12 @@ public class Exam {
     public Map<String, ?> generateExam(@RequestBody GenerateRequest generateRequest) {
         try {
             final ExamData examData = examGenerator.generateExam(generateRequest.qq, partitionService.findAllByIds(generateRequest.partitionIds.stream().map(Integer::parseInt).toList()));
+            examDataService.save(examData);
+            questionStatisticService.appendStatistic(examData);
             Map<String, Object> result = new HashMap<>();
             result.put("examId", examData.getId());
             result.put("questionItemCount", examData.getQuestionIds().size());
+            sendUpdateExamRecord(examData);
             return result;
         } catch (ExamGenerateFailedException e) {
             Map<String,String> errorDataMap = new HashMap<>();
@@ -76,7 +82,7 @@ public class Exam {
         Optional<ExamData> optionalExamData = examDataService.findById(request.examId);
         if (optionalExamData.isPresent()) {
             try {
-                final Map<String, Object> result = getExamDataQuestions(request, optionalExamData.get());
+                final Map<String, Object> result = examDataService.getExamDataQuestions(request.indexes, optionalExamData.get());
                 return objectMapper.writeValueAsString(result);
             } catch (ExamInvalidException e) {
                 return EXAM_INVALIDED_JSON;
@@ -86,32 +92,7 @@ public class Exam {
         }
     }
     
-    private Map<String, Object> getExamDataQuestions(GetQuestionsByIndexRequest request, ExamData examData) throws ExamInvalidException {
-        if (examData.getStatus() == ExamData.Status.ONGOING) {
-            Map<String, Object> result = new HashMap<>();
-            List<String> allQuestionIds = examData.getQuestionIds();
-            List<String> questionIds = new ArrayList<>();
-            for (int index : request.indexes) {
-                questionIds.add(allQuestionIds.get(index));
-            }
-            final List<Question> questions = new ArrayList<>(questionService.findAllById(questionIds));
-            if (questions.size() != request.indexes.length) {
-                logger.warn("some questions of the exam is missing, remediate exam");
-                examGenerator.remediateExam(examData);
-                return getExamDataQuestions(request, examData);
-//            throw new RuntimeException("Questions not found");
-            }
-            Map<Integer, Question> indexQuestionMap = new HashMap<>();
-            questions.forEach(question -> indexQuestionMap.put(allQuestionIds.indexOf(question.getId()), question));
-            result.put("questions", indexQuestionMap);
-            return result;
-        } else {
-            logger.error("Exam[{}] invalided", examData.getId());
-            throw new ExamInvalidException();
-        }
-    }
-    
-/*
+    /*
     @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, path = "/api/reload")
     public ExamData loadLastExam(@RequestParam String qq, HttpServletRequest request) {
         return null;
@@ -128,7 +109,9 @@ public class Exam {
         if (optionalExamData.isPresent()) {
             final ExamData examData = optionalExamData.get();
             try {
-                return objectMapper.writeValueAsString(examDataService.handleSubmit(examData, submitRequest.answer));
+                final ExamResult examResult = examDataService.handleSubmit(examData, submitRequest.answer);
+                sendUpdateExamRecord(examData);
+                return objectMapper.writeValueAsString(examResult);
             } catch (ExamInvalidException e) {
                 logger.error("Exam[{}] invalided", examData.getId());
                 return EXAM_INVALIDED_JSON;
@@ -161,5 +144,12 @@ public class Exam {
         result.put("gradingData", gradingSettingMap);
         result.put("partitions", partitionsNameMap);
         return result;
+    }
+    
+    private void sendUpdateExamRecord(ExamData examData) {
+        Map<Object,Object> updateData = new HashMap<>();
+        updateData.put("type","updateExamRecord");
+        updateData.put("examRecord", examData);
+        webSocketService.sendMessageToChannel(updateData,"examRecord");
     }
 }

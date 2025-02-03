@@ -4,6 +4,7 @@ import router from "@/router/index.js";
 import HarmonyOSIcon_Quit from "@/components/icons/HarmonyOSIcon_Quit.vue";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
+import UI_Meta from "@/utils/UI_Meta.js";
 
 const {proxy} = getCurrentInstance();
 
@@ -25,8 +26,8 @@ const pageGroups = [
     }, {
         groupName: "设置",
         paths: [
-            {pathName: 'global-setting', name: '服务器设置', icon: "Tools"},
-            {pathName: 'account', name: '用户设置', icon: "SetUp"},
+            {pathName: 'global-setting-base', name: '服务器设置', icon: "Tools"},
+            {pathName: 'account-base', name: '用户设置', icon: "SetUp"},
         ]
     }
 ]
@@ -42,11 +43,13 @@ const expandBool = defineModel("expand", {
 })
 
 function expandMenu() {
-    expandBool.value = true;
+    if (!UI_Meta.mobile.value)
+        expandBool.value = true;
 }
 
 function shrinkMenu() {
-    expandBool.value = false;
+    if (!UI_Meta.mobile.value)
+        expandBool.value = false;
 }
 
 function routeTo(name) {
@@ -64,11 +67,13 @@ const props = defineProps({
 </script>
 
 <template>
-    <div id="menu-container" :class="{'menu-container-inline': inlineBool}">
+    <div id="menu-container" :class="{'menu-container-inline': inlineBool && (!UI_Meta.mobile.value)}">
+        <div style="position: absolute;width: 100vw;height: calc(100vh - 32px);z-index: 2001"
+             @click="inlineBool = false" v-if="inlineBool && (UI_Meta.mobile.value)"></div>
         <div id="menu" class="container"
-             :class="{'menu-inline': inlineBool,'menu-expand': expandBool || inlineBool}" @mouseenter="expandMenu"
-             @mouseleave="shrinkMenu" @click.stop>
-            <el-scrollbar view-style="overflow-x: hidden;">
+             :class="{'menu-inline': inlineBool,'menu-expand': expandBool || inlineBool}"
+             @mouseenter="expandMenu" @mouseleave="shrinkMenu" @click.stop>
+            <el-scrollbar style="margin-bottom: 8px;" view-style="overflow-x: hidden;">
                 <div class="menu-group" v-for="(group,$index) in pageGroups">
                     <el-button v-for="pageItem of group.paths" text
                                @click="routeTo(pageItem.pathName)"
@@ -82,7 +87,7 @@ const props = defineProps({
                 </div>
             </el-scrollbar>
             <div style="flex: 1"></div>
-            <div style="display: flex;flex-direction: row" class="default-hidden-menu">
+            <div style="display: flex;flex-direction: row;" class="default-hidden-menu">
                 <el-button-group style="display:flex;flex-direction: row;align-items: stretch">
                     <el-button id="menu-avatar-button" @click="router.push({name: 'account-base'})" text
                                style="width: 150px;height: 52px;display: flex;flex-direction: row;padding: 4px;">

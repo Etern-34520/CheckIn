@@ -222,7 +222,7 @@ const switchEnableUser = () => {
                 <div class="panel-1" v-loading="questionLoading">
                     <waterfall :data="questions" :min-row-width="400" style="padding: 8px 12px">
                         <template #item="{item,index}">
-                            <question-info-panel :question-info="item"
+                            <question-info-panel :question-info="item" class="clickable"
                                                  @click="router.push({name:'question-detail',params: {id:item.question.id}})"/>
                         </template>
                     </waterfall>

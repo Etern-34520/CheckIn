@@ -1,6 +1,6 @@
 package indi.etern.checkIn.entities.setting.verification;
 
-import indi.etern.checkIn.entities.convertor.ListJsonConverter;
+import indi.etern.checkIn.entities.converter.ListJsonConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

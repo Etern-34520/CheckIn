@@ -36,8 +36,8 @@ public class QuestionStatisticService {
             });
             case SUBMITTED -> {
                 handleStatistics(examData, (questionStatistic) -> {
-                    final int index = examData.getQuestionIds().indexOf(questionStatistic.getId());
-                    final Answer<?,?> answer = examData.getAnswers().get(index);
+//                    final int index = examData.getQuestionIds().indexOf(questionStatistic.getId());
+                    final Answer<?,?> answer = examData.getAnswersMap().get(questionStatistic.getId());
                     final Answer.CheckedResultType checkedResultType = answer.check().checkedResultType();
                     switch (checkedResultType) {
                         case CORRECT -> questionStatistic.increaseCorrectCount();

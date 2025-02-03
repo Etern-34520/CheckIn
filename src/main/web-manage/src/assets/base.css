@@ -406,8 +406,15 @@
     word-break: break-word;
 }
 
+.el-popper {
+    z-index: 2002;
+}
 .el-popper * {
     color: var(--front-color);
+}
+
+.el-picker-panel {
+    background: var(--panel-bg-color) var(--lighting-effect-background-1) !important;
 }
 
 .el-upload-list__item {
@@ -595,7 +602,7 @@
     min-height: 22px !important;
 }
 
-.el-date-editor--daterange,
+#app .el-date-editor--daterange,
 .el-textarea, .el-input, .el-select {
     box-sizing: border-box;
     border-radius: 4px !important;
@@ -614,15 +621,11 @@
     background: var(--lighting-effect-background-2);
 }
 
-.el-date-editor--daterange:not(.is-disabled):hover,
-.el-date-editor--daterange:not(.is-disabled).is-active,
+#app .el-date-editor--daterange:not(.is-disabled):hover,
+#app .el-date-editor--daterange:not(.is-disabled).is-active,
 .el-textarea:not(.is-disabled):hover,
 .el-input:not(.is-disabled):hover,
-    /*.el-input-number:not(.is-disabled):has(:hover),*/
-.el-select:not(.is-disabled):hover /*,
-*:not(.el-tabs__nav):has(> .is-focused),
-*:not(.el-checkbox):not(.el-radio-group):not(.el-tabs__nav):has(> .is-focus)*/
-{
+.el-select:not(.is-disabled):hover {
     background: var(--panel-bg-color-overlay);
 }
 
@@ -1211,3 +1214,8 @@ input:autofill {
 input:-webkit-autofill {
     transition: 1000000000000000000000s linear 100000000000000000000000s;
 }*/
+
+.start-date .el-date-table-cell__text,
+.end-date .el-date-table-cell__text{
+    color: var(--front-color-reserse) !important;
+}

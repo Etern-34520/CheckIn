@@ -2,7 +2,7 @@ package indi.etern.checkIn.entities.question.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import indi.etern.checkIn.entities.BaseEntity;
-import indi.etern.checkIn.entities.convertor.MapConverter;
+import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.linkUtils.Link;
 import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;

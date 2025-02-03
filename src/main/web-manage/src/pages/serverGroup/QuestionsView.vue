@@ -817,7 +817,7 @@ onUnmounted(() => {
                         </el-alert>
                         <div>
                             <transition-group name="slide-hide">
-                                <question-info-panel class="disable-init-animate"
+                                <question-info-panel class="disable-init-animate clickable"
                                                      v-for="questionInfo of QuestionCache.getErrorQuestions()"
                                                      :key="questionInfo.question.id"
                                                      @click="openEdit(questionInfo.question.id)"

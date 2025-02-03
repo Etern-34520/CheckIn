@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -46,7 +47,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilter(jwtAuthenticationFilter())
+                .addFilterBefore(jwtAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .exceptionHandling((exceptionHandling) -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/checkIn/login/"))
                         .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect("/checkIn/login/"))
@@ -56,15 +57,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-    //    @Bean
+        @Bean
     public AuthenticationManager authenticationManager(
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
         if (authenticationManager != null) {
             return authenticationManager;
         }
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+//        authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
         authenticationManager = new ProviderManager(authenticationProvider);
         return authenticationManager;
@@ -87,10 +88,10 @@ public class SecurityConfig {
 
     @Bean
     JwtAuthenticationFilter jwtAuthenticationFilter() {
-        if (authenticationManager == null) {
-            authenticationManager = authenticationManager(userDetailsService(), passwordEncoder());
-        }
-        return new JwtAuthenticationFilter(authenticationManager);
+//        if (authenticationManager == null) {
+//            authenticationManager = authenticationManager(userDetailsService(), passwordEncoder());
+//        }
+        return new JwtAuthenticationFilter(/*authenticationManager*/);
     }
 
 }

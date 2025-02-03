@@ -10,7 +10,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
-public final class ExamResult {
+public final class ExamResult implements Comparable<ExamResult> {
     private long qq;
     private float score;
     private int correctCount;
@@ -55,5 +55,10 @@ public final class ExamResult {
     @Override
     public int hashCode() {
         return Objects.hash(qq, score, correctCount, halfCorrectCount, wrongCount, questionCount, message, level);
+    }
+    
+    @Override
+    public int compareTo(ExamResult o) {
+        return (int) (this.score - o.score);
     }
 }

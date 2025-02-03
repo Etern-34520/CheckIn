@@ -27,7 +27,8 @@ function switchMenuStyle() {
 </script>
 <template>
     <div id="top-bar">
-        <el-button v-on:click="switchMenuStyle" text class="menu-display-button" style="width: 30px;height: 30px;margin-left: 8px;margin-right: 16px"
+        <el-button v-on:click="switchMenuStyle" text class="menu-display-button"
+                   style="width: 30px;height: 30px;margin-left: 8px;margin-right: 16px"
                    link>
             <svg id="menuIcon" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
                 <g>
@@ -37,16 +38,20 @@ function switchMenuStyle() {
                 </g>
             </svg>
         </el-button>
-        <el-breadcrumb style="flex-shrink: 0;" :separator-icon="ArrowRight">
-            <!--suppress JSValidateTypes -->
-            <el-breadcrumb-item :to="{ path: '/manage/' }">checkIn</el-breadcrumb-item>
-            <TransitionGroup name="breadcrumb-item">
-                <!--suppress JSValidateTypes -->
-                <el-breadcrumb-item :key="pathItem.name" v-for="(pathItem,$index) in breadcrumbPathArray" :to="$index!==breadcrumbPathArray.length-1?{path: pathItem.path}:undefined">
-                    {{ pathItem.name }}
-                </el-breadcrumb-item>
-            </TransitionGroup>
-        </el-breadcrumb>
+        <el-scrollbar style="margin-right: 8px;">
+            <div style="height: 30px;margin-top: 2px;display: flex;flex-direction: row;align-items: center">
+                <el-breadcrumb style="flex-shrink: 0;" :separator-icon="ArrowRight">
+                    <!--suppress JSValidateTypes -->
+                    <el-breadcrumb-item :to="{ path: '/manage/' }">checkIn</el-breadcrumb-item>
+                    <TransitionGroup name="breadcrumb-item">
+                        <!--suppress JSValidateTypes -->
+                        <el-breadcrumb-item :key="pathItem.name" v-for="(pathItem,$index) in breadcrumbPathArray" :to="$index!==breadcrumbPathArray.length-1?{path: pathItem.path}:undefined">
+                            {{ pathItem.name }}
+                        </el-breadcrumb-item>
+                    </TransitionGroup>
+                </el-breadcrumb>
+            </div>
+        </el-scrollbar>
         <div class="flex-blank-1"></div>
         <el-button @click="router.push({name:'account-base'})" text
                    style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">

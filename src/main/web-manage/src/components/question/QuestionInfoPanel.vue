@@ -1,20 +1,21 @@
 <script setup>
 import PartitionCache from "../../data/PartitionCache.js";
 import Collapse from "@/components/common/Collapse.vue";
+import router from "@/router/index.js";
 
 const props = defineProps({
     questionInfo: Object,
-    clickable: {
-        type: Boolean,
-        default: true,
-    },
     disableErrorAndWarning: {
+        type: Boolean,
+        default: false,
+    },
+    subQuestionExpanded: {
         type: Boolean,
         default: false,
     }
 });
 
-const partitionNames = ref([]);
+const partitionNames = ref({});
 
 if (props.questionInfo.question.partitionIds instanceof Array) {
     PartitionCache.getNamesSyncByIds(props.questionInfo.question.partitionIds).then((names) => {
@@ -32,7 +33,7 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
 
 
 <template>
-    <div class="panel-1 question-info-panel" :class="{clickable:clickable}">
+    <div class="panel-1 question-info-panel">
         <div class="grid1">
             <div class="padding">
                 <div class="question-content panel-1 flex-blank-1 disable-init-animate">
@@ -50,7 +51,7 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
                     </el-tag>
                 </div>
                 <div v-if="questionInfo.type==='QuestionGroup'">
-                    <collapse @click.stop :content-background="false">
+                    <collapse @click.stop :expanded="subQuestionExpanded" :content-background="false">
                         <template #title>
                             <el-text style="line-height: 32px;margin-left: 8px;">子题目</el-text>
                         </template>
@@ -70,7 +71,7 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
                     <template
                         v-if="questionInfo.question.partitionIds!==undefined&&questionInfo.question.partitionIds!==null">
                         <el-tag
-                            v-for="partitionName of partitionNames"
+                            v-for="(partitionName,partitionId,index) in partitionNames"
                             type="info">
                             {{ partitionName }}
                         </el-tag>
