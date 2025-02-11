@@ -36,7 +36,7 @@ public class SpecialPartitionLimitService {
     }
     
     public void flush() {
-        SettingItem settingItem4 = settingService.getItem("drawing","specialPartitionLimits");
+        SettingItem settingItem4 = settingService.getItem("generating","specialPartitionLimits");
         //noinspection unchecked
         Map<String,Map<String,Object>> map = settingItem4.getValue(Map.class);
         specialPartitionLimits = SpecialPartitionLimitService.from(map.values());

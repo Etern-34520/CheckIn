@@ -79,10 +79,10 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
                 </div>
                 <div class="errorsDescription" v-if="!disableErrorAndWarning">
                     <transition-group name="errorDescriptions">
-                        <el-text v-for="error of questionInfo.errors"
+                        <el-text v-for="showError of questionInfo.errors"
                                  :key="error.content?error.content:''"
                                  type="danger">
-                            {{ error.content }}
+                            {{ showError.content }}
                         </el-text>
                     </transition-group>
                 </div>

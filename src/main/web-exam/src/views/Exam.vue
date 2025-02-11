@@ -18,7 +18,7 @@ const answerData = ref(proxy.$cookies.get("submissions"));
 if (!answerData.value) answerData.value = {};
 
 const routeToResult = () => {
-    proxy.$cookies.set("phrase", "result");
+    proxy.$cookies.set("phrase", "result", "7d");
     router.push({name: "result"});
 }
 onBeforeMount(() => {
@@ -57,6 +57,10 @@ const handleError = (data, actionDescription) => {
                             }
                     ).then(() => {
                         alerting = false;
+                        proxy.$cookies.set("phrase", "generating", "7d");
+                        proxy.$cookies.remove("submissions");
+                        proxy.$cookies.remove("timestamps");
+                        proxy.$cookies.remove("examInfo");
                         router.push({name: "generate"});
                     });
                 alerting = true;
@@ -74,6 +78,10 @@ const handleError = (data, actionDescription) => {
                             }
                     ).then(() => {
                         alerting = false;
+                        proxy.$cookies.set("phrase", "generating", "7d");
+                        proxy.$cookies.remove("submissions");
+                        proxy.$cookies.remove("timestamps");
+                        proxy.$cookies.remove("examInfo");
                         router.push({name: "generate"});
                     })
                 alerting = true;
@@ -134,7 +142,8 @@ const loadQuestionsByIndexes = (indexes, force = false) => {
                 handleError(data, "获取题目时出错");
             }
             resolve();
-        }, () => {
+        }, (error) => {
+            handleError(error, "获取题目时出错");
             reject();
         })
     }
@@ -341,13 +350,15 @@ const submitExam = () => {
             examId: examInfo.value.examId,
             answer: mappedAnswerData,
         }).then((response) => {
-            proxy.$cookies.set("result", response);
             if (response.type !== "error") {
+                proxy.$cookies.set("result", response, "7d");
                 routeToResult();
                 console.log(response);
             } else {
                 handleError(response, "提交时出错");
             }
+        }, (error) => {
+            handleError(error, "提交时出错");
         });
         //TODO
         submitting.value = false;
@@ -473,8 +484,8 @@ const confirmAllUpdate = () => {
     flex-direction: column;
     overflow-y: auto;
     overflow-x: visible;
-    max-width: 80vw;
-    min-width: 80vw;
+    max-width: 90vw;
+    min-width: 90vw;
     flex: 1;
     scrollbar-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
     scrollbar-width: thin;
@@ -490,6 +501,7 @@ const confirmAllUpdate = () => {
     align-self: center;
     overflow: auto;
     max-height: 100vh;
+    min-width: 80px;
     scrollbar-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
     scrollbar-width: thin;
     scrollbar-gutter: stable both-edges;
@@ -498,7 +510,7 @@ const confirmAllUpdate = () => {
 .question-card {
     max-height: 75vh;
     min-height: 75vh;
-    margin: 40px;
+    margin: 40px 5vw 40px 5vw;
     transition: all var(--ease-in-out-quint) 400ms;
 }
 
@@ -506,7 +518,7 @@ const confirmAllUpdate = () => {
     .question-card {
         max-height: 90vh;
         min-height: 90vh;
-        margin: 40px 0;
+        margin: 40px 0 40px 20px;
     }
 }
 

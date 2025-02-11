@@ -6,7 +6,7 @@ import {ElMessageBox} from "element-plus";
 
 const {proxy} = getCurrentInstance();
 const props = defineProps({
-    drawingData: {
+    generatingData: {
         required: true,
         type: Object
     },
@@ -17,7 +17,7 @@ const props = defineProps({
 });
 const selectablePartitions = [];
 for (const [id, name] of Object.entries(props.partitions)) {
-    if (!props.drawingData.requiredPartitions.includes(Number(id))) {
+    if (!props.generatingData.requiredPartitions.includes(Number(id))) {
         selectablePartitions.push({
             id: id,
             name: name,
@@ -62,7 +62,7 @@ const startExam = () => {
     })
 }
 
-const validate1 = computed(() => selectedPartitions.value.length >= props.drawingData.partitionRange[0] && selectedPartitions.value.length <= props.drawingData.partitionRange[1]);
+const validate1 = computed(() => selectedPartitions.value.length >= props.generatingData.partitionRange[0] && selectedPartitions.value.length <= props.generatingData.partitionRange[1]);
 const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 100000000000);
 </script>
 
@@ -73,7 +73,7 @@ const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 1000
             <el-text size="large" style="align-self: baseline">必选分区</el-text>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
                 <el-tag size="large" type="info" style="font-size: 14px;margin: 2px"
-                        v-for="requiredPartitionId of drawingData.requiredPartitions">
+                        v-for="requiredPartitionId of generatingData.requiredPartitions">
                     {{ partitions[requiredPartitionId] }}
                 </el-tag>
             </div>
@@ -84,7 +84,7 @@ const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 1000
                 <el-text>{{ selectedPartitions.length }} / {{ selectablePartitions.length }}</el-text>
                 <el-text style="margin-left: 8px;"
                          :type="validate1?'info':'danger'">
-                    请选择 {{ drawingData.partitionRange[0] }} ~ {{ drawingData.partitionRange[1] }} 个
+                    请选择 {{ generatingData.partitionRange[0] }} ~ {{ generatingData.partitionRange[1] }} 个
                 </el-text>
             </div>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">

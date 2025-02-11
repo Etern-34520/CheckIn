@@ -1,9 +1,9 @@
 <script setup>
 import 'splitpanes/dist/splitpanes.css'
 import ResponsiveSplitpane from "@/components/common/ResponsiveDoubleSplitpane.vue";
-import WebSocketConnector from "@/api/websocket.js";
 import Collapse from "@/components/common/Collapse.vue";
-import ExamRecordItem from "@/pages/serverGroup/examRecord/ExamRecordItem.vue";
+import WebSocketConnector from "@/api/websocket.js";
+import RequestRecordItem from "@/pages/serverGroup/requestRecord/RequestRecordItem.vue";
 import router from "@/router/index.js";
 
 const loading = ref(false);
@@ -23,42 +23,31 @@ const data = ref({});
 const getExamRecords = async () => {
     loading.value = true;
     WebSocketConnector.send({
-        type: "getExamRecords",
+        type: "getRequestRecords",
         from: dateRange.value[0].toISOString(),
         to: dateRange.value[1].toISOString()
     }).then((response) => {
-        data.value = response.examRecords;
+        data.value = response.requestRecords;
         loading.value = false;
     });
 }
 
 getExamRecords();
-
-const putItem = (date, examRecord) => {
-    if (!data.value[date]) {
-        data.value[date] = {};
-    }
-    if (data.value[date][examRecord.id]) {
-        data.value[date][examRecord.id] = examRecord;
-    } else {
+const channel = WebSocketConnector.subscribe("requestRecords", (data1) => {
+    // console.log(data1);
+    const requestRecord = data1.requestRecord;
+    const date = requestRecord.time.split(" ")[0];
+    // console.log(data.value);
+    if (data.value[date]) {
         let target = {}
-        target[examRecord.id] = examRecord;
+        target[requestRecord.id] = requestRecord;
         data.value[date] = Object.assign(target, data.value[date]);//place in front
-    }
-}
-const channel = WebSocketConnector.subscribe("examRecord", (data1) => {
-    const examRecord = data1.examRecord;
-    const generateDate = examRecord.generateTime.split(" ")[0];
-    const submitDate = examRecord.submitTime ? examRecord.submitTime.split(" ")[0] : null;
-    putItem(generateDate, examRecord);
-    if (submitDate && submitDate !== generateDate) {
-        putItem(submitDate, examRecord);
     }
 });
 
 onBeforeUnmount(() => {
     channel.unsubscribe();
-});
+})
 
 watch(() => dateRange, getExamRecords, {deep: true});
 
@@ -86,26 +75,25 @@ const getDates = (from, to) => {
     return dates.reverse();
 }
 
-const openRecord = (id) => {
-    router.push({name: 'exam-record-detail', params: {id: id}});
-}
-
 const filterText = ref("");
 let textBlocks = [''];
 watch(() => filterText.value, () => textBlocks = filterText.value.split(';'));
 const doFilter = (filterText, record) => {
     for (const textBlock of textBlocks) {
         if (textBlock === '' || record.id.toLowerCase().includes(textBlock.toLowerCase()) ||
-                record.qqNumber.toString().toLowerCase().includes(textBlock.toLowerCase()) ||
+                (record.qqnumber && record.qqnumber.toString().includes(textBlock)) ||
+                record.ipString.toLowerCase().includes(textBlock.toLowerCase()) ||
+                record.type.toLowerCase().includes(textBlock.toLowerCase()) ||
                 record.status.toLowerCase().includes(textBlock.toLowerCase()) ||
-                record.questionAmount.toString().includes(textBlock) ||
-                record.examResult.score.toString().includes(textBlock) ||
-                record.examResult.level.toString().includes(textBlock) ||
-                record.examResult.message.toString().includes(textBlock)) {
+                record.time.toString().includes(textBlock)) {
             return true;
         }
     }
     return false;
+}
+
+const openRecord = (id) => {
+    router.push({name: 'request-record-detail', params: {id: id}});
 }
 
 const showEmptyDates = ref(false);
@@ -136,9 +124,10 @@ const showEmptyDates = ref(false);
                     <transition-group name="smooth-height">
                         <template v-for="dateString in getDates(dateRange[0],dateRange[1])">
                             <div class="smooth-height-base" :key="dateString"
-                                 v-if="showEmptyDates || Boolean(data[dateString])">
+                                 v-if="showEmptyDates || (data[dateString] && Object.keys(data[dateString]).length > 0)">
                                 <div>
                                     <collapse
+                                            v-if="showEmptyDates || Boolean(data[dateString])"
                                             :expanded="Boolean(data[dateString])"
                                             :title-background="false"
                                             :content-background="false"
@@ -161,9 +150,10 @@ const showEmptyDates = ref(false);
                                                         <div class="slide-hide-base" v-if="doFilter(filterText,record)"
                                                              :key="record.id">
                                                             <div>
-                                                                <exam-record-item style="min-height: 0" :record="record"
-                                                                                  class="clickable"
-                                                                                  @click="openRecord(record.id)"/>
+                                                                <request-record-item style="min-height: 0"
+                                                                                     :record="record"
+                                                                                     class="clickable"
+                                                                                     @click="openRecord(record.id)"/>
                                                             </div>
                                                         </div>
                                                     </template>

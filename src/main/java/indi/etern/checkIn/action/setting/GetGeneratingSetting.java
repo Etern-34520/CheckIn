@@ -6,8 +6,8 @@ import indi.etern.checkIn.action.interfaces.Action;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 
-@Action("getDrawingSetting")
-public class GetDrawingSetting extends MapResultAction {
+@Action("getGeneratingSetting")
+public class GetGeneratingSetting extends MapResultAction {
     
     @Override
     public String requiredPermissionName() {
@@ -16,7 +16,7 @@ public class GetDrawingSetting extends MapResultAction {
     
     @Override
     protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        GetSettingCommon getSettingCommon = new GetSettingCommon(SaveDrawingSetting.KEYS,"drawing");
+        GetSettingCommon getSettingCommon = new GetSettingCommon(SaveGeneratingSetting.KEYS,"generating");
         final LinkedHashMap<String,Object> map = new LinkedHashMap<>();
         map.put("data",getSettingCommon.doGet());
         return Optional.of(map);

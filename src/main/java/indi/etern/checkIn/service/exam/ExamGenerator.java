@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,13 +26,11 @@ public class ExamGenerator {
     private final SettingService settingService;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final QuestionService questionService;
-    private final QuestionStatisticService questionStatisticService;
     
     public ExamGenerator(PartitionService partitionService, SettingService settingService, QuestionService questionService, QuestionStatisticService questionStatisticService) {
         this.partitionService = partitionService;
         this.settingService = settingService;
         this.questionService = questionService;
-        this.questionStatisticService = questionStatisticService;
     }
     
     private void drawQuestions(Set<Question> drewQuestions, List<Partition> partitions, int questionAmount, Random random, DrawingStrategy drawingStrategy, CompletingStrategy completingStrategy) throws NotEnoughQuestionsForExamException, MinQuestionLimitOutOfBoundsException {
@@ -91,11 +90,11 @@ public class ExamGenerator {
         final DrawingStrategy drawingStrategy = getDrawingStrategy();
         final CompletingStrategy completingStrategy = getCompletingStrategy();
         
-        SettingItem settingItem2 = settingService.getItem("drawing", "questionAmount");
+        SettingItem settingItem2 = settingService.getItem("generating", "questionAmount");
         int questionAmount = settingItem2.getValue(Integer.class);
         logger.debug("question amount: {}", questionAmount);
         
-        SettingItem settingItem3 = settingService.getItem("drawing", "requiredPartitions");
+        SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
         //noinspection unchecked
         List<Integer> requiredPartitionIds = (List<Integer>) settingItem3.getValue(List.class);
         List<Integer> selectedPartitionIds = selectedPartitions.stream().map(Partition::getId).toList();
@@ -105,10 +104,12 @@ public class ExamGenerator {
         logger.debug("required partitions: {}", partitionService.findAllByIds(requiredPartitionIds));
         logger.debug("selected partitions: {}", partitionService.findAllByIds(selectedPartitionIds));
         
+        SettingItem expireTimeSetting = settingService.getItem("exam","expiredPeriod");
+        Period expiredPeriod = expireTimeSetting.getValue(Period.class);
         try {
             LinkedHashSet<Question> questions = new LinkedHashSet<>();
             drawQuestions(questions, partitions, questionAmount, new Random(), drawingStrategy, completingStrategy);
-            ExamData examData = ExamData.builder()
+            return ExamData.builder()
                     .id(UUID.randomUUID().toString())
                     .qqNumber(qq)
                     .status(ExamData.Status.ONGOING)
@@ -117,9 +118,8 @@ public class ExamGenerator {
                     .selectedPartitionIds(selectedPartitionIds)
                     .requiredPartitionIds(requiredPartitionIds)
                     .generateTime(LocalDateTime.now())
+                    .expireTime(LocalDateTime.now().plus(expiredPeriod))
                     .build();
-//            examDataService.save(examData);
-            return examData;
         } catch (Exception e) {
             logger.error("generate exam failed", e);
             throw e;
@@ -127,7 +127,7 @@ public class ExamGenerator {
     }
     
     private CompletingStrategy getCompletingStrategy() {
-        SettingItem settingItem1 = settingService.getItem("drawing", "completingStrategy");
+        SettingItem settingItem1 = settingService.getItem("generating", "completingStrategy");
         String completingStrategyName = settingItem1.getValue(String.class);
         CompletingStrategy completingStrategy = CompletingStrategy.valueOf(completingStrategyName.toUpperCase());
         logger.debug("use completing strategy: {}", completingStrategy);
@@ -135,7 +135,7 @@ public class ExamGenerator {
     }
     
     private DrawingStrategy getDrawingStrategy() {
-        SettingItem settingItem = settingService.getItem("drawing", "drawingStrategy");
+        SettingItem settingItem = settingService.getItem("generating", "drawingStrategy");
         String drawingStrategyName = settingItem.getValue(String.class);
         DrawingStrategy drawingStrategy = DrawingStrategy.valueOf(drawingStrategyName.toUpperCase());
         logger.debug("use drawing strategy: {}", drawingStrategy);

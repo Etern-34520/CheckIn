@@ -20,6 +20,52 @@ let normallyClose = false;
 window.onclose = function () {
     WebSocketConnector.close();
 }
+const sendInternal = (objMessage) => {
+    let message = JSON.stringify(objMessage);
+    if (message.length > limits) {
+        const messageParts = [];
+        const partCount = Math.ceil(message.length / limits);
+        const partMessageIds = [];
+        for (let i = 0; i < partCount; i++) {
+            const messageId = randomUUIDv4();
+            partMessageIds.push(messageId);
+            messageParts.push({
+                messageId: messageId,
+                type: "partMessage",
+                partId: objMessage["messageId"],
+                messagePart: message.substring(i * limits, (i + 1) * limits),
+            });
+        }
+        const oldPromise = WebSocketConnector.promises[objMessage["messageId"]];
+        const promiseData1 = {};
+        let promise1 = new Promise((resolve, reject) => {
+            promiseData1["resolve"] = () => {
+                for (const message of messageParts) {
+                    WebSocketConnector.ws.send(JSON.stringify(message));
+                }
+                WebSocketConnector.promises[objMessage["messageId"]] = oldPromise;
+            };
+            promiseData1["reject"] = reject;
+            promiseData1["message"] = objMessage;
+        });
+        promise1["resolve"] = promiseData1["resolve"];
+        promise1["reject"] = promiseData1["reject"];
+        promise1["message"] = promiseData1["message"];
+        WebSocketConnector.promises[objMessage["messageId"]] = promise1;
+
+        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (part message [count: ${partMessageIds.length}]):`, objMessage);
+
+        WebSocketConnector.ws.send(JSON.stringify({
+            messageId: objMessage["messageId"],
+            type: "partMessage",
+            messageIds: partMessageIds,
+        }));
+    } else {
+        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (simple message):`, objMessage);
+
+        WebSocketConnector.ws.send(message);
+    }
+}
 const WebSocketConnector = {
     ws: null,
     firstConnect: true,
@@ -31,6 +77,7 @@ const WebSocketConnector = {
         qq1 = qq;
         token1 = token;
         let url = window.location.host;
+        // let url = "localhost:8080";
         return new Promise((resolve, reject) => {
             const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
             ws.onclose = function () {
@@ -45,7 +92,7 @@ const WebSocketConnector = {
                 } else {
                     autoRetriedTimes = 0;
                     if (!normallyClose) {
-                        console.log('WebSocket Closed');
+                        console.info('WebSocket Closed');
                         if (!notifications["closed"])
                             notifications["closed"] = ElNotification({
                                 title: '与服务器的连接已断开',
@@ -57,13 +104,13 @@ const WebSocketConnector = {
                             });
                         reject();
                     } else {
-                        console.log('WebSocket Closed Normally');
+                        console.info('WebSocket Closed Normally');
                         normallyClose = false;
                     }
                 }
             }
             ws.onerror = function (error) {
-                console.log('WebSocket error', error);
+                console.error('WebSocket error', error);
                 if (!notifications["error"])
                     if (autoRetriedTimes === 3) {
                         notifications["error"] = ElNotification({
@@ -84,16 +131,17 @@ const WebSocketConnector = {
                 });
                 if (this.waitingTasks.length > 0) {
                     this.waitingTasks.forEach((promise) => {
-                        let promise1 = this.send(promise["message"], promise["expectResponse"]);
+                        sendInternal(promise["message"]);
+                        /*let promise1 = this.send(promise.message);
                         promise1.then((message) => {
                             promise.resolve(message);
-                        });
+                        });*/
                     });
                     this.waitingTasks = [];
                 }
                 const channelEntries = Object.entries(this.channels);
                 if (channelEntries.length > 0) {
-                    for (const [name,channel] of channelEntries) {
+                    for (const [name, channel] of channelEntries) {
                         const actions = channel.actions;
                         for (const action of actions) {
                             this.subscribe(name, action);
@@ -104,18 +152,18 @@ const WebSocketConnector = {
                     notifications[key].close();
                 }
                 notifications = {};
-                console.log('WebSocket Opened');
+                console.info('WebSocket Opened');
                 resolve();
             }.bind(this);
             ws.onmessage = function (event) {
                 const message = JSON.parse(event.data);
                 // delete message.messageId;
                 if (WebSocketConnector.actions[message.type]) {
-                    console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
+                    console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
                     WebSocketConnector.actions[message.type](message);
                 } else if (WebSocketConnector.channels[message.channelName]) {
                     const channel1 = WebSocketConnector.channels[message.channelName];
-                    console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
+                    console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
                     if (channel1 && channel1.actions instanceof Array) {
                         channel1.actions.forEach((callback) => {
                             callback(message);
@@ -128,7 +176,7 @@ const WebSocketConnector = {
                             let showNotification = true;
                             message.disableNotification = () => {
                                 showNotification = false;
-                            };
+                            }
                             console.error("websocket error", message);
                             const doNotification = () => {
                                 delete message.disableNotification;
@@ -141,15 +189,11 @@ const WebSocketConnector = {
                                         duration: 0
                                     });
                                 }
-                            };
-                            const reject1 = promise.reject(message);
-                            if (reject1) {
-                                reject1.then(doNotification);
-                            } else {
-                                doNotification();
                             }
+                            promise.then(doNotification);
+                            promise.reject(message);
                         } else {
-                            console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
+                            console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
                             promise.resolve(message);
                         }
                     }
@@ -163,75 +207,26 @@ const WebSocketConnector = {
     reconnect() {
         return WebSocketConnector.connect(qq1, token1);
     },
-    send: function (/** Object*/objMessage, expectResponse = true) {
+    send: function (/** Object*/objMessage) {
         let ableToSend = this.ws !== null && this.ws.readyState === WebSocket.OPEN;
-        objMessage["messageId"] = randomUUIDv4();
+        objMessage.messageId = randomUUIDv4();
         let promise;
-        if (expectResponse) {
-            objMessage["expectResponse"] = true;
-            const promiseData = {};
-            promise = new Promise((resolve, reject) => {
-                promiseData["resolve"] = resolve;
-                promiseData["reject"] = reject;
-                promiseData["message"] = objMessage;
-            })
-            promise["resolve"] = promiseData["resolve"];
-            promise["reject"] = promiseData["reject"];
-            promise["message"] = promiseData["message"];
-            if (ableToSend) {
-                this.promises[objMessage["messageId"]] = promise;
-            }
-        }
+        const promiseData = {};
+        promise = new Promise((resolve, reject) => {
+            promiseData.resolve = resolve;
+            promiseData.reject = reject;
+            promiseData.message = objMessage;
+        });
+        promise.resolve = promiseData.resolve;
+        promise.reject = promiseData.reject;
+        promise.message = promiseData.message;
+        this.promises[objMessage.messageId] = promise;
         if (ableToSend) {
-            let message = JSON.stringify(objMessage);
-            if (message.length > limits) {
-                const messageParts = [];
-                const partCount = Math.ceil(message.length / limits);
-                const partMessageIds = [];
-                for (let i = 0; i < partCount; i++) {
-                    const messageId = randomUUIDv4();
-                    partMessageIds.push(messageId);
-                    messageParts.push({
-                        messageId: messageId,
-                        type: "partMessage",
-                        partId: objMessage["messageId"],
-                        messagePart: message.substring(i * limits, (i + 1) * limits),
-                    });
-                }
-                const oldPromise = this.promises[objMessage["messageId"]];
-                const promiseData1 = {};
-                let promise1 = new Promise((resolve, reject) => {
-                    promiseData1["resolve"] = () => {
-                        for (const message of messageParts) {
-                            this.ws.send(JSON.stringify(message));
-                        }
-                        this.promises[objMessage["messageId"]] = oldPromise;
-                    };
-                    promiseData1["reject"] = reject;
-                    promiseData1["message"] = objMessage;
-                });
-                promise1["resolve"] = promiseData1["resolve"];
-                promise1["reject"] = promiseData1["reject"];
-                promise1["message"] = promiseData1["message"];
-                this.promises[objMessage["messageId"]] = promise1;
-
-                console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (part message [count: ${partMessageIds.length}]):`, objMessage);
-
-                this.ws.send(JSON.stringify({
-                    messageId: objMessage["messageId"],
-                    type: "partMessage",
-                    messageIds: partMessageIds,
-                }));
-            } else {
-                console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (simple message):`, objMessage);
-
-                this.ws.send(message);
-            }
+            sendInternal(objMessage);
         } else {
             this.waitingTasks.push(promise);
         }
-        if (expectResponse)
-            return promise;
+        return promise;
     },
     registerAction: function (type, callback) {
         WebSocketConnector.actions[type] = callback;
@@ -247,7 +242,7 @@ const WebSocketConnector = {
         }
     },
     subscribe: function (channelName, callback) {
-        console.log(`[ ${getCurrentIsoTime()} ][ WebSocket ] subscribe channel (${channelName}):`, callback);
+        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] subscribe channel (${channelName})`);
         const unsubscribe = () => {
             if (WebSocketConnector.channels[channelName]) {
                 WebSocketConnector.channels[channelName].actions = WebSocketConnector.channels[channelName].actions.filter((cb) => cb !== callback);
@@ -271,7 +266,7 @@ const WebSocketConnector = {
                 }
             }
         });
-        return {name: channelName,unsubscribe: unsubscribe};
+        return {name: channelName, unsubscribe: unsubscribe};
     },
 }
 export default WebSocketConnector

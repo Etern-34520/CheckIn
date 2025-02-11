@@ -20,7 +20,7 @@ public class WebSocketService {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketService.class);
     public static WebSocketService singletonInstance;
     private final ObjectMapper objectMapper;
-    private final HashMap<String,Channel> channelHashMap = new HashMap<>();
+    private final HashMap<String, Channel> channelHashMap = new HashMap<>();
     
     @Getter
     public static class Channel {
@@ -112,12 +112,12 @@ public class WebSocketService {
     }
     
     @SneakyThrows
-    public void sendMessageToAll(LinkedHashMap<String,Object> map) {
+    public void sendMessageToAll(LinkedHashMap<String, Object> map) {
         sendMessageToAll(objectMapper.writeValueAsString(map));
     }
     
     @SneakyThrows
-    public void sendMessageToAllWithoutLog(LinkedHashMap<String,Object> map) {
+    public void sendMessageToAllWithoutLog(LinkedHashMap<String, Object> map) {
         sendMessageToAllWithoutLog(objectMapper.writeValueAsString(map));
     }
     
@@ -144,22 +144,25 @@ public class WebSocketService {
     }
     
     public void unsubscribeChannel(String sid, String channelName) {
-        Channel channel = channelHashMap.get(channelName);
-        if (channel != null) {
-            channel.sids.remove(sid);
-            if (channel.sids.isEmpty()) {
-                channelHashMap.remove(channelName);
+        if (!channelHashMap.isEmpty()) {
+            Channel channel = channelHashMap.get(channelName);
+            if (channel != null) {
+                channel.sids.remove(sid);
+                if (channel.sids.isEmpty()) {
+                    channelHashMap.remove(channelName);
+                }
             }
         }
     }
     
     public void unsubscribeAllChannels(String sid) {
-        for (Channel channel : channelHashMap.values()) {
-            channel.sids.remove(sid);
-            if (channel.sids.isEmpty()) {
-                channelHashMap.remove(channel.name);
+        if (!channelHashMap.isEmpty())
+            for (Channel channel : channelHashMap.values()) {//FIXME
+                channel.sids.remove(sid);
+                if (channel.sids.isEmpty()) {
+                    channelHashMap.remove(channel.name);
+                }
             }
-        }
     }
     
     /*public void sendMessageToChannel(String message, String channelName) {
@@ -169,21 +172,23 @@ public class WebSocketService {
         }
     }*/
     
-    public void sendMessageToChannel(Map<Object,Object> message, String channelName) {
+    public void sendMessageToChannel(Map<Object, Object> message, String channelName) {
+        logger.info("webSocket to channel:{}}", channelName);
         Channel channel = channelHashMap.get(channelName);
         if (channel != null) {
-            message.put("channelName",channelName);
+            message.put("channelName", channelName);
             sendMessages(message, channel.sids);
             message.remove("channelName");
         }
     }
     
-/*
-    public void sendMessageToChannel(String message, Channel channel) {
-        sendMessages(message, channel.sids);
-    }
-*/
-    public void sendMessageToChannel(Map<?,?> message, Channel channel) {
+    /*
+        public void sendMessageToChannel(String message, Channel channel) {
+            sendMessages(message, channel.sids);
+        }
+    */
+    public void sendMessageToChannel(Map<?, ?> message, Channel channel) {
+        logger.info("webSocket to channel:{}", channel.getName());
         sendMessages(message, channel.sids);
     }
     

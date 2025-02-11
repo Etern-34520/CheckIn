@@ -99,7 +99,7 @@ function loadPartitionChildrenNode(partitionId, isPartitionEmpty, resolve, rejec
                 tree.value.filter(filterText.value);
             });
             resolve(data);
-        }, (error) => {
+        }, (showError) => {
             reject();
         });
     }
@@ -660,7 +660,7 @@ onUnmounted(() => {
 <template>
     <responsive-splitpane ref="responsiveSplitpane" :left-loading="loading" show-left-label="题目列表">
         <template #left>
-            <el-input prefix-icon="Search" v-model="filterText" placeholder="搜索 (以 &quot;,&quot; 分词)"/>
+            <el-input prefix-icon="Search" v-model="filterText" placeholder="搜索 (以 &quot;;&quot; 分词)"/>
             <el-button type="primary" style="margin-top: 8px" @click="upload" :loading="uploading"
                        loading-icon="_Loading_"
                        :disabled="!QuestionCache.reactiveDirty.value">

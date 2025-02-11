@@ -10,10 +10,10 @@ import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionPo
 import UserDataInterface from "@/data/UserDataInterface.js";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
 import Collapse from "@/components/common/Collapse.vue";
-import MultipleChoicesEditorPlugin from "@/components/editor/module/MultipleChoicesEditorModule.vue";
+import MultipleChoicesEditorPlugin from "@/pages/serverGroup/questions/editor/module/MultipleChoicesEditorModule.vue";
 import QuestionCache from "@/data/QuestionCache.js";
 import toolbar from "@/data/MarkdownEditorToolbar.js";
-import ImageViewer from "@/components/editor/ImagesViewer.vue";
+import ImageViewer from "@/pages/serverGroup/questions/editor/ImagesViewer.vue";
 import UIMeta from "@/utils/UI_Meta.js";
 import {MdEditor} from "md-editor-v3";
 
@@ -165,11 +165,11 @@ const onPreview = (file) => {
             <div style="display: flex;flex-direction: column">
                 <div style="display: flex;margin-bottom: 4px" class="alerts">
                     <transition-group name="alert">
-                        <el-tag v-for="error of questionInfo.errors" :key="'error'+error.content" type="danger"
+                        <el-tag v-for="showError of questionInfo.errors" :key="'error'+error.content" type="danger"
                                 :closable="false">
                             <div style="display: flex;flex-direction: row;align-items: center;">
                                 <el-text type="danger" style="margin: 4px">
-                                    {{ error.content }}
+                                    {{ showError.content }}
                                 </el-text>
                                 <el-button-group>
                                     <el-button v-for="errorButton of error.buttons" link

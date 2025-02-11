@@ -36,8 +36,12 @@ public class JwtAuthenticationFilter implements Filter {
                 try {
                     userDetails = jwtTokenProvider.getUser(token);
                     if (!userDetails.isEnabled()) {
-                        response.addCookie(new Cookie("name", userDetails.getUsername()));
-                        response.addCookie(new Cookie("qq", String.valueOf(userDetails.getQQNumber())));
+                        final Cookie nameCookie = new Cookie("name", userDetails.getUsername());
+                        nameCookie.setPath("/checkIn");
+                        response.addCookie(nameCookie);
+                        final Cookie qqCookie = new Cookie("qq", String.valueOf(userDetails.getQQNumber()));
+                        qqCookie.setPath("/checkIn");
+                        response.addCookie(qqCookie);
 //                    response.sendRedirect("/checkIn/login/");
                         return;
                     }

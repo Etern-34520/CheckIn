@@ -1,10 +1,10 @@
 <script setup>
-import MultipleChoicesPreviewModule from "@/components/editor/module/MultipleChoicesPreviewModule.vue";
+import MultipleChoicesPreviewModule from "@/pages/serverGroup/questions/editor/module/MultipleChoicesPreviewModule.vue";
 import QuestionGroupSubQuestionPreviewModule
-    from "@/components/editor/module/QuestionGroupSubQuestionPreviewModule.vue";
+    from "@/pages/serverGroup/questions/editor/module/QuestionGroupSubQuestionPreviewModule.vue";
 import {MdEditor} from "md-editor-v3";
 import UIMeta from "@/utils/UI_Meta.js";
-import ImagesViewer from "@/components/editor/ImagesViewer.vue";
+import ImagesViewer from "@/pages/serverGroup/questions/editor/ImagesViewer.vue";
 // import 'md-editor-v3/lib/preview.css';
 
 const props = defineProps({

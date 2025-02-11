@@ -38,11 +38,11 @@ const groups = [
                 }
             },
             {
-                name: "抽取设置",
+                name: "生成设置",
                 description: "题量 分区数 必选分区 特殊分区限制 抽取策略 补足策略",
                 icon: Files,
                 action: () => {
-                    router.push({name: "drawing-setting"});
+                    router.push({name: "generating-setting"});
                 }
             },
             {

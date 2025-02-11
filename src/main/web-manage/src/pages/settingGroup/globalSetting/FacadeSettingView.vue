@@ -11,7 +11,7 @@ const editing = ref(false);
 const mode = ref('预览');
 const data = ref({});
 const gradingData = ref({});
-const drawingData = ref({});
+const generatingData = ref({});
 const loading = ref(true);
 const error = ref(false);
 let backup = {};
@@ -53,7 +53,7 @@ const finishEditing = () => {
         })
     }, (err) => {
         ElMessage({
-            type: "error", message: "保存失败"
+            type: "showError", message: "保存失败"
         })
     })*/
 }
@@ -93,14 +93,14 @@ const getData = () => {
             });
         }), new Promise(resolve => {
             WebSocketConnector.send({
-                type: "getDrawingSetting",
+                type: "getGeneratingSetting",
             }).then((response) => {
-                drawingData.value = response.data;
-                if (!drawingData.value.specialPartitionLimits) drawingData.value.specialPartitionLimits = ref({});
-                if (!drawingData.value.specialLimitsEnabledPartitions) drawingData.value.specialLimitsEnabledPartitions = ref([]);
+                generatingData.value = response.data;
+                if (!generatingData.value.specialPartitionLimits) generatingData.value.specialPartitionLimits = ref({});
+                if (!generatingData.value.specialLimitsEnabledPartitions) generatingData.value.specialLimitsEnabledPartitions = ref([]);
                 if (response.data.specialPartitionLimits) {
                     for (const key in response.data.specialPartitionLimits) {
-                        drawingData.value.specialLimitsEnabledPartitions.push(Number(key));
+                        generatingData.value.specialLimitsEnabledPartitions.push(Number(key));
                     }
                 }
                 resolve()
@@ -192,25 +192,25 @@ const deleteIcon = () => {
                                             <div style="display: flex;flex-direction: row;align-items: center">
                                                 <el-tag style="align-self: start;margin-right: 12px;" type="info">题量
                                                 </el-tag>
-                                                <el-text>{{ drawingData.questionAmount }}</el-text>
+                                                <el-text>{{ generatingData.questionAmount }}</el-text>
                                             </div>
                                             <div style="display: flex;flex-direction: row;align-items: center">
                                                 <el-tag style="align-self: start;margin-right: 12px;" type="info">
                                                     分区数
                                                 </el-tag>
-                                                <el-text v-if="drawingData.partitionRange" style="margin-right: 4px">
-                                                    {{ drawingData.partitionRange[0] }}
+                                                <el-text v-if="generatingData.partitionRange" style="margin-right: 4px">
+                                                    {{ generatingData.partitionRange[0] }}
                                                 </el-text>
-                                                <el-text v-if="drawingData.partitionRange" style="margin-right: 4px">~
+                                                <el-text v-if="generatingData.partitionRange" style="margin-right: 4px">~
                                                 </el-text>
-                                                <el-text v-if="drawingData.partitionRange">
-                                                    {{ drawingData.partitionRange[1] }}
+                                                <el-text v-if="generatingData.partitionRange">
+                                                    {{ generatingData.partitionRange[1] }}
                                                 </el-text>
                                             </div>
                                         </div>
                                         <div class="flex-blank-1"></div>
                                         <router-link class="el-link el-link--info is-underline"
-                                                     :to="{name:'drawing-setting'}">在抽取设置中更改
+                                                     :to="{name:'generating-setting'}">在生成设置中更改
                                         </router-link>
                                     </div>
                                     <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;">
@@ -225,7 +225,7 @@ const deleteIcon = () => {
                                         <div style="display: flex;flex-direction: column;flex: 1;margin-right: 8px;">
                                             <div class="score-bar" style="background: rgba(0,0,0,0);margin-bottom: 4px;overflow: visible">
                                                 <template v-for="(level,$index) of gradingData.levels">
-                                                    <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * drawingData.questionAmount - gradingData.splits[$index]}"
+                                                    <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * generatingData.questionAmount - gradingData.splits[$index]}"
                                                          style="display: flex;flex-direction: column">
                                                         <el-text>{{ level.name }}</el-text>
                                                     </div>
@@ -236,13 +236,13 @@ const deleteIcon = () => {
                                                 <template v-for="(level,$index) of gradingData.levels">
                                                     <div :style="{
                                                  background: level.colorHex,
-                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * drawingData.questionAmount - gradingData.splits[$index]
+                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * generatingData.questionAmount - gradingData.splits[$index]
                                              }"
                                                          style="height: 6px"></div>
                                                 </template>
                                             </div>
                                         </div>
-                                        <el-text>{{ gradingData.questionScore * drawingData.questionAmount }}</el-text>
+                                        <el-text>{{ gradingData.questionScore * generatingData.questionAmount }}</el-text>
                                     </div>
                                     <!--
                                                                         <div class="score-bar">

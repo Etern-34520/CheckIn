@@ -7,8 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Action("saveDrawingSetting")
-public class SaveDrawingSetting extends MapResultAction {
+@Action("saveGeneratingSetting")
+public class SaveGeneratingSetting extends MapResultAction {
     public static final String[] KEYS = {"questionAmount", "partitionRange", "specialPartitionLimits", "requiredPartitions", "completingPartitions", "drawingStrategy", "completingStrategy"};
     SaveSettingCommon saveSettingCommon;
     @Override
@@ -26,6 +26,6 @@ public class SaveDrawingSetting extends MapResultAction {
     public void initData(Map<String, Object> dataMap) {
         //noinspection unchecked
         saveSettingCommon = new SaveSettingCommon((Map<String, Object>) dataMap.get("data"),
-                KEYS,"drawing");
+                KEYS,"generating");
     }
 }

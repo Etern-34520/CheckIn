@@ -61,7 +61,7 @@ public class ExamDataService {
         examData.setStatus(ExamData.Status.SUBMITTED);
         
         //noinspection unchecked
-        ArrayList<Number> levelSplit = settingService.getItem("grading.splits").getValue(ArrayList.class);
+        ArrayList<Number> levelSplit = settingService.getItem("grading","splits").getValue(ArrayList.class);
         List<GradingLevel> gradingLevels = gradingLevelService.findAll();
         
         Float[] levelSplitArray = new Float[levelSplit.size() + 1];
@@ -71,7 +71,7 @@ public class ExamDataService {
             index.incrementAndGet();
         });
         
-        SettingItem scoreSettingItem = SettingService.singletonInstance.findItem("grading.questionScore").orElseThrow();
+        SettingItem scoreSettingItem = settingService.getItem("grading","questionScore");
         float singleQuestionScore = scoreSettingItem.getValue(Number.class).floatValue();
         
         levelSplitArray[levelSplitArray.length - 1] = examData.getQuestionAmount() * singleQuestionScore;
@@ -82,6 +82,7 @@ public class ExamDataService {
             levelIndex = levelSplitArray.length - 2;//avoid overflow
         } else {
             if (searchResult >= 0) levelIndex = searchResult;//at lower point
+            else if (searchResult == -1) levelIndex = 0;//at lower point
             else levelIndex = -searchResult - 2;//at part
         }
         final GradingLevel gradingLevel = gradingLevels.get(levelIndex);
@@ -133,5 +134,13 @@ public class ExamDataService {
     public Optional<ExamData> findMaxByQQ(long qq) {
         List<ExamData> examDataList = examDataRepository.findAllByQqNumberIs(qq);
         return examDataList.stream().max(Comparator.comparing(ExamData::getExamResult));//TODO expire time
+    }
+    
+    public void invalidAllByQQ(long qq) {
+        List<ExamData> examDataList = examDataRepository.findAllByQqNumberAndStatus(qq, ExamData.Status.ONGOING);
+        for (ExamData examData : examDataList) {
+            examData.setStatus(ExamData.Status.EXPIRED);
+        }
+        examDataRepository.saveAll(examDataList);
     }
 }

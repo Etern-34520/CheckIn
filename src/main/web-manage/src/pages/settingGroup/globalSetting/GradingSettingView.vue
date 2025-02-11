@@ -14,7 +14,7 @@ const data = ref({
     questionAmount: 0,
     partitionRange: [0, 100]
 });
-const drawingData = ref();
+const generatingData = ref();
 const loading = ref(true);
 const error = ref(false);
 let backup = {};
@@ -71,14 +71,14 @@ const getData = () => {
         });
     }), new Promise(resolve => {
         WebSocketConnector.send({
-            type: "getDrawingSetting",
+            type: "getGeneratingSetting",
         }).then((response) => {
-            drawingData.value = response.data;
-            if (!drawingData.value.specialPartitionLimits) drawingData.value.specialPartitionLimits = ref({});
-            if (!drawingData.value.specialLimitsEnabledPartitions) drawingData.value.specialLimitsEnabledPartitions = ref([]);
+            generatingData.value = response.data;
+            if (!generatingData.value.specialPartitionLimits) generatingData.value.specialPartitionLimits = ref({});
+            if (!generatingData.value.specialLimitsEnabledPartitions) generatingData.value.specialLimitsEnabledPartitions = ref([]);
             if (response.data.specialPartitionLimits) {
                 for (const key in response.data.specialPartitionLimits) {
-                    drawingData.value.specialLimitsEnabledPartitions.push(Number(key));
+                    generatingData.value.specialLimitsEnabledPartitions.push(Number(key));
                 }
             }
             resolve()
@@ -100,7 +100,7 @@ const addLevel = () => {
     console.log(data.value.splits.length);
     console.log(data.value.levels.length);
     if (data.value.splits.length < data.value.levels.length + 1) {
-        const number = (data.value.questionScore * drawingData.value.questionAmount + data.value.splits[data.value.splits.length - 1]) / 2;
+        const number = (data.value.questionScore * generatingData.value.questionAmount + data.value.splits[data.value.splits.length - 1]) / 2;
         data.value.splits.push(number);
         console.log(number)
     }
@@ -144,7 +144,7 @@ const removeLevel = (index) => {
         <div v-if="!loading && !error" style="display: flex;flex-wrap: wrap;">
             <div style="display: flex;margin-right: 32px;align-items: center">
                 <el-tag type="info" style="margin-right: 16px;">题数</el-tag>
-                <el-text>{{ drawingData.questionAmount }}</el-text>
+                <el-text>{{ generatingData.questionAmount }}</el-text>
             </div>
             <div style="display: flex;margin-right: 32px;align-items: center">
                 <el-tag type="info" style="margin-right: 16px;">每题分值</el-tag>
@@ -152,15 +152,15 @@ const removeLevel = (index) => {
             </div>
             <div style="display: flex;margin-right: 32px;align-items: center">
                 <el-tag type="info" style="margin-right: 16px;">总分值</el-tag>
-                <el-text>{{ data.questionScore * drawingData.questionAmount }}</el-text>
+                <el-text>{{ data.questionScore * generatingData.questionAmount }}</el-text>
             </div>
-            <!--            <el-input-number v-model="data.questionScore * drawingData.questionAmount"></el-input-number>-->
+            <!--            <el-input-number v-model="data.questionScore * generatingData.questionAmount"></el-input-number>-->
         </div>
         <div class="score-bar" style="margin-bottom: 16px;" v-if="!loading && !error">
             <div v-for="(level,$index) of data.levels"
                  :style="{
                 background: level.colorHex,
-                flex: data.splits[$index+1] ? data.splits[$index+1] : data.questionScore * drawingData.questionAmount - data.splits[$index]
+                flex: data.splits[$index+1] ? data.splits[$index+1] : data.questionScore * generatingData.questionAmount - data.splits[$index]
                 }"
                  style="height: 6px"></div>
         </div>
@@ -190,7 +190,7 @@ const removeLevel = (index) => {
                                         <grading-level-card :disabled="!editing" v-model="data.levels[$index]"
                                                             v-model:split="data.splits"
                                                             :min="0"
-                                                            :max="data.questionScore * drawingData.questionAmount"
+                                                            :max="data.questionScore * generatingData.questionAmount"
                                                             :predefine="predefine" :index="$index"></grading-level-card>
                                         <transition name="remove-button">
                                             <el-button class="disable-init-animate" style="margin-left: 16px;"

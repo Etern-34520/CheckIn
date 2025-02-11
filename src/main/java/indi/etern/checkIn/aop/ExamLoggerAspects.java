@@ -1,9 +1,9 @@
 package indi.etern.checkIn.aop;
 
-import indi.etern.checkIn.controller.rest.Exam;
 import indi.etern.checkIn.entities.exam.ExamData;
-import indi.etern.checkIn.entities.record.TrafficRecord;
-import indi.etern.checkIn.service.dao.TrafficRecordService;
+import indi.etern.checkIn.entities.record.RequestRecord;
+import indi.etern.checkIn.service.dao.RequestRecordService;
+import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.aspectj.lang.JoinPoint;
@@ -12,76 +12,96 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
 @Aspect
 public class ExamLoggerAspects {
-    final TrafficRecordService trafficRecordService;
+    final RequestRecordService requestRecordService;
+    private final WebSocketService webSocketService;
     
-    public ExamLoggerAspects(TrafficRecordService trafficRecordService) {
-        this.trafficRecordService = trafficRecordService;
+    public ExamLoggerAspects(RequestRecordService requestRecordService, WebSocketService webSocketService) {
+        this.requestRecordService = requestRecordService;
+        this.webSocketService = webSocketService;
     }
     
     @FunctionalInterface
     private interface RequestProcessor {
-        void process(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, TrafficRecord trafficRecord);
+        void process(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, RequestRecord requestRecord);
     }
     
-    private void record(TrafficRecord.Type type, RequestProcessor processor) {
+    private RequestRecord record(RequestRecord.Type type, RequestProcessor processor) {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         HttpServletResponse httpServletResponse = servletRequestAttributes.getResponse();
-        TrafficRecord trafficRecord = TrafficRecord.from(httpServletRequest, httpServletResponse);
-        trafficRecord.setType(type);
+        RequestRecord requestRecord = RequestRecord.from(httpServletRequest, httpServletResponse);
+        requestRecord.setType(type);
         if (processor != null) {
-            processor.process(httpServletRequest, httpServletResponse, trafficRecord);
+            processor.process(httpServletRequest, httpServletResponse, requestRecord);
         }
-        trafficRecordService.save(trafficRecord);
+        sendUpdateRequestRecord(requestRecord);
+        requestRecordService.save(requestRecord);
+        return requestRecord;
     }
     
-    private void record(TrafficRecord.Type type,Throwable throwable,RequestProcessor processor) {
+    private RequestRecord record(RequestRecord.Type type, Throwable throwable, RequestProcessor processor) {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         HttpServletResponse httpServletResponse = servletRequestAttributes.getResponse();
-        TrafficRecord trafficRecord = TrafficRecord.from(httpServletRequest, httpServletResponse, throwable);
-        trafficRecord.setType(type);
+        RequestRecord requestRecord = RequestRecord.from(httpServletRequest, httpServletResponse, throwable);
+        requestRecord.setType(type);
         if (processor != null) {
-            processor.process(httpServletRequest, httpServletResponse, trafficRecord);
+            processor.process(httpServletRequest, httpServletResponse, requestRecord);
         }
-        trafficRecordService.save(trafficRecord);
+        sendUpdateRequestRecord(requestRecord);
+        requestRecordService.save(requestRecord);
+        return requestRecord;
+    }
+    
+    private void sendUpdateRequestRecord(RequestRecord requestRecord) {
+        Map<Object, Object> updateData = new HashMap<>();
+        updateData.put("type", "updateRequestRecord");
+        updateData.put("requestRecord", requestRecord);
+        webSocketService.sendMessageToChannel(updateData, "requestRecords");
     }
     
     
-    @Pointcut("execution(* indi.etern.checkIn.controller.html.MainController.exam())")
+    @Pointcut("execution(* indi.etern.checkIn.controller.html.MainController.exam(..))")
     public void visitExam() {
     }
     
     @Before("visitExam()")
     public void beforeVisit() {
-        record(TrafficRecord.Type.VISIT, null);
+        record(RequestRecord.Type.VISIT, null);
     }
     
-    @Pointcut("execution(* indi.etern.checkIn.controller.rest.Exam.generateExam(..))")
+    @Pointcut("execution(* indi.etern.checkIn.service.exam.ExamGenerator.generateExam(..))")
     public void generateExam() {
     }
     
-    @AfterReturning("generateExam()")
-    public void afterGenerate(JoinPoint joinPoint) {
-        record(TrafficRecord.Type.GENERATE, getGenerateProcessor(joinPoint));
+    @AfterReturning(pointcut = "generateExam()", returning = "examData")
+    public void afterGenerate(JoinPoint joinPoint,ExamData examData) {
+        record(RequestRecord.Type.GENERATE, getGenerateProcessor(joinPoint,examData));
     }
     
-    @AfterThrowing(pointcut = "generateExam()",throwing = "throwable")
+    @AfterThrowing(pointcut = "generateExam()", throwing = "throwable")
     public void afterGenerate(JoinPoint joinPoint, Throwable throwable) {
-        record(TrafficRecord.Type.GENERATE, throwable, getGenerateProcessor(joinPoint));
+        record(RequestRecord.Type.GENERATE, throwable, getGenerateProcessor(joinPoint,null));
     }
     
-    private static RequestProcessor getGenerateProcessor(JoinPoint joinPoint) {
-        return (httpServletRequest, httpServletResponse, trafficRecord) -> {
-            Exam.GenerateRequest generateRequest = (Exam.GenerateRequest) joinPoint.getArgs()[0];
-            long qq = generateRequest.qq();
-            trafficRecord.setQQNumber(qq);
-            trafficRecord.getExtraData().put("partitionIds", generateRequest.partitionIds());
+    private RequestProcessor getGenerateProcessor(JoinPoint joinPoint,ExamData examData) {
+        return (httpServletRequest, httpServletResponse, requestRecord) -> {
+            long qq = (long) joinPoint.getArgs()[0];
+            if (examData != null) {
+                requestRecord.setRelatedExamDataId(examData.getId());
+//                requestRecord.getExtraData().put("examData", examData.toDataMap());
+                List<RequestRecord> requestRecords = requestRecordService.findAllBySessionId(requestRecord.getSessionId());
+                requestRecords.forEach(requestRecord1 -> requestRecord1.setRelatedExamDataId(examData.getId()));
+                requestRecordService.saveAll(requestRecords);
+            }
+            requestRecord.setQQNumber(qq);
         };
     }
     
@@ -91,19 +111,21 @@ public class ExamLoggerAspects {
     
     @AfterReturning("getQuestionsByExamIdAndIndexes()")
     public void afterGetQuestionsByExamIdAndIndexes(JoinPoint joinPoint) {
-        record(TrafficRecord.Type.GET_EXAM_QUESTION, getGetQuestionsProcessor(joinPoint));
+        record(RequestRecord.Type.GET_EXAM_QUESTIONS, getGetQuestionsProcessor(joinPoint));
     }
     
-    @AfterThrowing(pointcut = "getQuestionsByExamIdAndIndexes()",throwing = "throwable")
+    @AfterThrowing(pointcut = "getQuestionsByExamIdAndIndexes()", throwing = "throwable")
     public void afterExceptionGetQuestionsByExamIdAndIndexes(JoinPoint joinPoint, Throwable throwable) {
-        record(TrafficRecord.Type.GET_EXAM_QUESTION, throwable, getGetQuestionsProcessor(joinPoint));
+        record(RequestRecord.Type.GET_EXAM_QUESTIONS, throwable, getGetQuestionsProcessor(joinPoint));
     }
     
     private static RequestProcessor getGetQuestionsProcessor(JoinPoint joinPoint) {
         return (httpServletRequest, httpServletResponse, trafficRecord) -> {
             ExamData examData = (ExamData) joinPoint.getArgs()[1];
+            trafficRecord.setRelatedExamDataId(examData.getId());
             trafficRecord.setQQNumber(examData.getQqNumber());
             trafficRecord.getExtraData().put("indexes", joinPoint.getArgs()[0]);
+//            trafficRecord.getExtraData().put("examData", examData.toDataMap());
         };
     }
     
@@ -113,21 +135,23 @@ public class ExamLoggerAspects {
     
     @AfterReturning("submit()")
     public void afterSubmit(JoinPoint joinPoint) {
-        record(TrafficRecord.Type.SUBMIT, getSubmitProcessor(joinPoint));
+        record(RequestRecord.Type.SUBMIT, getSubmitProcessor(joinPoint));
     }
     
-    @AfterThrowing(pointcut = "submit()",throwing = "throwable")
+    @AfterThrowing(pointcut = "submit()", throwing = "throwable")
     public void afterSubmitThrowing(JoinPoint joinPoint, Throwable throwable) {
-        record(TrafficRecord.Type.SUBMIT, throwable, getSubmitProcessor(joinPoint));
+        record(RequestRecord.Type.SUBMIT, throwable, getSubmitProcessor(joinPoint));
     }
     
     private static RequestProcessor getSubmitProcessor(JoinPoint joinPoint) {
         return (httpServletRequest, httpServletResponse, trafficRecord) -> {
             ExamData examData = (ExamData) joinPoint.getArgs()[0];
+            trafficRecord.setRelatedExamDataId(examData.getId());
             //noinspection unchecked
             Map<String, Object> answerData = (Map<String, Object>) joinPoint.getArgs()[1];
             trafficRecord.setQQNumber(examData.getQqNumber());
-            trafficRecord.getExtraData().put("answerData", answerData);
+//            trafficRecord.getExtraData().put("answerData", answerData);
+//            trafficRecord.getExtraData().put("examData", examData.toDataMap());
         };
     }
 }

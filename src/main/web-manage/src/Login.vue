@@ -20,9 +20,6 @@ function login() {
     }).then(response => {
         console.log(response);
         if (response.result === "success") {
-            proxy.$cookies.set("token", response.token);
-            proxy.$cookies.set("name", response.name);
-            proxy.$cookies.set("qq", response.qq);
             loginMessage.value = "";
             emit("loginAs", {name: response.name, qq: response.qq, token: response.token});
         } else if (response.result === "fail") {

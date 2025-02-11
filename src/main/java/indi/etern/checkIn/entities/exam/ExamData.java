@@ -13,12 +13,15 @@ import indi.etern.checkIn.entities.question.impl.group.QuestionGroupAnswer;
 import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
 import indi.etern.checkIn.entities.question.interfaces.answer.Answer;
 import indi.etern.checkIn.entities.question.interfaces.answer.SingleQuestionAnswer;
+import indi.etern.checkIn.service.dao.ExamDataService;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.exam.ExamResult;
+import indi.etern.checkIn.service.web.WebSocketService;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Entity
@@ -41,6 +44,15 @@ public class ExamData implements BaseEntity<String> {
 //    @JsonIgnore
     @Setter
     Status status;
+    
+    public Status getStatus() {
+        if (status == Status.ONGOING && LocalDateTime.now().isAfter(expireTime)) {
+            status = Status.EXPIRED;
+            ExamDataService.singletonInstance.save(this);
+            sendUpdateExamRecord();
+        }
+        return status;
+    }
     
     @Convert(converter = ListJsonConverter.class)
     @Column(columnDefinition = "mediumtext")
@@ -74,6 +86,9 @@ public class ExamData implements BaseEntity<String> {
     @Setter
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime submitTime;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    LocalDateTime expireTime;
     
     public ExamResult checkAnswerMap(Map<String, Object> answerMap) {
         List<Question> orderedQuestions =
@@ -136,5 +151,30 @@ public class ExamData implements BaseEntity<String> {
     @Override
     public String toString() {
         return "ExamData[" + id + "]";
+    }
+    
+    public LinkedHashMap<String, Object> toDataMap() {
+        LinkedHashMap<String, Object> examDataMap = new LinkedHashMap<>();
+        examDataMap.put("id", id);
+        examDataMap.put("qqNumber", qqNumber);
+        examDataMap.put("status", getStatus());
+        examDataMap.put("generateTime", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(generateTime));
+        examDataMap.put("expireTime", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(expireTime));
+        if (submitTime != null)
+            examDataMap.put("submitTime", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(submitTime));
+        examDataMap.put("requiredPartitionIds", requiredPartitionIds);
+        examDataMap.put("selectedPartitionIds", selectedPartitionIds);
+        examDataMap.put("questionAmount", questionAmount);
+        examDataMap.put("questionIds", questionIds);
+        examDataMap.put("result", examResult);
+        examDataMap.put("answers", answersMap);
+        return examDataMap;
+    }
+    
+    public void sendUpdateExamRecord() {
+        Map<Object,Object> updateData = new HashMap<>();
+        updateData.put("type","updateExamRecord");
+        updateData.put("examRecord", this);
+        WebSocketService.singletonInstance.sendMessageToChannel(updateData,"examRecord");
     }
 }

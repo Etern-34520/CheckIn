@@ -3,7 +3,7 @@ import WebSocketConnector from "@/api/websocket.js";
 import {ElMessage} from "element-plus";
 import 'md-editor-v3/lib/style.css';
 import PartitionCache from "@/data/PartitionCache.js";
-import SpecialPartitionRule from "@/pages/settingGroup/globalSetting/drawingSetting/SpecialPartitionRuleTag.vue";
+import SpecialPartitionRule from "@/pages/settingGroup/globalSetting/generatingSetting/SpecialPartitionRuleTag.vue";
 import Waterfall from "@/components/common/Waterfall.vue";
 
 const editing = ref(false);
@@ -29,7 +29,7 @@ const finishEditing = () => {
     editing.value = false;
     if (backupJSON !== JSON.stringify(data.value)) {
         WebSocketConnector.send({
-            type: "saveDrawingSetting",
+            type: "saveGeneratingSetting",
             data: data.value
         }).then(() => {
             ElMessage({
@@ -62,7 +62,7 @@ const getData = () => {
             });
         }), new Promise((resolve, reject) => {
             WebSocketConnector.send({
-                type: "getDrawingSetting",
+                type: "getGeneratingSetting",
             }).then((response) => {
                 data.value = response.data;
                 if (!data.value.specialPartitionLimits) data.value.specialPartitionLimits = ref({});
@@ -109,7 +109,7 @@ const updateLimits = (partitionIds) => {
 
 <template>
     <div style="display: flex;flex-direction: column;padding-bottom: 16px">
-        <el-text style="align-self:baseline;font-size: 24px">抽取设置</el-text>
+        <el-text style="align-self:baseline;font-size: 24px">生成设置</el-text>
         <div style="display: flex;margin-top: 16px;margin-left: 8px;margin-bottom: 20px;">
             <transition-group name="blur-scale">
                 <el-button-group key="button-group">

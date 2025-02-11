@@ -19,7 +19,7 @@ onBeforeMount(() => {
             for (const question of response.questions) {
                 questionInfos.value.push(QuestionCache.wrapToQuestionInfo(question));
             }
-        }, (error) => {
+        }, (showError) => {
             loading.value = false;
         });
     } catch (e) {

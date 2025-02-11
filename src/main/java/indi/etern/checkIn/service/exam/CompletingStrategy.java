@@ -15,7 +15,7 @@ public enum CompletingStrategy {
     },
     REQUIRED {
         public List<Partition> getCompletingPartitions() {
-            SettingItem settingItem = SettingService.singletonInstance.getItem("drawing", "requiredPartitions");
+            SettingItem settingItem = SettingService.singletonInstance.getItem("generating", "requiredPartitions");
             //noinspection unchecked
             List<Integer> partitionIds = (List<Integer>) settingItem.getValue(List.class);
             return PartitionService.singletonInstance.findAllByIds(partitionIds);
@@ -28,7 +28,7 @@ public enum CompletingStrategy {
     },
     SELECTED {
         public List<Partition> getCompletingPartitions() {
-            SettingItem settingItem = SettingService.singletonInstance.getItem("drawing", "completingPartitions");
+            SettingItem settingItem = SettingService.singletonInstance.getItem("generating", "completingPartitions");
             //noinspection unchecked
             List<Integer> partitionIds = (List<Integer>) settingItem.getValue(List.class);
             return PartitionService.singletonInstance.findAllByIds(partitionIds);

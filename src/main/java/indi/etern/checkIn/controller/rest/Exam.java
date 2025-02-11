@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.partition.GetPartitionsAction;
-import indi.etern.checkIn.action.setting.GetDrawingSetting;
+import indi.etern.checkIn.action.setting.GetGeneratingSetting;
 import indi.etern.checkIn.action.setting.GetFacadeSetting;
 import indi.etern.checkIn.action.setting.GetGradingSetting;
 import indi.etern.checkIn.entities.exam.ExamData;
@@ -56,12 +56,13 @@ public class Exam {
     public Map<String, ?> generateExam(@RequestBody GenerateRequest generateRequest) {
         try {
             final ExamData examData = examGenerator.generateExam(generateRequest.qq, partitionService.findAllByIds(generateRequest.partitionIds.stream().map(Integer::parseInt).toList()));
+            examDataService.invalidAllByQQ(generateRequest.qq);
             examDataService.save(examData);
             questionStatisticService.appendStatistic(examData);
             Map<String, Object> result = new HashMap<>();
             result.put("examId", examData.getId());
             result.put("questionItemCount", examData.getQuestionIds().size());
-            sendUpdateExamRecord(examData);
+            examData.sendUpdateExamRecord();
             return result;
         } catch (ExamGenerateFailedException e) {
             Map<String,String> errorDataMap = new HashMap<>();
@@ -110,7 +111,7 @@ public class Exam {
             final ExamData examData = optionalExamData.get();
             try {
                 final ExamResult examResult = examDataService.handleSubmit(examData, submitRequest.answer);
-                sendUpdateExamRecord(examData);
+                examData.sendUpdateExamRecord();
                 return objectMapper.writeValueAsString(examResult);
             } catch (ExamInvalidException e) {
                 logger.error("Exam[{}] invalided", examData.getId());
@@ -129,7 +130,7 @@ public class Exam {
     public Map<String, Object> getFacadeData() {
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> facadeSettingMap = actionExecutor.executeByTypeClass(GetFacadeSetting.class).orElseThrow();
-        Map<String, Object> drawingSettingMap = actionExecutor.executeByTypeClass(GetDrawingSetting.class).orElseThrow();
+        Map<String, Object> generatingSettingMap = actionExecutor.executeByTypeClass(GetGeneratingSetting.class).orElseThrow();
         Map<String, Object> gradingSettingMap = actionExecutor.executeByTypeClass(GetGradingSetting.class).orElseThrow();
         
         Map<String, Object> partitions = actionExecutor.executeByTypeClass(GetPartitionsAction.class).orElseThrow();
@@ -140,16 +141,9 @@ public class Exam {
         });
         
         result.put("facadeData", facadeSettingMap);
-        result.put("drawingData", drawingSettingMap);
+        result.put("generatingData", generatingSettingMap);
         result.put("gradingData", gradingSettingMap);
         result.put("partitions", partitionsNameMap);
         return result;
-    }
-    
-    private void sendUpdateExamRecord(ExamData examData) {
-        Map<Object,Object> updateData = new HashMap<>();
-        updateData.put("type","updateExamRecord");
-        updateData.put("examRecord", examData);
-        webSocketService.sendMessageToChannel(updateData,"examRecord");
     }
 }

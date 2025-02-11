@@ -7,16 +7,16 @@ import {VueDraggable} from "vue-draggable-plus";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
-import BasicQuestionEditor from "@/components/editor/BasicQuestionEditor.vue";
-import SubQuestionEditor from "@/components/editor/SubQuestionEditor.vue";
-import MultipleChoicesEditorPlugin from "@/components/editor/module/MultipleChoicesEditorModule.vue";
+import BasicQuestionEditor from "@/pages/serverGroup/questions/editor/BasicQuestionEditor.vue";
+import SubQuestionEditor from "@/pages/serverGroup/questions/editor/SubQuestionEditor.vue";
+import MultipleChoicesEditorPlugin from "@/pages/serverGroup/questions/editor/module/MultipleChoicesEditorModule.vue";
 import QuestionPreview from "@/components/question/QuestionPreview.vue";
 
 const {proxy} = getCurrentInstance();
 const route = useRoute();
 let questionInfo = ref({});
 
-const error = ref(false);
+const showError = ref(false);
 const errorMessage = ref("");
 const ready = ref(false);
 const loading = ref(false);
@@ -200,11 +200,11 @@ const currentUserQQ = Number(proxy.$cookies.get("qq"));
         </div>
         <div style="display: flex;justify-self: stretch;flex-wrap: wrap;margin-left: 8px;margin-right: 8px" class="alerts">
             <transition-group name="alert">
-                <el-tag v-for="(error,id) in questionInfo.errors" :key="'error-'+id" type="danger"
+                <el-tag v-for="(showError,id) in questionInfo.errors" :key="'error-'+id" type="danger"
                         :closable="false">
                     <div style="display: flex;flex-direction: row;align-items: center;">
                         <el-text type="danger" style="margin: 4px">
-                            {{ error.content }}
+                            {{ showError.content }}
                         </el-text>
                         <el-button-group>
                             <el-button v-for="errorButton of error.buttons" link

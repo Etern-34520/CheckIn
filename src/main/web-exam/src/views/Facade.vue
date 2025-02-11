@@ -13,14 +13,14 @@ const props = defineProps({
     }, gradingData: {
         type: Object,
         required: true
-    }, drawingData: {
+    }, generatingData: {
         type: Object,
         required: true
     },
 })
 
 const routeGenerateExam = () => {
-    proxy.$cookies.set("phrase", "generate", "7d");
+    proxy.$cookies.set("phrase", "generating", "7d");
     router.push({name: 'generate'});
 }
 </script>
@@ -56,19 +56,19 @@ const routeGenerateExam = () => {
                         <div style="display: flex;flex-direction: row;align-items: center">
                             <el-tag style="align-self: start;margin-right: 12px;" type="info">题量
                             </el-tag>
-                            <el-text>{{ drawingData.questionAmount }}</el-text>
+                            <el-text>{{ generatingData.questionAmount }}</el-text>
                         </div>
                         <div style="display: flex;flex-direction: row;align-items: center">
                             <el-tag style="align-self: start;margin-right: 12px;" type="info">
                                 分区数
                             </el-tag>
-                            <el-text v-if="drawingData.partitionRange" style="margin-right: 4px">
-                                {{ drawingData.partitionRange[0] }}
+                            <el-text v-if="generatingData.partitionRange" style="margin-right: 4px">
+                                {{ generatingData.partitionRange[0] }}
                             </el-text>
-                            <el-text v-if="drawingData.partitionRange" style="margin-right: 4px">~
+                            <el-text v-if="generatingData.partitionRange" style="margin-right: 4px">~
                             </el-text>
-                            <el-text v-if="drawingData.partitionRange">
-                                {{ drawingData.partitionRange[1] }}
+                            <el-text v-if="generatingData.partitionRange">
+                                {{ generatingData.partitionRange[1] }}
                             </el-text>
                         </div>
                     </div>
@@ -82,7 +82,7 @@ const routeGenerateExam = () => {
                         <div class="score-bar"
                              style="background: rgba(0,0,0,0);margin-bottom: 4px;overflow: visible">
                             <template v-for="(level,$index) of gradingData.levels">
-                                <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * drawingData.questionAmount - gradingData.splits[$index]}"
+                                <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * generatingData.questionAmount - gradingData.splits[$index]}"
                                      style="display: flex;flex-direction: column">
                                     <el-text>{{ level.name }}</el-text>
                                 </div>
@@ -95,13 +95,13 @@ const routeGenerateExam = () => {
                             <template v-for="(level,$index) of gradingData.levels">
                                 <div :style="{
                                                  background: level.colorHex,
-                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * drawingData.questionAmount - gradingData.splits[$index]
+                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * generatingData.questionAmount - gradingData.splits[$index]
                                              }"
                                      style="height: 6px"></div>
                             </template>
                         </div>
                     </div>
-                    <el-text>{{ gradingData.questionScore * drawingData.questionAmount }}</el-text>
+                    <el-text>{{ gradingData.questionScore * generatingData.questionAmount }}</el-text>
                 </div>
             </div>
         </div>

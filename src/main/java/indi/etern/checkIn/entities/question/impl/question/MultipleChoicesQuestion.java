@@ -227,7 +227,7 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
                 throw new QuestionBuilderException("Less than two choices");
             }
             if (linkWrapper == null) {
-                String string = SettingService.singletonInstance.getItem("other.defaultPartitionName").getValue(String.class);
+                String string = SettingService.singletonInstance.getItem("other","defaultPartitionName").getValue(String.class);
                 if (string == null) string = "undefined";
                 String finalString = string;
                 usePartitionLinks(partitionLink -> partitionLink.getTargets().add(Partition.getInstance(finalString)));

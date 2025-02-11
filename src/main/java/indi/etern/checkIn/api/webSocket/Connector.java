@@ -137,13 +137,13 @@ public class Connector implements SubProtocolCapable {
                 }
                 case "subscribe" -> {
                     final String channelName = contentMap.get("channel").toString();
-                    logger.info("websocket subscribe from {}({}): channel \"{}\"",sessionUser.getName(),sessionUser.getQQNumber(),channelName);
+                    logger.debug("websocket subscribe from {}({}): channel \"{}\"",sessionUser.getName(),sessionUser.getQQNumber(),channelName);
                     webSocketService.subscribeChannel(sid, channelName);
                     sendMessage("{\"type\":\"success\",\"messageId\":\"" + messageId + "\"}");
                 }
                 case "unsubscribe" -> {
                     final String channelName = contentMap.get("channel").toString();
-                    logger.info("websocket unsubscribe from {}({}): channel \"{}\"",sessionUser.getName(),sessionUser.getQQNumber(),channelName);
+                    logger.debug("websocket unsubscribe from {}({}): channel \"{}\"",sessionUser.getName(),sessionUser.getQQNumber(),channelName);
                     webSocketService.unsubscribeChannel(sid, channelName);
                     sendMessage("{\"type\":\"success\",\"messageId\":\"" + messageId + "\"}");
                 }
@@ -151,7 +151,7 @@ public class Connector implements SubProtocolCapable {
                     String logMessage = message.length() > 65535 ? message.substring(0, 4096) : message;
                     try {
                         Result result = actionExecutor.executeByMap(contentMap);
-                        logger.info("{}({}):{}", sessionUser.getName(), sid, logMessage);
+                        logger.debug("{}({}):{}", sessionUser.getName(), sid, logMessage);
                         if (result.getResult().isPresent()) {
                             LinkedHashMap<String, Object> map = result.getResult().get();
                             map.put("messageId", messageId);
@@ -162,7 +162,7 @@ public class Connector implements SubProtocolCapable {
                             e.printStackTrace();
                         }
                         logger.error("{} : {}", e.getClass().getName(), e.getMessage());
-                        logger.info("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, logMessage);
+                        logger.debug("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, logMessage);
                         if (e instanceof PermissionDeniedException permissionDeniedException) {
                             sendError(messageId, permissionDeniedException.getDescription());
                         } else
@@ -276,8 +276,8 @@ public class Connector implements SubProtocolCapable {
     
     public void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
-        if (message.length() > 65535) message = message.substring(0, 4096) + "...";
-        logger.info("webSocket to {}({}):{}", sessionUser.getName(), sid, message);
+        if (message.length() > 8192) message = message.substring(0, 8192) + "\n=========(truncated)=========";
+        logger.debug("webSocket to {}({}):{}", sessionUser.getName(), sid, message);
     }
     
     @NonNull

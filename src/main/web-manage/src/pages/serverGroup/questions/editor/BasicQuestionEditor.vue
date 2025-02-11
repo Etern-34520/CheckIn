@@ -7,7 +7,7 @@ import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionPo
 import UserDataInterface from "@/data/UserDataInterface.js";
 import Collapse from "@/components/common/Collapse.vue";
 // import "vditor/dist/index.css"
-import ImageViewer from "@/components/editor/ImagesViewer.vue";
+import ImageViewer from "@/pages/serverGroup/questions/editor/ImagesViewer.vue";
 import {MdEditor} from "md-editor-v3";
 import UIMeta from "@/utils/UI_Meta.js";
 

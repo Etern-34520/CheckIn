@@ -23,7 +23,7 @@ const breadcrumbMap = {
     "my-data": "我的",
     "verification-setting": "上传校验设置",
     "facade-setting": "首页设置",
-    "drawing-setting": "抽取设置",
+    "generating-setting": "生成设置",
     "grading-setting": "评级设置",
     "about": "关于"
 }

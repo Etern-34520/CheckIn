@@ -29,7 +29,14 @@ const router = createRouter({
                 {
                     path: 'request-record/',
                     name: 'request-record',
-                    component: () => import('../pages/serverGroup/RequestRecordView.vue')
+                    component: () => import('../pages/serverGroup/requestRecord/RequestRecordView.vue'),
+                    children: [
+                        {
+                            path: ":id/",
+                            name: "request-record-detail",
+                            component: () => import('../pages/serverGroup/requestRecord/RequestRecordDetailView.vue')
+                        }
+                    ]
                 },
                 {
                     path: 'exam-record/',
@@ -100,9 +107,9 @@ const router = createRouter({
                             component: () => import('../pages/settingGroup/globalSetting/FacadeSettingView.vue')
                         },
                         {
-                            path: "drawing-setting/",
-                            name: "drawing-setting",
-                            component: () => import('../pages/settingGroup/globalSetting/DrawingSettingView.vue')
+                            path: "generating-setting/",
+                            name: "generating-setting",
+                            component: () => import('../pages/settingGroup/globalSetting/GeneratingSettingView.vue')
                         },
                         {
                             path: "grading-setting/",
@@ -135,12 +142,12 @@ const router = createRouter({
                 }, {
                     path: 'questions/',
                     name: 'questions',
-                    component: () => import('../pages/serverGroup/QuestionsView.vue'),
+                    component: () => import('../pages/serverGroup/questions/QuestionsView.vue'),
                     children: [
                         {
                             path: ':id/',
                             name: 'question-detail',
-                            component: () => import('../components/editor/QuestionEditor.vue'),
+                            component: () => import('../pages/serverGroup/questions/editor/QuestionEditor.vue'),
                             meta: {
                                 warning: warning
                             }

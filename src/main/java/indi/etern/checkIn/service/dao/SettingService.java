@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class SettingService {
@@ -46,10 +45,6 @@ public class SettingService {
         return settingRepository.findAllById(keys);
     }
     
-    public Optional<SettingItem> findItem(String key) {
-        return settingRepository.findById(key);
-    }
-    
     public void delete(String key) {
         settingRepository.deleteById(key);
     }
@@ -64,10 +59,6 @@ public class SettingService {
     
     public void exists(String key) {
         settingRepository.existsById(key);
-    }
-    
-    public List<SettingItem> findAllByKeyLike(String key) {
-        return settingRepository.findAllByKeyLike(key);
     }
     
     public void setAll(Map<String, Object> dataMap) {
