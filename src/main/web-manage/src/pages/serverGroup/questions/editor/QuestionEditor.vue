@@ -64,7 +64,7 @@ let update = (newVal, oldVal) => {
         if (questionData.ableToEdit) {
             view.value = "编辑";
         } else {
-            view.value = "预览";//TODO test
+            view.value = "预览";
         }
     }, (rejectData) => {
         requested = true;
@@ -376,7 +376,6 @@ onMounted(() => {
                                                                                                             </el-icon>
                                                                                                         </el-button>-->
                                                         </div>
-                                                        <!--                                        TODO-->
                                                         <link-panel
                                                                 @click="routeToRelatedExamRecords"
                                                                 :description="'共 ' + (questionInfo.question.statistic?questionInfo.question.statistic.examDataCount:0) + ' 个'"

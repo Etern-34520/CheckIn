@@ -166,7 +166,7 @@ public class QuestionService {
         return partitionLinkRepository.findAll().stream().map(QuestionLinkImpl::getSource).filter(Question::isEnabled).toList();
     }
     
-    public List<Question> findLatestModifiedQuestions() {//TODO TEST
+    public List<Question> findLatestModifiedQuestions() {
         return questionRepository.findAllByLastModifiedTimeBeforeAndLinkWrapper_LinkType(
                 LocalDateTime.now(), QuestionLinkImpl.LinkType.PARTITION_LINK, Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
 //        return questionRepository.findAll(Question.NOT_SUB_QUESTION_EXAMPLE,LocalDateTime.now(),Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));

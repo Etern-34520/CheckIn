@@ -37,10 +37,9 @@ public class ChangeUserPasswordAction extends TransactionalAction {
             map.put("message", "wrong password");
             map.put("failureType", "previousPasswordIncorrect");
             return Optional.of(map);
-//            throw new AuthException("wrong password");
         }
         user.setPassword(passwordEncoder.encode(password));
-        userService.saveAndFlush(user);//FIXME
+        userService.saveAndFlush(user);
         
         UserUpdateUtils.sendUpdateUserToAll(user);
         return successOptionalMap;

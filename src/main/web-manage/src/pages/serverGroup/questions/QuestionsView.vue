@@ -586,7 +586,7 @@ const switchMenuVisible = (button) => {
     }
 }
 
-const rectifyCheck = (nodeObj, checkStatus) => {//TODO
+const rectifyCheck = (nodeObj, checkStatus) => {
     function rectify1(currentPartitionId) {
         const currentPartitionCheckedQuestionIds = new Set();
         for (const checkedNode of checkStatus.checkedNodes) {

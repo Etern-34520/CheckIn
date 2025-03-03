@@ -287,7 +287,6 @@
 }
 
 .el-button:not(.is-text):not(.is-link) {
-    /*TODO hover*/
     --button-bg-color: var(--panel-bg-color);
     background: var(--button-bg-color) var(--lighting-effect-background-2);
     border: var(--border-1) !important;
@@ -1054,8 +1053,6 @@
 .fade-in-linear-leave-active .el-overlay-message-box {
     animation: none !important;
 }
-
-/*TODO dialog-fade-enter-active*/
 
 .dialog-fade-enter-from,
 .dialog-fade-leave-to,

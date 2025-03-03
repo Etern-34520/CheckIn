@@ -158,7 +158,7 @@ public class WebSocketService {
     public void unsubscribeAllChannels(String sid) {
         if (!channelHashMap.isEmpty()) {
             final HashSet<Channel> channels = new HashSet<>(channelHashMap.values());
-            for (Channel channel : channels) {//FIXME
+            for (Channel channel : channels) {
                 channel.sids.remove(sid);
                 if (channel.sids.isEmpty()) {
                     channelHashMap.remove(channel.name);

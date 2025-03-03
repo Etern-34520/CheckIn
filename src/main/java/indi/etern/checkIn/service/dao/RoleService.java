@@ -96,7 +96,6 @@ public class RoleService {
     @Transactional
     public void delete(Role role) {
         final String permissionName = "change role to " + role.getType();
-//        permissionRepository.deleteByName(permissionName);//FIXME
         final Optional<Permission> byName = permissionRepository.findByName(permissionName);
         if (byName.isPresent()) {
             final Permission permission = byName.get();
@@ -105,10 +104,6 @@ public class RoleService {
                 role1.getPermissions().remove(permission);
                 roleRepository.save(role1);
             }
-//            permission.setGroup(null);
-//            final PermissionGroup group = permission.getGroup();
-//            group.getPermissions().remove(permission);//FIXME
-//            permissionGroupRepository.save(group);
             permissionRepository.delete(permission);
         }
         

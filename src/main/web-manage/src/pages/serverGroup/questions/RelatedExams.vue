@@ -17,7 +17,6 @@ const data = ref({});
 const currentQuestionInfo = ref();
 
 const loadData = () => {
-    //TODO
     QuestionCache.getAsync(router.currentRoute.value.params.id).then((questionInfo) => {
         currentQuestionInfo.value = questionInfo;
         WebSocketConnector.send({

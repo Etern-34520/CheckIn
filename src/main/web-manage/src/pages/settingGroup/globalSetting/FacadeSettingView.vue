@@ -14,7 +14,6 @@ const mode = ref('预览');
 const data = ref({});
 const gradingData = ref({});
 const extraData = ref({});
-// const generatingData = ref({});//TODO
 const loading = ref(true);
 const error = ref(false);
 

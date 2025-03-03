@@ -48,7 +48,7 @@ public class CreateRoleAction extends TransactionalAction {
             Role currentUserRole = currentUser.getRole();
             currentUserRole = roleService.findByType(currentUserRole.getType()).orElseThrow();//flush Role.users
             currentUserRole.getPermissions().add(createdPermission);
-            actionExecutor.executeByTypeClass(SendPermissionsToUsersAction.class, currentUserRole.getUsers());//TODO test
+            actionExecutor.executeByTypeClass(SendPermissionsToUsersAction.class, currentUserRole.getUsers());
             roleService.save(currentUserRole);
         }
         

@@ -146,7 +146,7 @@ const hideCreatingDialog = () => {
 <template>
     <responsive-double-splitpane ref="responsiveSplitpane" :left-loading="loading" show-left-label="用户列表">
         <template #left>
-            <custom-dialog v-model="showCreateUser" :buttons-option="buttonsOption" ref="createUserDialog" title="新建用户" @closed="hideCreatingDialog"><!--TODO permission-->
+            <custom-dialog v-model="showCreateUser" :buttons-option="buttonsOption" ref="createUserDialog" title="新建用户" @closed="hideCreatingDialog">
                 <div style="display: flex;flex-direction: column;">
                     <div style="width: 56px;height: 56px;align-self: center">
                         <transition name="blur-scale" mode="out-in">
