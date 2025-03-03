@@ -14,7 +14,7 @@ const props = defineProps({
         <template #item="{item,index}">
             <div style="padding: 4px;">
                 <el-button style="width: 100%;height: 100%">
-                    <el-text>{{item.content}}</el-text>
+                    <el-text :type="item.correct?'success':'danger'">{{item.content}}</el-text>
                 </el-button>
             </div>
         </template>

@@ -1,7 +1,6 @@
 <script setup>
 import WebSocketConnector from "@/api/websocket.js";
 import {ElMessage} from "element-plus";
-import 'md-editor-v3/lib/style.css';
 import PartitionCache from "@/data/PartitionCache.js";
 import SpecialPartitionRule from "@/pages/settingGroup/globalSetting/generatingSetting/SpecialPartitionRuleTag.vue";
 import Waterfall from "@/components/common/Waterfall.vue";
@@ -9,6 +8,7 @@ import Waterfall from "@/components/common/Waterfall.vue";
 const editing = ref(false);
 const data = ref({
     questionAmount: 0,
+    questionScore: 5,
     partitionRange: [0, 100]
 });
 const loading = ref(true);
@@ -108,33 +108,45 @@ const updateLimits = (partitionIds) => {
 </script>
 
 <template>
-    <div style="display: flex;flex-direction: column;padding-bottom: 16px">
-        <el-text style="align-self:baseline;font-size: 24px">生成设置</el-text>
-        <div style="display: flex;margin-top: 16px;margin-left: 8px;margin-bottom: 20px;">
-            <transition-group name="blur-scale">
-                <el-button-group key="button-group">
-                    <transition-group name="blur-scale">
-                        <el-button class="disable-init-animate" style="margin-right: 4px;"
-                                   @click="editing ? finishEditing():startEditing()"
-                                   :disabled="loading || error" key="edit">
-                            {{ editing ? '完成' : '编辑' }}
-                        </el-button>
-                        <el-button class="disable-init-animate" style="margin-right: 24px;"
-                                   @click="cancel" v-if="editing" key="cancel">
-                            {{ editing ? '取消' : '编辑' }}
-                        </el-button>
-                    </transition-group>
-                </el-button-group>
-            </transition-group>
+    <div style="display: flex;flex-direction: column;">
+        <div style="display: flex;flex-direction: row;margin-bottom: 32px;">
+            <el-text style="align-self:baseline;font-size: 24px">生成设置</el-text>
+            <div style="display: flex;margin-left: 32px;">
+                <transition-group name="blur-scale">
+                    <el-button-group key="button-group">
+                        <transition-group name="blur-scale">
+                            <el-button class="disable-init-animate" style="margin-right: 4px;"
+                                       @click="editing ? finishEditing():startEditing()"
+                                       :disabled="loading || error" key="edit">
+                                {{ editing ? '完成' : '编辑' }}
+                            </el-button>
+                            <el-button class="disable-init-animate" style="margin-right: 24px;"
+                                       @click="cancel" v-if="editing" key="cancel">
+                                {{ editing ? '取消' : '编辑' }}
+                            </el-button>
+                        </transition-group>
+                    </el-button-group>
+                </transition-group>
+            </div>
         </div>
         <el-scrollbar v-loading="loading">
             <div style="display: flex;flex-direction: column;align-items: center">
                 <transition name="blur-scale" mode="out-in">
                     <div v-if="!loading && !error"
                          style="max-width: 1280px;width: min(70vw,1280px);display: flex;flex-direction: column">
-                        <el-text size="large" class="field-label">题量</el-text>
-                        <div style="display: flex;padding: 8px 0">
-                            <el-input-number v-model="data.questionAmount" :disabled="!editing"></el-input-number>
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap">
+                            <div style="display: flex;flex-direction: column;margin-right: 32px">
+                                <el-text size="large" class="field-label">题量</el-text>
+                                <div style="display: flex;padding: 8px 0">
+                                    <el-input-number v-model="data.questionAmount" :disabled="!editing"></el-input-number>
+                                </div>
+                            </div>
+                            <div style="display: flex;flex-direction: column;">
+                                <el-text size="large" class="field-label">每题分数</el-text>
+                                <div style="display: flex;padding: 8px 0">
+                                    <el-input-number v-model="data.questionScore" :disabled="!editing"></el-input-number>
+                                </div>
+                            </div>
                         </div>
                         <div class="field-label" style="display: flex;flex-direction: row">
                             <el-text size="large" style="margin-right: 8px">可选分区数</el-text>
@@ -161,6 +173,11 @@ const updateLimits = (partitionIds) => {
                             </div>
                         </div>
                         <el-text size="large" class="field-label">必选分区</el-text>
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap">
+                            <el-text style="align-self: center" type="info">在生成时显示分区名称</el-text>
+                            <el-switch style="margin-left: 8px;align-self: center" :disabled="!editing"
+                                       v-model="data.showRequiredPartitions"/>
+                        </div>
                         <el-select
                                 v-model="data.requiredPartitions"
                                 placeholder="必选分区"
@@ -219,7 +236,7 @@ const updateLimits = (partitionIds) => {
                                         placeholder="补全分区"
                                         multiple
                                         filterable
-                                        style="margin: 8px 0;margin-left: 8px;min-width: min(500px,15vw)"
+                                        style="margin: 8px 0 8px 8px;min-width: min(400px,10vw)"
                                         :class="{error:(editing && data.completingStrategy==='selected') && (!data.completingPartitions || data.completingPartitions.length===0)}"
                                         :disabled="!(editing && data.completingStrategy==='selected')">
                                     <el-option v-for="(partition,id) in refPartitions" :key="partition.id"
@@ -229,7 +246,7 @@ const updateLimits = (partitionIds) => {
                         </el-radio-group>
                     </div>
                     <div v-else-if="error" style="display:flex;flex-direction: column">
-                        <el-empty description="获取信息失败"></el-empty>
+                        <el-empty description="获取设置失败"></el-empty>
                         <el-button link type="primary" @click="getData" size="large">重试</el-button>
                     </div>
                 </transition>

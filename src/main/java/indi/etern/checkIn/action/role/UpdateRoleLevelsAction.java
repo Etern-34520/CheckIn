@@ -22,7 +22,7 @@ public class UpdateRoleLevelsAction extends MapResultAction {
     
     @Override
     public String requiredPermissionName() {
-        return "";
+        return "update role level";
     }
     
     @Override

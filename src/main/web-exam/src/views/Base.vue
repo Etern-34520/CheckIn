@@ -5,7 +5,7 @@ import router from "@/router/index.js";
 const {proxy} = getCurrentInstance();
 const facadeData = ref({});
 const gradingData = ref({});
-const generatingData = ref({});
+const extraData = ref({});
 const partitions = ref({});
 const loading = ref(true);
 const error = ref(false);
@@ -17,7 +17,10 @@ const getData = () => {
     proxy.$http.get("examData").then((response) => {
         facadeData.value = response.facadeData.data;
         gradingData.value = response.gradingData.data;
-        generatingData.value = response.generatingData.data;
+        extraData.value = response.facadeData.extraData;
+        console.log(facadeData.value);
+        console.log(gradingData.value);
+        console.log(extraData.value);
         partitions.value = response.partitions;
         console.log(phrase);
         if (phrase === "examining") {
@@ -53,7 +56,7 @@ getData();
                     <router-view v-slot="{ Component }">
                         <transition name="route-page" mode="out-in">
                             <component :is="Component" :facade-data="facadeData" :grading-data="gradingData"
-                                       :generating-data="generatingData" :partitions="partitions"/>
+                                       :extra-data="extraData" :partitions="partitions"/>
                         </transition>
                     </router-view>
                 </template>

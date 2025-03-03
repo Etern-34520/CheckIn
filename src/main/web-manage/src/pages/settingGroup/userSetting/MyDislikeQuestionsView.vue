@@ -13,13 +13,13 @@ onBeforeMount(() => {
     try {
         WebSocketConnector.send({
             type: "getDislikeQuestionsByUserQQ",
-            qq: UserDataInterface.getCurrentUser().qq
+            qq: UserDataInterface.getCurrentUser().value.qq
         }).then((response) => {
             loading.value = false;
             for (const question of response.questions) {
                 questionInfos.value.push(QuestionCache.wrapToQuestionInfo(question));
             }
-        }, (showError) => {
+        }, (error) => {
             loading.value = false;
         });
     } catch (e) {

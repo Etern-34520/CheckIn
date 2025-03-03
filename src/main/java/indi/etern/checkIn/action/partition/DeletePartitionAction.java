@@ -2,7 +2,7 @@ package indi.etern.checkIn.action.partition;
 
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.action.question.utils.QuestionUpdateUtils;
+import indi.etern.checkIn.utils.QuestionUpdateUtils;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;

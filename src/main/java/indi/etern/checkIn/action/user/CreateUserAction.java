@@ -19,7 +19,7 @@ public class CreateUserAction extends TransactionalAction {
 
     @Override
     public String requiredPermissionName() {
-        return "create user" + (Objects.equals(roleType, "user") ? "" : ",change role,change role " + roleType);
+        return "create user,change role to " + roleType;
     }
     
     @Override
@@ -28,7 +28,7 @@ public class CreateUserAction extends TransactionalAction {
         if (UserService.singletonInstance.existsByQQNumber(qqNumber)) {
             result = getOptionalErrorMap("user already exists");
         } else {
-            UserService.singletonInstance.unbindAndDeleteById(qqNumber);
+//            UserService.singletonInstance.unbindAndDeleteById(qqNumber);
             final String initPassword = UUID.randomUUID().toString();
             User newUser = new User(name, qqNumber, initPassword);
             newUser.setRole(RoleService.singletonInstance.findByType(roleType).orElse(Role.getInstance(roleType,-1)));

@@ -3,7 +3,6 @@ package indi.etern.checkIn.entities.question.impl;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.converter.MapConverter;
-import indi.etern.checkIn.entities.linkUtils.Link;
 import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.question.statistic.QuestionStatistic;
@@ -25,14 +24,20 @@ import java.util.UUID;
 @Entity
 @Table(name = "questions")
 public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<String> {
+//    public static final Example<Question> NOT_SUB_QUESTION_EXAMPLE;
+//    static {
+//        final Question probe = new Question();
+//        probe.setLinkWrapper(new ToPartitionsLink());
+//        NOT_SUB_QUESTION_EXAMPLE = Example.of(probe);
+//    }
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
     @Column(name = "content",columnDefinition = "text")
     protected String content;
 
 //    protected int hashcode;
     
-    @JoinColumn(name = "author_qqnumber", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @JoinColumn(name = "author_qqnumber", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @NotFound(action = NotFoundAction.IGNORE)
     @JsonIgnore
     protected User author = null;// = User.exampleOfName("unknown");
@@ -51,8 +56,10 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     
     @Getter
     @JoinTable(name = "upvoters_questions_mapping",
-            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)),
-            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)))
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)))
     @ManyToMany(cascade = {
             CascadeType.REFRESH
     }, fetch = FetchType.EAGER)
@@ -64,13 +71,15 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
             CascadeType.REFRESH
     }, fetch = FetchType.EAGER)
     @JoinTable(name = "downvoters_questions_mapping",
-            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)),
-            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)))
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)))
     @JsonIgnore
     protected Set<User> downVoters = new HashSet<>();
     
     @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL,orphanRemoval = true)
-    @JoinColumn(name = "id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnore
     protected QuestionLinkImpl<?> linkWrapper;
     
@@ -124,7 +133,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @Override
     public void setLinkWrapper(QuestionLinkImpl<?> linkWrapper) {
         this.linkWrapper = linkWrapper;
-        ((Link<Question, ?>) linkWrapper).setSource(this);
+        linkWrapper.setSource(this);
     }
     
     /**

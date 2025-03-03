@@ -22,7 +22,9 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
     @Column(name = "name", unique = true, nullable = false)
     String name;
     
+//    FIXME foreign key
     @ManyToMany(mappedBy = "targets")
+//    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @Fetch(value = FetchMode.SUBSELECT)
     Set<ToPartitionsLink> questionLinks;
     

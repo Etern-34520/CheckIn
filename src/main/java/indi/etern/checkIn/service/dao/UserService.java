@@ -94,44 +94,12 @@ public class UserService implements UserDetailsService {
         });
     }
     
+/*
     public void unbindAndDelete(User user) {
         unbindAndDeleteById(user.getQQNumber());
         userRepository.flush();
     }
-    
-    public void enableByQQNumber(long qq) {
-        final Optional<User> optionalUser = findByQQNumber(qq);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            user.setEnabled(true);
-            save(user);
-        } else {
-            throw new UsernameNotFoundException("User not found:"+qq);
-        }
-    }
-    
-    public void disableByQQNumber(long qq) {
-        final Optional<User> optionalUser = findByQQNumber(qq);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            user.setEnabled(false);
-            save(user);
-        } else {
-            throw new UsernameNotFoundException("User not found:"+qq);
-        }
-    }
-    
-    public User changeRoleById(long qq, String roleType) {
-        final User[] user = new User[1];
-        template.execute(status -> {
-            Role role = roleService.findByType(roleType).orElseThrow();
-            user[0] = userRepository.findById(qq).orElseThrow();
-            user[0].setRole(role);
-            userRepository.save(user[0]);
-            return Boolean.TRUE;
-        });
-        return user[0];
-    }
+*/
     
     public boolean existsByQQNumber(long qqNumber) {
         return userRepository.existsById(qqNumber);
@@ -143,5 +111,17 @@ public class UserService implements UserDetailsService {
     
     public Set<User> findAllByRoleType(String roleType) {
         return roleRepository.findById(roleType).orElseThrow().getUsers();
+    }
+    
+    public List<User> findAllByQQNumber(List<Long> qqNumbers) {
+        return userRepository.findAllById(qqNumbers);
+    }
+    
+    public void deleteAllByQQ(List<Long> qqNumbers) {
+        userRepository.deleteAllById(qqNumbers);
+    }
+    
+    public void delete(User user) {
+        userRepository.delete(user);
     }
 }

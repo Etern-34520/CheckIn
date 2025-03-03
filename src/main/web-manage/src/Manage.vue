@@ -4,6 +4,7 @@ import router from "@/router/index.js";
 import SideMenu from "@/components/common/SideMenu.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import {Loading} from "@element-plus/icons-vue";
+import LoginDialog from "@/components/common/LoginDialog.vue";
 
 onBeforeMount(() => {
     updateBreadcrumbArray({path: window.location.pathname});
@@ -14,7 +15,9 @@ const menuInlineStyle = ref(false);
 const breadcrumbMap = {
     "request-record": "请求记录",
     "exam-record": "答题记录",
+    "related-requests": "相关请求",
     "questions": "题库",
+    "related-exams": "相关试题",
     "manage-user": "用户管理",
     "manage-group": "组管理",
     "global-setting": "服务器设置",
@@ -25,6 +28,7 @@ const breadcrumbMap = {
     "facade-setting": "首页设置",
     "generating-setting": "生成设置",
     "grading-setting": "评级设置",
+    "advance-setting": "高级设置",
     "about": "关于"
 }
 

@@ -4,6 +4,8 @@ import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.record.RequestRecord;
 import indi.etern.checkIn.service.dao.RequestRecordService;
 import indi.etern.checkIn.service.web.WebSocketService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.aspectj.lang.JoinPoint;
@@ -21,6 +23,8 @@ import java.util.Map;
 public class ExamLoggerAspects {
     final RequestRecordService requestRecordService;
     private final WebSocketService webSocketService;
+    @PersistenceContext
+    EntityManager entityManager;
     
     public ExamLoggerAspects(RequestRecordService requestRecordService, WebSocketService webSocketService) {
         this.requestRecordService = requestRecordService;
@@ -120,12 +124,12 @@ public class ExamLoggerAspects {
     }
     
     private static RequestProcessor getGetQuestionsProcessor(JoinPoint joinPoint) {
-        return (httpServletRequest, httpServletResponse, trafficRecord) -> {
+        return (httpServletRequest, httpServletResponse, requestRecord) -> {
             ExamData examData = (ExamData) joinPoint.getArgs()[1];
-            trafficRecord.setRelatedExamDataId(examData.getId());
-            trafficRecord.setQQNumber(examData.getQqNumber());
-            trafficRecord.getExtraData().put("indexes", joinPoint.getArgs()[0]);
-//            trafficRecord.getExtraData().put("examData", examData.toDataMap());
+            requestRecord.setRelatedExamDataId(examData.getId());
+            requestRecord.setQQNumber(examData.getQqNumber());
+            requestRecord.getExtraData().put("indexes", joinPoint.getArgs()[0]);
+//            requestRecord.getExtraData().put("examData", examData.toDataMap());
         };
     }
     
@@ -145,13 +149,11 @@ public class ExamLoggerAspects {
     
     private static RequestProcessor getSubmitProcessor(JoinPoint joinPoint) {
         return (httpServletRequest, httpServletResponse, trafficRecord) -> {
-            ExamData examData = (ExamData) joinPoint.getArgs()[0];
-            trafficRecord.setRelatedExamDataId(examData.getId());
-            //noinspection unchecked
-            Map<String, Object> answerData = (Map<String, Object>) joinPoint.getArgs()[1];
-            trafficRecord.setQQNumber(examData.getQqNumber());
-//            trafficRecord.getExtraData().put("answerData", answerData);
-//            trafficRecord.getExtraData().put("examData", examData.toDataMap());
+            final Object arg = joinPoint.getArgs()[0];
+            if (arg instanceof ExamData examData) {
+                trafficRecord.setRelatedExamDataId(examData.getId());
+                trafficRecord.setQQNumber(examData.getQqNumber());
+            }
         };
     }
 }

@@ -15,7 +15,9 @@ const reconnect = () => {
 </script>
 
 <template>
-<ElButton type="primary" @click="reconnect" :loading="loading" :loading-icon="_Loading_">重新连接</ElButton>
+    <div style="display: flex;flex-direction: column;margin-top: 32px">
+        <ElButton style="flex: 1" type="primary" @click="reconnect" :loading="loading" :loading-icon="_Loading_">重新连接</ElButton>
+    </div>
 </template>
 
 <style scoped>

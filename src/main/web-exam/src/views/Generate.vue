@@ -6,7 +6,7 @@ import {ElMessageBox} from "element-plus";
 
 const {proxy} = getCurrentInstance();
 const props = defineProps({
-    generatingData: {
+    extraData: {
         required: true,
         type: Object
     },
@@ -17,7 +17,7 @@ const props = defineProps({
 });
 const selectablePartitions = [];
 for (const [id, name] of Object.entries(props.partitions)) {
-    if (!props.generatingData.requiredPartitions.includes(Number(id))) {
+    if (!props.extraData.requiredPartitions.includes(Number(id))) {
         selectablePartitions.push({
             id: id,
             name: name,
@@ -62,18 +62,18 @@ const startExam = () => {
     })
 }
 
-const validate1 = computed(() => selectedPartitions.value.length >= props.generatingData.partitionRange[0] && selectedPartitions.value.length <= props.generatingData.partitionRange[1]);
+const validate1 = computed(() => selectedPartitions.value.length >= props.extraData.partitionRange[0] && selectedPartitions.value.length <= props.extraData.partitionRange[1]);
 const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 100000000000);
 </script>
 
 <template>
     <div class="auto-padding-center" style="flex:1">
         <el-text style="font-size: 24px;align-self: baseline;margin-top: 64px">选择分区</el-text>
-        <div class="panel" style="padding: 16px 24px;margin-top: 36px">
+        <div class="panel" style="padding: 16px 24px;margin-top: 36px" v-if="extraData.requiredPartitions && extraData.requiredPartitions.length > 0">
             <el-text size="large" style="align-self: baseline">必选分区</el-text>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
                 <el-tag size="large" type="info" style="font-size: 14px;margin: 2px"
-                        v-for="requiredPartitionId of generatingData.requiredPartitions">
+                        v-for="requiredPartitionId of extraData.requiredPartitions">
                     {{ partitions[requiredPartitionId] }}
                 </el-tag>
             </div>
@@ -84,7 +84,7 @@ const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 1000
                 <el-text>{{ selectedPartitions.length }} / {{ selectablePartitions.length }}</el-text>
                 <el-text style="margin-left: 8px;"
                          :type="validate1?'info':'danger'">
-                    请选择 {{ generatingData.partitionRange[0] }} ~ {{ generatingData.partitionRange[1] }} 个
+                    请选择 {{ extraData.partitionRange[0] }} ~ {{ extraData.partitionRange[1] }} 个
                 </el-text>
             </div>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">

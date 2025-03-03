@@ -5,7 +5,7 @@ import 'md-editor-v3/lib/style.css';
 import UI_Meta from "@/UI_Meta.js";
 import LockUtil from "@/Lock.js";
 import _Loading_ from "@/components/_Loading_.vue";
-import {ElMessageBox} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 const {proxy} = getCurrentInstance();
 
@@ -88,6 +88,10 @@ const handleError = (data, actionDescription) => {
                 console.error("EXAM IS NOT EXIST");
                 break;
             default:
+                ElMessage({
+                    type: "error",
+                    message: "上传出错: " + data.message
+                })
                 console.error(data.message);
         }
     } else {

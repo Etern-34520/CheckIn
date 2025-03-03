@@ -30,7 +30,7 @@ public class QuestionGroupAnswer extends Answer<QuestionGroup, List<SingleQuesti
     @Override
     public CheckedResult check() {
         if (result == null) {
-            SettingItem scoreSettingItem = SettingService.singletonInstance.getItem("grading","questionScore");
+            SettingItem scoreSettingItem = SettingService.singletonInstance.getItem("generating","questionScore");
             float singleMaxScore = scoreSettingItem.getValue(Number.class).floatValue();
             int maxCount = source.questionLinks.size();
             int correctCount = (int) answers.stream()

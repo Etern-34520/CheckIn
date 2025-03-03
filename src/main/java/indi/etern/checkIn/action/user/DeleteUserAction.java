@@ -13,11 +13,12 @@ import java.util.Optional;
 @Action("deleteUser")
 public class DeleteUserAction extends TransactionalAction {
     private final WebSocketService webSocketService;
+    private final UserService userService;
     private long qqNumber;
     
-    public DeleteUserAction(WebSocketService webSocketService) {
-        super();
+    public DeleteUserAction(WebSocketService webSocketService, UserService userService) {
         this.webSocketService = webSocketService;
+        this.userService = userService;
     }
     
     @Override
@@ -30,15 +31,18 @@ public class DeleteUserAction extends TransactionalAction {
         final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            UserService.singletonInstance.unbindAndDelete(user);
+            final String roleName = user.getRole().getType();
+            userService.delete(user);
             {
                 LinkedHashMap<String,Object> map = new LinkedHashMap<>();
                 map.put("type", "deleteUser");
+                map.put("name", user.getName());
+                map.put("role", roleName);
                 map.put("qq", qqNumber);
                 webSocketService.sendMessageToAll(map);
             }
         }
-        return Optional.empty();
+        return Optional.of(getSuccessMap());
     }
 
     @Override

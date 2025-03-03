@@ -1,15 +1,17 @@
 package indi.etern.checkIn.action.user;
 
+import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
+import indi.etern.checkIn.utils.UserUpdateUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Action("setEnableUser")
-public class SetEnableUserAction extends UserMapResultAction {
+public class SetEnableUserAction extends TransactionalAction {
     private long qqNumber;
     private boolean enable;
     private final UserService userService;
@@ -32,7 +34,7 @@ public class SetEnableUserAction extends UserMapResultAction {
             user.setEnabled(enable);
             userService.saveAndFlush(user);
             optionalMap = successOptionalMap;
-            sendUpdateUserToAll(user);
+            UserUpdateUtils.sendUpdateUserToAll(user);
         } else {
             optionalMap = getOptionalErrorMap("user not found");
         }

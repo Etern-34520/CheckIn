@@ -4,16 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.partition.GetPartitionsAction;
-import indi.etern.checkIn.action.setting.GetGeneratingSetting;
-import indi.etern.checkIn.action.setting.GetFacadeSetting;
-import indi.etern.checkIn.action.setting.GetGradingSetting;
+import indi.etern.checkIn.action.setting.get.GetFacadeSetting;
+import indi.etern.checkIn.action.setting.get.GetGradingSetting;
 import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.service.dao.ExamDataService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.QuestionStatisticService;
 import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
-import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.throwable.exam.generate.ExamGenerateFailedException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import lombok.SneakyThrows;
@@ -35,16 +33,14 @@ public class Exam {
     private final Logger logger = LoggerFactory.getLogger(Exam.class);
     private final String EXAM_IS_NOT_EXIST_JSON = "{\"type\":\"error\",\"message\":\"Exam is not exist\"}";
     private final String EXAM_INVALIDED_JSON = "{\"type\":\"error\",\"message\":\"Exam invalided\"}";
-    private final WebSocketService webSocketService;
     private final QuestionStatisticService questionStatisticService;
     
-    public Exam(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, WebSocketService webSocketService, QuestionStatisticService questionStatisticService) {
+    public Exam(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService) {
         this.partitionService = partitionService;
         this.actionExecutor = actionExecutor;
         this.examGenerator = examGenerator;
         this.examDataService = examDataService;
         this.objectMapper = objectMapper;
-        this.webSocketService = webSocketService;
         this.questionStatisticService = questionStatisticService;
     }
     
@@ -52,7 +48,7 @@ public class Exam {
     }
     
     @PostMapping(path = "/api/generate")
-    @Transactional
+    @Transactional(noRollbackFor = Throwable.class)
     public Map<String, ?> generateExam(@RequestBody GenerateRequest generateRequest) {
         try {
             final ExamData examData = examGenerator.generateExam(generateRequest.qq, partitionService.findAllByIds(generateRequest.partitionIds.stream().map(Integer::parseInt).toList()));
@@ -104,6 +100,7 @@ public class Exam {
     }
     
     @SneakyThrows
+    @Transactional
     @RequestMapping(method = RequestMethod.POST, path = "/api/submit")
     public String submit(@RequestBody SubmitRequest submitRequest) {
         Optional<ExamData> optionalExamData = examDataService.findById(submitRequest.examId);
@@ -129,11 +126,11 @@ public class Exam {
     @RequestMapping(method = RequestMethod.GET, path = "/api/examData")
     public Map<String, Object> getFacadeData() {
         Map<String, Object> result = new HashMap<>();
-        Map<String, Object> facadeSettingMap = actionExecutor.executeByTypeClass(GetFacadeSetting.class).orElseThrow();
-        Map<String, Object> generatingSettingMap = actionExecutor.executeByTypeClass(GetGeneratingSetting.class).orElseThrow();
-        Map<String, Object> gradingSettingMap = actionExecutor.executeByTypeClass(GetGradingSetting.class).orElseThrow();
+        Map<String, Object> facadeSettingMap = actionExecutor.executeByTypeClass(GetFacadeSetting.class,null).orElseThrow();
+//        Map<String, Object> generatingSettingMap = actionExecutor.executeByTypeClass(GetGeneratingSetting.class).orElseThrow();
+        Map<String, Object> gradingSettingMap = actionExecutor.executeByTypeClass(GetGradingSetting.class, null).orElseThrow();
         
-        Map<String, Object> partitions = actionExecutor.executeByTypeClass(GetPartitionsAction.class).orElseThrow();
+        Map<String, Object> partitions = actionExecutor.executeByTypeClass(GetPartitionsAction.class, null).orElseThrow();
         ArrayList<LinkedHashMap<String, Object>> partitionsList = (ArrayList<LinkedHashMap<String, Object>>) partitions.get("partitions");
         Map<String, String> partitionsNameMap = new HashMap<>();
         partitionsList.forEach((partition) -> {
@@ -141,7 +138,7 @@ public class Exam {
         });
         
         result.put("facadeData", facadeSettingMap);
-        result.put("generatingData", generatingSettingMap);
+//        result.put("generatingData", generatingSettingMap);
         result.put("gradingData", gradingSettingMap);
         result.put("partitions", partitionsNameMap);
         return result;

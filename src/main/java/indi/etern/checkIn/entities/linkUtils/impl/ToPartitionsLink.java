@@ -15,18 +15,19 @@ import java.util.Set;
 //@Table("partitions_questions_mapping")
 @Getter
 public class ToPartitionsLink extends QuestionLinkImpl<Partition> implements ToManyLink<Question, Partition> {
-    /*@ManyToMany(mappedBy = "questions")*/
-    @ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    
+    @ManyToMany(cascade = {CascadeType.REFRESH,CascadeType.MERGE}, fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
-/*
     @JoinTable(name = "questions_link_mapping",
-            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "partition_id", referencedColumnName = "id"))
-*/
-    @JoinTable(name = "questions_link_mapping",
-            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)),
-            inverseJoinColumns = @JoinColumn(name = "partition_id", referencedColumnName = "id"), foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "partition_id", referencedColumnName = "id", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
     Set<Partition> targets = new HashSet<>();
+    
+    {
+        linkType = LinkType.PARTITION_LINK;
+    }
     
     @FunctionalInterface
     public interface Configurator {

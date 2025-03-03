@@ -6,6 +6,7 @@ import router from "@/router/index.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 import CustomDialog from "@/components/common/CustomDialog.vue";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const props = defineProps({
     user: {
@@ -72,8 +73,8 @@ const editGroupButtonOption = ref([{
             delete editGroupButtonOption.value[0].loading;
         });
     }
-},{
-    content: "关闭",
+}, {
+    content: "取消",
     type: "info",
     onclick: onClose
 }]);
@@ -101,7 +102,7 @@ const editNameButtonOption = ref([{
             delete editNameButtonOption.value[0].loading;
         });
     }
-},{
+}, {
     content: "关闭",
     type: "info",
     onclick: onClose
@@ -112,12 +113,20 @@ const editUserGroup = () => {
 const editUserName = () => {
     showEditUserName.value = true;
 }
+const currentUser = UserDataInterface.getCurrentUser();
+
+const showDropdown = (user) => {
+    return (currentUser.value.qq !== user.qq && PermissionInfo.hasPermission('manage user', 'delete user')) ||
+            (currentUser.value.qq !== user.qq && PermissionInfo.hasPermission('role', /^change role to /)) ||
+            (currentUser.value.qq === user.qq || PermissionInfo.hasPermission('manage user', 'change user name'));
+}
 </script>
 
 <template>
     <div class="panel-1"
          style="display: flex;flex-direction: row;padding: 8px 12px;align-items: center;margin-bottom: 2px">
-        <custom-dialog v-model="showEditUserGroup" title="修改用户组" :buttons-option="editGroupButtonOption" @close="onClose">
+        <custom-dialog v-model="showEditUserGroup" title="修改用户组" :buttons-option="editGroupButtonOption"
+                       @close="onClose">
             <div style="display: flex;align-items: center;margin-bottom: 16px;">
                 <el-avatar shape="circle" style="width: 36px;height: 36px;margin-right: 8px;flex: none;"
                            :src="getAvatarUrlOf(user.qq)"/>
@@ -130,17 +139,16 @@ const editUserName = () => {
                     <el-text style="font-size: 12px;align-self: baseline" type="info">{{ user.qq }}</el-text>
                 </div>
             </div>
-            <el-select
-                    filterable
-                    v-model="newUserGroupName"
-                    style="flex:1;margin-right: 4px"
-                    placeholder="用户组">
+            <el-select filterable v-model="newUserGroupName"
+                       style="flex:1;margin-right: 4px" placeholder="用户组">
                 <template v-for="(userGroup,i) in UserDataInterface.userGroups">
-                    <el-option :value="userGroup.type" :label="userGroup.type"></el-option>
+                    <el-option :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup.type)"
+                               :value="userGroup.type" :label="userGroup.type"></el-option>
                 </template>
             </el-select>
         </custom-dialog>
-        <custom-dialog v-model="showEditUserName" title="修改用户名" :buttons-option="editNameButtonOption" @close="onClose">
+        <custom-dialog v-model="showEditUserName" title="修改用户名" :buttons-option="editNameButtonOption"
+                       @close="onClose">
             <div style="display: flex;align-items: center;margin-bottom: 16px;">
                 <el-avatar shape="circle" style="width: 36px;height: 36px;margin-right: 8px;flex: none;"
                            :src="getAvatarUrlOf(user.qq)"/>
@@ -171,16 +179,24 @@ const editUserName = () => {
         </div>
         <div class="flex-blank-1"></div>
         <el-tag style="font-size: 12px" type="info">{{ user.role }}</el-tag>
-        <el-dropdown trigger="click">
+        <el-dropdown trigger="click" v-if="showDropdown(user)">
             <el-button link @click.stop>
                 <el-icon>
                     <more-filled/>
                 </el-icon>
             </el-button>
             <template #dropdown>
-                <el-dropdown-item @click="editUserName">修改用户名</el-dropdown-item>
-                <el-dropdown-item @click="editUserGroup">修改用户组</el-dropdown-item>
-                <el-dropdown-item v-if="UserDataInterface.getCurrentUser().qq !== user.qq" @click="deleteUser">
+                <el-dropdown-item @click="editUserName"
+                                  v-if="currentUser.qq === user.qq || PermissionInfo.hasPermission('manage user','change user name')">
+                    修改用户名
+                </el-dropdown-item>
+                <el-dropdown-item @click="editUserGroup"
+                                  v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('role','change role to ' + user.role)">
+                    修改用户组
+                </el-dropdown-item>
+                <el-dropdown-item
+                        v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('manage user','delete user')"
+                        @click="deleteUser">
                     <el-text type="danger">删除</el-text>
                 </el-dropdown-item>
             </template>

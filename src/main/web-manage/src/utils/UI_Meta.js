@@ -30,7 +30,7 @@ const checkMobile = () => {
 checkColorScheme();
 checkMobile();
 window.addEventListener("resize",checkMobile);
-window.addEventListener("focus",checkColorScheme);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change",checkColorScheme);
 export default {
     mobile:mobile,
     colorScheme: colorScheme,

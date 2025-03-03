@@ -9,6 +9,7 @@ import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import WebSocketConnector from "@/api/websocket.js";
 import {ElMessage} from "element-plus";
 import HarmonyOSIcon_InfoCircle from "@/components/icons/HarmonyOSIcon_InfoCircle.vue";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const editing = ref(false);
 const data = ref([]);
@@ -79,37 +80,39 @@ const varietiesData = [
 
 <template>
     <div style="display: flex;flex-direction: column">
-        <el-text style="align-self:baseline;font-size: 24px">上传校验设置</el-text>
-        <div style="display: flex;margin-top: 16px;margin-left: 8px">
-            <transition-group name="blur-scale">
-                <el-button class="disable-init-animate" style="margin-right: 12px;" @click="editing ? finishEditing():startEditing()"
-                           :disabled="loading || (editing && hasError) || error" key="edit">
-                    {{ editing ? '完成' : '编辑' }}
-                </el-button>
-                <div style="display: flex;flex-direction: row" v-if="editing" key="action">
-                    <el-button class="disable-init-animate" @click="cancel">取消</el-button>
-                    <el-button class="disable-init-animate" @click="addRule" link style="margin-right: 12px;"
-                               :icon="HarmonyOSIcon_Plus">
-                        添加规则
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap">
+            <el-text style="align-self:baseline;font-size: 24px">上传校验设置</el-text>
+            <div style="display: flex;margin-left: 32px" v-if="PermissionInfo.hasPermission('setting','save verification setting')">
+                <transition-group name="blur-scale">
+                    <el-button class="disable-init-animate" style="margin-right: 12px;" @click="editing ? finishEditing():startEditing()"
+                               :disabled="loading || (editing && hasError) || error" key="edit">
+                        {{ editing ? '完成' : '编辑' }}
                     </el-button>
-                    <el-popover trigger="click">
-                        <template #reference>
-                            <el-button link class="disable-init-animate" :icon="HarmonyOSIcon_InfoCircle" type="info">
-                                提示信息可用变量
-                            </el-button>
-                        </template>
-                        <template #default>
-                            <div class="varieties">
-                                <div style="display: flex;flex-direction: row" v-for="datum of varietiesData">
-                                    <el-text>{{ datum.reference }}</el-text>
-                                    <div class="flex-blank-1" style="min-width: 12px;"></div>
-                                    <el-text type="info">{{ datum.name }}</el-text>
+                    <div style="display: flex;flex-direction: row" v-if="editing" key="action">
+                        <el-button class="disable-init-animate" @click="cancel">取消</el-button>
+                        <el-button class="disable-init-animate" @click="addRule" link style="margin-right: 12px;"
+                                   :icon="HarmonyOSIcon_Plus">
+                            添加规则
+                        </el-button>
+                        <el-popover trigger="click">
+                            <template #reference>
+                                <el-button link class="disable-init-animate" :icon="HarmonyOSIcon_InfoCircle" type="info">
+                                    提示信息可用变量
+                                </el-button>
+                            </template>
+                            <template #default>
+                                <div class="varieties">
+                                    <div style="display: flex;flex-direction: row" v-for="datum of varietiesData">
+                                        <el-text>{{ datum.reference }}</el-text>
+                                        <div class="flex-blank-1" style="min-width: 12px;"></div>
+                                        <el-text type="info">{{ datum.name }}</el-text>
+                                    </div>
                                 </div>
-                            </div>
-                        </template>
-                    </el-popover>
-                </div>
-            </transition-group>
+                            </template>
+                        </el-popover>
+                    </div>
+                </transition-group>
+            </div>
         </div>
         <el-scrollbar v-loading="loading">
             <div style="padding-bottom: 100px">
@@ -160,7 +163,7 @@ const varietiesData = [
                         </transition-group>
                     </vue-draggable>
                     <div v-else-if="error" style="display:flex;flex-direction: column">
-                        <el-empty description="获取信息失败"></el-empty>
+                        <el-empty description="获取设置失败"></el-empty>
                         <el-button link type="primary" @click="getData" size="large">重试</el-button>
                     </div>
                 </transition>

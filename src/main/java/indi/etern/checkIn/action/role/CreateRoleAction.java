@@ -1,8 +1,11 @@
 package indi.etern.checkIn.action.role;
 
+import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.Role;
+import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.web.WebSocketService;
 
@@ -13,12 +16,14 @@ import java.util.Optional;
 @Action("createRole")
 public class CreateRoleAction extends TransactionalAction {
     private final WebSocketService webSocketService;
+    private final ActionExecutor actionExecutor;
     Role role;
     private final RoleService roleService;
     
-    public CreateRoleAction(RoleService roleService, WebSocketService webSocketService) {
+    public CreateRoleAction(RoleService roleService, WebSocketService webSocketService, ActionExecutor actionExecutor) {
         this.roleService = roleService;
         this.webSocketService = webSocketService;
+        this.actionExecutor = actionExecutor;
     }
     
     @Override
@@ -28,7 +33,7 @@ public class CreateRoleAction extends TransactionalAction {
     
     @Override
     protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        roleService.save(role);
+        Permission createdPermission = roleService.save(role);
         
         LinkedHashMap<String,Object> map = new LinkedHashMap<>();
         map.put("type","addRole");
@@ -37,6 +42,15 @@ public class CreateRoleAction extends TransactionalAction {
         role.put("level",this.role.getLevel());
         map.put("role",role);
         webSocketService.sendMessageToAll(map);
+        
+        if (createdPermission != null) {
+            final User currentUser = getCurrentUser();
+            Role currentUserRole = currentUser.getRole();
+            currentUserRole = roleService.findByType(currentUserRole.getType()).orElseThrow();//flush Role.users
+            currentUserRole.getPermissions().add(createdPermission);
+            actionExecutor.executeByTypeClass(SendPermissionsToUsersAction.class, currentUserRole.getUsers());//TODO test
+            roleService.save(currentUserRole);
+        }
         
         return successOptionalMap;
     }

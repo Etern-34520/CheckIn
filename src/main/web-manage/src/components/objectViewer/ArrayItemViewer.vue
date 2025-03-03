@@ -20,7 +20,7 @@ const props = defineProps({
             <el-text type="info" v-if="showIndex" style="align-self: start;">{{index}}</el-text>
             <array-item-viewer v-if="item instanceof Array" :data="item"/>
             <object-field-viewer v-else-if="typeof item === 'object'" :data="item"/>
-            <el-text v-else-if="item" style="flex: 1;word-break: break-all;align-self: start;">
+            <el-text v-else-if="item !== null && item !== undefined" style="flex: 1;word-break: break-all;align-self: start;">
                 {{item}}
             </el-text>
             <el-text v-else type="info">[null]</el-text>

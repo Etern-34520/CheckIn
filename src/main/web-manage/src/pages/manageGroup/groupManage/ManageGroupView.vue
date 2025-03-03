@@ -10,6 +10,8 @@ import {VueDraggable} from "vue-draggable-plus";
 import WebSocketConnector from "@/api/websocket.js";
 import PartitionCache from "@/data/PartitionCache.js";
 import _Loading_ from "@/components/common/_Loading_.vue";
+import {ElMessage} from "element-plus";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const responsiveSplitpane = ref(null);
 const filterText = ref("");
@@ -20,7 +22,7 @@ watch(() => UserDataInterface.userGroups, (newValue) => {
     for (const userGroupType in userGroups) {
         userGroupsArray.value.push(userGroups[userGroupType]);
     }
-},{immediate:true,deep:true});
+}, {immediate: true, deep: true});
 const loading = ref(true);
 
 const changingLevel = ref(false);
@@ -33,7 +35,7 @@ const doFilter = (userGroup) => {
         for (const filterTextItem of filterTextItems) {
             if (filterTextItem.length === 0) continue;
             if (userGroup.type.includes(filterTextItem)) {
-                return true;//FIXME
+                return true;
             }
         }
         return false;
@@ -61,9 +63,11 @@ UserDataInterface.getReactiveUserGroupsAsync().then((userGroups1) => {
 });
 
 const openView = (userGroup) => {
-    router.push({name:'group-detail', params:{
-        type:userGroup.type
-    }});
+    router.push({
+        name: 'group-detail', params: {
+            type: userGroup.type
+        }
+    });
 }
 
 const switchChangingLevel = () => {
@@ -78,9 +82,23 @@ const switchChangingLevel = () => {
         WebSocketConnector.send({
             type: "updateRoleLevels",
             levels: levels
-        }).then(() => {
-            waitForResponse.value = false;
+        }).then((response) => {
+            if (response.type === 'success') {
+                ElMessage({
+                    type: 'success',
+                    message: '修改成功',
+                });
+            } else {
+                ElMessage({
+                    type: 'error',
+                    message: '修改失败',
+                });
+            }            waitForResponse.value = false;
         }, (err) => {
+            ElMessage({
+                type: 'error',
+                message: '修改失败',
+            });
             waitForResponse.value = false;
         });
     }
@@ -107,11 +125,12 @@ const cancelCreating = () => {
         <template #left>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
                 <el-input v-model="filterText" placeholder="搜索用户组（以&quot;,&quot;分词）" prefix-icon="Search"
-                          style="margin-bottom: 8px;flex: 1;margin-right: 8px;min-width: 200px"/>
-                <el-popover trigger="click" width="400px" @after-leave="cancelCreating">
+                          style="margin-bottom: 8px;flex: 1;min-width: 200px"/>
+                <el-popover trigger="click" width="400px" @after-leave="cancelCreating" style="margin-left: 8px;"
+                            v-if="PermissionInfo.hasPermission('role','create role')">
                     <template #reference>
                         <!--suppress JSValidateTypes -->
-                        <el-button :icon="HarmonyOSIcon_Plus" style="margin-right: 8px">
+                        <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px" class="disable-init-animate">
                             新建用户组
                         </el-button>
                     </template>
@@ -124,18 +143,17 @@ const cancelCreating = () => {
                             />
                             <el-button-group>
                                 <el-button type="primary" @click="confirmCreating"
-                                           :disabled="createdGroupName===''||(UserDataInterface.userGroups[createdGroupName])">
+                                           :disabled="createdGroupName===''||Boolean(UserDataInterface.userGroups[createdGroupName])">
                                     确定
                                 </el-button>
                             </el-button-group>
                         </div>
                     </template>
                 </el-popover>
-                <!--suppress JSValidateTypes -->
-                <el-button :icon="Sort" :loading="waitForResponse" :loading-icon="_Loading_"
+<!--                <el-button :icon="Sort" :loading="waitForResponse" :loading-icon="_Loading_" class="disable-init-animate"
                            @click="switchChangingLevel" style="margin-left: 0">
                     {{ changingLevel ? "完成" : "调整级别" }}
-                </el-button>
+                </el-button>-->
             </div>
             <el-scrollbar>
                 <VueDraggable
@@ -146,7 +164,8 @@ const cancelCreating = () => {
                         handle=".handle">
                     <transition-group name="filter">
                         <template v-for="userGroup of userGroupsArray" :key="userGroup.type">
-                            <div style="display: flex;flex-direction: row;align-items: center" v-if="doFilter(userGroup)">
+                            <div style="display: flex;flex-direction: row;align-items: center"
+                                 v-if="doFilter(userGroup)">
                                 <transition name="handle" mode="out-in">
                                     <div class="handle" style="cursor: grab">
                                         <HarmonyOSIcon_Handle v-if="changingLevel" style="margin-right: 8px"

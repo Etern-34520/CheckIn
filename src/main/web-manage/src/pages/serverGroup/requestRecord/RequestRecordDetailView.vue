@@ -116,19 +116,6 @@ const routeToRelatedExamRecord = (id) => {
                         <template #title>
                             <div style="margin-top: 12px;margin-bottom: 12px">
                                 <el-text size="large">
-                                    Request Headers
-                                </el-text>
-                            </div>
-                        </template>
-                        <template #content>
-                            <el-empty v-if="!Boolean(data.requestHeaders) || Object.keys(data.requestHeaders).length === 0"></el-empty>
-                            <object-field-viewer v-else :data="data.requestHeaders"/>
-                        </template>
-                    </collapse>
-                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false" :title-background="false" expanded>
-                        <template #title>
-                            <div style="margin-top: 12px;margin-bottom: 12px">
-                                <el-text size="large">
                                     Response Headers
                                 </el-text>
                             </div>

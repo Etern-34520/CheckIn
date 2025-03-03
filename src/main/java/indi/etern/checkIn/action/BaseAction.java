@@ -1,41 +1,48 @@
 package indi.etern.checkIn.action;
 
 import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
-import java.util.concurrent.Callable;
 
-public abstract class BaseAction<Res, InitDataType> implements Callable<Optional<Res>> {
+public abstract class BaseAction<Res, InitDataType> {
     @Getter(AccessLevel.PROTECTED)
     final User currentUser;
     {
-        Object object = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (object instanceof User user) {
-            currentUser = user;
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object object = authentication.getPrincipal();
+            if (object instanceof User user) {
+                currentUser = user;
+            } else {
+                currentUser = User.ANONYMOUS;
+            }
         } else {
             currentUser = User.ANONYMOUS;
         }
     }
 
-    @Override
-    public Optional<Res> call() throws Exception {
+    public Optional<Res> call(InitDataType initData) throws Exception {
+        initData(initData);
         try {
             String requiredPermissionName = requiredPermissionName();
             if (requiredPermissionName != null && !requiredPermissionName.isEmpty())
                 for (String s : requiredPermissionName.split(",")) {
                     if (!JwtTokenProvider.singletonInstance.isUserHasPermission(currentUser,s)) {
-                        throw new PermissionDeniedException("权限不足，需要" + s,s);
+                        throw new PermissionDeniedException("权限不足，需要 \"" + s + "\"",s);
                     }
                 }
-            return doAction();
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return doAction();
     }
 
     abstract public String requiredPermissionName();

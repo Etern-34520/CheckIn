@@ -21,8 +21,6 @@ public class MVCConfig implements WebMvcConfigurer {
         
         viewResolver.setPrefix("/view/");
         viewResolver.setSuffix(".html");
-        
-        viewResolver.setExposeContextBeansAsAttributes(true);
         return viewResolver;
     }
     

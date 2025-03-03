@@ -6,6 +6,10 @@ const props = defineProps({
     record: {
         type: Object,
         required: true
+    },
+    showIp: {
+        type: Boolean,
+        default: false,
     }
 })
 </script>
@@ -14,14 +18,16 @@ const props = defineProps({
     <div class="panel-1 request-record-item disable-init-animate" :class="record.status.toLowerCase()">
         <div class="pointer-color"></div>
         <div>
-            <div style="display: flex;flex-direction: row;align-items: center;flex-wrap: wrap">
-                <el-text style="margin-bottom: 8px;margin-right: 16px;">{{ record.ipString }}</el-text>
-                <transition>
-                    <div style="display: flex;flex-direction: row" v-if="record.qqnumber">
+            <div style="display: flex;flex-direction: row;align-items: center;flex-wrap: wrap;">
+                <transition name="blur-scale">
+                    <div style="display: flex;flex-direction: row;margin-right: 16px;" v-if="record.qqnumber">
                         <el-avatar :src="getAvatarUrlOf(record.qqnumber)" style="margin-right: 8px;margin-bottom: 8px"
                                    size="small"/>
                         <el-text style="margin-bottom: 8px;">{{ record.qqnumber }}</el-text>
                     </div>
+                </transition>
+                <transition name="blur-scale">
+                    <el-text style="margin-bottom: 8px;" v-if="showIp || !Boolean(record.qqnumber)">{{ record.ipString }}</el-text>
                 </transition>
                 <div class="flex-blank-1"></div>
                 <el-tag :type="record.status === 'ERROR' ? 'danger' : 'info'" style="margin-bottom: 8px;margin-right: 4px;">{{ record.status }}</el-tag>

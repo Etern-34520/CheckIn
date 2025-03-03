@@ -13,4 +13,6 @@ public interface ExamDataRepository extends JpaRepository<ExamData,String> {
     List<ExamData> findAllByGenerateTimeBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
     List<ExamData> findAllByQqNumberIs(long qqNumber);
     List<ExamData> findAllByQqNumberAndStatus(long qqNumber, ExamData.Status status);
+    
+    List<ExamData> findAllByQuestionIdsContains(String questionIds);
 }

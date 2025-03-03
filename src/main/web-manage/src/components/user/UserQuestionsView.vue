@@ -1,6 +1,5 @@
 <script setup>
 import WebSocketConnector from "@/api/websocket.js";
-import UserDataInterface from "@/data/UserDataInterface.js";
 import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import QuestionCache from "@/data/QuestionCache.js";
 import router from "@/router/index.js";
@@ -26,7 +25,7 @@ onBeforeMount(() => {
             for (const question of response.questions) {
                 questionInfos.value.push(QuestionCache.wrapToQuestionInfo(question));
             }
-        }, (showError) => {
+        }, (error) => {
             loading.value = false;
         });
     } catch (e) {

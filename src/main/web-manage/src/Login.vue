@@ -1,64 +1,37 @@
 <script setup>
-// import {ref,getCurrentInstance,defineEmits} from 'vue';
-import Router from "@/router/index.js";
-import {DArrowRight, Loading} from "@element-plus/icons-vue";
-/*import WebSocketConnector from "@/websocket/websocket.js";*/
-const usernameOrQQ = ref('');
-const password = ref('');
-const {proxy} = getCurrentInstance();
+import LoginDialog from "@/components/common/LoginDialog.vue";
+import iconBlack from "@/assets/icons/icon-black.svg";
+import iconWhite from "@/assets/icons/icon-white.svg";
+import UI_Meta from "@/utils/UI_Meta.js";
 
-const loginMessage = ref('');
-const key = ref(true);
-const requesting = ref(false);
-const emit = defineEmits(["loginAs"]);
+const colorScheme = UI_Meta.colorScheme;
 
-function login() {
-    requesting.value = true;
-    proxy.$http.post("api", {
-        usernameOrQQ: usernameOrQQ.value,
-        password: password.value
-    }).then(response => {
-        console.log(response);
-        if (response.result === "success") {
-            loginMessage.value = "";
-            emit("loginAs", {name: response.name, qq: response.qq, token: response.token});
-        } else if (response.result === "fail") {
-            requesting.value = false;
-            loginMessage.value = response.message;
-        } else {
-            requesting.value = false;
-            loginMessage.value = "请求时遇到错误"
-        }
-        key.value = !key.value;
-    }, error => {
-        requesting.value = false;
-        loginMessage.value = "请求时遇到错误";
-        key.value = !key.value;
-    });
+const getIcon = () => {
+    if (colorScheme.value === 'light') {
+        return iconBlack;
+    } else {
+        return iconWhite;
+    }
 }
 </script>
 
 <template>
     <div style="width: 100%;height:100%;display: flex;align-items: center;align-content:center;justify-content: center;overflow: hidden">
-        <div id="login" style="z-index:2;width: 300px;display: flex;flex-direction: column;justify-content: stretch;">
-            <el-input v-model="usernameOrQQ" autofocus placeholder="用户名 / QQ" class="login-input"
-                      type="text" size="large"></el-input>
-            <el-input v-model="password" placeholder="密码" type="password" show-password clearable class="login-input"
-                      size="large"></el-input>
-            <el-button text bg :disabled="requesting" :loading="requesting" loading-icon="_Loading_" :icon="DArrowRight"
-                       @click="login">登录
-            </el-button>
-            <div style="height: 30px;display: flex;place-items: stretch;place-content: center;">
-                <Transition name="message" mode="out-in">
-                    <el-text :key="key">{{ loginMessage }}</el-text>
-                </Transition>
+        <div style="z-index: 2">
+            <div style="display: flex;flex-direction: row;margin-bottom: 4px;">
+                <img :src="getIcon()" class="animate-0" alt="" width="64" height="64" style="margin-bottom: 16px;opacity: 0.6"/>
+                <div style="display: flex;flex-direction: column;margin-left: 16px">
+                    <el-text class="animate-1" style="align-self: baseline;font-size:1.5em">Check In</el-text>
+                    <el-text class="animate-2" style="align-self: baseline;font-size:1.4em" size="large">登录</el-text>
+                </div>
             </div>
+            <login-dialog class="animate-3" style="width: 300px;"/>
         </div>
-        <div class="background-font">
-            <div style="font-size: 256px;filter: blur(8px)">
+        <div class="background-font animate-0">
+            <div style="font-size: 256px;">
                 CHECKIN
             </div>
-            <div style="font-size: 200px;margin-top: -200px;filter: blur(8px)">
+            <div style="font-size: 200px;margin-top: -200px;">
                 LOGIN
             </div>
         </div>
@@ -66,10 +39,6 @@ function login() {
 </template>
 
 <style scoped>
-#login > * {
-    margin-top: 4px;
-}
-
 .background-font {
     position: absolute;
     display: flex;
@@ -83,33 +52,61 @@ function login() {
     opacity: 0.07;
     user-select: none;
     overflow: hidden;
+    filter: blur(16px);
 }
 
-/*noinspection CssUnusedSymbol*/
-.message-enter-active, .message-leave-active {
-    transition: all 0.2s;
+@keyframes ani-0 {
+    0% {
+        filter: blur(16px);
+        opacity: 0;
+    }
+    100% {
+    }
+}
+@keyframes ani-1 {
+    0% {
+        transform: translate3d(-24px,0,0);
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@keyframes ani-2 {
+    0% {
+        transform: translate3d(-16px,0,0);
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@keyframes ani-3 {
+    0% {
+        filter: blur(16px);
+        transform: translate3d(0,-16px,0);
+        opacity: 0;
+    }
+    100% {
+        filter: blur(0);
+        opacity: 1;
+    }
 }
 
-/*noinspection CssUnusedSymbol*/
-.message-enter-from, .message-leave-to {
-    filter: blur(8px);
-    opacity: 0;
+.animate-0 {
+    animation: ani-0 0.8s 200ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
 }
-</style>
-
-<style>
-.login-input input {
-    text-align: center;
+.animate-1 {
+    animation: ani-1 0.6s 300ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
 }
-
-.login-input .el-input__suffix {
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: end;
+.animate-2 {
+    animation: ani-2 0.6s 600ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
 }
-
-.login-input .el-input__suffix-inner {
-    position: absolute !important;
+.animate-3 {
+    animation: ani-3 1s 400ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
 }
 </style>

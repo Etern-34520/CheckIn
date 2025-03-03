@@ -32,7 +32,7 @@ public class MultipleChoiceAnswer extends Answer<MultipleChoicesQuestion, List<S
     
     @Override
     public CheckedResult check() {
-        SettingItem scoreSettingItem = SettingService.singletonInstance.getItem("grading","questionScore");
+        SettingItem scoreSettingItem = SettingService.singletonInstance.getItem("generating","questionScore");
         float maxScore = scoreSettingItem.getValue(Number.class).floatValue();
         if (result == null) {
             final boolean correct = source.checkAnswer(this);

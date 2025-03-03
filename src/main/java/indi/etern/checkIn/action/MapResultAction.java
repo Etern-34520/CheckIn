@@ -1,7 +1,5 @@
 package indi.etern.checkIn.action;
 
-import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -28,11 +26,11 @@ public abstract class MapResultAction extends BaseAction<LinkedHashMap<String,Ob
     }
 
     @Override
-    public Optional<LinkedHashMap<String,Object>> call() throws Exception {
+    public Optional<LinkedHashMap<String,Object>> call(Map<String, Object> initData) throws Exception {
         try {
-            return super.call();
-        } catch (PermissionDeniedException e) {
-            return getOptionalErrorMap("权限不足，需要" + e.getRequiredPermissionName());
+            return super.call(initData);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -45,7 +45,8 @@ const props = defineProps({
                              v-model="model.colorHex" :disabled="disabled"></el-color-picker>
             <div style="display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1">
                 <el-text class="field-label disable-init-animate" style="margin-top: 0 !important;">名称</el-text>
-                <el-input v-model="model.name" class="disable-init-animate" :disabled="disabled" :class="{error: !(model.name)}"></el-input>
+                <el-input v-model="model.name" class="disable-init-animate" :disabled="disabled"
+                          :class="{error: !(model.name)}"></el-input>
             </div>
         </div>
         <el-text class="field-label disable-init-animate">描述</el-text>
@@ -64,10 +65,14 @@ const props = defineProps({
             </template>
         </collapse>
         <el-text class="field-label disable-init-animate">分数</el-text>
-        <div style="display: flex;flex-direction: row">
-            <el-input-number class="disable-init-animate" :min="min + 1" :max="max - 1" v-model="split[index]" :disabled="disabled" style="margin-right: 16px"></el-input-number>
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap">
+            <el-input-number class="disable-init-animate" :min="min + index" :max="max - (split.length - index)"
+                             v-model="split[index]"
+                             :disabled="index === 0 || disabled" style="margin-right: 16px"></el-input-number>
             <el-text size="large" style="margin-right: 16px">~</el-text>
-            <el-input-number class="disable-init-animate" :min="min + 1" :max="max - 1" v-if="split[index+1]" :disabled="disabled" v-model="split[index+1]"></el-input-number>
+            <el-input-number class="disable-init-animate" :min="min + index" :max="max - (split.length - index)"
+                             v-if="split[index+1]"
+                             :disabled="disabled" v-model="split[index+1]"></el-input-number>
             <el-input-number class="disable-init-animate" v-else :model-value="max" disabled></el-input-number>
         </div>
     </div>

@@ -2,17 +2,25 @@
 import {
     Check,
     CircleCheck,
-    Files,
+    Files, MoreFilled,
     Postcard,
 } from "@element-plus/icons-vue";
 import LinkPanel from "@/components/common/LinkPanel.vue";
 import Waterfall from "@/components/common/Waterfall.vue";
 import router from "@/router/index.js";
 import HarmonyOSIcon_InfoCircle from "@/components/icons/HarmonyOSIcon_InfoCircle.vue";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 defineExpose({
     name: "Base"
 });
+
+const showGeneratingSetting = ref(false);
+const showAdvanceSetting = ref(false);
+watch(() => PermissionInfo.permissions.value, () => {
+    showGeneratingSetting.value = PermissionInfo.hasPermission('setting', 'get generating setting');
+    showAdvanceSetting.value = PermissionInfo.hasPermission('setting', 'get advance setting');
+}, {immediate: true, deep: true});
 
 const groups = [
     {
@@ -39,7 +47,8 @@ const groups = [
             },
             {
                 name: "生成设置",
-                description: "题量 分区数 必选分区 特殊分区限制 抽取策略 补足策略",
+                show: showGeneratingSetting,
+                description: "题量 分值 分区数 必选分区 特殊分区限制 抽取策略 补足策略",
                 icon: Files,
                 action: () => {
                     router.push({name: "generating-setting"});
@@ -49,25 +58,26 @@ const groups = [
                 name: "评级设置", description: "分数线 分级 消息", icon: Check, action: () => {
                     router.push({name: "grading-setting"});
                 }
-            },
-//                 TODO
-/*
-            {
-                name: "高级设置", description: "外部API 自动创建用户", icon: MoreFilled, action: () => {
-                    router.push({name: "facade-setting"});
-                }
             }
-*/
         ]
     }, {
         name: "其它",
         items: [
             {
                 name: "关于",
-                description: "作者 使用到的开源项目 Github",
+                description: "使用到的开源项目 Github",
                 icon: HarmonyOSIcon_InfoCircle,
                 action: () => {
                     router.push({name: "about"});
+                }
+            },
+            {
+                name: "高级设置",
+                show: showAdvanceSetting,
+                description: "外部API",
+                icon: MoreFilled,
+                action: () => {
+                    router.push({name: "advance-setting"});
                 }
             }
         ]
@@ -81,8 +91,11 @@ const groups = [
             <template #item="{item:group,index}">
                 <div style="display: flex;flex-direction: column;margin-bottom: 16px;margin-left: 8px;margin-right: 8px">
                     <el-text style="font-size: 20px;align-self: baseline;margin-bottom: 8px">{{ group.name }}</el-text>
-                    <link-panel @click="item.action()" v-for="item of group.items" :key="item.name"
-                                :description="item.description" :name="item.name" :icon="item.icon"/>
+                    <template v-for="item of group.items">
+                        <link-panel @click="item.action()" :key="item.name"
+                                    v-if="item.show === undefined?true:item.show.value"
+                                    :description="item.description" :name="item.name" :icon="item.icon"/>
+                    </template>
                 </div>
             </template>
         </waterfall>

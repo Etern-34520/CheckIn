@@ -12,13 +12,14 @@ import EditPartitionNameDialog from "@/components/question/EditPartitionNameDial
 import HarmonyOSIcon_Upload from "@/components/icons/HarmonyOSIcon_Upload.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
-import {ArrowLeftBold, List} from "@element-plus/icons-vue";
+import {ArrowLeftBold, List, RefreshLeft} from "@element-plus/icons-vue";
 import CreatePartitionButton from "@/components/question/CreatePartitionButton.vue";
 import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import SelectPartitionsActionPop from "@/components/question/SelectPartitionsActionPop.vue";
 import UIMeta from "@/utils/UI_Meta.js";
 import ResponsiveSplitpane from "@/components/common/ResponsiveDoubleSplitpane.vue";
 import {ElMessageBox} from "element-plus";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const {proxy} = getCurrentInstance();
 
@@ -46,7 +47,7 @@ const filterNode = (value, node) => {
 const filterQuestionInfo = (questionInfo) => {
     for (const v of filterText.value.split(",")) {
         if (v !== "" &&
-                (questionInfo.type !== 'Question' && questionInfo.type !== 'QuestionGroup') || (
+                (questionInfo.type === 'Partition') || (
                         (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase())) ||
                         (questionInfo.question.id && questionInfo.question.id.toUpperCase().includes(v.toUpperCase())))
         ) {
@@ -74,7 +75,14 @@ function loadPartitionChildrenNode(partitionId, isPartitionEmpty, resolve, rejec
         }
     };
     const localPartitionQuestionNodes = localPartitionQuestionData[partitionId];
-    let data = [createQuestionButtonData];
+    let data = [];
+    data.push(createQuestionButtonData);
+    /*
+        if (PermissionInfo.hasPermission('question','create and edit owns questions') ||
+                PermissionInfo.hasPermission('question group','create and edit owns question groups')) {
+            data.push(createQuestionButtonData);
+        }
+    */
     if (localPartitionQuestionNodes instanceof Array) {
         data.push(...localPartitionQuestionNodes);
     }
@@ -99,22 +107,25 @@ function loadPartitionChildrenNode(partitionId, isPartitionEmpty, resolve, rejec
                 tree.value.filter(filterText.value);
             });
             resolve(data);
-        }, (showError) => {
+        }, (error) => {
             reject();
         });
     }
 }
 
 const loadNode = (node, resolve, reject) => {
-    let partitionId = node.data.id;
+    let nodeId = node.data.id;
     if (node.level === 0) {
         let createPartitionButtonData = {
-            id: "create-partition-" + partitionId,
+            id: "create-partition-" + nodeId,
             leaf: true,
             data: {type: "createPartition"}
         };
         PartitionCache.getRefPartitionsAsync().then((partitions) => {
-            let data = [createPartitionButtonData];
+            let data = [];
+            if (PermissionInfo.hasPermission('partition', 'create partition')) {
+                data.push(createPartitionButtonData)
+            }
             for (const [id, partition] of Object.entries(partitions.value)) {
                 data.push(getTreeNodeDataOfPartition(partition));
             }
@@ -125,7 +136,7 @@ const loadNode = (node, resolve, reject) => {
         if (node.data.data.loaded) {
             resolve(node.data.data.loadedChildren);
         } else {
-            loadPartitionChildrenNode(partitionId, node.data.questionAmount === 0, resolve, reject);
+            loadPartitionChildrenNode(nodeId, node.data.questionAmount === 0, resolve, reject);
         }
     }
     /*resolve(data);*/
@@ -140,7 +151,7 @@ function getTreeNodeDataOfPartition(partition) {
         data: {
             editing: false,
             partition: partition,
-            type: "partition"
+            type: "Partition"
         }
     };
 }
@@ -245,8 +256,8 @@ const allowDrag = (node) => {
 const allowDrop = (draggingNode, dropNode, type) => {
     // console.log(draggingNode, dropNode, type);
     let nodeDataType = dropNode.data.data.type;
-    return ((nodeDataType === 'partition' || nodeDataType === 'QuestionGroup') && type === "inner") ||
-            (nodeDataType !== 'partition' && nodeDataType !== "createPartition" && type === "next");
+    return ((nodeDataType === "Partition" || nodeDataType === "QuestionGroup") && type === "inner") ||
+            (nodeDataType !== "Partition" && nodeDataType !== "createPartition" && type === "next");
 }
 
 const onDrop = (dragNode, dropNode, place, event) => {
@@ -273,7 +284,7 @@ const onDrop = (dragNode, dropNode, place, event) => {
     let dropPartitionId;
     delete dropNode.data.data.dragHover;
     const dataType = dropNodeData.type;
-    if (dataType === "partition") {
+    if (dataType === "Partition") {
         dropPartitionId = dropNodeData.partition.id;
     } else if (dataType === "Question" || dataType === "QuestionGroup") {
         dropPartitionId = dropNode.data.treeId.split("/")[0];
@@ -297,75 +308,95 @@ const onDragEnd = (node, dropNode, event) => {
 }
 
 const createQuestionGroup = (partitionId) => {
-    const authorQQ = Number(proxy.$cookies.get("qq"));
-    let question = {
-        id: randomUUIDv4(),
-        content: "",
-        enabled: false,
-        partitionIds: [partitionId],
-        authorQQ: authorQQ,
-        upVoters: new Set(),
-        downVoters: new Set(),
-        localNew: true,
-    };
-    const questionInfo = QuestionCache.createQuestionGroup(question, undefined, authorQQ);
-    tree.value.append(QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
+    if (PermissionInfo.hasPermission('question group', 'create and edit owns question groups')) {
+        const authorQQ = Number(proxy.$cookies.get("qq"));
+        let question = {
+            id: randomUUIDv4(),
+            content: "",
+            enabled: false,
+            partitionIds: [partitionId],
+            authorQQ: authorQQ,
+            upVoters: new Set(),
+            downVoters: new Set(),
+            localNew: true,
+        };
+        const questionInfo = QuestionCache.createQuestionGroup(question, undefined, authorQQ);
+        const questionNodeItemData = QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId);
+        tree.value.append(questionNodeItemData, tree.value.getNode(partitionId));
+    } else {
+        console.error('Permission denied: create and edit owns question groups');
+    }
 }
 
 const createMultipleChoiceQuestion = (partitionId) => {
-    let question = {
-        id: randomUUIDv4(),
-        content: "",
-        type: "MultipleChoicesQuestion",
-        enabled: false,
-        partitionIds: [partitionId],
-        authorQQ: Number(proxy.$cookies.get("qq")),
-        upVoters: new Set(),
-        downVoters: new Set(),
-        localNew: true,
-        choices: [{
+    if (PermissionInfo.hasPermission('question', 'create and edit owns questions')) {
+        let question = {
             id: randomUUIDv4(),
-            correct: true,
-            content: ""
-        }, {
-            id: randomUUIDv4(),
-            correct: false,
-            content: ""
-        }]
-    };
-    const questionInfo = QuestionCache.create(question);
-    tree.value.append(QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
+            content: "",
+            type: "MultipleChoicesQuestion",
+            enabled: false,
+            partitionIds: [partitionId],
+            authorQQ: Number(proxy.$cookies.get("qq")),
+            upVoters: new Set(),
+            downVoters: new Set(),
+            localNew: true,
+            choices: [{
+                id: randomUUIDv4(),
+                correct: true,
+                content: ""
+            }, {
+                id: randomUUIDv4(),
+                correct: false,
+                content: ""
+            }]
+        };
+        const questionInfo = QuestionCache.create(question);
+        tree.value.append(QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
+    } else {
+        console.error('Permission denied: create and edit owns questions');
+    }
 }
 
 const dragEnter = (dragNode, enterNode, event) => {
-    if (enterNode.data.data.type === 'partition')
+    if (enterNode.data.data.type === "Partition")
         enterNode.data.data.dragHover = true;
 }
 
 const dragLeave = (dragNode, leaveNode, event) => {
-    if (leaveNode.data.data.type === 'partition')
+    if (leaveNode.data.data.type === "Partition")
         delete leaveNode.data.data.dragHover;
 }
 
 const uploading = ref(false);
 
+const failedQuestionReasons = ref({});
+const showfailedQuestionReasons = ref(false);
+
 const upload = () => {
     let hasErrorQuestions = QuestionCache.getErrorQuestions().length > 0;
+    const doUpload = () => {
+        QuestionCache.uploadAll().then((data) => {
+            uploading.value = false;
+            console.log(data);
+            console.log(data.succeedQuestionIds);
+            console.log(data.failedQuestionReasons);
+            failedQuestionReasons.value = data.failedQuestionReasons;
+            showfailedQuestionReasons.value = Object.keys(failedQuestionReasons.value).length > 0;
+            showTree.value = showfailedQuestionReasons.value ? false : showTree.value;
+        }, (err) => {
+            uploading.value = false;
+        });
+    }
     if (hasErrorQuestions && showTree.value === true) {
         errorsDisplay.value = true;
         showTree.value = false;
+        responsiveSplitpane.value.showLeft();
     } else if (hasErrorQuestions && showTree.value === false) {
         uploading.value = true;
-        QuestionCache.uploadAll().then(() => {
-            uploading.value = false;
-        });
+        doUpload();
     } else if (!hasErrorQuestions) {
         uploading.value = true;
-        QuestionCache.uploadAll().then(() => {
-            uploading.value = false;
-        }, () => {
-            uploading.value = false;
-        });
+        doUpload();
     }
     // QuestionTempStorage.uploadAll();
 }
@@ -373,8 +404,11 @@ const upload = () => {
 const backToTree = () => {
     showTree.value = true;
     setTimeout(() => {
-        if (showTree.value === true)
+        if (showTree.value === true) {
             errorsDisplay.value = false;
+            showfailedQuestionReasons.value = false;
+            failedQuestionReasons.value = {};
+        }
     }, 600);
 }
 
@@ -417,7 +451,7 @@ function batchDo(questionInfoAction, questionNodeAction) {
             if (questionId === "createQuestion") continue;
             checkedQuestionIds.add(questionId);
             checkedQuestionNodes.add(node);
-        } else if (node.data.type === "partition") {
+        } else if (node.data.type === "Partition") {
             let zones = node.zones;
             for (const questionNode of zones) {
                 if (questionNode.data.type === "Question" || questionNode.data.type === "QuestionGroup") {
@@ -522,7 +556,7 @@ const batchActionButtons = ref([
         action: () => {
             batchSetEnable(false);
         },
-    }, {
+    }, /*{
         name: "启用乱序",
         show: () => {
             return true;
@@ -538,7 +572,7 @@ const batchActionButtons = ref([
         action: () => {
             batchSetEnableRandom(false);
         },
-    }]
+    }*/]
 );
 
 const switchMenuVisible = (button) => {
@@ -552,17 +586,19 @@ const switchMenuVisible = (button) => {
     }
 }
 
-const rectifyCheck = (nodeObj, checkStatus) => {
+const rectifyCheck = (nodeObj, checkStatus) => {//TODO
     function rectify1(currentPartitionId) {
         const currentPartitionCheckedQuestionIds = new Set();
         for (const checkedNode of checkStatus.checkedNodes) {
-            let partitionId = Number(checkedNode.treeId.split("/")[0]);
-            if (partitionId === currentPartitionId && checkedNode.data.type === "Question") {
-                currentPartitionCheckedQuestionIds.add(checkedNode.data.question.id);
+            if (checkedNode.data.type === 'Question') {
+                let partitionId = Number(checkedNode.treeId.split("/")[0]);
+                if (partitionId === currentPartitionId && checkedNode.data.type === "Question") {
+                    currentPartitionCheckedQuestionIds.add(checkedNode.data.question.id);
+                }
             }
         }
         for (const halfCheckedNode of checkStatus.halfCheckedNodes) {
-            if (halfCheckedNode.data.type === "partition" && halfCheckedNode.id === currentPartitionId) {
+            if (halfCheckedNode.data.type === "Partition" && halfCheckedNode.id === currentPartitionId) {
                 if (currentPartitionCheckedQuestionIds.size === 0) {
                     tree.value.setChecked(halfCheckedNode.id + "/createQuestion", false, false);
                 }
@@ -578,8 +614,7 @@ const rectifyCheck = (nodeObj, checkStatus) => {
     if (dataType === "Question" || dataType === "QuestionGroup") {
         const currentPartitionId = Number(nodeObj.treeId.split("/")[0]);
         rectify1(currentPartitionId);
-    } else if (dataType === "partition") {
-        //FIXME
+    } else if (dataType === "Partition") {
         if (!QuestionCache.loadedPartitionIds.has(nodeObj.treeId)) {
             loadPartitionChildrenNode(nodeObj.treeId, nodeObj.data.questionAmount === 0, (data) => {
                 nodeObj.data.loadedChildren = data;
@@ -601,7 +636,7 @@ function onDeleteNode(nodeObj) {
     if (nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup') {
 
         if (nodeObj.data.question.localDeleted) {
-            QuestionCache.restore(nodeObj.data.question.id);
+            QuestionCache.restoreDelete(nodeObj.data.question.id);
         } else {
             QuestionCache.delete(nodeObj.data.question.id);
         }
@@ -655,6 +690,18 @@ const stop = router.afterEach((to, from) => {
 onUnmounted(() => {
     stop();
 });
+
+const restoreAllErrorUploadChanges = () => {
+    for (const id of Object.keys(failedQuestionReasons.value)) {
+        QuestionCache.restoreChanges(id);
+    }
+}
+
+const getTypeName = (type) => {
+    if (type === "MultipleChoicesQuestion") return "选择题";
+    else if (type === "QuestionGroup") return "题组";
+    else return "未知";
+}
 </script>
 
 <template>
@@ -665,7 +712,7 @@ onUnmounted(() => {
                        loading-icon="_Loading_"
                        :disabled="!QuestionCache.reactiveDirty.value">
                 <HarmonyOSIcon_Upload/>
-                <el-text>{{ showTree ? "上传题目更改" : "确认上传" }}</el-text>
+                <el-text>{{ errorsDisplay ? "确认上传" : "上传题目更改" }}</el-text>
             </el-button>
             <!--                    <el-scrollbar>-->
             <div class="slide-base"
@@ -718,7 +765,7 @@ onUnmounted(() => {
                                         </template>
                                         <template v-else-if="nodeObj.data.type==='createQuestion'">
                                             <!--                                            TODO component-->
-                                            <el-popover trigger="click" width="auto">
+                                            <el-popover trigger="click" popper-style="min-width: 80px;width: auto;">
                                                 <template #reference>
                                                     <el-button text size="small" :icon="HarmonyOSIcon_Plus"
                                                                class="flex-blank-1 disable-tree-item-hover disable-tree-item-focus disable-tree-checkbox">
@@ -729,15 +776,17 @@ onUnmounted(() => {
                                                     <div class="no-pop-padding create-selection">
                                                         <el-button-group>
                                                             <el-button
+                                                                    :disabled="!PermissionInfo.hasPermission('question group','create and edit owns question groups')"
                                                                     @click="createQuestionGroup(nodeObj.data.partitionId)">
                                                                 题组
                                                             </el-button>
                                                             <el-button
+                                                                    :disabled="!PermissionInfo.hasPermission('question','create and edit owns questions')"
                                                                     @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
                                                                 选择题
                                                             </el-button>
-                                                            <el-button disabled>排序题</el-button>
-                                                            <el-button disabled>填空题</el-button>
+                                                            <!--                                                            <el-button disabled>排序题</el-button>-->
+                                                            <!--                                                            <el-button disabled>填空题</el-button>-->
                                                         </el-button-group>
                                                     </div>
                                                 </template>
@@ -746,19 +795,26 @@ onUnmounted(() => {
                                         <template v-else>
                                             <!--                                            TODO component-->
                                             <div class="tree-node-item"
-                                                 :class="{dragHover:nodeObj.data.dragHover}">
+                                                 :class="{
+                                                dragHover:nodeObj.data.dragHover
+                                            }">
                                                 <div class="point" :class="{
                                                             changed:nodeObj.data.dirty,
                                                             error:nodeObj.data.showError,
                                                             warning:nodeObj.data.showWarning
                                                         }"></div>
+                                                <!--                                                :class="{'disable-tree-checkbox': !(nodeObj.data.type === 'Partition'?true:nodeObj.data.ableToEdit)}"-->
                                                 <div class="question-tree-node">
+                                                    <el-text v-if="nodeObj.data.type === 'Question'" size="small" type="info" style="margin-right: 8px;">
+                                                        {{getTypeName(nodeObj.data.question.type)}}
+                                                    </el-text>
                                                     <el-text class="question-tree-node-content"
-                                                             :style="{
-                                                                opacity: (nodeObj.data.question&&nodeObj.data.question.localDeleted)?0.5:1
-                                                            }">
+                                                             :class="{
+                                                        'local-deleted': nodeObj.data.question&&nodeObj.data.question.localDeleted,
+                                                        'unable-to-edit': nodeObj.data.question&&!nodeObj.data.ableToEdit,
+                                                             }">
                                                         {{
-                                                            nodeObj.data.type === 'partition' ?
+                                                            nodeObj.data.type === 'Partition' ?
                                                                     nodeObj.data.partition.name : nodeObj.data.question.content
                                                         }}
                                                     </el-text>
@@ -767,11 +823,11 @@ onUnmounted(() => {
                                                     <el-popover trigger="click"
                                                                 v-model:visible="nodeObj.data.editing"
                                                                 width="400"
-                                                                v-if="nodeObj.data.type === 'partition'">
+                                                                v-if="nodeObj.data.type === 'Partition'">
                                                         <template #reference>
                                                             <el-button class="node-button" size="small"
                                                                        @click.stop="nodeObj.data.editing = false"
-                                                                       v-if="nodeObj.data.type === 'partition'">
+                                                                       v-if="nodeObj.data.type === 'Partition'">
                                                                 <HarmonyOSIcon_Rename/>
                                                                 <el-text v-if="!UIMeta.mobile.value">重命名</el-text>
                                                             </el-button>
@@ -784,6 +840,7 @@ onUnmounted(() => {
                                                         </template>
                                                     </el-popover>
                                                     <el-button class="node-button" size="small"
+                                                               v-if="nodeObj.data.type === 'Partition'?PermissionInfo.hasPermission('partition','delete partititon'):nodeObj.data.ableToDelete"
                                                                @click.stop="onDeleteNode(nodeObj)">
                                                         <HarmonyOSIcon_Remove/>
                                                         <template v-if="!UIMeta.mobile.value">
@@ -811,21 +868,59 @@ onUnmounted(() => {
                                     <ArrowLeftBold/>
                                 </el-icon>
                             </el-button>
-                            <el-text type="warning">
-                                这些有错误的题目将不会上传
-                            </el-text>
+                            <transition name="blur-scale">
+                                <el-text type="warning" v-if="errorsDisplay">
+                                    这些有错误的题目将不会上传
+                                </el-text>
+                            </transition>
                         </el-alert>
-                        <div>
-                            <transition-group name="slide-hide">
-                                <question-info-panel class="disable-init-animate clickable"
-                                                     v-for="questionInfo of QuestionCache.getErrorQuestions()"
-                                                     :key="questionInfo.question.id"
-                                                     @click="openEdit(questionInfo.question.id)"
-                                                     :question-info="questionInfo"/>
-                            </transition-group>
-                        </div>
+                        <transition name="blur-scale">
+                            <div v-if="errorsDisplay">
+                                <transition-group name="slide-hide">
+                                    <question-info-panel class="disable-init-animate clickable"
+                                                         v-for="questionInfo of QuestionCache.getErrorQuestions()"
+                                                         :key="questionInfo.question.id"
+                                                         @click="openEdit(questionInfo.question.id)"
+                                                         :question-info="questionInfo"/>
+                                </transition-group>
+                            </div>
+                        </transition>
                         <transition name="empty">
                             <el-empty v-show="QuestionCache.getErrorQuestions().length===0"/>
+                        </transition>
+                    </el-scrollbar>
+                </div>
+                <div class="errorsList" v-show="showfailedQuestionReasons" :class="{hideRight:showTree}">
+                    <el-scrollbar>
+                        <el-alert type="error" :closable="false">
+                            <div style="display: flex;flex-wrap: wrap;">
+                                <el-button style="padding: 8px;margin: 4px" text @click="backToTree">
+                                    <el-icon>
+                                        <ArrowLeftBold/>
+                                    </el-icon>
+                                </el-button>
+                                <el-text type="danger" style="margin: 4px;margin-right: 12px">
+                                    题目上传出错
+                                </el-text>
+                                <el-button link type="primary" :icon="RefreshLeft" style="margin: 4px" @click="restoreAllErrorUploadChanges">
+                                    全部重置更改
+                                </el-button>
+                            </div>
+                        </el-alert>
+                        <transition name="blur-scale">
+                            <div>
+                                <transition-group name="slide-hide">
+                                    <question-info-panel class="disable-init-animate clickable"
+                                                         v-for="[questionId, reason] of Object.entries(failedQuestionReasons)"
+                                                         :key="questionId" disable-error-and-warning
+                                                         @click="openEdit(questionId)"
+                                                         :question-info="QuestionCache.reactiveQuestionInfos.value[questionId]">
+                                        <div style="margin-top: 8px;">
+                                            <el-text type="danger">{{ reason }}</el-text>
+                                        </div>
+                                    </question-info-panel>
+                                </transition-group>
+                            </div>
                         </transition>
                     </el-scrollbar>
                 </div>
@@ -1079,6 +1174,14 @@ onUnmounted(() => {
     width: 98%;
     left: 1%;
     filter: none;
+}
+
+.local-deleted {
+    opacity: 0.4;
+}
+
+.unable-to-edit {
+    opacity: 0.6;
 }
 </style>
 <style>

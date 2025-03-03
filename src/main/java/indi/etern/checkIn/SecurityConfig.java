@@ -41,6 +41,7 @@ public class SecurityConfig {
                         authorizeHttpRequests
                                 .requestMatchers("/manage/**").authenticated()
                                 .requestMatchers("/api/websocket/**").authenticated()
+                                .requestMatchers("/api/qualify").authenticated()
                                 .anyRequest().permitAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)

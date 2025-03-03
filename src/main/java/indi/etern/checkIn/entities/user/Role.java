@@ -21,12 +21,15 @@ public class Role {
     private String type;
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<User> users = new HashSet<>();
-    @ManyToMany(cascade = {CascadeType.PERSIST,  CascadeType.REFRESH, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH})
 //    @JoinColumn(value = "ROLE_TYPE",referencedColumnName = "TYPE")
 //    @NotFound(action = NotFoundAction.IGNORE)
+//    FIXME foreign
     @JoinTable(name = "ROLE_PERMISSION_MAPPING",
-            joinColumns = @JoinColumn(name = "ROLE_TYPE", referencedColumnName = "TYPE", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)),
-            inverseJoinColumns = @JoinColumn(name = "PERMISSION_ID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)))
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            joinColumns = @JoinColumn(name = "ROLE_TYPE", referencedColumnName = "TYPE", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "PERMISSION_ID", referencedColumnName = "ID", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)))
     private Set<Permission> permissions = new HashSet<>();
     @Setter
     private int level;

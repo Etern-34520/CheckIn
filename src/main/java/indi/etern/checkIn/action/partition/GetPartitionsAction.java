@@ -18,7 +18,7 @@ public class GetPartitionsAction extends TransactionalAction {
 
     @Override
     protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        LinkedHashMap<String,Object> result = new LinkedHashMap<>();
+        LinkedHashMap<String,Object> result = getSuccessMap();
         TransactionTemplateUtil.getTransactionTemplate().execute((res) -> {
             ArrayList<Object> partitionList = new ArrayList<>();
             result.put("partitions", partitionList);

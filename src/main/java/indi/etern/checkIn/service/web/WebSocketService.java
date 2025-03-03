@@ -54,9 +54,9 @@ public class WebSocketService {
         for (Connector item : Connector.CONNECTORS) {
             try {
                 if (toSids.isEmpty()) {
-                    item.sendMessage(message);
+                    item.sendMessageWithOutLog(message);
                 } else if (toSids.contains(item.getSid())) {
-                    item.sendMessage(message);
+                    item.sendMessageWithOutLog(message);
                 }
             } catch (IOException ignored) {
             }
@@ -70,9 +70,9 @@ public class WebSocketService {
         for (Connector item : Connector.CONNECTORS) {
             try {
                 if (toSids.isEmpty()) {
-                    item.sendMessage(message);
+                    item.sendMessageWithOutLog(message);
                 } else if (toSids.contains(item.getSid())) {
-                    item.sendMessage(message);
+                    item.sendMessageWithOutLog(message);
                 }
             } catch (IOException ignored) {
             }
@@ -156,13 +156,15 @@ public class WebSocketService {
     }
     
     public void unsubscribeAllChannels(String sid) {
-        if (!channelHashMap.isEmpty())
-            for (Channel channel : channelHashMap.values()) {//FIXME
+        if (!channelHashMap.isEmpty()) {
+            final HashSet<Channel> channels = new HashSet<>(channelHashMap.values());
+            for (Channel channel : channels) {//FIXME
                 channel.sids.remove(sid);
                 if (channel.sids.isEmpty()) {
                     channelHashMap.remove(channel.name);
                 }
             }
+        }
     }
     
     /*public void sendMessageToChannel(String message, String channelName) {

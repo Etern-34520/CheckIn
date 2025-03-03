@@ -2,6 +2,7 @@
 import PartitionCache from "../../data/PartitionCache.js";
 import Collapse from "@/components/common/Collapse.vue";
 import router from "@/router/index.js";
+import getAvatarUrlOf from "@/utils/Avatar.js";
 
 const props = defineProps({
     questionInfo: Object,
@@ -29,6 +30,13 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
     });
 }
 */
+const getTypeName = (type) => {
+    switch (type) {
+        case "MultipleChoicesQuestion": return "选择题";
+        case "QuestionGroup": return "题组";
+        default : return type;
+    }
+}
 </script>
 
 
@@ -36,21 +44,49 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
     <div class="panel-1 question-info-panel">
         <div class="grid1">
             <div class="padding">
-                <div class="question-content panel-1 flex-blank-1 disable-init-animate">
-                    <el-scrollbar :max-height="120" style="padding: 4px 16px;flex: 1">
+                <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+                    <div style="width: 6px;height: 6px;align-self: center;border-radius: 3px;margin: 8px;"
+                         :style="questionInfo.question.enabled?'background: var(--el-color-primary);':'background: var(--el-color-info);'"></div>
+                    <div style="display: flex;flex-direction: row;flex: 1">
+                        <el-text type="info" size="small" style="margin-right: 16px">类型</el-text>
                         <el-text>
-                            <pre>{{ questionInfo.question.content }}</pre>
+                            {{ getTypeName(questionInfo.question.type ? questionInfo.question.type : questionInfo.type) }}
+                        </el-text>
+                    </div>
+                    <transition name="blur-scale">
+                        <div style="display: flex;flex-direction: row;flex: 1" v-if="questionInfo.question.authorQQ">
+                            <el-text type="info" size="small" style="margin-right: 16px">作者</el-text>
+                            <el-button @click.stop="router.push({name:'user-detail', params: {id: questionInfo.question.authorQQ}})" text
+                                       style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
+                                <el-avatar shape="circle" :src="getAvatarUrlOf(questionInfo.question.authorQQ)"
+                                           style="margin-right: 4px;width: 20px;height: 20px"></el-avatar>
+                                <el-text style="margin-left: 4px;">{{ questionInfo.question.authorQQ }}</el-text>
+                            </el-button>
+                        </div>
+                    </transition>
+                </div>
+                <div class="question-content flex-blank-1 disable-init-animate">
+                    <el-text type="info" size="small" style="margin-right: 16px">内容</el-text>
+                    <el-scrollbar :max-height="120" style="padding: 0;flex: 1">
+                        <el-text>
+                            <pre style="word-wrap: break-word;white-space: pre-wrap;">{{
+                                    questionInfo.question.content
+                                }}</pre>
                         </el-text>
                     </el-scrollbar>
                 </div>
-                <div class="choicesList"
+                <div style="display: flex;flex-direction: row;margin-bottom: 4px"
                      v-if="questionInfo.question.choices!==undefined&&questionInfo.question.choices!==null">
-                    <el-tag v-for="choice of questionInfo.question.choices"
-                            :type="choice.correct?'success':'danger'">
-                        {{ choice.content }}
-                    </el-tag>
+                    <el-text type="info" size="small" style="margin-right: 16px;word-break: keep-all">选项</el-text>
+                    <div>
+                        <el-tag v-for="choice of questionInfo.question.choices"
+                                style="margin-bottom: 2px;margin-right: 2px"
+                                :type="choice.correct?'success':'danger'">
+                            {{ choice.content }}
+                        </el-tag>
+                    </div>
                 </div>
-                <div v-if="questionInfo.type==='QuestionGroup'">
+                <div v-if="questionInfo.question.type==='QuestionGroup'">
                     <collapse @click.stop :expanded="subQuestionExpanded" :content-background="false">
                         <template #title>
                             <el-text style="line-height: 32px;margin-left: 8px;">子题目</el-text>
@@ -65,27 +101,26 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
                     </collapse>
                 </div>
                 <div>
-                    <el-tag type="info" style="margin-right: 16px">
-                        {{ questionInfo.question.type ? questionInfo.question.type : questionInfo.type }}
-                    </el-tag>
                     <template
-                        v-if="questionInfo.question.partitionIds!==undefined&&questionInfo.question.partitionIds!==null">
+                            v-if="questionInfo.question.partitionIds!==undefined&&questionInfo.question.partitionIds!==null">
+                        <el-text type="info" size="small" style="margin-right: 16px">分区</el-text>
                         <el-tag
-                            v-for="(partitionName,partitionId,index) in partitionNames"
-                            type="info">
+                                v-for="(partitionName,partitionId,index) in partitionNames"
+                                type="info">
                             {{ partitionName }}
                         </el-tag>
                     </template>
                 </div>
                 <div class="errorsDescription" v-if="!disableErrorAndWarning">
                     <transition-group name="errorDescriptions">
-                        <el-text v-for="showError of questionInfo.errors"
+                        <el-text v-for="error of questionInfo.errors"
                                  :key="error.content?error.content:''"
                                  type="danger">
-                            {{ showError.content }}
+                            {{ error.content }}
                         </el-text>
                     </transition-group>
                 </div>
+                <slot/>
             </div>
         </div>
     </div>
@@ -103,12 +138,11 @@ for (const partitionId of props.questionInfo.question.partitionIds) {
     padding: 0;
     min-height: 0;
     grid-template-rows: 1fr;
-    transition:
-        transform 0.2s var(--ease-in-out-quint),
-        background-color 0.2s var(--ease-in-out-quint);
+    transition: transform 0.2s var(--ease-in-out-quint),
+    background-color 0.2s var(--ease-in-out-quint);
 }
 
-.question-info-panel:not(:has(.clickable:active)):active {
+.question-info-panel.clickable:not(:has(.clickable:active)):active {
     transform: scale(0.98);
 }
 

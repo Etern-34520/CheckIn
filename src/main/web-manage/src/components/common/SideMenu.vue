@@ -5,6 +5,7 @@ import HarmonyOSIcon_Quit from "@/components/icons/HarmonyOSIcon_Quit.vue";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import UI_Meta from "@/utils/UI_Meta.js";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const {proxy} = getCurrentInstance();
 
@@ -13,8 +14,11 @@ const pageGroups = [
         groupName: "服务器",
         paths: [
             {pathName: 'home', name: '首页', icon: "House"},
-            {pathName: 'request-record', name: '请求记录', icon: "Link"},
             {pathName: 'exam-record', name: '答题记录', icon: "MessageBox"},
+            {
+                pathName: 'request-record', name: '请求记录', icon: "Link",
+                show: PermissionInfo.hasPermission('request record', 'get request records')
+            },
             {pathName: 'questions', name: '题库', icon: "Finished"}
         ]
     }, {
@@ -75,15 +79,16 @@ const props = defineProps({
              @mouseenter="expandMenu" @mouseleave="shrinkMenu" @click.stop>
             <el-scrollbar style="margin-bottom: 8px;" view-style="overflow-x: hidden;">
                 <div class="menu-group" v-for="(group,$index) in pageGroups">
-                    <el-button v-for="pageItem of group.paths" text
-                               @click="routeTo(pageItem.pathName)"
-                               @mouseenter="expandMenu">
-                        <el-icon :size="16" style="margin-right: 12px;margin-left: 2px;">
-                            <Component :is="pageItem.icon"/>
-                        </el-icon>
-                        {{ pageItem.name }}
-                    </el-button>
-                    <!--                <el-divider v-if="$index!==pageGroups.length-1" style="margin-top: 2px;margin-bottom: 2px"></el-divider>-->
+                    <template v-for="pageItem of group.paths">
+                        <el-button text v-if="pageItem.show === undefined?true:pageItem.show"
+                                   @click="routeTo(pageItem.pathName)"
+                                   @mouseenter="expandMenu">
+                            <el-icon :size="16" style="margin-right: 12px;margin-left: 2px;">
+                                <Component :is="pageItem.icon"/>
+                            </el-icon>
+                            {{ pageItem.name }}
+                        </el-button>
+                    </template>
                 </div>
             </el-scrollbar>
             <div style="flex: 1"></div>
@@ -215,7 +220,7 @@ const props = defineProps({
     background: rgba(0, 0, 0, 0) !important;
     width: 200px !important;
     /*backdrop-filter: blur(8px);*/
-    transition-delay: 0ms !important;
+    transition-delay: 200ms !important;
     box-shadow: none;
     /*border-right-color: var(--el-border-color-lighter) !important;*/
     border-radius: 0;

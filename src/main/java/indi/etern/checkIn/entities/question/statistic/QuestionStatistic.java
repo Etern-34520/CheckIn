@@ -24,22 +24,26 @@ public class QuestionStatistic implements BaseEntity<String> {
     @Id
     @JoinTable(
             name = "questions",
-            joinColumns = @JoinColumn(name = "id"),
-            inverseJoinColumns = @JoinColumn(name = "id"))
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            joinColumns = @JoinColumn(name = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)))
     @Column(columnDefinition = "char(36)")
     @JsonIgnore
     String id;
     
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @JoinColumn(name = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnore
     Question question;
     
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinTable(
             name = "statistic_exam_data_mapping",
-            joinColumns = @JoinColumn(name = "exam_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)),
-            inverseJoinColumns = @JoinColumn(name = "statistic_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT)))
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            joinColumns = @JoinColumn(name = "exam_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)),
+            inverseJoinColumns = @JoinColumn(name = "statistic_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)))
     @Fetch(FetchMode.SUBSELECT)
     @JsonIgnore
     List<ExamData> drewExamData;

@@ -1,14 +1,14 @@
 package indi.etern.checkIn.action.role;
 
+import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.action.user.UserMapResultAction;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.RoleService;
 
 import java.util.*;
 
 @Action("getAllRoles")
-public class GetAllRolesAction extends UserMapResultAction {
+public class GetAllRolesAction extends TransactionalAction {
     final private RoleService roleService;
     
     public GetAllRolesAction(RoleService roleService) {
@@ -22,7 +22,7 @@ public class GetAllRolesAction extends UserMapResultAction {
 
     @Override
     protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        LinkedHashMap<String,Object> result = new LinkedHashMap<>();
+        LinkedHashMap<String,Object> result = getSuccessMap();
         ArrayList<Object> roleList = new ArrayList<>();
         final List<Role> roles = roleService.findAll();
         roles.sort(Comparator.comparingInt(Role::getLevel));

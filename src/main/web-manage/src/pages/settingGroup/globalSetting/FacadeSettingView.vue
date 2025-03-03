@@ -1,19 +1,23 @@
 <script setup>
 import WebSocketConnector from "@/api/websocket.js";
-import {ElMessage, ElLink} from "element-plus";
+import {ElMessage} from "element-plus";
 import {Picture} from "@element-plus/icons-vue";
 import UIMeta from "@/utils/UI_Meta.js";
 import {MdEditor} from "md-editor-v3";
 import 'md-editor-v3/lib/style.css';
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
+import PermissionInfo from "@/auth/PermissionInfo.js";
+import router from "@/router/index.js";
 
 const editing = ref(false);
 const mode = ref('预览');
 const data = ref({});
 const gradingData = ref({});
-const generatingData = ref({});
+const extraData = ref({});
+// const generatingData = ref({});//TODO
 const loading = ref(true);
 const error = ref(false);
+
 let backup = {};
 let backupJSON;
 const cancel = () => {
@@ -53,7 +57,7 @@ const finishEditing = () => {
         })
     }, (err) => {
         ElMessage({
-            type: "showError", message: "保存失败"
+            type: "error", message: "保存失败"
         })
     })*/
 }
@@ -67,6 +71,7 @@ const getData = () => {
                 type: "getFacadeSetting",
             }).then((response) => {
                 data.value = response.data;
+                extraData.value = response.extraData;
                 resolve();
             }, (err) => {
                 ElMessage({
@@ -84,26 +89,6 @@ const getData = () => {
                 if (!gradingData.value.splits) gradingData.value.splits = [0];
                 if (!gradingData.value.questionScore) gradingData.value.questionScore = 5;
                 resolve();
-            }, (err) => {
-                ElMessage({
-                    type: "error", message: "获取设置失败"
-                });
-                loading.value = false;
-                error.value = true;
-            });
-        }), new Promise(resolve => {
-            WebSocketConnector.send({
-                type: "getGeneratingSetting",
-            }).then((response) => {
-                generatingData.value = response.data;
-                if (!generatingData.value.specialPartitionLimits) generatingData.value.specialPartitionLimits = ref({});
-                if (!generatingData.value.specialLimitsEnabledPartitions) generatingData.value.specialLimitsEnabledPartitions = ref([]);
-                if (response.data.specialPartitionLimits) {
-                    for (const key in response.data.specialPartitionLimits) {
-                        generatingData.value.specialLimitsEnabledPartitions.push(Number(key));
-                    }
-                }
-                resolve()
             }, (err) => {
                 ElMessage({
                     type: "error", message: "获取设置失败"
@@ -136,28 +121,31 @@ const deleteIcon = () => {
 </script>
 
 <template>
-    <div style="display: flex;flex-direction: column;padding-bottom: 16px">
-        <el-text style="align-self:baseline;font-size: 24px">首页设置</el-text>
-        <div style="display: flex;margin-top: 16px;margin-left: 8px;margin-bottom: 20px;">
-            <transition-group name="blur-scale">
-                <el-button-group key="button-group">
-                    <transition-group name="blur-scale">
-                        <el-button class="disable-init-animate" style="margin-right: 4px;"
-                                   @click="editing ? finishEditing():startEditing()"
-                                   :disabled="loading || error" key="edit">
-                            {{ editing ? '完成' : '编辑' }}
-                        </el-button>
-                        <el-button class="disable-init-animate" style="margin-right: 24px;"
-                                   @click="cancel" v-if="editing" key="cancel">
-                            {{ editing ? '取消' : '编辑' }}
-                        </el-button>
-                    </transition-group>
-                </el-button-group>
-                <el-segmented v-model="mode" key="segmented" v-if="editing" :options="['预览','编辑']" block
-                              style="margin-right: 16px"/>
-            </transition-group>
+    <div style="display: flex;flex-direction: column;">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap">
+            <el-text style="align-self:baseline;font-size: 24px">首页设置</el-text>
+            <div style="display: flex;margin-left: 32px;"
+                 v-if="PermissionInfo.hasPermission('setting','save facade setting')">
+                <transition-group name="blur-scale">
+                    <el-button-group key="button-group">
+                        <transition-group name="blur-scale">
+                            <el-button class="disable-init-animate" style="margin-right: 4px;"
+                                       @click="editing ? finishEditing():startEditing()"
+                                       :disabled="loading || error" key="edit">
+                                {{ editing ? '完成' : '编辑' }}
+                            </el-button>
+                            <el-button class="disable-init-animate" style="margin-right: 24px;"
+                                       @click="cancel" v-if="editing" key="cancel">
+                                {{ editing ? '取消' : '编辑' }}
+                            </el-button>
+                        </transition-group>
+                    </el-button-group>
+                    <el-segmented v-model="mode" key="segmented" v-if="editing" :options="['预览','编辑']" block
+                                  style="margin-right: 16px"/>
+                </transition-group>
+            </div>
         </div>
-        <el-scrollbar v-loading="loading">
+        <el-scrollbar v-loading="loading" style="margin-top: 20px;">
             <transition name="blur-scale" mode="out-in">
                 <div v-if="!loading && !error" class="facade-base">
                     <transition name="blur-scale" mode="out-in">
@@ -192,65 +180,62 @@ const deleteIcon = () => {
                                             <div style="display: flex;flex-direction: row;align-items: center">
                                                 <el-tag style="align-self: start;margin-right: 12px;" type="info">题量
                                                 </el-tag>
-                                                <el-text>{{ generatingData.questionAmount }}</el-text>
+                                                <el-text>{{ extraData.questionAmount }}</el-text>
                                             </div>
                                             <div style="display: flex;flex-direction: row;align-items: center">
                                                 <el-tag style="align-self: start;margin-right: 12px;" type="info">
                                                     分区数
                                                 </el-tag>
-                                                <el-text v-if="generatingData.partitionRange" style="margin-right: 4px">
-                                                    {{ generatingData.partitionRange[0] }}
+                                                <el-text v-if="extraData.partitionRange" style="margin-right: 4px">
+                                                    {{ extraData.partitionRange[0] }}
                                                 </el-text>
-                                                <el-text v-if="generatingData.partitionRange" style="margin-right: 4px">~
+                                                <el-text v-if="extraData.partitionRange" style="margin-right: 4px">~
                                                 </el-text>
-                                                <el-text v-if="generatingData.partitionRange">
-                                                    {{ generatingData.partitionRange[1] }}
+                                                <el-text v-if="extraData.partitionRange">
+                                                    {{ extraData.partitionRange[1] }}
                                                 </el-text>
                                             </div>
                                         </div>
                                         <div class="flex-blank-1"></div>
-                                        <router-link class="el-link el-link--info is-underline"
-                                                     :to="{name:'generating-setting'}">在生成设置中更改
-                                        </router-link>
+                                        <el-link class="el-link el-link--info is-underline"
+                                                 @click="router.push({name:'generating-setting'})">生成设置
+                                        </el-link>
                                     </div>
                                     <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;">
                                         <el-tag style="align-self: start" type="info">分数段</el-tag>
                                         <div class="flex-blank-1"></div>
-                                        <router-link class="el-link el-link--info is-underline" :to="{name:'grading-setting'}">
-                                            在评极设置中更改
-                                        </router-link>
+                                        <el-link class="el-link el-link--info is-underline"
+                                                 @click="router.push({name:'grading-setting'})">
+                                            评级设置
+                                        </el-link>
                                     </div>
                                     <div style="display: flex">
                                         <el-text style="margin-right: 8px;">{{ gradingData.splits[0] }}</el-text>
                                         <div style="display: flex;flex-direction: column;flex: 1;margin-right: 8px;">
-                                            <div class="score-bar" style="background: rgba(0,0,0,0);margin-bottom: 4px;overflow: visible">
+                                            <div class="score-bar"
+                                                 style="background: rgba(0,0,0,0);margin-bottom: 4px;overflow: visible">
                                                 <template v-for="(level,$index) of gradingData.levels">
-                                                    <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * generatingData.questionAmount - gradingData.splits[$index]}"
+                                                    <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : extraData.questionScore * extraData.questionAmount - gradingData.splits[$index]}"
                                                          style="display: flex;flex-direction: column">
                                                         <el-text>{{ level.name }}</el-text>
                                                     </div>
-                                                    <el-text v-if="gradingData.splits[$index + 1]">{{ gradingData.splits[$index + 1] }}</el-text>
+                                                    <el-text v-if="gradingData.splits[$index + 1]">
+                                                        {{ gradingData.splits[$index + 1] }}
+                                                    </el-text>
                                                 </template>
                                             </div>
                                             <div class="score-bar" style="margin-bottom: 16px;">
                                                 <template v-for="(level,$index) of gradingData.levels">
                                                     <div :style="{
                                                  background: level.colorHex,
-                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * generatingData.questionAmount - gradingData.splits[$index]
+                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : extraData.questionScore * extraData.questionAmount - gradingData.splits[$index]
                                              }"
                                                          style="height: 6px"></div>
                                                 </template>
                                             </div>
                                         </div>
-                                        <el-text>{{ gradingData.questionScore * generatingData.questionAmount }}</el-text>
+                                        <el-text>{{ extraData.questionScore * extraData.questionAmount }}</el-text>
                                     </div>
-                                    <!--
-                                                                        <div class="score-bar">
-                                                                            <div style="width: 60%;background: var(&#45;&#45;el-color-danger);height: 6px"></div>
-                                                                            <div style="width: 20%;background: var(&#45;&#45;el-color-warning);height: 6px"></div>
-                                                                            <div style="width: 20%;background: var(&#45;&#45;el-color-success);height: 6px"></div>
-                                                                        </div>
-                                    -->
                                 </div>
                             </div>
                             <div style="flex:1;width: 100%;background: var(--html-bg) var(--lighting-effect-background-2);z-index: 1;margin-top: 64px;display: flex;flex-direction: column;align-items: center;padding-bottom: 200px">
@@ -324,7 +309,7 @@ const deleteIcon = () => {
                     </transition>
                 </div>
                 <div v-else-if="error" style="display:flex;flex-direction: column">
-                    <el-empty description="获取信息失败"></el-empty>
+                    <el-empty description="获取设置失败"></el-empty>
                     <el-button link type="primary" @click="getData" size="large">重试</el-button>
                 </div>
             </transition>

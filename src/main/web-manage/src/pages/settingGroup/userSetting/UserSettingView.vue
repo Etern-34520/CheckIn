@@ -1,7 +1,7 @@
 <script setup>
 import UserDataInterface from "@/data/UserDataInterface.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
-import {Finished} from "@element-plus/icons-vue";
+import {Finished, MessageBox} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
@@ -24,6 +24,14 @@ const groups = [
     {
         name: "我的",
         items: [
+            {
+                name: "我的答题记录", description: "", icon: MessageBox, action: () => {
+                    router.push({
+                        name: "my-data",
+                        query: {tab: "my-exam-records"}
+                    })
+                }
+            },
             {
                 name: "我的题目", description: "", icon: Finished, action: () => {
                     router.push({
@@ -58,7 +66,7 @@ const groups = [
                 description: "",
                 icon: HarmonyOSIcon_Rename,
                 action: () => {
-                    name.value = user.name;
+                    name.value = user.value.name;
                     changeNameDialogVisible.value = true;
                 }
             },
@@ -86,8 +94,9 @@ const groups = [
                     ).then(() => {
                         WebSocketConnector.send({
                             type: "deleteUser",
-                            qq: user.qq
-                        }).then(() => {
+                            qq: user.value.qq
+                        }).then((data) => {
+                            console.log(data);
                             UserDataInterface.logout();
                         });
                     }).catch(() => {
@@ -116,44 +125,39 @@ const changeUserNameDialog = ref(null);
 const done = ref(false);
 
 const confirmChangePassword = () => {
-    if (done.value) {
-        closeDialog();
+    if (oldPassword.value === '') {
+        changePasswordDialog.value.showTip("请输入原密码", "error")
+    } else if (newPassword.value !== newPasswordRepeat.value) {
+        changePasswordDialog.value.showTip("两次输入的密码不一致", "error")
+    } else if (newPassword.value.length < 5) {
+        changePasswordDialog.value.showTip("密码过短", "error")
+    } else if (newPassword.value === oldPassword.value) {
+        changePasswordDialog.value.showTip("新密码与旧密码一致", "error")
     } else {
-        if (oldPassword.value === '') {
-            changePasswordDialog.value.showTip("请输入原密码", "error")
-        } else if (newPassword.value !== newPasswordRepeat.value) {
-            changePasswordDialog.value.showTip("两次输入的密码不一致", "error")
-        } else if (newPassword.value.length < 5) {
-            changePasswordDialog.value.showTip("密码过短", "error")
-        } else if (newPassword.value === oldPassword.value) {
-            changePasswordDialog.value.showTip("新密码与旧密码一致", "error")
-        } else {
-            WebSocketConnector.send({
-                type: "changeUserPassword",
-                qq: user.qq,
-                oldPassword: oldPassword.value,
-                newPassword: newPassword.value
-            }).then((resp) => {
-                if (resp.type === 'fail') {
-                    resp.failureType === 'previousPasswordIncorrect' ? changePasswordDialog.value.showTip('原密码错误', "error") : changePasswordDialog.value.showTip('修改失败', "error");
-                    // message.value = resp.message;
-                } else {
-                    changePasswordDialog.value.showTip('修改成功', "success")
-                    done.value = true;
-                }
-                // changePasswordDialogVisible.value = false;
-            }, (err) => {
-                changePasswordDialog.value.showTip(err.message, "error")
-                return false;
-            });
-        }
+        WebSocketConnector.send({
+            type: "changeUserPassword",
+            oldPassword: oldPassword.value,
+            newPassword: newPassword.value
+        }).then((resp) => {
+            if (resp.type === 'fail') {
+                resp.failureType === 'previousPasswordIncorrect' ? changePasswordDialog.value.showTip('原密码错误', "error") : changePasswordDialog.value.showTip('修改失败', "error");
+                // message.value = resp.message;
+            } else {
+                changePasswordDialog.value.showTip('修改成功', "success")
+                done.value = true;
+            }
+            // changePasswordDialogVisible.value = false;
+        }, (err) => {
+            changePasswordDialog.value.showTip(err.message, "error")
+            return false;
+        });
     }
 }
 
 watch(() => name.value, () => {
     if (name.value === '') {
         changeUserNameDialog.value.showTip("请输入新用户名", "error")
-    } else if (name.value === user.name) {
+    } else if (name.value === user.value.name) {
         changeUserNameDialog.value.showTip("新用户名与原用户名相同", "error")
     } else if (name.value.length < 3) {
         changeUserNameDialog.value.showTip("用户名过短", "error")
@@ -163,27 +167,23 @@ watch(() => name.value, () => {
 });
 
 const confirmRename = () => {
-    if (done.value) {
-        closeDialog();
-    } else {
-        WebSocketConnector.send({
-            type: "changeUserName",
-            qq: user.qq,
-            newName: name.value
-        }).then((resp) => {
-            if (resp.type === 'fail') {
-                changeUserNameDialog.value.showTip(resp.message, "error")
-            } else {
-                changeUserNameDialog.value.showTip("修改成功", "success")
-                done.value = true;
-                user.name = name.value;
-            }
-            // changeNameDialogVisible.value = false;
-        }, (err) => {
-            changeUserNameDialog.value.showTip(err.message, "error")
-            return false;
-        });
-    }
+    WebSocketConnector.send({
+        type: "changeUserName",
+        qq: user.value.qq,
+        newName: name.value
+    }).then((resp) => {
+        if (resp.type === 'fail') {
+            changeUserNameDialog.value.showTip(resp.message, "error")
+        } else {
+            changeUserNameDialog.value.showTip("修改成功", "success")
+            done.value = true;
+            user.value.name = name.value;
+        }
+        // changeNameDialogVisible.value = false;
+    }, (err) => {
+        changeUserNameDialog.value.showTip(err.message, "error")
+        return false;
+    });
 }
 
 const closeDialog = () => {
@@ -200,21 +200,23 @@ const onclose = () => {
 
 const buttonsOption1 = ref([
     {
+        id: "cancel",
         content: "取消",
         type: "info",
         onclick: () => {
             changePasswordDialogVisible.value = false;
+            closeDialog();
         },
         hidden: computed(() => {
             return done.value;
         })
     }, {
+        id: "confirm",
         content: computed(() => done.value ? "完成" : "确定"),
         type: "primary",
         onclick: () => {
             if (done.value) {
-                done.value = false;
-                changePasswordDialogVisible.value = false;
+                closeDialog();
             } else {
                 confirmChangePassword();
             }
@@ -227,27 +229,29 @@ const buttonsOption1 = ref([
 
 const buttonsOption2 = ref([
     {
+        id: "cancel",
         content: "取消",
         type: "info",
         onclick: () => {
             changeNameDialogVisible.value = false;
+            closeDialog();
         },
         hidden: computed(() => {
             return done.value;
         })
     }, {
+        id: "confirm",
         content: computed(() => done.value ? "完成" : "确定"),
         type: "primary",
         onclick: () => {
             if (done.value) {
-                done.value = false;
-                changeNameDialogVisible.value = false;
+                closeDialog();
             } else {
                 confirmRename();
             }
         },
         disabled: computed(() => {
-            return name.value === '' || name.value === user.name || name.value.length < 3;
+            return !done.value && (name.value === '' || name.value === user.value.name || name.value.length < 3);
         })
     }
 ]);
@@ -271,7 +275,8 @@ const buttonsOption2 = ref([
                 </div>
                 <el-input v-model="newPasswordRepeat" :disabled="done" type="password" placeholder=""/>
             </custom-dialog>
-            <custom-dialog v-model="changeNameDialogVisible" ref="changeUserNameDialog" @closed="onclose" title="修改用户名"
+            <custom-dialog v-model="changeNameDialogVisible" ref="changeUserNameDialog" @closed="onclose"
+                           title="修改用户名"
                            :buttons-option="buttonsOption2">
                 <div class="dialog-input-label">
                     <el-text>新用户名</el-text>
@@ -279,7 +284,7 @@ const buttonsOption2 = ref([
                 <el-input v-model="name" :disabled="done" placeholder=""/>
             </custom-dialog>
             <div style="display: flex;flex-direction: row;margin-bottom: 28px">
-                <el-avatar shape="circle" style="width: 84px;height: 84px;margin-right: 8px;"
+                <el-avatar shape="circle" style="width: 84px;height: 84px;margin-right: 16px;"
                            :src="getAvatarUrlOf(user.qq)"/>
                 <div style="display:flex;flex-direction: column;justify-content: center;">
                     <el-text style="font-size: 24px;align-self: baseline">{{ user.name }}</el-text>
@@ -287,15 +292,12 @@ const buttonsOption2 = ref([
                     <el-text style="font-size: 16px;align-self: baseline" type="info">{{ user.role }}</el-text>
                 </div>
             </div>
-            <!--        <waterfall :data="groups">-->
-            <!--            <template #item="{item:group,index}">-->
-            <div v-for="group of groups" style="display: flex;flex-direction: column;margin-bottom: 16px;margin-left: 8px;margin-right: 8px">
+            <div v-for="group of groups"
+                 style="display: flex;flex-direction: column;margin-bottom: 16px;margin-left: 8px;margin-right: 8px">
                 <el-text style="font-size: 20px;align-self: baseline;margin-bottom: 8px">{{ group.name }}</el-text>
                 <link-panel @click="item.action()" v-for="item of group.items" :key="item.name"
                             :description="item.description" :name="item.name" :icon="item.icon"/>
             </div>
-            <!--            </template>-->
-            <!--        </waterfall>-->
         </div>
     </div>
 </template>

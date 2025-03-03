@@ -37,8 +37,8 @@ const onEndDrag = () => {
         <div style="display: flex;flex-direction: row;align-items: center">
             <el-text>选项</el-text>
             <div class="flex-blank-1"></div>
-            <el-text type="info" style="margin-right: 8px;">启用乱序选项</el-text>
-            <el-switch v-model="questionInfo.question.randomOrdered"/>
+<!--            <el-text type="info" style="margin-right: 8px;">启用乱序选项</el-text>
+            <el-switch v-model="questionInfo.question.randomOrdered"/>-->
         </div>
         <VueDraggable
             ref="draggable"

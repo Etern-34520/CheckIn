@@ -66,23 +66,22 @@ public class JwtAuthenticationFilter implements Filter {
     
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearerTokenFromParameter = request.getParameter("token");
-//        String bearerTokenFromHeader = request.getHeader("Authorization");
-//        String bearerTokenFromWebSocketHeader = request.getHeader("Sec-WebSocket-Protocol");
         
-        if (StringUtils.hasText(bearerTokenFromParameter) && bearerTokenFromParameter.startsWith("Bearer ")) {
-            return bearerTokenFromParameter.substring(7);
-        }/* else if (StringUtils.hasText(bearerTokenFromHeader) && bearerTokenFromHeader.startsWith("Bearer ")) {
-            return bearerTokenFromHeader.substring(7);
-        } else if (StringUtils.hasText(bearerTokenFromWebSocketHeader)) {
-            return bearerTokenFromWebSocketHeader;
-        } */ else {
-            final Cookie[] cookies = request.getCookies();
-            if (cookies != null)
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals("token")) {
-                        return cookie.getValue();
+        if (StringUtils.hasText(bearerTokenFromParameter)) {
+            return bearerTokenFromParameter;
+        } else {
+            final String header = request.getHeader("Token");
+            if (header != null) {
+                return header;
+            } else {
+                final Cookie[] cookies = request.getCookies();
+                if (cookies != null)
+                    for (Cookie cookie : cookies) {
+                        if (cookie.getName().equals("token")) {
+                            return cookie.getValue();
+                        }
                     }
-                }
+            }
         }
         return null;
     }

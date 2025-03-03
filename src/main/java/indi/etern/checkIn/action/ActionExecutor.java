@@ -1,6 +1,7 @@
 package indi.etern.checkIn.action;
 
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import org.springframework.data.repository.cdi.Eager;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -71,13 +71,24 @@ public class ActionExecutor {
         }
         final BaseAction<?, ?> action = applicationContext.getBean(actionMap.get(actionName));
         if (action instanceof MapResultAction mapResultAction) {
+            Optional<LinkedHashMap<String,Object>> optionalResultData;
             try{
-                mapResultAction.initData(contentMap);
+                optionalResultData = mapResultAction.call(contentMap);
+            } catch (PermissionDeniedException e) {
+                Result result = new Result();
+                LinkedHashMap<String,Object> map = new LinkedHashMap<>();
+                map.put("type", "error");
+                map.put("message", "权限不足，需要 \"" + e.getRequiredPermissionName() + "\"");
+                result.setResult(Optional.of(map));
+                return result;
             } catch (NullPointerException e) {
                 Result result = new Result();
                 LinkedHashMap<String,Object> value = new LinkedHashMap<>();
                 value.put("type", "error");
                 value.put("message", "Action \"" + actionName + "\" : parameter absent ( " + e.getMessage() + " )");
+                if (logger.isDebugEnabled()) {
+                    e.printStackTrace();
+                }
                 result.setResult(Optional.of(value));
                 return result;
             } catch (ClassCastException e) {
@@ -85,16 +96,17 @@ public class ActionExecutor {
                 LinkedHashMap<String,Object> value = new LinkedHashMap<>();
                 value.put("type", "error");
                 value.put("message", "Action \"" + actionName + "\" : parameter type error ( " + e.getMessage() + " )");
+                if (logger.isDebugEnabled()) {
+                    e.printStackTrace();
+                }
                 result.setResult(Optional.of(value));
                 return result;
             }
-            
             Result result = new Result();
-            Optional<LinkedHashMap<String,Object>> optionalResult = mapResultAction.call();
-            result.setResult(optionalResult);
+            result.setResult(optionalResultData);
 
             LinkedHashMap<String,Object> map;
-            map = optionalResult.orElseGet(LinkedHashMap::new);
+            map = optionalResultData.orElseGet(LinkedHashMap::new);
             map.put("messageId", contentMap.get("messageId").toString());
             
             logger.debug("Execute by map: {}", actionName);
@@ -105,10 +117,11 @@ public class ActionExecutor {
     }
 
     @SneakyThrows
-    public <T> Optional<T> executeByTypeClass(Class<? extends BaseAction<T, ?>> clazz) {
-        BaseAction<T, ?> action = applicationContext.getBean(clazz);
-        return action.call();
+    public <T,InitDataType> Optional<T> executeByTypeClass(Class<? extends BaseAction<T, InitDataType>> clazz, InitDataType initData) {
+        BaseAction<T, InitDataType> action = applicationContext.getBean(clazz);
+        return action.call(initData);
     }
+/*
     public <T> Optional<T> executeByTypeClass(Class<? extends BaseAction<T, ?>> clazz, Object dataObj) {
         BaseAction<?, ?> action = applicationContext.getBean(clazz);
         Method[] methods = action.getClass().getMethods();
@@ -131,4 +144,5 @@ public class ActionExecutor {
             throw new RuntimeException(e);
         }
     }
+*/
 }

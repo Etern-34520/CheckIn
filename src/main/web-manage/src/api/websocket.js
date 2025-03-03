@@ -1,8 +1,9 @@
-import {ElNotification} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
+import {ElNotification} from "element-plus";
 import {h} from "vue";
 import randomUUIDv4 from "@/utils/UUID.js";
 import Reconnect from "@/components/common/Reconnect.vue";
+import {jwtDecode} from "jwt-decode";
 
 let qq1;
 let token1;
@@ -17,9 +18,6 @@ function getCurrentIsoTime() {
 let autoRetriedTimes = 0;
 let normallyClose = false;
 
-window.onclose = function () {
-    WebSocketConnector.close();
-}
 const sendInternal = (objMessage) => {
     let message = JSON.stringify(objMessage);
     if (message.length > limits) {
@@ -79,130 +77,141 @@ const WebSocketConnector = {
         let url = window.location.host;
         // let url = "localhost:8080";
         return new Promise((resolve, reject) => {
-            const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
-            ws.onclose = function () {
-                if (!normallyClose && autoRetriedTimes < 3) {
-                    autoRetriedTimes++;
-                    setTimeout(() => {
-                        WebSocketConnector.reconnect().then(() => {
-                            autoRetriedTimes = 0;
-                        }, () => {
-                        });
-                    }, 3000);
-                } else {
-                    autoRetriedTimes = 0;
-                    if (!normallyClose) {
-                        console.info('WebSocket Closed');
-                        if (!notifications["closed"])
-                            notifications["closed"] = ElNotification({
-                                title: '与服务器的连接已断开',
-                                message: h(Reconnect, {}, {}),
+            // window.cookieStore.get("token").then((result) => {
+            //     let date = new Date(result.expires);
+            const decoded = jwtDecode(token);
+            if (decoded.exp * 1000 < Date.now()) {
+                reject("token expired");
+            } else {
+                const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
+                ws.onclose = function () {
+                    if (!normallyClose && autoRetriedTimes < 3) {
+                        autoRetriedTimes++;
+                        setTimeout(() => {
+                            WebSocketConnector.reconnect().then(() => {
+                                autoRetriedTimes = 0;
+                            }, () => {
+                                reject();
+                            });
+                        }, 3000);
+                    } else {
+                        autoRetriedTimes = 0;
+                        if (!normallyClose) {
+                            console.info('WebSocket Closed');
+                            if (!notifications["closed"])
+                                notifications["closed"] = ElNotification({
+                                    title: '与服务器的连接已断开',
+                                    message: h(Reconnect, {}, {}),
+                                    position: 'bottom-right',
+                                    type: 'warning',
+                                    duration: 0,
+                                    showClose: false
+                                });
+                            reject();
+                        } else {
+                            console.info('WebSocket Closed Normally');
+                            normallyClose = false;
+                        }
+                    }
+                }
+                ws.onerror = function (error) {
+                    console.error('WebSocket error', error);
+                    if (autoRetriedTimes === 3) {
+                        if (!notifications["error"])
+                            notifications["error"] = ElNotification({
+                                title: '连接服务器失败',
+                                message: '请检查网络连接',
                                 position: 'bottom-right',
-                                type: 'warning',
-                                duration: 0,
-                                showClose: false
+                                type: 'error',
                             });
                         reject();
-                    } else {
-                        console.info('WebSocket Closed Normally');
-                        normallyClose = false;
                     }
                 }
-            }
-            ws.onerror = function (error) {
-                console.error('WebSocket error', error);
-                if (!notifications["error"])
-                    if (autoRetriedTimes === 3) {
-                        notifications["error"] = ElNotification({
-                            title: '连接服务器失败',
-                            message: '请检查网络连接',
-                            position: 'bottom-right',
-                            type: 'error',
-                        });
-                    }
-                reject();
-            }
-            ws.onopen = function () {
-                this.send({
-                    type: "token",
-                    token: token
-                }).then((message) => {
-                    PermissionInfo.init(message.permissions);
-                });
-                if (this.waitingTasks.length > 0) {
-                    this.waitingTasks.forEach((promise) => {
-                        sendInternal(promise["message"]);
-                        /*let promise1 = this.send(promise.message);
-                        promise1.then((message) => {
-                            promise.resolve(message);
-                        });*/
+                ws.onopen = function () {
+                    this.send({
+                        type: "token",
+                        token: token
                     });
-                    this.waitingTasks = [];
-                }
-                const channelEntries = Object.entries(this.channels);
-                if (channelEntries.length > 0) {
-                    for (const [name, channel] of channelEntries) {
-                        const actions = channel.actions;
-                        for (const action of actions) {
-                            this.subscribe(name, action);
-                        }
-                    }
-                }
-                for (const key in notifications) {
-                    notifications[key].close();
-                }
-                notifications = {};
-                console.info('WebSocket Opened');
-                resolve();
-            }.bind(this);
-            ws.onmessage = function (event) {
-                const message = JSON.parse(event.data);
-                // delete message.messageId;
-                if (WebSocketConnector.actions[message.type]) {
-                    console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
-                    WebSocketConnector.actions[message.type](message);
-                } else if (WebSocketConnector.channels[message.channelName]) {
-                    const channel1 = WebSocketConnector.channels[message.channelName];
-                    console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
-                    if (channel1 && channel1.actions instanceof Array) {
-                        channel1.actions.forEach((callback) => {
-                            callback(message);
+                    this.registerAction("updatePermissions", (message) => {
+                        PermissionInfo.init(message.permissions);
+                    })
+                    if (this.waitingTasks.length > 0) {
+                        this.waitingTasks.forEach((promise) => {
+                            sendInternal(promise["message"]);
                         });
+                        this.waitingTasks = [];
                     }
-                } else if (message.messageId) {
-                    const promise = this.promises[message.messageId];
-                    if (promise && promise instanceof Promise) {
-                        if (message.type === "error") {
-                            let showNotification = true;
-                            message.disableNotification = () => {
-                                showNotification = false;
+                    const channelEntries = Object.entries(this.channels);
+                    if (channelEntries.length > 0) {
+                        for (const [name, channel] of channelEntries) {
+                            const actions = channel.actions;
+                            for (const action of actions) {
+                                this.subscribe(name, action);
                             }
-                            console.error("websocket error", message);
-                            const doNotification = () => {
-                                delete message.disableNotification;
-                                if (showNotification) {
-                                    ElNotification({
-                                        title: '执行操作时出错',
-                                        message: message.message,
-                                        position: 'bottom-right',
-                                        type: 'error',
-                                        duration: 0
-                                    });
-                                }
-                            }
-                            promise.then(doNotification);
-                            promise.reject(message);
-                        } else {
-                            console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
-                            promise.resolve(message);
                         }
                     }
-                } else {
-                    console.warn(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (no handler):`, message);
-                }
-            }.bind(this);
-            this.ws = ws;
+                    for (const key in notifications) {
+                        notifications[key].close();
+                    }
+                    notifications = {};
+                    console.info('WebSocket Opened');
+                    window.onclose = function () {
+                        WebSocketConnector.close();
+                    }
+                    resolve();
+                }.bind(this);
+                ws.onmessage = function (event) {
+                    const message = JSON.parse(event.data);
+                    // delete message.messageId;
+                    if (WebSocketConnector.actions[message.type] instanceof Array) {
+                        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
+                        for (const callback of WebSocketConnector.actions[message.type]) {
+                            callback(message);
+                        }
+                    } else if (WebSocketConnector.channels[message.channelName]) {
+                        const channel1 = WebSocketConnector.channels[message.channelName];
+                        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
+                        if (channel1 && channel1.actions instanceof Array) {
+                            channel1.actions.forEach((callback) => {
+                                callback(message);
+                            });
+                        }
+                    } else if (message.messageId) {
+                        const promise = this.promises[message.messageId];
+                        if (promise && promise instanceof Promise) {
+                            if (message.type === "error") {
+                                let showNotification = true;
+                                message.disableNotification = () => {
+                                    showNotification = false;
+                                }
+                                console.error("websocket error", message);
+                                const doNotification = () => {
+                                    delete message.disableNotification;
+                                    if (showNotification) {
+                                        ElNotification({
+                                            title: '执行操作时出错',
+                                            message: message.message,
+                                            position: 'bottom-right',
+                                            type: 'error',
+                                            duration: 3000
+                                        });
+                                    }
+                                }
+                                promise.catch(doNotification);
+                                promise.reject(message);
+                            } else {
+                                console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
+                                promise.resolve(message);
+                            }
+                        }
+                    } else {
+                        console.warn(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (no handler):`, message);
+                    }
+                }.bind(this);
+                this.ws = ws;
+            }
         });
+        // });
     },
     reconnect() {
         return WebSocketConnector.connect(qq1, token1);
@@ -229,7 +238,16 @@ const WebSocketConnector = {
         return promise;
     },
     registerAction: function (type, callback) {
-        WebSocketConnector.actions[type] = callback;
+        if (!(WebSocketConnector.actions[type] instanceof Array)) {
+            WebSocketConnector.actions[type] = [];
+        }
+        WebSocketConnector.actions[type].push(callback);
+        const index = WebSocketConnector.actions[type].indexOf(callback);
+        return {
+            unregister: () => {
+                WebSocketConnector.actions[type].splice(index, 1);
+            }
+        };
     },
     close: function () {
         if (this.ws) {
@@ -269,4 +287,4 @@ const WebSocketConnector = {
         return {name: channelName, unsubscribe: unsubscribe};
     },
 }
-export default WebSocketConnector
+export default WebSocketConnector;

@@ -22,7 +22,7 @@ const props = defineProps({
             </el-text>
             <array-item-viewer class="object-view-element" v-if="field instanceof Array" :data="field" style="margin-bottom: 8px"/>
             <object-field-viewer class="object-view-element" v-else-if="typeof field === 'object' && Boolean(field)" :data="field" style="margin-bottom: 8px"/>
-            <el-text class="object-view-element" v-else-if="field" style="flex: 1;word-break: break-all;align-self: start;margin-bottom: 8px">
+            <el-text class="object-view-element" v-else-if="field !== null && field !== undefined" style="flex: 1;word-break: break-all;align-self: start;margin-bottom: 8px">
                 {{field}}
             </el-text>
             <el-text class="object-view-element" v-else type="info" style="margin-bottom: 8px">[null]</el-text>

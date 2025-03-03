@@ -30,10 +30,10 @@
 .light:root {
     --el-text-color: rgb(10, 10, 10) !important;
     --el-text-color-regular: rgb(10, 10, 10) !important;
-    --el-color-primary: #8fa1b3 !important;
-    --el-color-primary-1: #859ba6 !important;
-    --el-color-primary-2: #7a8a99 !important;
-    --el-color-primary-3: #707e8c !important;
+    --el-color-primary-3: #8fa1b3 !important;
+    --el-color-primary-2: #859ba6 !important;
+    --el-color-primary-1: #7a8a99 !important;
+    --el-color-primary: #707e8c !important;
     /*--el-color-primary: AccentColor !important;*/
     --html-bg: rgb(240, 245, 245);
     --menu-shadow: 4px 0 32px rgba(0, 0, 0, 0.1);
@@ -168,7 +168,20 @@
     overflow: auto !important;
 }
 
-/*noinspection SpellCheckingInspection*/
+#app:has(.md-editor-resize-operate:active) * ,
+#app:has(.splitpanes__splitter:active) * {
+    user-select: none !important;
+}
+
+#app:has(.md-editor-resize-operate:active) * ,
+#app:has(.splitpanes--vertical > .splitpanes__splitter:active) * {
+    cursor: col-resize !important;
+}
+
+#app:has(.splitpanes--horizonal > .splitpanes__splitter:active) * {
+    cursor: row-resize !important;
+}
+
 .md-editor-resize-operate,
 .splitpanes__splitter {
     transition: background-color 300ms var(--ease-in-out-quint);
@@ -185,19 +198,16 @@
     display: none !important;
 }
 
-/*noinspection SpellCheckingInspection*/
 .md-editor-resize-operate:hover,
 .splitpanes__splitter:hover {
     background: var(--splitter-bg-hover) !important;
 }
 
-/*noinspection SpellCheckingInspection*/
 .md-editor-resize-operate:active,
 .splitpanes__splitter:active {
     background: var(--splitter-bg-active) !important;
 }
 
-/*noinspection SpellCheckingInspection*/
 .md-editor-resize-operate::after,
 .splitpanes--vertical .splitpanes__splitter::after {
     transition: 200ms var(--ease-in-out-quint);
@@ -212,8 +222,7 @@
     justify-self: center;
 }
 
-/*noinspection SpellCheckingInspection*/
-.splitpanes--horizonal .splitpanes__splitter::after {
+.splitpanes--horizontal .splitpanes__splitter::after {
     transition: 400ms var(--ease-in-out-quint);
     content: "";
     display: block;
@@ -241,13 +250,13 @@
 }
 
 /*noinspection SpellCheckingInspection*/
-.splitpanes--horizonal .splitpanes__splitter:hover::after {
+.splitpanes--horizontal .splitpanes__splitter:hover::after {
     width: 44px !important;
     opacity: 0.75 !important;
 }
 
 /*noinspection SpellCheckingInspection*/
-.splitpanes--horizonal .splitpanes__splitter:active::after {
+.splitpanes--horizontal .splitpanes__splitter:active::after {
     width: 20px !important;
     opacity: 1 !important;
 }
@@ -278,6 +287,7 @@
 }
 
 .el-button:not(.is-text):not(.is-link) {
+    /*TODO hover*/
     --button-bg-color: var(--panel-bg-color);
     background: var(--button-bg-color) var(--lighting-effect-background-2);
     border: var(--border-1) !important;
@@ -324,6 +334,9 @@
     background: var(--panel-bg-color-overlay) !important;
 }
 
+.el-select-dropdown__item.is-disabled {
+    opacity: 0.5;
+}
 
 .el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:after {
     content: none !important;
@@ -390,6 +403,10 @@
     backdrop-filter: blur(32px);
     background: var(--lighting-effect-background-1);
     border: var(--border-1) !important;
+}
+
+.el-notification__group {
+    width: 100%;
 }
 
 .el-notification-fade-leave-active {
@@ -504,7 +521,7 @@
 }
 
 .el-checkbox__inner {
-    --el-checkbox-checked-icon-color: var(--front-color-dark);
+    --el-checkbox-checked-icon-color: var(--front-color-reserse);
 }
 
 .el-checkbox__inner:after {
@@ -758,6 +775,7 @@
     border: var(--border-1) !important;
     transition: background-color 200ms var(--ease-in-out-quint);
     font-weight: normal !important;
+    text-align: center;
 }
 
 .el-check-tag--primary {
@@ -777,14 +795,15 @@
     background: var(--el-color-primary);
     border-radius: 1.5px !important;
     display: block;
-    margin-top: 2px;
-    margin-bottom: -5px;
+    margin-top: 4px;
+    margin-bottom: -8px;
 }
 
 .el-check-tag.is-checked::after {
-    width: 60% !important;
-    left: 20% !important;
+    width: max(calc(100% - 8px),60%) !important;
+    left: min(4px,20%) !important;
     opacity: 1 !important;
+    margin-top: 4px !important;
 }
 
 .el-tag__content {
@@ -1010,24 +1029,44 @@
     flex: none;
 }
 
+.dialog-fade-enter-active,
+.dialog-fade-leave-active,
 .is-message-box.fade-in-linear-enter-active,
 .is-message-box.fade-in-linear-leave-active {
     transition: 300ms var(--ease-in-out-quint);
 }
 
+.dialog-fade-enter-active > div[role="dialog"],
 .is-message-box.fade-in-linear-enter-active > div[role="dialog"] {
     transition: 400ms var(--ease-in-bounce-1);
 }
 
+.dialog-fade-leave-active > div[role="dialog"],
 .is-message-box.fade-in-linear-leave-active > div[role="dialog"] {
     transition: 200ms var(--ease-in-quint);
 }
 
+.dialog-fade-enter-active .el-overlay-dialog,
+.dialog-fade-enter-active,
+.dialog-fade-leave-active .el-overlay-dialog,
+.dialog-fade-leave-active,
+.fade-in-linear-enter-active .el-overlay-message-box,
+.fade-in-linear-leave-active .el-overlay-message-box {
+    animation: none !important;
+}
+
+/*TODO dialog-fade-enter-active*/
+
+.dialog-fade-enter-from,
+.dialog-fade-leave-to,
 .is-message-box.fade-in-linear-enter-from,
 .is-message-box.fade-in-linear-leave-to {
     opacity: 0;
 }
 
+
+.dialog-fade-enter-from > div[role="dialog"],
+.dialog-fade-leave-to > div[role="dialog"],
 .is-message-box.fade-in-linear-enter-from > div[role="dialog"],
 .is-message-box.fade-in-linear-leave-to > div[role="dialog"] {
     scale: 0.7;

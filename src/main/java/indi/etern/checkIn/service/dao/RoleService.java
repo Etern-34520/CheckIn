@@ -8,6 +8,7 @@ import indi.etern.checkIn.repositories.PermissionRepository;
 import indi.etern.checkIn.repositories.RoleRepository;
 import indi.etern.checkIn.service.web.WebSocketService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,15 +33,15 @@ public class RoleService {
         return roleRepository.findAll();
     }
     
-    public void save(Role role) {
-        roleRepository.save(role);
-        final String name = "change role " + role.getType();
+    public Permission save(Role role) {
+        final String name = "change role to " + role.getType();
         if (!permissionRepository.existsByName(name)) {
             final Permission permission = new Permission(name);
-            permission.setDescription("修改用户所属组组到：" + role.getType());
+            permission.setDescription("修改用户所属组组到 " + role.getType());
             PermissionGroup rolePermissionGroup = permissionGroupRepository.findById("role").orElseThrow();
-            rolePermissionGroup.getPermissions().add(permission);
-            permissionGroupRepository.save(rolePermissionGroup);
+            permission.setGroup(rolePermissionGroup);
+            permissionRepository.save(permission);
+            roleRepository.save(role);
             
             LinkedHashMap<String,Object> map = new LinkedHashMap<>();
             map.put("type", "addPermission");
@@ -51,6 +52,10 @@ public class RoleService {
             map.put("permission", permissionJson);
             
             webSocketService.sendMessageToAll(map);
+            return permission;
+        } else {
+            roleRepository.save(role);
+            return null;
         }
     }
     
@@ -61,9 +66,8 @@ public class RoleService {
     public List<PermissionGroup> getAllPermissionGroups() {
         return permissionGroupRepository.findAll();
     }
-    public void savePermissionGroup(PermissionGroup permissionGroup) {
-        permissionRepository.saveAll(permissionGroup.getPermissions());
-        permissionGroupRepository.save(permissionGroup);
+    public void savePermission(Permission permission) {
+        permissionRepository.save(permission);
     }
     
     public Optional<Role> findById(String id) {
@@ -89,9 +93,24 @@ public class RoleService {
         roleRepository.deleteById(roleType);
     }
     
+    @Transactional
     public void delete(Role role) {
-        final String permissionName = "change role " + role.getType();
-        permissionRepository.deleteByName(permissionName);
+        final String permissionName = "change role to " + role.getType();
+//        permissionRepository.deleteByName(permissionName);//FIXME
+        final Optional<Permission> byName = permissionRepository.findByName(permissionName);
+        if (byName.isPresent()) {
+            final Permission permission = byName.get();
+            final List<Role> rolesHasThisPermission = List.copyOf(roleRepository.findAllByPermissionsContains(permission));
+            for (Role role1 : rolesHasThisPermission) {
+                role1.getPermissions().remove(permission);
+                roleRepository.save(role1);
+            }
+//            permission.setGroup(null);
+//            final PermissionGroup group = permission.getGroup();
+//            group.getPermissions().remove(permission);//FIXME
+//            permissionGroupRepository.save(group);
+            permissionRepository.delete(permission);
+        }
         
         LinkedHashMap<String,Object> map = new LinkedHashMap<>();
         map.put("type", "deletePermission");

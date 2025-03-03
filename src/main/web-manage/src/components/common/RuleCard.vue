@@ -487,7 +487,7 @@ const addToValues = (datum, index) => {
                                 <el-option value="warning" label="警告">
                                     <el-text type="warning">警告</el-text>
                                 </el-option>
-                                <el-option value="showError" label="错误">
+                                <el-option value="error" label="错误">
                                     <el-text type="danger">错误</el-text>
                                 </el-option>
                             </el-select>

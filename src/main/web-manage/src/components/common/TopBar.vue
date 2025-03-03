@@ -2,6 +2,9 @@
 import {ArrowRight} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
+import UI_Meta from "@/utils/UI_Meta.js";
+import iconWhite from "@/assets/icons/icon-white.svg";
+import iconBlack from "@/assets/icons/icon-black.svg";
 
 const props = defineProps({
     user: {
@@ -23,6 +26,15 @@ function switchMenuStyle() {
     menuInlineStyle.value = !menuInlineStyle.value;
 }
 
+const colorScheme = UI_Meta.colorScheme;
+
+const getIcon = () => {
+    if (colorScheme.value === 'light') {
+        return iconBlack;
+    } else {
+        return iconWhite;
+    }
+}
 // changeUrl.value = changeUrlFunc;
 </script>
 <template>
@@ -42,7 +54,10 @@ function switchMenuStyle() {
             <div style="height: 30px;margin-top: 2px;display: flex;flex-direction: row;align-items: center">
                 <el-breadcrumb style="flex-shrink: 0;" :separator-icon="ArrowRight">
                     <!--suppress JSValidateTypes -->
-                    <el-breadcrumb-item :to="{ path: '/manage/' }">checkIn</el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ name: 'home' }" style="line-height: 14px;">
+                        <img :src="getIcon()" alt="" width="14" height="14" style="float: left;margin-right: 4px;"/>
+                        checkIn
+                    </el-breadcrumb-item>
                     <TransitionGroup name="breadcrumb-item">
                         <!--suppress JSValidateTypes -->
                         <el-breadcrumb-item :key="pathItem.name" v-for="(pathItem,$index) in breadcrumbPathArray" :to="$index!==breadcrumbPathArray.length-1?{path: pathItem.path}:undefined">
@@ -102,5 +117,11 @@ button:hover #menuIcon rect {
     word-break: keep-all;
     opacity: 0;
     filter: blur(12px);
+}
+</style>
+
+<style>
+.el-breadcrumb-inner {
+    line-height: 14px !important;
 }
 </style>

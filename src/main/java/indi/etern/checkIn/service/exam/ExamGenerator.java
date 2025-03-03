@@ -85,30 +85,30 @@ public class ExamGenerator {
         }
     }
     
-    @SneakyThrows
     public ExamData generateExam(long qq, List<Partition> selectedPartitions) {
-        final DrawingStrategy drawingStrategy = getDrawingStrategy();
-        final CompletingStrategy completingStrategy = getCompletingStrategy();
-        
-        SettingItem settingItem2 = settingService.getItem("generating", "questionAmount");
-        int questionAmount = settingItem2.getValue(Integer.class);
-        logger.debug("question amount: {}", questionAmount);
-        
-        SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
-        //noinspection unchecked
-        List<Integer> requiredPartitionIds = (List<Integer>) settingItem3.getValue(List.class);
-        List<Integer> selectedPartitionIds = selectedPartitions.stream().map(Partition::getId).toList();
-        List<Partition> partitions = new ArrayList<>(requiredPartitionIds.size() + selectedPartitionIds.size());
-        partitions.addAll(selectedPartitions);
-        partitions.addAll(partitionService.findAllByIds(requiredPartitionIds));
-        logger.debug("required partitions: {}", partitionService.findAllByIds(requiredPartitionIds));
-        logger.debug("selected partitions: {}", partitionService.findAllByIds(selectedPartitionIds));
-        
-        SettingItem expireTimeSetting = settingService.getItem("exam","expiredPeriod");
-        Period expiredPeriod = expireTimeSetting.getValue(Period.class);
         try {
+            final DrawingStrategy drawingStrategy = getDrawingStrategy();
+            final CompletingStrategy completingStrategy = getCompletingStrategy();
+            
+            SettingItem settingItem2 = settingService.getItem("generating", "questionAmount");
+            int questionAmount = settingItem2.getValue(Integer.class);
+            logger.debug("question amount: {}", questionAmount);
+            
+            SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
+            //noinspection unchecked
+            List<Integer> requiredPartitionIds = (List<Integer>) settingItem3.getValue(List.class);
+            List<Integer> selectedPartitionIds = selectedPartitions.stream().map(Partition::getId).toList();
+            List<Partition> partitions = new ArrayList<>(requiredPartitionIds.size() + selectedPartitionIds.size());
+            partitions.addAll(selectedPartitions);
+            partitions.addAll(partitionService.findAllByIds(requiredPartitionIds));
+            logger.debug("required partitions: {}", partitionService.findAllByIds(requiredPartitionIds));
+            logger.debug("selected partitions: {}", partitionService.findAllByIds(selectedPartitionIds));
+            
+            SettingItem expireTimeSetting = settingService.getItem("exam", "expiredPeriod");
+            Period expiredPeriod = expireTimeSetting.getValue(Period.class);
             LinkedHashSet<Question> questions = new LinkedHashSet<>();
             drawQuestions(questions, partitions, questionAmount, new Random(), drawingStrategy, completingStrategy);
+            
             return ExamData.builder()
                     .id(UUID.randomUUID().toString())
                     .qqNumber(qq)
@@ -169,7 +169,7 @@ public class ExamGenerator {
             }
             List<Question> questionsList = new ArrayList<>(questions);
             int remediateIndex = 0;
-            for (int i = 0;i < existedQuestions.length;i++) {
+            for (int i = 0; i < existedQuestions.length; i++) {
                 if (existedQuestions[i] == null) {
                     existedQuestions[i] = questionsList.get(remediateIndex);
                     remediateIndex++;

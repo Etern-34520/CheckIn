@@ -5,17 +5,20 @@ import MyDislikeQuestionsView from "@/pages/settingGroup/userSetting/MyDislikeQu
 import MyQuestionsView from "@/pages/settingGroup/userSetting/MyQuestionsView.vue";
 import router from "@/router/index.js";
 import TabPane from "@/components/common/TabPane.vue";
+import MyExamRecordsView from "@/pages/settingGroup/userSetting/MyExamRecordsView.vue";
 
 
 const selectedTabName = ref("我的题目");
 
 const CnEnMapping = {
+    "我的答题记录": "my-exam-records",
     "我的题目": "my-questions",
     "我点赞的题目": "my-like-questions",
     "我点踩的题目": "my-dislike-questions"
 }
 
 const EnCnMapping = {
+    "my-exam-records" : "我的答题记录",
     "my-questions": "我的题目",
     "my-like-questions": "我点赞的题目",
     "my-dislike-questions": "我点踩的题目"
@@ -33,6 +36,7 @@ const onSwitchTab = (tab) => {
 }
 
 const tabs = {
+    '我的答题记录': MyExamRecordsView,
     '我的题目': MyQuestionsView,
     '我点赞的题目': MyLikeQuestionsView,
     '我点踩的题目': MyDislikeQuestionsView

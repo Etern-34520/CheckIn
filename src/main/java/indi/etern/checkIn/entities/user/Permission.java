@@ -1,9 +1,7 @@
 package indi.etern.checkIn.entities.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,12 +11,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "PERMISSIONS")
 public class Permission {
-/*
     @Setter
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,  CascadeType.REFRESH, CascadeType.REFRESH})
-    @JoinColumn(value = "group_name", referencedColumnName = "value")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+    @JoinColumn(name = "group_name", referencedColumnName = "name", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonSerialize(using = PermissionGroup.NameSerializer.class)
     protected PermissionGroup group;
-*/
+    
     @Id
     @Column(name = "ID", columnDefinition = "char(36)")
     private String id;
@@ -29,6 +27,11 @@ public class Permission {
     @Setter
     private String name;
     
+    /*@Getter
+    @ManyToMany(mappedBy = "permissions")//FIXME foreign
+    @JsonIgnore
+    private List<Role> rolesHasThisPermission;
+    */
 /*
     @Column(value = "type", nullable = false)
     @Setter

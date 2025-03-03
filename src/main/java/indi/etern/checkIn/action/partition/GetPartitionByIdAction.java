@@ -20,7 +20,7 @@ public class GetPartitionByIdAction extends TransactionalAction {
     
     @Override
     public String requiredPermissionName() {
-        return "";
+        return null;
     }
     
     @Override
@@ -28,7 +28,7 @@ public class GetPartitionByIdAction extends TransactionalAction {
         Optional<Partition> optionalPartition = partitionService.findById(partitionId);
         if (optionalPartition.isPresent()) {
             Partition partition = optionalPartition.get();
-            LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+            LinkedHashMap<String, Object> result = getSuccessMap();
             result.put("partition", partition.toInfoMap());
             return Optional.of(result);
         } else {

@@ -7,6 +7,7 @@ import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import WebSocketConnector from "@/api/websocket.js";
 import CustomDialog from "@/components/common/CustomDialog.vue";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 // const user = UserDataInterface.getCurrentUser();
 const users = UserDataInterface.users;
@@ -127,7 +128,7 @@ const confirmCreate = () => {
     }).then((response) => {
         waitingResponse.value = false;
         createOver.value = true;
-        createUserDialog.value.showTip(`初始密码（只显示一次）：${response.initPassword}`, "info");
+        createUserDialog.value.showTip(`初始密码（只显示一次）：${response.initPassword}`, "primary");
     }, (err) => {
         waitingResponse.value = false;
     });
@@ -145,7 +146,7 @@ const hideCreatingDialog = () => {
 <template>
     <responsive-double-splitpane ref="responsiveSplitpane" :left-loading="loading" show-left-label="用户列表">
         <template #left>
-            <custom-dialog v-model="showCreateUser" :buttons-option="buttonsOption" ref="createUserDialog" title="新建用户" @closed="hideCreatingDialog">
+            <custom-dialog v-model="showCreateUser" :buttons-option="buttonsOption" ref="createUserDialog" title="新建用户" @closed="hideCreatingDialog"><!--TODO permission-->
                 <div style="display: flex;flex-direction: column;">
                     <div style="width: 56px;height: 56px;align-self: center">
                         <transition name="blur-scale" mode="out-in">
@@ -168,63 +169,17 @@ const hideCreatingDialog = () => {
                     </div>
                     <el-select filterable v-model="groupOfNewUser" placeholder="选择">
                         <template v-for="(userGroup,i) in userGroups">
-                            <el-option :value="userGroup.type" :label="userGroup.type"></el-option>
+                            <el-option :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup.type)"
+                                       :value="userGroup.type" :label="userGroup.type"></el-option>
                         </template>
                     </el-select>
                 </div>
             </custom-dialog>
-<!--            <el-dialog title="新建用户" align-center append-to-body :show-close="false" v-model="showCreateUser"
-                       @close="hideCreatingDialog"
-                       style="width:300px" draggable>
-                <div style="display: flex;flex-direction: column;">
-                    <div style="width: 56px;height: 56px;align-self: center">
-                        <transition name="blur-scale" mode="out-in">
-                            <el-avatar :key="QQOfNewUser" shape="circle" size="large"
-                                       :src="getAvatarUrlOf(QQOfNewUser)"/>
-                        </transition>
-                    </div>
-                    <div class="dialog-input-label">
-                        <el-text>用户名</el-text>
-                    </div>
-                    <el-input v-model="nameOfNewUser" placeholder="新用户"/>
-                    <div class="dialog-input-label">
-                        <el-text>QQ</el-text>
-                        <el-text type="primary" style="margin-left: 4px">*</el-text>
-                    </div>
-                    <el-input type="number" v-model.number="QQOfNewUser"/>
-                    <div class="dialog-input-label">
-                        <el-text>用户组</el-text>
-                        <el-text v-model="groupOfNewUser" type="primary" style="margin-left: 4px">*</el-text>
-                    </div>
-                    <el-select filterable v-model="groupOfNewUser" placeholder="选择">
-                        <template v-for="(userGroup,i) in userGroups">
-                            <el-option :value="userGroup.type" :label="userGroup.type"></el-option>
-                        </template>
-                    </el-select>
-                    <div style="min-height: 40px;margin-top: 16px;">
-                        <transition name="blur-scale" mode="out-in">
-                            <el-text :key="tipTransitionCaller" style="margin-right: 16px"
-                                     :type="creatingTip.type?creatingTip.type:'info'">{{ creatingTip.content }}
-                            </el-text>
-                        </transition>
-                    </div>
-                </div>
-                <template #footer>
-                    <transition name="hide-cancel" mode="out-in">
-                        <el-button v-if="!createOver" @click="hideCreatingDialog">取消</el-button>
-                    </transition>
-                    <el-button @click="createOver?hideCreatingDialog():confirmCreate()"
-                               :disabled="creatingError||!QQOfNewUser||!groupOfNewUser"
-                               type="primary">
-                        {{ createOver ? "完成" : "确定" }}
-                    </el-button>
-                </template>
-            </el-dialog>-->
             <div style="display: flex;flex-direction: row">
                 <el-input v-model="filterText" placeholder="搜索用户（以&quot;,&quot;分词）" prefix-icon="Search"
                           style="margin-bottom: 8px;flex: 1"/>
                 <!--suppress JSValidateTypes -->
-                <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px" @click="showCreateUser = true">
+                <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px" @click="showCreateUser = true" class="disable-init-animate">
                     新建用户
                 </el-button>
             </div>

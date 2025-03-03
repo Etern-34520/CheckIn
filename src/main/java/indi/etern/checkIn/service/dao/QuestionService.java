@@ -10,9 +10,7 @@ import indi.etern.checkIn.repositories.ToPartitionLinkRepository;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -48,10 +46,6 @@ public class QuestionService {
 
     public Question getById(String id) {
         return questionRepository.findById(id).orElse(null);
-    }
-
-    public void saveAndFlush(Question Question) {
-        questionRepository.saveAndFlush(Question);
     }
 
     public Optional<Question> findById(String id) {
@@ -170,6 +164,13 @@ public class QuestionService {
     
     public List<Question> findAllHasPartition() {
         return partitionLinkRepository.findAll().stream().map(QuestionLinkImpl::getSource).filter(Question::isEnabled).toList();
+    }
+    
+    public List<Question> findLatestModifiedQuestions() {//TODO TEST
+        return questionRepository.findAllByLastModifiedTimeBeforeAndLinkWrapper_LinkType(
+                LocalDateTime.now(), QuestionLinkImpl.LinkType.PARTITION_LINK, Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
+//        return questionRepository.findAll(Question.NOT_SUB_QUESTION_EXAMPLE,LocalDateTime.now(),Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
+//        return questionRepository.findAll(Question.NOT_SUB_QUESTION_EXAMPLE, PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "lastModifiedTime"))).getContent();
     }
 }
 

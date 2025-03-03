@@ -1,6 +1,9 @@
 <script setup>
 import Collapse from "@/components/common/Collapse.vue";
 import Waterfall from "@/components/common/Waterfall.vue";
+import iconWhite from "@/assets/icons/icon-white.svg";
+import iconBlack from "@/assets/icons/icon-black.svg";
+import UI_Meta from "@/utils/UI_Meta.js";
 
 const data = [{
         type: "前端",
@@ -13,30 +16,49 @@ const data = [{
             "Element Plus",
             "MdEditorV3",
             "Axios",
-            "Splitpanes"
+            "Splitpanes",
+            "JWT Decode",
+            "...",
         ]
     }, {
         type: "后端",
         projects: [
             "Spring Boot",
+            "Hibernate",
             "Tomcat",
-            "Commons IO",
             "Jackson",
             "Jakarta",
             "Json Web Token",
-            "MYSQL",
+            "MYSQL (jdbc)",
+            "H2 Database (jdbc)",
+            "DB2 (jdbc)",
+            "...",
         ]
     }
 ]
+
+const colorScheme = UI_Meta.colorScheme;
+const getIcon = () => {
+    if (colorScheme.value === 'light') {
+        return iconBlack;
+    } else {
+        return iconWhite;
+    }
+}
 </script>
 
 <template>
     <div style="display: flex;flex-direction: column;align-items: center;">
         <div style="max-width: 1280px; width: min(75vw, 1280px); display: flex; flex-direction: column;">
             <el-text style="font-size: 24px;align-self: baseline;margin-bottom: 16px">关于</el-text>
-            <div style="display: flex;flex-direction: row;margin-bottom: 8px;">
-                <el-text size="large" style="margin-right: 32px">CheckIn</el-text>
-                <el-link type="info" href="https://github.com/Etern-34520/CheckIn" target="_blank">Github</el-link>
+            <div class="panel-1" style="display: flex;flex-direction: row;margin-bottom: 8px;padding: 24px">
+                <img :src="getIcon()" alt="" width="48" height="48" style="margin-right: 16px;"/>
+                <div style="display: flex;flex-direction: column;">
+                    <el-text size="large" style="align-self: baseline">CheckIn</el-text>
+                    <el-text type="info" style="align-self: baseline">2.0.0 alpha3</el-text>
+                    <el-link type="info" style="align-self: baseline"
+                             href="https://github.com/Etern-34520/CheckIn" target="_blank">Github</el-link>
+                </div>
             </div>
             <collapse>
                 <template #title>

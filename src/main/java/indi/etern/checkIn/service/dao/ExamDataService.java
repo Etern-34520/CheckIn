@@ -7,6 +7,8 @@ import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.repositories.ExamDataRepository;
 import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
+import indi.etern.checkIn.throwable.SettingInvalidException;
+import indi.etern.checkIn.throwable.exam.ExamException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -52,17 +54,17 @@ public class ExamDataService {
         examDataRepository.saveAndFlush(examData);
     }
     
-    @Transactional
-    public ExamResult handleSubmit(ExamData examData, Map<String, Object> answer) throws ExamInvalidException {
-        if (examData.getStatus()!= ExamData.Status.ONGOING) {
+    @Transactional(noRollbackFor = Throwable.class)
+    public ExamResult handleSubmit(ExamData examData, Map<String, Object> answer) throws ExamException {
+        if (examData.getStatus() != ExamData.Status.ONGOING) {
             throw new ExamInvalidException();
         }
-        final ExamResult examResult = examData.checkAnswerMap(answer);
-        examData.setStatus(ExamData.Status.SUBMITTED);
-        
         //noinspection unchecked
-        ArrayList<Number> levelSplit = settingService.getItem("grading","splits").getValue(ArrayList.class);
+        ArrayList<Number> levelSplit = settingService.getItem("grading", "splits").getValue(ArrayList.class);
         List<GradingLevel> gradingLevels = gradingLevelService.findAll();
+        if (gradingLevels.isEmpty()) {
+            throw new SettingInvalidException("grading levels missing");
+        }
         
         Float[] levelSplitArray = new Float[levelSplit.size() + 1];
         AtomicInteger index = new AtomicInteger(0);
@@ -71,11 +73,12 @@ public class ExamDataService {
             index.incrementAndGet();
         });
         
-        SettingItem scoreSettingItem = settingService.getItem("grading","questionScore");
+        SettingItem scoreSettingItem = settingService.getItem("generating", "questionScore");
         float singleQuestionScore = scoreSettingItem.getValue(Number.class).floatValue();
         
         levelSplitArray[levelSplitArray.length - 1] = examData.getQuestionAmount() * singleQuestionScore;
         
+        final ExamResult examResult = examData.checkAnswerMap(answer);
         final int searchResult = Arrays.binarySearch(levelSplitArray, examResult.getScore());
         int levelIndex;
         if (searchResult == levelSplitArray.length - 1) {//max score
@@ -92,6 +95,7 @@ public class ExamDataService {
         
         examData.setExamResult(examResult);
         examData.setSubmitTime(LocalDateTime.now());
+        examData.setStatus(ExamData.Status.SUBMITTED);
         examDataRepository.save(examData);
         return examResult;
     }
@@ -142,5 +146,14 @@ public class ExamDataService {
             examData.setStatus(ExamData.Status.EXPIRED);
         }
         examDataRepository.saveAll(examDataList);
+    }
+    
+    public List<ExamData> findAllByQQ(long qq) {
+        return examDataRepository.findAllByQqNumberIs(qq);
+    }
+    
+    public List<ExamData> getExamDataContainsQuestionById(String questionId) {
+        return examDataRepository.findAllByQuestionIdsContains(questionId);
+//        return null;
     }
 }

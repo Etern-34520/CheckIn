@@ -105,7 +105,7 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
     @OrderBy("orderIndex")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Fetch(value = FetchMode.SUBSELECT)
-    @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     List<Choice> choices;
     
     private void setRandomOrdered(boolean randomOrdered) {

@@ -20,12 +20,12 @@ public class GetRequestRecordDetailAction extends MapResultAction {
     
     @Override
     public String requiredPermissionName() {
-        return "";
+        return "get request records";
     }
     
     @Override
     protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
-        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> result = getSuccessMap();
         final RequestRecord requestRecord = requestRecordService.findById(id).orElseThrow(() -> new RuntimeException("RequestRecord not found"));
         final LinkedHashMap<String, Object> requestRecordDataMap = requestRecord.toDataMap();
         result.put("requestRecord", requestRecordDataMap);

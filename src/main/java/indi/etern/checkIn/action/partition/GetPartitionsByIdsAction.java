@@ -18,7 +18,7 @@ public class GetPartitionsByIdsAction extends TransactionalAction {
 
     @Override
     public String requiredPermissionName() {
-        return "";
+        return null;
     }
 
     @Override

@@ -136,7 +136,7 @@ public class RequestRecord implements BaseEntity<String> {
     public static RequestRecord from(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Throwable throwable) {
         RequestRecord requestRecord = from(httpServletRequest, httpServletResponse);
         requestRecord.status = Status.ERROR;
-        Map<String, Object> throwableMap = new HashMap<>();
+        Map<String, Object> throwableMap = new LinkedHashMap<>();
         throwableMap.put("name", throwable.getClass().getName());
         throwableMap.put("message", throwable.getMessage());
         throwableMap.put("stackTrace", Arrays.stream(throwable.getStackTrace()).map(StackTraceElement::toString).toList());

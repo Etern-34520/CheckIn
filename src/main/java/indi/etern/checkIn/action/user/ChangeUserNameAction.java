@@ -1,21 +1,24 @@
 package indi.etern.checkIn.action.user;
 
+import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
+import indi.etern.checkIn.utils.UserUpdateUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Action("changeUserName")
-public class ChangeUserNameAction extends UserMapResultAction {
+public class ChangeUserNameAction extends TransactionalAction {
     private long qqNumber;
     private String name;
 
     @Override
     public String requiredPermissionName() {
-        return null;//TODO
+        if (qqNumber == getCurrentUser().getQQNumber()) return null;
+        return "change user name";
     }
 
     @Override
@@ -24,7 +27,7 @@ public class ChangeUserNameAction extends UserMapResultAction {
         User user = optionalUser.orElseThrow();
         user.setName(name);
         UserService.singletonInstance.saveAndFlush(user);
-        sendUpdateUserToAll(user);
+        UserUpdateUtils.sendUpdateUserToAll(user);
         return successOptionalMap;
     }
 

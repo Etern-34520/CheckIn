@@ -5,7 +5,6 @@ const props = defineProps({
         default: 300
     },
     data: {
-        type: Array,
         required: true
     }
 });

@@ -16,9 +16,13 @@ public class ToQuestionGroupLink extends QuestionLinkImpl<QuestionGroup> impleme
         this.target = target;
         target.addQuestionLink(this);
     }
+    
+    {
+        linkType = LinkType.QUESTION_GROUP_LINK;
+    }
 
     @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.EAGER)
-    @JoinColumn(foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnore
     protected QuestionGroup target;
 

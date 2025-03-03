@@ -6,28 +6,18 @@ import PartitionCache from "@/data/PartitionCache.js";
 import CreateNewPartitionDialog from "@/components/question/CreateNewPartitionPop.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import Collapse from "@/components/common/Collapse.vue";
-// import "vditor/dist/index.css"
 import ImageViewer from "@/pages/serverGroup/questions/editor/ImagesViewer.vue";
 import {MdEditor} from "md-editor-v3";
 import UIMeta from "@/utils/UI_Meta.js";
+import 'md-editor-v3/lib/style.css';
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
-const {proxy} = getCurrentInstance();
 const imageViewerVisible = ref(false);
-const image = ref({name: "", data: ""});
 const upload = ref();
 
 const allUsers = ref({});
 
 let partitions = PartitionCache.refPartitions;
-/*
-PartitionCache.getRefPartitionsAsync().then((refPartitions1) => {
-    partitions = refPartitions1;
-});
-*/
-
-import 'md-editor-v3/lib/style.css';
-// import 'md-editor-v3/lib/preview.css';
-
 
 UserDataInterface.getUsersAsync().then((users) => {
     allUsers.value = users;
@@ -40,9 +30,11 @@ const questionInfo = defineModel("questionInfo", {
 
 const filter = function (rawFile) {
     if (rawFile.raw.type.startsWith("image")) {
-        if (questionInfo.value.question.images)
-            for (const image of questionInfo.value.question.images) {
-                if (image.size === rawFile.raw.size) {
+        if (!questionInfo.value.question.images === undefined) {
+            questionInfo.value.question.images = [];
+        }
+            /*for (const image of questionInfo.value.question.images) {
+                if (image.uid === rawFile.uid) {
                     ElNotification({
                         title: "重复",
                         message: "图片已存在",
@@ -52,8 +44,7 @@ const filter = function (rawFile) {
                     upload.value.handleRemove(rawFile);
                     return false;
                 }
-            }
-        else questionInfo.value.question.images = [];
+            }*/
         upload.value.handleRemove(rawFile);
         convert(rawFile.raw).then((result) => {
             questionInfo.value.question.images.push(result);
@@ -144,8 +135,28 @@ const onPreview = (file) => {
     imageViewerVisible.value = true;
 }
 
-const reload = () => {
-    window.location.reload();
+const ableToSwitchEnable = () => {
+    let ableToSwitchEnableQuestion = PermissionInfo.hasPermission('question', 'enable and disable questions')
+    let ableToSwitchEnableQuestionGroup = PermissionInfo.hasPermission('question group', 'enable and disable question groups')
+    let ableToSwitchEnable;
+    if (questionInfo.value.question.type === "QuestionGroup") {
+        ableToSwitchEnable = ableToSwitchEnableQuestionGroup;
+    } else {
+        ableToSwitchEnable = ableToSwitchEnableQuestion;
+    }
+    return ableToSwitchEnable;
+}
+
+const ableToChangeAuthor = () => {
+    let ableToChangeQuestionAuthor = PermissionInfo.hasPermission('question', 'change question author')
+    let ableToChangeQuestionGroupAuthor = PermissionInfo.hasPermission('question group', 'change question group author')
+    let ableToChangeAuthor;
+    if (questionInfo.value.question.type === "QuestionGroup") {
+        ableToChangeAuthor = ableToChangeQuestionGroupAuthor;
+    } else {
+        ableToChangeAuthor = ableToChangeQuestionAuthor;
+    }
+    return ableToChangeAuthor;
 }
 </script>
 
@@ -172,7 +183,8 @@ const reload = () => {
             <div style="display: flex;max-height: 800px;min-height: 200px !important;">
                 <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
                            preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']" style="height: 75vh"
-                           :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.mobile.value" :preview="!UIMeta.mobile.value"/>
+                           :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.mobile.value"
+                           :preview="!UIMeta.mobile.value"/>
             </div>
         </template>
     </collapse>
@@ -228,7 +240,8 @@ const reload = () => {
             </template>
         </el-select>
         <div style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column">
-            <el-select v-model="questionInfo.question.authorQQ" :class="questionInfo.inputMeta['author-0']" filterable clearable placeholder="作者">
+            <el-select v-model="questionInfo.question.authorQQ" :class="questionInfo.inputMeta['author-0']" filterable
+                       clearable placeholder="作者" :disabled="!ableToChangeAuthor(questionInfo)">
                 <template #label="{ label, value }">
                     <div style="display: flex;align-items: center;justify-items: stretch">
                         <el-avatar shape="circle" :size="24" style="margin: 4px" fit="cover"
@@ -252,7 +265,7 @@ const reload = () => {
                 <el-text style="margin: 0 8px;">
                     启用
                 </el-text>
-                <el-switch v-model="questionInfo.question.enabled"/>
+                <el-switch v-model="questionInfo.question.enabled" :disabled="!ableToSwitchEnable(questionInfo)"/>
             </div>
         </div>
     </div>

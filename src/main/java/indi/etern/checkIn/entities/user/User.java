@@ -31,9 +31,8 @@ public class User implements UserDetails {
     @Getter
     protected String password;
     @Getter
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "ROLE_TYPE", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
-//    @NotFound(action = NotFoundAction.IGNORE)
+    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REFRESH,CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @JoinColumn(name = "ROLE_TYPE", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     protected Role role;
 /*
     @PostLoad

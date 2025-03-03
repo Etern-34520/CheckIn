@@ -23,7 +23,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="panel" style="padding: 32px;flex: 1;width: 0;">
+    <div class="panel" style="flex: 1;width: 0;padding: 32px 32px 0;">
         <div class="slide-switch-base" :class="className">
             <router-view v-slot="{ Component }">
                 <transition :name="transitionName">

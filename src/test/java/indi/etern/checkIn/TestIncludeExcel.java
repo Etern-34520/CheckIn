@@ -60,7 +60,9 @@ public class TestIncludeExcel {
                 for (ExcelQuestion excelQuestion : cachedDataList) {
                     try {
                         MultipleChoicesQuestion.Builder multipleQuestionBuilder = new MultipleChoicesQuestion.Builder();
-                        multipleQuestionBuilder.setQuestionContent(excelQuestion.content.replace(" [单选题]","").replace("[单选题]",""));
+                        multipleQuestionBuilder.setQuestionContent(excelQuestion.content
+                                .replace(" [单选题]","").replace("[单选题]","")
+                                .replace(" [多选题]","").replace("[多选题]",""));
                         List<String> choicesString = objectMapper.readValue(excelQuestion.choiceJsonArray.replace("，",",").replace("“","\""), List.class);
                         List<Integer> correctIndexes = objectMapper.readValue(excelQuestion.correctChoiceIndexJsonArray, List.class);
                         int index = 0;

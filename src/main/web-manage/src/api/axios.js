@@ -49,20 +49,20 @@ export default {
     post(url, data) {
         return new Promise((resolve, reject) => {
             axios.post(url, data).then(
-                    response => {
+                response => {
+                    try {
                         if (response.data) {
-                            try {
-                                resolve(response.data)
-                            } catch (e) {
-                                reject(response)
-                            }
+                            resolve(response.data)
                         } else {
                             reject(response)
                         }
-                    },
-                    error => {
-                        reject(err)
-                    });
+                    } catch (e) {
+                        reject(response)
+                    }
+                },
+                error => {
+                    reject(err)
+                });
         })
     },
     get(url, data) {

@@ -3,11 +3,13 @@ package indi.etern.checkIn.auth;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.service.dao.RobotTokenService;
 import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.dao.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import java.util.Date;
 public class JwtTokenProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
     public static JwtTokenProvider singletonInstance;
+    private final RobotTokenService robotTokenService;
     
     @Value("${jwt-secret}")
     private String jwtSecret;
@@ -31,10 +34,11 @@ public class JwtTokenProvider {
     
     final RoleService roleService;
 
-    public JwtTokenProvider(UserService userService, RoleService roleService) {
+    public JwtTokenProvider(UserService userService, RoleService roleService, RobotTokenService robotTokenService) {
         this.userService = userService;
         this.roleService = roleService;
         singletonInstance = this;
+        this.robotTokenService = robotTokenService;
     }
 
     // 生成 JWT token
@@ -45,7 +49,7 @@ public class JwtTokenProvider {
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
 
         String token = Jwts.builder()
-                .setSubject(user.getName() + ":" + user.getQQNumber())
+                .setSubject(String.valueOf(user.getQQNumber()))
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
                 .signWith(key())
@@ -67,8 +71,12 @@ public class JwtTokenProvider {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        String usernameAndQQ = claims.getSubject();
-        return userService.findByQQNumber(Long.parseLong(usernameAndQQ.split(":")[1])).orElseThrow();
+        String subject = claims.getSubject();
+        if (subject.equals("robot") && robotTokenService.existByToken(token)) {
+            return User.ANONYMOUS;
+        } else {
+            return userService.findByQQNumber(Long.parseLong(subject)).orElseThrow();
+        }
     }
 
     // 验证 Jwt token
@@ -87,6 +95,8 @@ public class JwtTokenProvider {
             logger.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: {}", e.getMessage());
+        } catch (SignatureException e) {
+            logger.error("Invalid JWT signature: {}", e.getMessage());
         }
         return false;
     }
@@ -108,5 +118,19 @@ public class JwtTokenProvider {
             }
         }
         return false;
+    }
+    
+    public String generateRobotToken(User applicant,String id) {
+        Date expireDate = new Date(Long.MAX_VALUE);
+        String token = Jwts.builder()
+                .setSubject("robot")
+                .setIssuer(String.valueOf(applicant.getQQNumber()))
+                .setIssuedAt(new Date())
+                .setHeaderParam("generateTime", String.valueOf(System.currentTimeMillis()))
+                .setHeaderParam("entryId", id)
+                .setExpiration(expireDate)
+                .signWith(key())
+                .compact();
+        return token;
     }
 }

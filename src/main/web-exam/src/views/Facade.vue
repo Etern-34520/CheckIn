@@ -13,7 +13,7 @@ const props = defineProps({
     }, gradingData: {
         type: Object,
         required: true
-    }, generatingData: {
+    }, extraData: {
         type: Object,
         required: true
     },
@@ -56,19 +56,19 @@ const routeGenerateExam = () => {
                         <div style="display: flex;flex-direction: row;align-items: center">
                             <el-tag style="align-self: start;margin-right: 12px;" type="info">题量
                             </el-tag>
-                            <el-text>{{ generatingData.questionAmount }}</el-text>
+                            <el-text>{{ extraData.questionAmount }}</el-text>
                         </div>
                         <div style="display: flex;flex-direction: row;align-items: center">
                             <el-tag style="align-self: start;margin-right: 12px;" type="info">
                                 分区数
                             </el-tag>
-                            <el-text v-if="generatingData.partitionRange" style="margin-right: 4px">
-                                {{ generatingData.partitionRange[0] }}
+                            <el-text v-if="extraData.partitionRange" style="margin-right: 4px">
+                                {{ extraData.partitionRange[0] }}
                             </el-text>
-                            <el-text v-if="generatingData.partitionRange" style="margin-right: 4px">~
+                            <el-text v-if="extraData.partitionRange" style="margin-right: 4px">~
                             </el-text>
-                            <el-text v-if="generatingData.partitionRange">
-                                {{ generatingData.partitionRange[1] }}
+                            <el-text v-if="extraData.partitionRange">
+                                {{ extraData.partitionRange[1] }}
                             </el-text>
                         </div>
                     </div>
@@ -76,13 +76,14 @@ const routeGenerateExam = () => {
                 <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;">
                     <el-tag style="align-self: start" type="info">分数段</el-tag>
                 </div>
+<!--                {{extraData}}-->
                 <div style="display: flex">
                     <el-text style="margin-right: 8px;">{{ gradingData.splits[0] }}</el-text>
                     <div style="display: flex;flex-direction: column;flex: 1;margin-right: 8px;">
                         <div class="score-bar"
                              style="background: rgba(0,0,0,0);margin-bottom: 4px;overflow: visible">
                             <template v-for="(level,$index) of gradingData.levels">
-                                <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * generatingData.questionAmount - gradingData.splits[$index]}"
+                                <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : extraData.questionScore * extraData.questionAmount - gradingData.splits[$index]}"
                                      style="display: flex;flex-direction: column">
                                     <el-text>{{ level.name }}</el-text>
                                 </div>
@@ -95,13 +96,13 @@ const routeGenerateExam = () => {
                             <template v-for="(level,$index) of gradingData.levels">
                                 <div :style="{
                                                  background: level.colorHex,
-                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : gradingData.questionScore * generatingData.questionAmount - gradingData.splits[$index]
+                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : extraData.questionScore * extraData.questionAmount - gradingData.splits[$index]
                                              }"
                                      style="height: 6px"></div>
                             </template>
                         </div>
                     </div>
-                    <el-text>{{ gradingData.questionScore * generatingData.questionAmount }}</el-text>
+                    <el-text>{{ extraData.questionScore * extraData.questionAmount }}</el-text>
                 </div>
             </div>
         </div>

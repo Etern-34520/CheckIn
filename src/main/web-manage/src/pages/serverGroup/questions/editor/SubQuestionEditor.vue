@@ -16,6 +16,7 @@ import toolbar from "@/data/MarkdownEditorToolbar.js";
 import ImageViewer from "@/pages/serverGroup/questions/editor/ImagesViewer.vue";
 import UIMeta from "@/utils/UI_Meta.js";
 import {MdEditor} from "md-editor-v3";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const {proxy} = getCurrentInstance();
 const imageDialogVisible = ref(false);
@@ -50,7 +51,10 @@ watch(() => questionInfo.value.question, (newVal, oldVal) => {
 
 const filter = function (rawFile) {
     if (rawFile.raw.type.startsWith("image")) {
-        if (questionInfo.value.question.images)
+        if (questionInfo.value.question.images === undefined) {
+            questionInfo.value.question.images = [];
+        }
+/*
             for (const image of questionInfo.value.question.images) {
                 if (image.size === rawFile.raw.size) {
                     ElNotification({
@@ -63,7 +67,7 @@ const filter = function (rawFile) {
                     return false;
                 }
             }
-        else questionInfo.value.question.images = [];
+*/
         upload.value.handleRemove(rawFile);
         convert(rawFile.raw).then((result) => {
             questionInfo.value.question.images.push(result);
@@ -157,6 +161,18 @@ const onPreview = (file) => {
     viewerIndex.value = questionInfo.value.question.images.findIndex(item => item.uid === file.uid);
     imageDialogVisible.value = true;
 }
+
+const ableToChangeAuthor = () => {
+    let ableToChangeQuestionAuthor = PermissionInfo.hasPermission('question', 'change question author')
+    let ableToChangeQuestionGroupAuthor = PermissionInfo.hasPermission('question group', 'change question group author')
+    let ableToChangeAuthor;
+    if (questionInfo.value.question.type === "QuestionGroup") {
+        ableToChangeAuthor = ableToChangeQuestionGroupAuthor;
+    } else {
+        ableToChangeAuthor = ableToChangeQuestionAuthor;
+    }
+    return ableToChangeAuthor;
+}
 </script>
 
 <template>
@@ -165,11 +181,11 @@ const onPreview = (file) => {
             <div style="display: flex;flex-direction: column">
                 <div style="display: flex;margin-bottom: 4px" class="alerts">
                     <transition-group name="alert">
-                        <el-tag v-for="showError of questionInfo.errors" :key="'error'+error.content" type="danger"
+                        <el-tag v-for="error of questionInfo.errors" :key="'error'+error.content" type="danger"
                                 :closable="false">
                             <div style="display: flex;flex-direction: row;align-items: center;">
                                 <el-text type="danger" style="margin: 4px">
-                                    {{ showError.content }}
+                                    {{ error.content }}
                                 </el-text>
                                 <el-button-group>
                                     <el-button v-for="errorButton of error.buttons" link
@@ -208,7 +224,7 @@ const onPreview = (file) => {
                     </div>
                     <div style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column;justify-content: stretch">
                         <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"
-                                   :class="questionInfo.inputMeta['author-0']">
+                                   :class="questionInfo.inputMeta['author-0']" :disabled="!ableToChangeAuthor(questionInfo)">
                             <template #label="{ label, value }">
                                 <div style="display: flex;align-items: center;justify-items: stretch">
                                     <el-avatar shape="circle" :size="24" style="margin: 4px" fit="cover"

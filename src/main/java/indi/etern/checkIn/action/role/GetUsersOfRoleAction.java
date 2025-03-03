@@ -1,7 +1,7 @@
 package indi.etern.checkIn.action.role;
 
+import indi.etern.checkIn.action.TransactionalAction;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.action.user.UserMapResultAction;
 import indi.etern.checkIn.service.dao.UserService;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Action("getUsersOfRole")
-public class GetUsersOfRoleAction extends UserMapResultAction {
+public class GetUsersOfRoleAction extends TransactionalAction {
     String roleType;
 
     @Override
@@ -20,7 +20,7 @@ public class GetUsersOfRoleAction extends UserMapResultAction {
 
     @Override
     protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        LinkedHashMap<String,Object> result = new LinkedHashMap<>();
+        LinkedHashMap<String,Object> result = getSuccessMap();
         ArrayList<Object> userList = new ArrayList<>();
         UserService.singletonInstance.findAllByRoleType(roleType).forEach(user -> {
             LinkedHashMap<String,Object> userInfo = new LinkedHashMap<>();

@@ -3,7 +3,6 @@ package indi.etern.checkIn.entities.exam;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import indi.etern.checkIn.entities.BaseEntity;
-import indi.etern.checkIn.entities.converter.ListJsonConverter;
 import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.converter.ObjectJsonConverter;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
@@ -30,7 +29,19 @@ import java.util.*;
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "exam_data")
-public class ExamData implements BaseEntity<String> {
+public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
+    
+    @Override
+    public int compareTo(@NonNull ExamData o) {
+        if (this.examResult == null) {
+            return -1;
+        } else if (o.examResult == null) {
+            return 1;
+        } else {
+            return (int) (this.examResult.getScore() - o.examResult.getScore());
+        }
+    }
+    
     public enum Status {
         ONGOING, SUBMITTED, MANUAL_INVALIDED, EXPIRED
     }
@@ -41,7 +52,7 @@ public class ExamData implements BaseEntity<String> {
     long qqNumber;
     int questionAmount;
     
-//    @JsonIgnore
+    //    @JsonIgnore
     @Setter
     Status status;
     
@@ -54,25 +65,31 @@ public class ExamData implements BaseEntity<String> {
         return status;
     }
     
-    @Convert(converter = ListJsonConverter.class)
-    @Column(columnDefinition = "mediumtext")
+    //    @Convert(converter = ListJsonConverter.class)
+    @ElementCollection(targetClass = Integer.class)
+    @CollectionTable(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    @Column(columnDefinition = "mediumtext")
     @JsonIgnore
     List<Integer> requiredPartitionIds;
     
-    @Convert(converter = ListJsonConverter.class)
-    @Column(columnDefinition = "mediumtext")
+    //    @Convert(converter = ListJsonConverter.class)
+    @ElementCollection(targetClass = Integer.class)
+    @CollectionTable(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    @Column(columnDefinition = "mediumtext")
     @JsonIgnore
     List<Integer> selectedPartitionIds;
     
-    @Convert(converter = ListJsonConverter.class)
-    @Column(columnDefinition = "mediumtext")
+    //    @Convert(converter = ListJsonConverter.class)
+    @ElementCollection(targetClass = String.class)
+    @CollectionTable(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    @Column(columnDefinition = "mediumtext")
     @JsonIgnore
     List<String> questionIds;
     
     @Convert(converter = MapConverter.class)
     @Column(name = "answers", columnDefinition = "mediumtext")
     @JsonIgnore
-    Map<String,Answer<?,?>> answersMap;
+    Map<String, Answer<?, ?>> answersMap;
     
     @Setter
     @Convert(converter = ObjectJsonConverter.class)
@@ -117,14 +134,14 @@ public class ExamData implements BaseEntity<String> {
                 //noinspection unchecked
                 var choiceAnswer = multipleChoicesQuestion.newAnswerFrom((List<String>) choiceIds);
                 if (questionGroup == null) {
-                    this.answersMap.put(multipleChoicesQuestion.getId(),choiceAnswer);
+                    this.answersMap.put(multipleChoicesQuestion.getId(), choiceAnswer);
                 } else {
                     questionGroupSubQuestionAnswers.add(choiceAnswer);
                 }
             } else if (value instanceof Map<?, ?> subQuestionAnswerMap && question instanceof QuestionGroup questionGroup1) {
                 List<Question> subQuestions = questionGroup1.getQuestionLinks().stream().map(QuestionLinkImpl::getSource).toList();
                 //noinspection unchecked
-                this.answersMap.put(questionGroup1.getId(),handleAnswerItemMap(subQuestions,
+                this.answersMap.put(questionGroup1.getId(), handleAnswerItemMap(subQuestions,
                         (Map<String, Object>) subQuestionAnswerMap,
                         questionGroup1)
                         .orElseThrow(IllegalStateException::new));
@@ -162,19 +179,19 @@ public class ExamData implements BaseEntity<String> {
         examDataMap.put("expireTime", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(expireTime));
         if (submitTime != null)
             examDataMap.put("submitTime", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(submitTime));
-        examDataMap.put("requiredPartitionIds", requiredPartitionIds);
-        examDataMap.put("selectedPartitionIds", selectedPartitionIds);
+        examDataMap.put("requiredPartitionIds", List.copyOf(requiredPartitionIds));
+        examDataMap.put("selectedPartitionIds", List.copyOf(selectedPartitionIds));
         examDataMap.put("questionAmount", questionAmount);
-        examDataMap.put("questionIds", questionIds);
+        examDataMap.put("questionIds", List.copyOf(questionIds));
         examDataMap.put("result", examResult);
         examDataMap.put("answers", answersMap);
         return examDataMap;
     }
     
     public void sendUpdateExamRecord() {
-        Map<Object,Object> updateData = new HashMap<>();
-        updateData.put("type","updateExamRecord");
+        Map<Object, Object> updateData = new HashMap<>();
+        updateData.put("type", "updateExamRecord");
         updateData.put("examRecord", this);
-        WebSocketService.singletonInstance.sendMessageToChannel(updateData,"examRecord");
+        WebSocketService.singletonInstance.sendMessageToChannel(updateData, "examRecord");
     }
 }

@@ -5,7 +5,7 @@ import UserDataInterface from "@/data/UserDataInterface.js";
 </script>
 
 <template>
-    <user-questions-view :qq="UserDataInterface.getCurrentUser().qq"/>
+    <user-questions-view :qq="UserDataInterface.getCurrentUser().value.qq"/>
 </template>
 
 <style scoped>

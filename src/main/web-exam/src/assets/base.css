@@ -121,11 +121,13 @@
     transform: scale(0.98);
 }
 
+.el-date-editor--daterange,
 .el-input {
     background: var(--el-bg-color);
     border: var(--border-1) !important;
 }
 
+.el-date-editor--daterange:not(.disable-init-animate),
 .el-input:not(.disable-init-animate) {
     animation: var(--init-animation);
     animation-fill-mode: backwards;
@@ -210,7 +212,7 @@
 }
 
 /*noinspection SpellCheckingInspection*/
-.splitpanes--horizonal .splitpanes__splitter::after {
+.splitpanes--horizontal .splitpanes__splitter::after {
     transition: 400ms var(--ease-in-out-quint);
     content: "";
     display: block;
@@ -238,13 +240,13 @@
 }
 
 /*noinspection SpellCheckingInspection*/
-.splitpanes--horizonal .splitpanes__splitter:hover::after {
+.splitpanes--horizontal .splitpanes__splitter:hover::after {
     width: 44px !important;
     opacity: 0.75 !important;
 }
 
 /*noinspection SpellCheckingInspection*/
-.splitpanes--horizonal .splitpanes__splitter:active::after {
+.splitpanes--horizontal .splitpanes__splitter:active::after {
     width: 20px !important;
     opacity: 1 !important;
 }
@@ -403,8 +405,15 @@
     word-break: break-word;
 }
 
+.el-popper {
+    z-index: 2002;
+}
 .el-popper * {
     color: var(--front-color);
+}
+
+.el-picker-panel {
+    background: var(--panel-bg-color) var(--lighting-effect-background-1) !important;
 }
 
 .el-upload-list__item {
@@ -509,6 +518,15 @@
     top: 7px !important;
 }
 
+.el-date-editor--daterange {
+    border-radius: 4px;
+    margin: 0;
+    background: var(--lighting-effect-background-2);
+    transition-delay: 50ms;
+    height: 100%;
+    place-items: baseline !important;
+}
+
 .el-input > *, .el-textarea > *, .el-select__wrapper {
     border-radius: 4px;
     margin: 0;
@@ -556,6 +574,7 @@
     background: linear-gradient(180deg, transparent calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
 }*/
 
+.el-date-editor--daterange,
 .el-input:not(.is-focus) > div,
 .el-textarea,
 .el-textarea > textarea,
@@ -582,6 +601,7 @@
     min-height: 22px !important;
 }
 
+#app .el-date-editor--daterange,
 .el-textarea, .el-input, .el-select {
     box-sizing: border-box;
     border-radius: 4px !important;
@@ -600,12 +620,11 @@
     background: var(--lighting-effect-background-2);
 }
 
+#app .el-date-editor--daterange:not(.is-disabled):hover,
+#app .el-date-editor--daterange:not(.is-disabled).is-active,
 .el-textarea:not(.is-disabled):hover,
 .el-input:not(.is-disabled):hover,
-    /*.el-input-number:not(.is-disabled):has(:hover),*/
-.el-select:not(.is-disabled):hover/*,
-*:not(.el-tabs__nav):has(> .is-focused),
-*:not(.el-checkbox):not(.el-radio-group):not(.el-tabs__nav):has(> .is-focus)*/ {
+.el-select:not(.is-disabled):hover {
     background: var(--panel-bg-color-overlay);
 }
 
@@ -641,6 +660,7 @@
     margin-bottom: 8px;
 }
 
+.el-date-editor--daterange::after,
 .question-input::after,
 .el-input::after, .el-textarea::after, .el-select::after, .el-checkbox::after {
     content: "";
@@ -665,10 +685,16 @@
     top: calc(100% - 4px);
 }
 
-.question-input.warning::after, .question-input.error::after,
+.el-date-editor--daterange.is-active::after,
 .el-input:has(.is-focus)::after, .el-textarea:has(textarea:focus)::after, .el-select:has(.is-focused)::after,
 .el-input-number.error > .el-input::after, .el-input-number.warning > .el-input::after,
+
+.question-input.warning::after,
+.el-date-editor--daterange.warning::after,
 .el-input.warning::after, .el-textarea.warning::after, .el-select.warning::after, .el-checkbox.warning::after,
+
+.question-input.error::after,
+.el-date-editor--daterange.error::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
     opacity: 1;
     width: 98%;
@@ -676,6 +702,7 @@
     filter: none;
 }
 
+.el-date-editor--daterange.warning::after,
 .el-input-number .el-input:has(.is-focus)::after,
 .el-input-number .el-input.warning::after,
 .el-input-number .el-input.error::after {
@@ -683,6 +710,7 @@
     left: calc(1% + 35px);
 }
 
+.el-date-editor--daterange.error::after,
 .el-input-number.is-without-controls .el-input:has(.is-focus)::after,
 .el-input-number.is-without-controls .el-input.warning::after,
 .el-input-number.is-without-controls .el-input.error::after {
@@ -701,6 +729,7 @@
     border-radius: 4px;
 }
 
+.el-date-editor--daterange:hover,
 .el-input-number .el-input-number__decrease:hover,
 .el-input-number .el-input-number__increase:hover {
     background: var(--panel-bg-color-overlay);
@@ -982,24 +1011,42 @@
     flex: none;
 }
 
+.dialog-fade-enter-active,
+.dialog-fade-leave-active,
 .is-message-box.fade-in-linear-enter-active,
 .is-message-box.fade-in-linear-leave-active {
     transition: 300ms var(--ease-in-out-quint);
 }
 
+.dialog-fade-enter-active > div[role="dialog"],
 .is-message-box.fade-in-linear-enter-active > div[role="dialog"] {
     transition: 400ms var(--ease-in-bounce-1);
 }
 
+.dialog-fade-leave-active > div[role="dialog"],
 .is-message-box.fade-in-linear-leave-active > div[role="dialog"] {
     transition: 200ms var(--ease-in-quint);
 }
 
+.dialog-fade-enter-active .el-overlay-dialog,
+.dialog-fade-enter-active,
+.dialog-fade-leave-active .el-overlay-dialog,
+.dialog-fade-leave-active,
+.fade-in-linear-enter-active .el-overlay-message-box,
+.fade-in-linear-leave-active .el-overlay-message-box {
+    animation: none !important;
+}
+
+.dialog-fade-enter-from,
+.dialog-fade-leave-to,
 .is-message-box.fade-in-linear-enter-from,
 .is-message-box.fade-in-linear-leave-to {
     opacity: 0;
 }
 
+
+.dialog-fade-enter-from > div[role="dialog"],
+.dialog-fade-leave-to > div[role="dialog"],
 .is-message-box.fade-in-linear-enter-from > div[role="dialog"],
 .is-message-box.fade-in-linear-leave-to > div[role="dialog"] {
     scale: 0.7;

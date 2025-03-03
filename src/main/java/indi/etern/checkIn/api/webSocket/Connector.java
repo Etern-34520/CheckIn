@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.MVCConfig;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.Result;
+import indi.etern.checkIn.action.role.SendPermissionsToUsersAction;
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
@@ -164,7 +165,7 @@ public class Connector implements SubProtocolCapable {
                         logger.error("{} : {}", e.getClass().getName(), e.getMessage());
                         logger.debug("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, logMessage);
                         if (e instanceof PermissionDeniedException permissionDeniedException) {
-                            sendError(messageId, permissionDeniedException.getDescription());
+                            sendError(messageId, permissionDeniedException.getMessage());
                         } else
                             sendError(messageId, e.getMessage());
                     }
@@ -213,27 +214,11 @@ public class Connector implements SubProtocolCapable {
             webSocketService.sendMessageToAll(objectMapper.writeValueAsString(dataMap));
             
             LinkedHashMap<String,Object> message = new LinkedHashMap<>();
-            message.put("messageId", contentMap.get("messageId").toString());
-            ArrayList<Object> permissions = new ArrayList<>();
-            sessionUser.getRole().getPermissions().forEach(permission -> {
-                permissions.add(permission.getName());
-            });
-            message.put("permissions", permissions);
-            sendMessage(objectMapper.writeValueAsString(message));
-            return true;
-        } else if (token == null || token.isEmpty()) {
-            Map<String, String> dataMap = new HashMap<>();
-            dataMap.put("type", "error");
-            dataMap.put("data", "token is empty");
-            dataMap.put("messageId", contentMap.get("messageId").toString());
-            sendMessage(objectMapper.writeValueAsString(dataMap));
-            return true;
-        } else if (!jwtTokenProvider.validateToken(token)) {
-            Map<String, String> dataMap = new HashMap<>();
-            dataMap.put("type", "error");
-            dataMap.put("data", "token is invalid");
-            dataMap.put("messageId", contentMap.get("messageId").toString());
-            sendMessage(objectMapper.writeValueAsString(dataMap));
+            message.put("type", "pushRole");
+            message.put("role", sessionUser.getRole().getType());
+            sendMessage(message);
+            
+            actionExecutor.executeByTypeClass(SendPermissionsToUsersAction.class,List.of(sessionUser));
             return true;
         } else if (sessionUser != null) {
             if (sessionUser.isEnabled()) {
