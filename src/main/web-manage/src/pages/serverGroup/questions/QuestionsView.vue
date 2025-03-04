@@ -44,12 +44,12 @@ const filterNode = (value, node) => {
     return filterQuestionInfo(node.data);
 }
 
-const filterQuestionInfo = (questionInfo) => {
+const filterQuestionInfo = (questionInfo) => {//FIXME
     for (const v of filterText.value.split(",")) {
         if (v !== "" &&
-                (questionInfo.type === 'Partition') || (
+                (questionInfo.type === 'Partition') || (questionInfo.type === 'Question' && (
                         (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase())) ||
-                        (questionInfo.question.id && questionInfo.question.id.toUpperCase().includes(v.toUpperCase())))
+                        (questionInfo.question.id && questionInfo.question.id.toUpperCase().includes(v.toUpperCase()))))
         ) {
             return true;
         }
@@ -805,8 +805,9 @@ const getTypeName = (type) => {
                                                         }"></div>
                                                 <!--                                                :class="{'disable-tree-checkbox': !(nodeObj.data.type === 'Partition'?true:nodeObj.data.ableToEdit)}"-->
                                                 <div class="question-tree-node">
-                                                    <el-text v-if="nodeObj.data.type === 'Question'" size="small" type="info" style="margin-right: 8px;">
-                                                        {{getTypeName(nodeObj.data.question.type)}}
+                                                    <el-text v-if="nodeObj.data.type === 'Question'" size="small"
+                                                             type="info" style="margin-right: 8px;">
+                                                        {{ getTypeName(nodeObj.data.question.type) }}
                                                     </el-text>
                                                     <el-text class="question-tree-node-content"
                                                              :class="{
@@ -828,7 +829,9 @@ const getTypeName = (type) => {
                                                             <el-button class="node-button" size="small"
                                                                        @click.stop="nodeObj.data.editing = false"
                                                                        v-if="nodeObj.data.type === 'Partition'">
-                                                                <HarmonyOSIcon_Rename/>
+                                                                <div style="margin: 0 4px">
+                                                                    <HarmonyOSIcon_Rename/>
+                                                                </div>
                                                                 <el-text v-if="!UIMeta.mobile.value">重命名</el-text>
                                                             </el-button>
                                                         </template>
@@ -842,13 +845,21 @@ const getTypeName = (type) => {
                                                     <el-button class="node-button" size="small"
                                                                v-if="nodeObj.data.type === 'Partition'?PermissionInfo.hasPermission('partition','delete partititon'):nodeObj.data.ableToDelete"
                                                                @click.stop="onDeleteNode(nodeObj)">
-                                                        <HarmonyOSIcon_Remove/>
+                                                        <div style="margin: 0 4px">
+                                                            <el-icon :size="16" color="var(--front-color)"
+                                                                     v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
+                                                                <RefreshLeft/>
+                                                            </el-icon>
+                                                            <HarmonyOSIcon_Remove v-else/>
+                                                        </div>
                                                         <template v-if="!UIMeta.mobile.value">
-                                                            <el-text
-                                                                    v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
-                                                                撤销删除
-                                                            </el-text>
-                                                            <el-text v-else>删除</el-text>
+                                                            <div style="margin-right: 4px">
+                                                                <el-text
+                                                                        v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
+                                                                    撤销删除
+                                                                </el-text>
+                                                                <el-text v-else>删除</el-text>
+                                                            </div>
                                                         </template>
                                                     </el-button>
                                                 </el-button-group>
@@ -902,7 +913,8 @@ const getTypeName = (type) => {
                                 <el-text type="danger" style="margin: 4px;margin-right: 12px">
                                     题目上传出错
                                 </el-text>
-                                <el-button link type="primary" :icon="RefreshLeft" style="margin: 4px" @click="restoreAllErrorUploadChanges">
+                                <el-button link type="primary" :icon="RefreshLeft" style="margin: 4px"
+                                           @click="restoreAllErrorUploadChanges">
                                     全部重置更改
                                 </el-button>
                             </div>

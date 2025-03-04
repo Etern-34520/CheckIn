@@ -158,13 +158,13 @@ const openRecord = (id) => {
                         </div>
                     </div>
                     <div style="padding: 16px 16px 0;flex:1" class="panel" v-loading="loadingTodayExamRecords">
-                        <el-text size="large" style="align-self: baseline;">今日答题记录</el-text>
-                        <div style="display: flex;flex-direction: row;align-items:center"
+                        <el-text size="large" style="align-self: baseline;margin-top: 4px">今日答题记录</el-text>
+                        <div style="display: flex;flex-direction: row;align-items:center;margin-top: 16px;"
                              v-if="loadingTodayExamRecordsError">
                             <el-text style="align-self: center;margin-right: 12px" type="info">加载数据时出错</el-text>
                             <el-button link @click="loadTodayExamRecords">重新加载</el-button>
                         </div>
-                        <el-scrollbar v-else-if="!loadingTodayExamRecords" style="margin-top: 8px;flex:1">
+                        <el-scrollbar v-else-if="!loadingTodayExamRecords" style="margin-top: 16px;flex:1">
                             <transition name="blur-scale">
                                 <div v-if="todayExamRecords && todayExamRecords[formatDate(today)]">
                                     <transition-group name="slide-hide">
@@ -180,21 +180,22 @@ const openRecord = (id) => {
                                         </div>
                                     </transition-group>
                                 </div>
+                                <el-empty v-else-if="!loadingTodayExamRecords" description="无记录"/>
                             </transition>
                         </el-scrollbar>
                     </div>
                 </pane>
                 <pane min-size="40">
                     <div class="panel" style="display: flex;flex-direction: column;padding: 16px">
-                        <el-text size="large" style="align-self: baseline;">最近更新的题目</el-text>
-                        <div v-loading="loadingRecentUpdatedQuestions" style="display:flex;flex-direction:column;flex:1;height: 0">
+                        <el-text size="large" style="align-self: baseline;margin-top: 4px">最近更新的题目</el-text>
+                        <div v-loading="loadingRecentUpdatedQuestions" style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">
                             <div style="display: flex;flex-direction: row;align-items:center"
                                  v-if="loadingRecentUpdatedQuestionsError">
                                 <el-text style="align-self: center;margin-right: 12px" type="info">加载数据时出错</el-text>
                                 <el-button link @click="loadRecentUpdatedQuestions">重新加载</el-button>
                             </div>
-                            <el-scrollbar v-else-if="recentUpdatedQuestions && !loadingRecentUpdatedQuestions">
-                                <waterfall :data="recentUpdatedQuestions" :min-row-width="400">
+                            <el-scrollbar v-else-if="recentUpdatedQuestions && !loadingRecentUpdatedQuestions" style="position: relative">
+                                <waterfall :data="recentUpdatedQuestions" :min-row-width="400" style="max-width: calc(100% - 4px)">
                                     <template #item="{item,index}">
                                         <question-info-panel :question-info="item" class="clickable" disable-error-and-warning
                                                              style="margin: 4px"
@@ -202,6 +203,7 @@ const openRecord = (id) => {
                                     </template>
                                 </waterfall>
                             </el-scrollbar>
+                            <el-empty v-else-if="!loadingRecentUpdatedQuestions" description="无数据"/>
                         </div>
                     </div>
                 </pane>

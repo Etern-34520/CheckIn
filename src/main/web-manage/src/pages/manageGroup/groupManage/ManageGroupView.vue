@@ -126,11 +126,11 @@ const cancelCreating = () => {
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
                 <el-input v-model="filterText" placeholder="搜索用户组（以&quot;,&quot;分词）" prefix-icon="Search"
                           style="margin-bottom: 8px;flex: 1;min-width: 200px"/>
-                <el-popover trigger="click" width="400px" @after-leave="cancelCreating" style="margin-left: 8px;"
+                <el-popover trigger="click" width="400px" @after-leave="cancelCreating"
                             v-if="PermissionInfo.hasPermission('role','create role')">
                     <template #reference>
                         <!--suppress JSValidateTypes -->
-                        <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px" class="disable-init-animate">
+                        <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px;margin-bottom: 8px" class="disable-init-animate">
                             新建用户组
                         </el-button>
                     </template>

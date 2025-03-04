@@ -758,6 +758,9 @@
     transition: background-color 200ms var(--ease-in-out-quint);
     font-weight: normal !important;
     text-align: center;
+    height: auto !important;
+    min-height: 24px !important;
+    padding: 4px 9px !important;
 }
 
 .el-check-tag--primary {
@@ -786,6 +789,13 @@
     left: min(4px,20%) !important;
     opacity: 1 !important;
     margin-top: 4px !important;
+}
+
+.el-tag__content {
+    transition: 200ms var(--ease-in-out-quint);
+    word-break: break-all;
+    white-space: break-spaces;
+    text-align: start;
 }
 
 .el-tag__content {

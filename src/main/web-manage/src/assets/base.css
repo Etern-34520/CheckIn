@@ -805,8 +805,17 @@
     margin-top: 4px !important;
 }
 
+.el-tag {
+    height: auto !important;
+    min-height: 24px !important;
+    padding: 4px 9px !important;
+}
+
 .el-tag__content {
     transition: 200ms var(--ease-in-out-quint);
+    word-break: break-all;
+    white-space: break-spaces;
+    text-align: start;
 }
 
 .md-editor-dropdown,
