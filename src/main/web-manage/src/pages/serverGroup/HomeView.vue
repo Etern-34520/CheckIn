@@ -157,32 +157,34 @@ const openRecord = (id) => {
                             </el-text>
                         </div>
                     </div>
-                    <div style="padding: 16px 16px 0;flex:1" class="panel" v-loading="loadingTodayExamRecords">
+                    <div style="padding: 16px 16px 0;flex:1" class="panel">
                         <el-text size="large" style="align-self: baseline;margin-top: 4px">今日答题记录</el-text>
-                        <div style="display: flex;flex-direction: row;align-items:center;margin-top: 16px;"
-                             v-if="loadingTodayExamRecordsError">
-                            <el-text style="align-self: center;margin-right: 12px" type="info">加载数据时出错</el-text>
-                            <el-button link @click="loadTodayExamRecords">重新加载</el-button>
-                        </div>
-                        <el-scrollbar v-else-if="!loadingTodayExamRecords" style="margin-top: 16px;flex:1">
-                            <transition name="blur-scale">
-                                <div v-if="todayExamRecords && todayExamRecords[formatDate(today)]">
-                                    <transition-group name="slide-hide">
-                                        <div class="slide-hide-base"
-                                             v-for="(record,id,index) in todayExamRecords[formatDate(today)]"
-                                             :key="record.id">
-                                            <div>
-                                                <exam-record-item style="min-height: 0"
-                                                                  :record="record"
-                                                                  class="clickable"
-                                                                  @click="openRecord(record.id)"/>
+                        <div v-loading="loadingTodayExamRecords" style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">
+                            <div style="display: flex;flex-direction: row;align-items:center;"
+                                 v-if="loadingTodayExamRecordsError">
+                                <el-text style="align-self: center;margin-right: 12px" type="info">加载数据时出错</el-text>
+                                <el-button link @click="loadTodayExamRecords">重新加载</el-button>
+                            </div>
+                            <el-scrollbar v-else-if="!loadingTodayExamRecords" style="margin-top: 16px;flex:1">
+                                <transition name="blur-scale">
+                                    <div v-if="todayExamRecords && todayExamRecords[formatDate(today)]">
+                                        <transition-group name="slide-hide">
+                                            <div class="slide-hide-base"
+                                                 v-for="(record,id,index) in todayExamRecords[formatDate(today)]"
+                                                 :key="record.id">
+                                                <div>
+                                                    <exam-record-item style="min-height: 0"
+                                                                      :record="record"
+                                                                      class="clickable"
+                                                                      @click="openRecord(record.id)"/>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </transition-group>
-                                </div>
-                                <el-empty v-else-if="!loadingTodayExamRecords" description="无记录"/>
-                            </transition>
-                        </el-scrollbar>
+                                        </transition-group>
+                                    </div>
+                                    <el-empty v-else-if="!loadingTodayExamRecords" description="无记录"/>
+                                </transition>
+                            </el-scrollbar>
+                        </div>
                     </div>
                 </pane>
                 <pane min-size="40">

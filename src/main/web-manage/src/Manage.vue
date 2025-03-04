@@ -116,5 +116,6 @@ const user = UserDataInterface.getCurrentUser();
 
 #manage-base > *:nth-of-type(2) {
     flex: 1;
+    width: 0;
 }
 </style>

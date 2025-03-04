@@ -3,6 +3,7 @@ import getAvatarUrlOf from "@/Avatar.js";
 import HarmonyOSIcon_InfoCircle from "@/icons/HarmonyOSIcon_InfoCircle.vue";
 import router from "@/router/index.js";
 import {ElMessageBox} from "element-plus";
+import {ArrowLeftBold} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 const props = defineProps({
@@ -64,11 +65,20 @@ const startExam = () => {
 
 const validate1 = computed(() => selectedPartitions.value.length >= props.extraData.partitionRange[0] && selectedPartitions.value.length <= props.extraData.partitionRange[1]);
 const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 100000000000);
+
+const back = () => {
+    proxy.$cookies.remove("phrase");
+    router.push({name: "facade"});
+}
 </script>
 
 <template>
     <div class="auto-padding-center" style="flex:1">
-        <el-text style="font-size: 24px;align-self: baseline;margin-top: 64px">选择分区</el-text>
+        <el-button link size="large" @click="back"
+                   style="margin-top: 36px;align-self: baseline;padding: 8px 16px !important;font-size: 1em">
+            <el-icon><ArrowLeftBold/></el-icon>返回
+        </el-button>
+        <el-text style="font-size: 24px;align-self: baseline;margin-top: 24px">选择分区</el-text>
         <div class="panel" style="padding: 16px 24px;margin-top: 36px" v-if="extraData.requiredPartitions && extraData.requiredPartitions.length > 0">
             <el-text size="large" style="align-self: baseline">必选分区</el-text>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
@@ -88,7 +98,7 @@ const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 1000
                 </el-text>
             </div>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
-                <el-check-tag size="large" type="info" style="font-size: 14px;margin: 2px"
+                <el-check-tag size="large" type="info" style="font-size: 14px;margin: 2px;padding: 12px 16px 0 16px !important;"
                               v-for="partition of selectablePartitions"
                               :checked="selectedPartitions.includes(Number(partition.id))"
                               @click="selectPartition(Number(partition.id))">

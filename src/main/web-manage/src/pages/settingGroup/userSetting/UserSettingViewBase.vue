@@ -23,17 +23,4 @@ onMounted(() => {
     </div>
 </template>
 
-<style scoped>/*
-.transition-page-enter-active,
-.transition-page-leave-active {
-    transition: 400ms var(--ease-in-out-quint);
-}
-
-.transition-page-enter-from {
-    transform: translateX(calc(-100% - 200px));
-}
-
-.transition-page-leave-to {
-    transform: translateX(calc(100% + 200px));
-}
-*/</style>
+<style scoped></style>

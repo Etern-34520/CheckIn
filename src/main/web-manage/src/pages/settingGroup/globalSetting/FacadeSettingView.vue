@@ -47,18 +47,6 @@ const finishEditing = () => {
             })
         })
     }
-    /*WebSocketConnector.send({
-        type: "saveVerificationSetting",
-        data: data.value
-    }).then(() => {
-        ElMessage({
-            type: "success", message: "保存成功"
-        })
-    }, (err) => {
-        ElMessage({
-            type: "error", message: "保存失败"
-        })
-    })*/
 }
 
 const getData = () => {
@@ -152,10 +140,9 @@ const deleteIcon = () => {
                              style="display: inherit;flex-direction: inherit;flex: inherit;align-items:center;width: 100%">
                             <div style="display: flex;flex-direction: row;flex-wrap: wrap;max-width: 80vw;width: 80vw;">
                                 <div v-if="data.icon" class="icon-image" style="position: relative">
-                                    <el-image
-                                            style="filter: saturate(2) blur(64px);transform: scale(3) translate3d(20%,5%,0); position: absolute"
+                                    <el-image style="width: 100%;height: 100%;filter: saturate(2) blur(64px);transform: scale(3) translate3d(20%,5%,0);position: absolute"
                                             :src="data.icon" fit="contain"></el-image>
-                                    <el-image :src="data.icon" fit="contain"></el-image>
+                                    <el-image :src="data.icon" fit="contain" style="width: 100%;height: 100%;"></el-image>
                                 </div>
                                 <div style="display: flex;flex-direction: column;margin-left: 32px;margin-right: 16px;margin-bottom: 48px;z-index: 1;justify-content: center;">
                                     <el-text

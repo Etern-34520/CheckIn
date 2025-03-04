@@ -257,48 +257,55 @@ const buttonsOption2 = ref([
 ]);
 </script>
 
-<template>
-    <div style="display: flex;flex-direction: column;align-items: center;">
-        <div style="max-width: 1280px; width: min(75vw, 1280px); display: flex; flex-direction: column;">
-            <custom-dialog v-model="changePasswordDialogVisible" ref="changePasswordDialog" @closed="onclose"
-                           title="修改密码" :buttons-option="buttonsOption1">
-                <div class="dialog-input-label">
-                    <el-text>原密码</el-text>
-                </div>
-                <el-input v-model="oldPassword" :disabled="done" type="password" placeholder=""/>
-                <div class="dialog-input-label">
-                    <el-text>新密码</el-text>
-                </div>
-                <el-input v-model="newPassword" :disabled="done" type="password" placeholder=""/>
-                <div class="dialog-input-label">
-                    <el-text>重复新密码</el-text>
-                </div>
-                <el-input v-model="newPasswordRepeat" :disabled="done" type="password" placeholder=""/>
-            </custom-dialog>
-            <custom-dialog v-model="changeNameDialogVisible" ref="changeUserNameDialog" @closed="onclose"
-                           title="修改用户名"
-                           :buttons-option="buttonsOption2">
-                <div class="dialog-input-label">
-                    <el-text>新用户名</el-text>
-                </div>
-                <el-input v-model="name" :disabled="done" placeholder=""/>
-            </custom-dialog>
-            <div style="display: flex;flex-direction: row;margin-bottom: 28px">
-                <el-avatar shape="circle" style="width: 84px;height: 84px;margin-right: 16px;"
-                           :src="getAvatarUrlOf(user.qq)"/>
-                <div style="display:flex;flex-direction: column;justify-content: center;">
-                    <el-text style="font-size: 24px;align-self: baseline">{{ user.name }}</el-text>
-                    <el-text style="font-size: 16px;align-self: baseline" type="info">{{ user.qq }}</el-text>
-                    <el-text style="font-size: 16px;align-self: baseline" type="info">{{ user.role }}</el-text>
+<template><!--FIXME scroll and transition-->
+    <div>
+        <el-scrollbar style="flex: 1">
+            <div style="display: flex;flex-direction: column;align-items: center;width: calc(100% - 4px)">
+                <div style="max-width: 1280px; width: min(75vw, 1280px); display: flex; flex-direction: column;">
+                    <custom-dialog v-model="changePasswordDialogVisible" ref="changePasswordDialog" @closed="onclose"
+                                   title="修改密码" :buttons-option="buttonsOption1">
+                        <div class="dialog-input-label">
+                            <el-text>原密码</el-text>
+                        </div>
+                        <el-input v-model="oldPassword" :disabled="done" type="password" placeholder=""/>
+                        <div class="dialog-input-label">
+                            <el-text>新密码</el-text>
+                        </div>
+                        <el-input v-model="newPassword" :disabled="done" type="password" placeholder=""/>
+                        <div class="dialog-input-label">
+                            <el-text>重复新密码</el-text>
+                        </div>
+                        <el-input v-model="newPasswordRepeat" :disabled="done" type="password" placeholder=""/>
+                    </custom-dialog>
+                    <custom-dialog v-model="changeNameDialogVisible" ref="changeUserNameDialog" @closed="onclose"
+                                   title="修改用户名"
+                                   :buttons-option="buttonsOption2">
+                        <div class="dialog-input-label">
+                            <el-text>新用户名</el-text>
+                        </div>
+                        <el-input v-model="name" :disabled="done" placeholder=""/>
+                    </custom-dialog>
+                    <div style="display: flex;flex-direction: row;margin-bottom: 28px">
+                        <el-avatar shape="circle" style="width: 84px;height: 84px;margin-right: 16px;"
+                                   :src="getAvatarUrlOf(user.qq)"/>
+                        <div style="display:flex;flex-direction: column;justify-content: center;">
+                            <el-text style="font-size: 24px;align-self: baseline">{{ user.name }}</el-text>
+                            <el-text style="font-size: 16px;align-self: baseline" type="info">{{ user.qq }}</el-text>
+                            <el-text style="font-size: 16px;align-self: baseline" type="info">{{ user.role }}</el-text>
+                        </div>
+                    </div>
+                    <div v-for="group of groups"
+                         style="display: flex;flex-direction: column;margin-bottom: 16px;margin-left: 8px;margin-right: 8px">
+                        <el-text style="font-size: 20px;align-self: baseline;margin-bottom: 8px">{{
+                                group.name
+                            }}
+                        </el-text>
+                        <link-panel @click="item.action()" v-for="item of group.items" :key="item.name"
+                                    :description="item.description" :name="item.name" :icon="item.icon"/>
+                    </div>
                 </div>
             </div>
-            <div v-for="group of groups"
-                 style="display: flex;flex-direction: column;margin-bottom: 16px;margin-left: 8px;margin-right: 8px">
-                <el-text style="font-size: 20px;align-self: baseline;margin-bottom: 8px">{{ group.name }}</el-text>
-                <link-panel @click="item.action()" v-for="item of group.items" :key="item.name"
-                            :description="item.description" :name="item.name" :icon="item.icon"/>
-            </div>
-        </div>
+        </el-scrollbar>
     </div>
 </template>
 

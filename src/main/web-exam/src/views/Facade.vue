@@ -29,27 +29,27 @@ const routeGenerateExam = () => {
     <div class="facade">
         <div class="auto-padding-center" style="flex-direction: row">
             <div v-if="facadeData.icon" class="icon-image" style="position: relative">
-                <el-image
-                        style="filter: saturate(2) blur(64px);transform: scale(3) translate3d(20%,5%,0); position: absolute"
-                        :src="facadeData.icon" fit="contain"></el-image>
-                <el-image :src="facadeData.icon" fit="contain"></el-image>
+                <el-image class="icon-blur"
+                          style="filter: saturate(2) blur(64px);transform: scale(3) translate3d(20%,5%,0);position: absolute;width: 100%;height: 100%;"
+                          :src="facadeData.icon" fit="contain"></el-image>
+                <el-image class="icon-main" :src="facadeData.icon" fit="contain"
+                          style="width: 100%;height: 100%;"></el-image>
             </div>
             <div style="display: flex;flex-direction: column;margin-left: 32px;margin-right: 16px;margin-bottom: 48px;z-index: 1;justify-content: center;">
-                <el-text
-                        style="font-size: 44px;font-weight: bolder;height: 60px;margin-top:20px;min-width: 300px;align-self: baseline;"
-                        :type="facadeData.title?undefined:'info'">{{
+                <el-text class="title"
+                         style="font-size: 44px;font-weight: bolder;height: 60px;margin-top:20px;min-width: 300px;align-self: baseline;"
+                         :type="facadeData.title?undefined:'info'">{{
                         facadeData.title ? facadeData.title : "[无标题]"
                     }}
                 </el-text>
-                <el-text
-                        style="font-size: 24px;height: 40px;margin-top:20px;min-width: 240px;margin-bottom: 40px;align-self: baseline;"
-                        :type="facadeData.subTitle?undefined:'info'">
+                <el-text class="subtitle"
+                         style="font-size: 24px;height: 40px;margin-top:20px;min-width: 240px;margin-bottom: 40px;align-self: baseline;"
+                         :type="facadeData.subTitle?undefined:'info'">
                     {{ facadeData.subTitle ? facadeData.subTitle : "[无副标题]" }}
                 </el-text>
             </div>
             <div class="flex-blank-1"></div>
-            <div class="panel-1"
-                 style="display: flex;flex-direction:column;align-items:stretch;justify-content:start;width: 400px;padding: 20px 32px;z-index: 1;align-self: center;margin-left: 32px;">
+            <div class="panel-1 exam-info">
                 <el-text size="large" style="align-self: start;">答题信息</el-text>
                 <div style="display: flex;flex-direction: row;align-items: center;margin-top: 8px;">
                     <div style="display: flex;flex-direction: column;margin-right: 8px">
@@ -76,7 +76,6 @@ const routeGenerateExam = () => {
                 <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;">
                     <el-tag style="align-self: start" type="info">分数段</el-tag>
                 </div>
-<!--                {{extraData}}-->
                 <div style="display: flex">
                     <el-text style="margin-right: 8px;">{{ gradingData.splits[0] }}</el-text>
                     <div style="display: flex;flex-direction: column;flex: 1;margin-right: 8px;">
@@ -106,7 +105,7 @@ const routeGenerateExam = () => {
                 </div>
             </div>
         </div>
-        <div style="flex:1;width: 100%;background: var(--html-bg) var(--lighting-effect-background-2);z-index: 1;margin-top: 64px;display: flex;flex-direction: column;align-items: center;padding-bottom: 200px">
+        <div class="facade-content">
             <md-editor no-upload-img placeholder="描述" v-model="facadeData.description"
                        class="preview-only"
                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
@@ -123,9 +122,9 @@ const routeGenerateExam = () => {
 
 <style scoped>
 .facade {
-    display: inherit;
-    flex-direction: inherit;
-    flex: inherit;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     align-items: center;
     width: 100%;
     margin-top: 10vh;
@@ -153,5 +152,86 @@ const routeGenerateExam = () => {
     min-height: 6px;
     border-radius: 3px;
     margin-top: 4px;
+}
+
+@keyframes ani-0 {
+    0% {
+        filter: blur(4px);
+        transform: translate3d(-40px, 0, 0);
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes ani-1 {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes ani-2 {
+    0% {
+        filter: blur(16px);
+        scale: 0.95;
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.title {
+    animation: ani-0 600ms 400ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
+}
+
+.subtitle {
+    animation: ani-0 600ms 800ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
+}
+
+.icon-blur {
+    animation: ani-1 800ms 400ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
+}
+
+.icon-main {
+    animation: ani-1 500ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
+}
+
+.exam-info {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: start;
+    width: 400px;
+    padding: 20px 32px;
+    z-index: 1;
+    align-self: center;
+    margin-left: 32px;
+
+    animation: ani-2 600ms 800ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
+}
+
+.facade-content {
+    flex: 1;
+    width: 100%;
+    background: var(--html-bg) var(--lighting-effect-background-2);
+    z-index: 1;
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 200px;
+
+    animation: ani-2 1000ms 900ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
 }
 </style>
