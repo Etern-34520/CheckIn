@@ -760,7 +760,13 @@
     text-align: center;
     height: auto !important;
     min-height: 24px !important;
-    padding: 4px 9px !important;
+    padding: 2px 9px !important;
+}
+
+.el-check-tag {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
 }
 
 .el-check-tag--primary {

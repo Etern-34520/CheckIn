@@ -88,7 +88,7 @@
                 </configuration>
             </plugin>
         </plugins>
-        <resources>
+        <!--<resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>false</filtering>
@@ -96,7 +96,7 @@
                     <exclude>application-dev.properties</exclude>
                 </excludes>
             </resource>
-        </resources>
+        </resources>-->
     </build>
     <dependencies>
         <dependency>

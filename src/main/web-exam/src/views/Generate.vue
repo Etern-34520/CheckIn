@@ -98,7 +98,7 @@ const back = () => {
                 </el-text>
             </div>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
-                <el-check-tag size="large" type="info" style="font-size: 14px;margin: 2px;padding: 12px 16px 0 16px !important;"
+                <el-check-tag size="large" type="info" style="font-size: 14px;margin: 2px;"
                               v-for="partition of selectablePartitions"
                               :checked="selectedPartitions.includes(Number(partition.id))"
                               @click="selectPartition(Number(partition.id))">

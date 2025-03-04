@@ -43,7 +43,7 @@ const select = (index) => {
     <waterfall :data="question.choices" :min-row-width="400">
         <template #item="{item,index}">
             <div style="display: flex;flex-direction: column;padding: 6px" v-if="model.selected">
-                <el-check-tag class="choice" type="info" style="flex: 1;padding-top: 10px !important;padding-bottom: 0 !important;" :checked="model.selected[String(index)]"
+                <el-check-tag class="choice" type="info" style="flex: 1;" :checked="model.selected[String(index)]"
                               @click="select(index);">
                     <el-text>{{ item.content}}</el-text>
                 </el-check-tag>

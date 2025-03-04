@@ -843,7 +843,7 @@ const getTypeName = (type) => {
                                                         </template>
                                                     </el-popover>
                                                     <el-button class="node-button" size="small"
-                                                               v-if="nodeObj.data.type === 'Partition'?PermissionInfo.hasPermission('partition','delete partititon'):nodeObj.data.ableToDelete"
+                                                               v-if="nodeObj.data.type === 'Partition'?PermissionInfo.hasPermission('partition','delete partition'):nodeObj.data.ableToDelete"
                                                                @click.stop="onDeleteNode(nodeObj)">
                                                         <div style="margin: 0 4px">
                                                             <el-icon :size="16" color="var(--front-color)"
