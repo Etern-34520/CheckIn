@@ -17,7 +17,7 @@ const props = defineProps({
             <mask id="_mask-10" class="svg-text-fill" fill="white">
                 <use xlink:href="#_path-10"/>
             </mask>
-            <use id="_Combined-Shape" class="svg-text-fill" fill="#000000" fill-rule="nonzero" xlink:href="#_path-10"/>
+            <use id="_Combined-Shape" class="svg-text-fill" fill="none" fill-rule="nonzero" xlink:href="#_path-10"/>
         </g>
     </svg>
 </template>

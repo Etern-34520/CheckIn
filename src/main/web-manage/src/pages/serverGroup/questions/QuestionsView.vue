@@ -711,7 +711,7 @@ const getTypeName = (type) => {
             <el-button type="primary" style="margin-top: 8px" @click="upload" :loading="uploading"
                        loading-icon="_Loading_"
                        :disabled="!QuestionCache.reactiveDirty.value">
-                <HarmonyOSIcon_Upload/>
+                <HarmonyOSIcon_Upload style="margin-right: 8px"/>
                 <el-text>{{ errorsDisplay ? "确认上传" : "上传题目更改" }}</el-text>
             </el-button>
             <!--                    <el-scrollbar>-->

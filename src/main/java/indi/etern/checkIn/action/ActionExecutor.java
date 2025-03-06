@@ -121,28 +121,4 @@ public class ActionExecutor {
         BaseAction<T, InitDataType> action = applicationContext.getBean(clazz);
         return action.call(initData);
     }
-/*
-    public <T> Optional<T> executeByTypeClass(Class<? extends BaseAction<T, ?>> clazz, Object dataObj) {
-        BaseAction<?, ?> action = applicationContext.getBean(clazz);
-        Method[] methods = action.getClass().getMethods();
-        try {
-            for (Method method : methods) {
-                if (method.getName().equals("initData")) {
-                    Class<?> parameterType = method.getParameterTypes()[0];
-                    if (parameterType.isInstance(dataObj)) {
-                        method.invoke(action, dataObj);
-                        break;
-                    } else {
-                        throw new ClassCastException("dataMap cannot be cased to '"+ parameterType +"'");
-                    }
-                }
-            }
-            logger.debug("Execute by type class and data object: {}", clazz.getName());
-            //noinspection unchecked
-            return (Optional<T>) action.call();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-*/
 }

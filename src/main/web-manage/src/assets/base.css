@@ -44,19 +44,17 @@
     --fullscreen-bg-color: rgba(255, 255, 255, 0.9);
     --popper-bg-color: rgba(255, 255, 255, 0.75);
     --icon-color: var(--icon-color-dark);
-    --icon-color-1: var(--icon-color-dark-1);
     --icon-color-reverse: var(--icon-color-light);
-    --icon-color-reverse-1: var(--icon-color-light-1);
     --front-color: var(--front-color-dark);
     --front-color-reserse: var(--front-color-light);
     --slider-button-color: rgb(255, 255, 255);
-    --dialog-bg-color: rgba(255, 255, 255, 0.6);
-    --dialog-footer-color: rgba(200, 200, 200, 0.6);
+    --dialog-bg-color: rgba(255, 255, 255, 0.9);
+    --dialog-footer-color: rgba(220, 220, 220, 0.6);
     --tree-node-bg-color: rgba(0, 0, 0, 0);
     --lighting-effect-background-1: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.08) 100%);
     --lighting-effect-background-2: linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.06) 100%);
     --lighting-effect-background-3: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.03) 100%);
-    --primary-button-text-color: rgba(255, 255, 255, 0.95);
+    --primary-button-text-color: rgba(0, 0, 0, 0.95);
 }
 
 .dark:root {
@@ -75,9 +73,7 @@
     --icon-color: var(--icon-color-light);
     --icon-color-1: var(--icon-color-light-1);
     --icon-color-reverse: var(--icon-color-dark);
-    --icon-color-reverse-1: var(--icon-color-dark-1);
     --front-color: var(--front-color-light);
-    --front-color-reserse: var(--front-color-dark);
     --slider-button-color: rgb(60, 60, 60);
     --dialog-bg-color: rgba(30, 30, 30, 0.6);
     --dialog-footer-color: rgba(10, 10, 10, 0.6);
@@ -108,6 +104,11 @@
 .el-button {
     transform: scale(1);
     transition: all 200ms var(--ease-in-out-quint) !important;
+}
+
+.el-button--info {
+    --el-button-text-color: var(--el-text-color-secondary) !important;
+    --el-button-hover-text-color: var(--el-text-color) !important;
 }
 
 .el-button:not(.disable-init-animate) {

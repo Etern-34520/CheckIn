@@ -181,7 +181,9 @@ public class ExamGenerator {
 //            examDataService.saveAndFlush(examData);
         } catch (Exception e) {
             logger.error("remediate exam failed", e);
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) {
+                e.printStackTrace();
+            }
             throw e;
         }
         return examData;

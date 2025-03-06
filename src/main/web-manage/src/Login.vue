@@ -48,7 +48,7 @@ const getIcon = () => {
     justify-content: center;
     width: 100%;
     height: 100%;
-    color: var(--text-color);
+    color: var(--el-text-color);
     opacity: 0.07;
     user-select: none;
     overflow: hidden;

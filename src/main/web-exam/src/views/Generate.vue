@@ -2,8 +2,9 @@
 import getAvatarUrlOf from "@/Avatar.js";
 import HarmonyOSIcon_InfoCircle from "@/icons/HarmonyOSIcon_InfoCircle.vue";
 import router from "@/router/index.js";
-import {ElMessageBox} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import {ArrowLeftBold} from "@element-plus/icons-vue";
+import _Loading_ from "@/components/_Loading_.vue";
 
 const {proxy} = getCurrentInstance();
 const props = defineProps({
@@ -38,7 +39,9 @@ const selectPartition = (partitionId) => {
 
 const qqNumber = ref();
 
+const loadingExam = ref(false);
 const startExam = () => {
+    loadingExam.value = true;
     proxy.$http.post("generate", {
         qq: qqNumber.value,
         partitionIds: selectedPartitions.value
@@ -50,6 +53,7 @@ const startExam = () => {
             proxy.$cookies.remove("timestamps");
             router.push({name: "examining"});
         } else {
+            loadingExam.value = false;
             ElMessageBox.alert(
                     data.cnDescription?data.cnDescription:data.enDescription?data.enDescription:data.exceptionType,
                     "生成题目时出错", {
@@ -60,6 +64,12 @@ const startExam = () => {
                     }
             )
         }
+    }, (err) => {
+        loadingExam.value = false;
+        ElMessage({
+            type: "error",
+            message: "生成题目时出错" + err.message
+        })
     })
 }
 
@@ -78,34 +88,36 @@ const back = () => {
                    style="margin-top: 36px;align-self: baseline;padding: 8px 16px !important;font-size: 1em">
             <el-icon><ArrowLeftBold/></el-icon>返回
         </el-button>
-        <el-text style="font-size: 24px;align-self: baseline;margin-top: 24px">选择分区</el-text>
-        <div class="panel" style="padding: 16px 24px;margin-top: 36px" v-if="extraData.requiredPartitions && extraData.requiredPartitions.length > 0">
-            <el-text size="large" style="align-self: baseline">必选分区</el-text>
-            <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
-                <el-tag size="large" type="info" style="font-size: 14px;margin: 2px"
-                        v-for="requiredPartitionId of extraData.requiredPartitions">
-                    {{ partitions[requiredPartitionId] }}
-                </el-tag>
+        <template v-if="(extraData.requiredPartitions && extraData.requiredPartitions.length > 0) || (selectablePartitions.length > 0)">
+            <el-text style="font-size: 24px;align-self: baseline;margin-top: 24px">选择分区</el-text>
+            <div class="panel" style="padding: 16px 24px;margin-top: 36px" v-if="extraData.requiredPartitions && extraData.requiredPartitions.length > 0">
+                <el-text size="large" style="align-self: baseline">必选分区</el-text>
+                <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
+                    <el-tag size="large" type="info" style="font-size: 14px;margin: 2px"
+                            v-for="requiredPartitionId of extraData.requiredPartitions">
+                        {{ partitions[requiredPartitionId] }}
+                    </el-tag>
+                </div>
             </div>
-        </div>
-        <div class="panel" style="padding: 16px 24px;margin-top: 24px">
-            <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
-                <el-text size="large" style="margin-right: 8px;">可选分区</el-text>
-                <el-text>{{ selectedPartitions.length }} / {{ selectablePartitions.length }}</el-text>
-                <el-text style="margin-left: 8px;"
-                         :type="validate1?'info':'danger'">
-                    请选择 {{ extraData.partitionRange[0] }} ~ {{ extraData.partitionRange[1] }} 个
-                </el-text>
+            <div class="panel" v-if="selectablePartitions.length > 0" style="padding: 16px 24px;margin-top: 24px">
+                <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+                    <el-text size="large" style="margin-right: 8px;">可选分区</el-text>
+                    <el-text>{{ selectedPartitions.length }} / {{ selectablePartitions.length }}</el-text>
+                    <el-text style="margin-left: 8px;"
+                             :type="validate1?'info':'danger'">
+                        请选择 {{ extraData.partitionRange[0] }} ~ {{ extraData.partitionRange[1] }} 个
+                    </el-text>
+                </div>
+                <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
+                    <el-check-tag size="large" type="info" style="font-size: 14px;margin: 2px;"
+                                  v-for="partition of selectablePartitions"
+                                  :checked="selectedPartitions.includes(Number(partition.id))"
+                                  @click="selectPartition(Number(partition.id))">
+                        {{ partition.name }}
+                    </el-check-tag>
+                </div>
             </div>
-            <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
-                <el-check-tag size="large" type="info" style="font-size: 14px;margin: 2px;"
-                              v-for="partition of selectablePartitions"
-                              :checked="selectedPartitions.includes(Number(partition.id))"
-                              @click="selectPartition(Number(partition.id))">
-                    {{ partition.name }}
-                </el-check-tag>
-            </div>
-        </div>
+        </template>
         <div style="display: flex;flex-direction: row;align-items: center;margin-top: 36px">
             <el-text style="font-size: 24px;align-self: baseline;margin-right: 16px;">你的QQ号码</el-text>
             <el-popover trigger="hover" width="160">
@@ -123,7 +135,8 @@ const back = () => {
                              :controls="false" style="min-width: min(70vw,200px)"/>
         </div>
         <div class="flex-blank-1"></div>
-        <el-button type="primary" size="large" style="margin-top: 36px;margin-bottom: 64px;align-self: center"
+        <el-button type="primary" size="large" :loading="loadingExam" :loading-icon="_Loading_"
+                   style="margin-top: 36px;margin-bottom: 64px;align-self: center;min-width: 180px"
                    @click="startExam" :disabled="!(validate1 && validate2)">开始答题
         </el-button>
     </div>

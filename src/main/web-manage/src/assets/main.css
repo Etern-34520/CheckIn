@@ -91,20 +91,12 @@ div.panel {
     fill: var(--icon-color) !important;
 }
 
-.svg-text-fill-1 {
-    fill: var(--icon-color-1) !important;
-}
-
 .svg-text-stroke {
     stroke: var(--icon-color);
 }
 
 .el-button--primary .svg-text-fill {
-    fill: var(--icon-color-reverse) !important;
-}
-
-.el-button--primary .svg-text-fill-1 {
-    fill: var(--icon-color-reverse-1) !important;
+    fill: var(--primary-button-text-color) !important;
 }
 
 * {
