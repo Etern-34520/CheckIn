@@ -14,8 +14,6 @@ import indi.etern.checkIn.throwable.entity.QuestionBuilderException;
 import indi.etern.checkIn.throwable.entity.QuestionException;
 import jakarta.persistence.*;
 import lombok.Getter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.util.*;
 
@@ -23,7 +21,7 @@ import java.util.*;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
-public class MultipleChoicesQuestion extends Question implements RandomOrderable, Answerable<List<String>> {
+public class MultipleChoicesQuestion extends Question implements RandomOrderable, Answerable<List<Integer>> {
     protected boolean randomOrdered;
     
     protected MultipleChoicesQuestion() {
@@ -62,9 +60,9 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
     }
     
     @Override
-    public MultipleChoiceAnswer newAnswerFrom(List<String> choiceIds) {
+    public MultipleChoiceAnswer newAnswerFrom(List<Integer> choiceIndexes) {
         final MultipleChoiceAnswer multipleChoiceAnswer = new MultipleChoiceAnswer();
-        multipleChoiceAnswer.initFromSource(this,choiceIds);
+        multipleChoiceAnswer.initFromSource(this, choiceIndexes);
         return multipleChoiceAnswer;
     }
     
@@ -102,10 +100,11 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
 //    @Enumerated(EnumType.STRING)
     MultipleChoicesQuestion.Type multipleChoiceType;
     
+    @ElementCollection
     @OrderBy("orderIndex")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @Fetch(value = FetchMode.SUBSELECT)
-    @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+//    @Fetch(value = FetchMode.SUBSELECT)
+//    @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     List<Choice> choices;
     
     private void setRandomOrdered(boolean randomOrdered) {
@@ -230,7 +229,7 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
                 String string = SettingService.singletonInstance.getItem("other","defaultPartitionName").getValue(String.class);
                 if (string == null) string = "undefined";
                 String finalString = string;
-                usePartitionLinks(partitionLink -> partitionLink.getTargets().add(Partition.getInstance(finalString)));
+                usePartitionLinks(partitionLink -> partitionLink.getTargets().add(Partition.ofName(finalString)));
             }
             multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, /*partitions,*/ author);
             multipleQuestion.setEnabled(enable);

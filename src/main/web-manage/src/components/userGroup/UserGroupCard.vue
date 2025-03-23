@@ -17,7 +17,9 @@ const showDeleteRoleUserActions = ref(false);
 const doDelete = (showNotification = true) => {
     return WebSocketConnector.send({
         type: "deleteRole",
-        roleType: props.userGroup.type
+        data: {
+            roleType: props.userGroup.type
+        }
     }).then(() => {
         ElMessage({
             type: 'success',
@@ -72,7 +74,9 @@ const buttonsOption = ref([{
             if (optionType.value === 'delete') {
                 WebSocketConnector.send({
                     type: "delete users",
-                    qqList: qqList,
+                    data: {
+                        qqList: qqList,
+                    }
                 }).then(() => {
                     doDelete().then(() => {
                         onClose();
@@ -86,8 +90,10 @@ const buttonsOption = ref([{
             } else {
                 WebSocketConnector.send({
                     type: "change users role",
-                    qqList: qqList,
-                    targetRole: targetUserGroupName.value,
+                    data: {
+                        qqList: qqList,
+                        targetRole: targetUserGroupName.value,
+                    }
                 }).then(() => {
                     delete buttonsOption.value[0].loading;
                     doDelete().then(() => {

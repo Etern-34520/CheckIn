@@ -130,7 +130,9 @@ const WebSocketConnector = {
                 ws.onopen = function () {
                     this.send({
                         type: "token",
-                        token: token
+                        data: {
+                            token: token
+                        }
                     });
                     this.registerAction("updatePermissions", (message) => {
                         PermissionInfo.init(message.permissions);
@@ -268,7 +270,9 @@ const WebSocketConnector = {
         };
         WebSocketConnector.send({
             type: "subscribe",
-            channel: channelName
+            data: {
+                channel: channelName
+            }
         }).then((message) => {
             if (!this.channels[channelName]) {
                 this.channels[channelName] = {

@@ -35,8 +35,10 @@ const update = (newVal, oldVal) => {
     });
     WebSocketConnector.send({
         type: "getQuestionsByUserQQ",
-        qq: Number(route.params.id),
-        limit: 6
+        data: {
+            qq: Number(route.params.id),
+            limit: 6
+        }
     }).then((respData) => {
         questionLoaded = true;
         const questionInfos = [];

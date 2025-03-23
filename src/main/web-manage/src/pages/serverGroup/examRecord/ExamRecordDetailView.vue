@@ -59,7 +59,9 @@ const update = () => {
     showError.value = false;
     WebSocketConnector.send({
         type: "getExamRecordDetail",
-        id: route.params.id
+        data: {
+            id: route.params.id
+        }
     }).then((response) => {
         data.value = response.examData;
         reloadRelatedData();

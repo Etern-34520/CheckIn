@@ -1,13 +1,12 @@
 package indi.etern.checkIn;
 
+import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.entities.question.impl.Partition;
+import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
-import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.Choice;
-import indi.etern.checkIn.service.dao.ChoiceService;
-import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
+import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.utils.TransactionTemplateUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -23,11 +22,7 @@ import java.util.Optional;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class QuestionTest {
     @Autowired
-    QuestionService multiPartitionableQuestionService;
-    @Autowired
     PartitionService partitionService;
-    @Autowired
-    ChoiceService choiceService;
 
     @Test
     void testInsert() {
@@ -145,7 +140,7 @@ public class QuestionTest {
             SingleCorrectQuestion multipleCorrectQuestion = (SingleCorrectQuestion) question;
             assert multipleCorrectQuestion.getCorrectChoice().getContent().equals("A");
             assert multipleCorrectQuestion.getContent().equals("testQuestion1");
-            assert multipleCorrectQuestion.getPartitions().contains(Partition.getInstance("undefined"));
+            assert multipleCorrectQuestion.getPartitions().contains(Partition.ofName("undefined"));
             question1 = question;
         }
         {
@@ -156,7 +151,7 @@ public class QuestionTest {
             assert multipleCorrectQuestion.getCorrectChoices().get(0).getContent().equals("A1");
             assert multipleCorrectQuestion.getCorrectChoices().get(1).getContent().equals("B1");
             assert multipleCorrectQuestion.getContent().equals("testQuestion2");
-            assert multipleCorrectQuestion.getPartitions().contains(Partition.getInstance("undefined"));
+            assert multipleCorrectQuestion.getPartitions().contains(Partition.ofName("undefined"));
             question2 = question;
         }
     }

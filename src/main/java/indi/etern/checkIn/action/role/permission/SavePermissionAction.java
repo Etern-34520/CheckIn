@@ -39,7 +39,8 @@ public class SavePermissionAction extends TransactionalAction {
             roleService.save(role);
             LinkedHashMap<String,Object> map = new LinkedHashMap<>();
             map.put("type", "success");
-            actionExecutor.executeByTypeClass(SendPermissionsToUsersAction.class,role.getUsers());
+            actionExecutor.execute(SendPermissionsToUsersAction.class,
+                    new SendPermissionsToUsersAction.Input(role.getUsers()));
             return Optional.of(map);
         }
     }

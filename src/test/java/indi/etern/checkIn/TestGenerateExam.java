@@ -38,7 +38,7 @@ public class TestGenerateExam {
     @Test
     void testGenerate () {
         List<Partition> partitions = new ArrayList<>();
-        partitions.add(Partition.getInstance("test"));
+        partitions.add(Partition.ofName("test"));
         TransactionTemplateUtil.getTransactionTemplate().executeWithoutResult((v) -> {
             try {
                 for (int i = 0; i < 200; i++) {

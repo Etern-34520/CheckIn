@@ -24,23 +24,21 @@ import java.util.UUID;
 @Entity
 @Table(name = "questions")
 public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<String> {
-//    public static final Example<Question> NOT_SUB_QUESTION_EXAMPLE;
-//    static {
-//        final Question probe = new Question();
-//        probe.setLinkWrapper(new ToPartitionsLink());
-//        NOT_SUB_QUESTION_EXAMPLE = Example.of(probe);
-//    }
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
+    
+    @Id
+    @Column(columnDefinition = "char(36)")
+    @JsonIgnore
+    protected String id;
+    
     @Column(name = "content",columnDefinition = "text")
     protected String content;
-
-//    protected int hashcode;
     
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinColumn(name = "author_qqnumber", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @NotFound(action = NotFoundAction.IGNORE)
     @JsonIgnore
-    protected User author = null;// = User.exampleOfName("unknown");
+    protected User author = null;
     
     @Column(name = "last_modified_time")
     protected LocalDateTime lastModifiedTime;
@@ -83,10 +81,6 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @JsonIgnore
     protected QuestionLinkImpl<?> linkWrapper;
     
-    @Id
-    @Column(columnDefinition = "char(36)")
-    @JsonIgnore
-    protected String id;
     @Setter
     @Convert(converter = MapConverter.class)
     @Basic(fetch = FetchType.LAZY)

@@ -3,6 +3,7 @@ package indi.etern.checkIn.controller.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.ActionExecutor;
+import indi.etern.checkIn.action.interfaces.ResultContext;
 import indi.etern.checkIn.action.partition.GetPartitionsAction;
 import indi.etern.checkIn.action.setting.get.GetFacadeSetting;
 import indi.etern.checkIn.action.setting.get.GetGradingSetting;
@@ -21,7 +22,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 public class Exam {
@@ -51,7 +55,7 @@ public class Exam {
     @Transactional(noRollbackFor = Throwable.class)
     public Map<String, ?> generateExam(@RequestBody GenerateRequest generateRequest) {
         try {
-            final ExamData examData = examGenerator.generateExam(generateRequest.qq, partitionService.findAllByIds(generateRequest.partitionIds.stream().map(Integer::parseInt).toList()));
+            final ExamData examData = examGenerator.generateExam(generateRequest.qq, partitionService.findAllByIds(generateRequest.partitionIds));
             examDataService.invalidAllByQQ(generateRequest.qq);
             examDataService.save(examData);
             questionStatisticService.appendStatistic(examData);
@@ -130,10 +134,10 @@ public class Exam {
 //        Map<String, Object> generatingSettingMap = actionExecutor.executeByTypeClass(GetGeneratingSetting.class).orElseThrow();
         Map<String, Object> gradingSettingMap = actionExecutor.executeByTypeClass(GetGradingSetting.class, null).orElseThrow();
         
-        Map<String, Object> partitions = actionExecutor.executeByTypeClass(GetPartitionsAction.class, null).orElseThrow();
-        ArrayList<LinkedHashMap<String, Object>> partitionsList = (ArrayList<LinkedHashMap<String, Object>>) partitions.get("partitions");
+        ResultContext<GetPartitionsAction.Output> context = actionExecutor.execute(GetPartitionsAction.class, null);
+        List<Map<String, Object>> partitionDataList = context.getOutput().partitionDataList();
         Map<String, String> partitionsNameMap = new HashMap<>();
-        partitionsList.forEach((partition) -> {
+        partitionDataList.forEach((partition) -> {
             partitionsNameMap.put(partition.get("id").toString(), (String) partition.get("name"));
         });
         

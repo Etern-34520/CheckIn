@@ -1,51 +1,57 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.PartitionService;
+import jakarta.annotation.Nonnull;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Action("getQuestionSimpleData")
-public class GetQuestionsSimpleDataAction extends TransactionalAction {
-    private int partitionId;
-    
-    @Override
-    public String requiredPermissionName() {
-        return null;
+public class GetQuestionsSimpleDataAction extends BaseAction1<GetQuestionsSimpleDataAction.Input, OutputData> {
+    public record Input(@Nonnull String partitionId) implements InputData {}
+    public record SuccessOutput(List<Map<String,Object>> questionList) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
     }
     
     @Override
-    public void initData(Map<String, Object> dataMap) {
-        partitionId = ((Number) dataMap.get("partitionId")).intValue();
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
-        Optional<Partition> optionalPartition = PartitionService.singletonInstance.findById(partitionId);
+    @Transactional
+    public void execute(ExecuteContext<Input, OutputData> context) {
+        final Input input = context.getInput();
+        Optional<Partition> optionalPartition = PartitionService.singletonInstance.findById(input.partitionId);
         if (optionalPartition.isPresent()) {
-            LinkedHashMap<String, Object> result = getSuccessMap();
-            ArrayList<Object> questionList = new ArrayList<>();
-            result.put("questionList", questionList);
+            List<Map<String,Object>> questionList = new ArrayList<>();
             for (var questionLink : optionalPartition.get().getQuestionLinks()) {
-                Question question = questionLink.getSource();
-                LinkedHashMap<String, Object> questionInfo = new LinkedHashMap<>();
-                questionInfo.put("id", question.getId());
-                questionInfo.put("content", question.getContent());
-                final User author = question.getAuthor();
-                if (author != null)
-                    questionInfo.put("authorQQ", author.getQQNumber());
-                questionInfo.put("type", question.getClass().getSimpleName());
+                final LinkedHashMap<String, Object> questionInfo = getSimpleInfoMap(questionLink);
                 questionList.add(questionInfo);
             }
-            return Optional.of(result);
+            context.resolve(new SuccessOutput(questionList));
+        } else {
+            context.resolve(MessageOutput.error("Partition not found"));
         }
-        return Optional.empty();
+    }
+    
+    private static LinkedHashMap<String, Object> getSimpleInfoMap(ToPartitionsLink questionLink) {
+        Question question = questionLink.getSource();
+        LinkedHashMap<String, Object> questionInfo = new LinkedHashMap<>();
+        questionInfo.put("id", question.getId());
+        questionInfo.put("content", question.getContent());
+        final User author = question.getAuthor();
+        if (author != null)
+            questionInfo.put("authorQQ", author.getQQNumber());
+        questionInfo.put("type", question.getClass().getSimpleName());
+        return questionInfo;
     }
 }

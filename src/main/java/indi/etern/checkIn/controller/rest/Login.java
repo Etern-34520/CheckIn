@@ -75,6 +75,7 @@ public class Login {
                     dataMap.put("result", "success");
                     dataMap.put("qq", qq);
                     dataMap.put("name", user.getName());
+                    dataMap.put("role", user.getRole().getType());
                     dataMap.put("token", jwtTokenProvider.generateToken(user));
                     return objectMapper.writeValueAsString(dataMap);
                 } else {

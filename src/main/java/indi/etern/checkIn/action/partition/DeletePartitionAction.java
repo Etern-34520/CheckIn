@@ -1,23 +1,38 @@
 package indi.etern.checkIn.action.partition;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.utils.QuestionUpdateUtils;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.utils.PartitionUpdateUtils;
+import indi.etern.checkIn.utils.QuestionUpdateUtils;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Action("deletePartition")
-public class DeletePartitionAction extends TransactionalAction {
-    private Logger logger = LoggerFactory.getLogger(DeletePartitionAction.class);
-    private int partitionId;
+public class DeletePartitionAction extends BaseAction1<DeletePartitionAction.Input, OutputData> {
+    public record Input(@Nonnull String partitionId) implements InputData {}
+    public record SuccessOutput(List<String> infectedQuestionIds) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
+    
+    private final Logger logger = LoggerFactory.getLogger(DeletePartitionAction.class);
     final PartitionService partitionService;
     final QuestionService questionService;
     
@@ -27,46 +42,43 @@ public class DeletePartitionAction extends TransactionalAction {
     }
     
     @Override
-    public String requiredPermissionName() {
-        return "delete partition";
-    }
-
-    @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        Partition partition = partitionService.findById(partitionId).orElseThrow();
-        List<Question> infectedquestions = new ArrayList<>();
-        if (partition.getQuestionLinks().isEmpty()) {
-            logger.debug("deleting empty partition \"" + partition.getName() + "\"");
-            partitionService.delete(partition);
-        } else {
-            logger.debug("partition \"" + partition.getName() + "\" is not empty");
-            for (ToPartitionsLink questionLink : partition.getQuestionLinks()) {
-                final Set<Partition> partitions = questionLink.getTargets();
-                partitions.remove(partition);
-                final Question question = questionLink.getSource();
-                infectedquestions.add(question);
-                if (partitions.isEmpty()) {
-                    logger.debug("deleting question (not beloned to other partitions) \"" + question.getId() + "\"");
-                    questionService.delete(question);
-                } else {
-                    logger.debug("updating question \"" + question.getId() + "\"");
-                    questionService.save(question);
+    public void execute(ExecuteContext<Input, OutputData> context) {
+        context.requirePermission("delete partition");
+        
+        final Input input = context.getInput();
+        Optional<Partition> optionalPartition = partitionService.findById(input.partitionId);
+        if (optionalPartition.isPresent()) {
+            List<Question> infectedQuestions = new ArrayList<>();
+            if (optionalPartition.get().getQuestionLinks().isEmpty()) {
+                logger.debug("deleting empty partition \"" + optionalPartition.get().getName() + "\"");
+                partitionService.delete(optionalPartition.orElse(null));
+            } else {
+                logger.debug("partition \"" + optionalPartition.get().getName() + "\" is not empty");
+                for (ToPartitionsLink questionLink : optionalPartition.get().getQuestionLinks()) {
+                    final Set<Partition> partitions = questionLink.getTargets();
+                    partitions.remove(optionalPartition);
+                    final Question question = questionLink.getSource();
+                    infectedQuestions.add(question);
+                    if (partitions.isEmpty()) {
+                        logger.debug("deleting question (not belonged to other partitions) \"" + question.getId() + "\"");
+                        questionService.delete(question);
+                    } else {
+                        logger.debug("updating question \"" + question.getId() + "\"");
+                        questionService.save(question);
+                    }
                 }
-            }
-            partitionService.delete(partition);
-            QuestionUpdateUtils.sendUpdateQuestionsToAll(infectedquestions);
+                partitionService.delete(optionalPartition.orElse(null));
+                QuestionUpdateUtils.sendUpdateQuestionsToAll(infectedQuestions);
 //            return getOptionalErrorMap("partition \"" + partition.getName() + "\" is not empty");
+            }
+            PartitionUpdateUtils.sendDeletePartitionToAll(optionalPartition.orElse(null));
+            if (infectedQuestions.isEmpty()) {
+                context.resolve(new SuccessOutput(null));
+            } else {
+                context.resolve(new SuccessOutput(infectedQuestions.stream().map(Question::getId).toList()));
+            }
+        } else {
+            context.resolve(MessageOutput.error("Partitionn not exist"));
         }
-        PartitionUpdateUtils.sendDeletePartitionToAll(partition);
-        final LinkedHashMap<String, Object> successMap = getSuccessMap();
-        if (!infectedquestions.isEmpty()) {
-            successMap.put("infectedQuestionIds", infectedquestions.stream().map(Question::getId).toList());
-        }
-        return Optional.of(successMap);
-    }
-
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        partitionId = ((Number) dataMap.get("id")).intValue();
     }
 }

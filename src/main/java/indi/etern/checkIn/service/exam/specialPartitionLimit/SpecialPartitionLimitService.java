@@ -12,7 +12,7 @@ import java.util.Map;
 @Component
 public class SpecialPartitionLimitService {
     private final SettingService settingService;
-    private Map<Integer,SpecialPartitionLimit> specialPartitionLimits;
+    private Map<String,SpecialPartitionLimit> specialPartitionLimits;
     public static SpecialPartitionLimitService singletonInstance;
     
     public SpecialPartitionLimitService(SettingService settingService) {
@@ -20,11 +20,11 @@ public class SpecialPartitionLimitService {
         singletonInstance = this;
     }
     
-    public static Map<Integer, SpecialPartitionLimit> from(Collection<Map<String, Object>> values) {
-        Map<Integer, SpecialPartitionLimit> partitionLimitMap = new HashMap<>();
+    public static Map<String, SpecialPartitionLimit> from(Collection<Map<String, Object>> values) {
+        Map<String, SpecialPartitionLimit> partitionLimitMap = new HashMap<>();
         values.forEach(dataMap -> {
             SpecialPartitionLimit specialPartitionLimit = new SpecialPartitionLimit();
-            final int partitionId1 = (int) dataMap.get("partitionId");
+            final String partitionId1 = dataMap.get("partitionId").toString();
             specialPartitionLimit.partitionId = partitionId1;
             specialPartitionLimit.minLimitEnabled = (boolean) dataMap.get("minLimitEnabled");
             specialPartitionLimit.minLimit = (int) dataMap.get("minLimit");
@@ -55,7 +55,7 @@ public class SpecialPartitionLimitService {
     public Map<Partition,SpecialPartitionLimit> getAll() {
         flush();
         Map<Partition,SpecialPartitionLimit> map = new HashMap<>();
-        specialPartitionLimits.forEach((id,limit) -> map.put(Partition.getInstance(id),limit));
+        specialPartitionLimits.forEach((id,limit) -> map.put(Partition.ofId(id),limit));
         return map;
     }
 }

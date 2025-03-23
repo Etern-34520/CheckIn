@@ -20,7 +20,7 @@ const loadData = () => {
     QuestionCache.getAsync(router.currentRoute.value.params.id).then((questionInfo) => {
         currentQuestionInfo.value = questionInfo;
         WebSocketConnector.send({
-            type: "get related exam records and answers",
+            type: "getRelatedExamRecordsAndAnswers",
             questionId: currentQuestionInfo.value.question.id
         }).then((response) => {
             data.value = response;

@@ -1,43 +1,45 @@
 package indi.etern.checkIn.action.partition;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
+import jakarta.annotation.Nonnull;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Action("getPartitionById")
-public class GetPartitionByIdAction extends TransactionalAction {
+public class GetPartitionByIdAction extends BaseAction1<GetPartitionByIdAction.Input, OutputData> {
+    public record Input(@Nonnull String id) implements InputData {}
+    public record SuccessOutput(Map<String,Object> partitionDataMap) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
+    
     private final PartitionService partitionService;
-    private Integer partitionId;
     
     public GetPartitionByIdAction(PartitionService partitionService) {
         this.partitionService = partitionService;
     }
     
     @Override
-    public String requiredPermissionName() {
-        return null;
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
-        Optional<Partition> optionalPartition = partitionService.findById(partitionId);
+    @Transactional
+    public void execute(ExecuteContext<Input, OutputData> context) {
+        final Input input = context.getInput();
+        Optional<Partition> optionalPartition = partitionService.findById(input.id);
         if (optionalPartition.isPresent()) {
             Partition partition = optionalPartition.get();
-            LinkedHashMap<String, Object> result = getSuccessMap();
-            result.put("partition", partition.toInfoMap());
-            return Optional.of(result);
+            context.resolve(new SuccessOutput(partition.toInfoMap()));
         } else {
-            return getOptionalErrorMap("Partition not found");
+            context.resolve(MessageOutput.error("Partition not found"));
         }
-    }
-    
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        partitionId = ((Number) dataMap.get("id")).intValue();
     }
 }

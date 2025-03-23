@@ -1,56 +1,54 @@
 package indi.etern.checkIn.action.question.update;
 
-import indi.etern.checkIn.action.BaseAction;
+import indi.etern.checkIn.action.BaseAction1;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.utils.QuestionCreateUtils;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
+import indi.etern.checkIn.utils.QuestionCreateUtils;
+import jakarta.annotation.Nonnull;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Action(value = "createOrUpdateQuestion", exposed = false)
-public class CreateOrUpdateQuestion extends BaseAction<Question, Map<?, ?>> {
-    final QuestionService questionService;
+public class CreateOrUpdateQuestion extends BaseAction1<CreateOrUpdateQuestion.Input, CreateOrUpdateQuestion.SuccessOutput> {
+    public record Input(@Nonnull Map<String,Object> questionDataMap) implements InputData {}
+    public record SuccessOutput(Question question) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
     
-    private Map<?, ?> questionDataMap;
-    private Question multiPartitionableQuestion = null;
+    final QuestionService questionService;
     
     public CreateOrUpdateQuestion(QuestionService questionService) {
         this.questionService = questionService;
     }
     
     @Override
-    public String requiredPermissionName() {
-        Set<String> requiredPermissionNames = new HashSet<>();
+    public void execute(ExecuteContext<Input, SuccessOutput> context) {
+        final Input input = context.getInput();
+        final Map<String, Object> questionDataMap = input.questionDataMap;
         Optional<Question> previousQuestion = questionService.findById(questionDataMap.get("id").toString());
-        multiPartitionableQuestion = QuestionCreateUtils.createMultipleChoicesQuestion(questionDataMap);
+        Question question = QuestionCreateUtils.createMultipleChoicesQuestion(questionDataMap);
         if (previousQuestion.isPresent() && questionDataMap.containsKey("authorQQ")) {
-            requiredPermissionNames.add("change question author");
+            context.requirePermission("change question author");
         }
         if (previousQuestion.isEmpty() ||
                 previousQuestion.get().getAuthor() != null &&
-                previousQuestion.get().getAuthor().equals(getCurrentUser())) {
-            requiredPermissionNames.add("create and edit owns questions");
+                context.isCurrentUser(previousQuestion.get().getAuthor())) {
+            context.requirePermission("create and edit owns questions");
         } else {
-            requiredPermissionNames.add("edit others questions");
+            context.requirePermission("edit others questions");
         }
         if (questionDataMap.containsKey("enabled")) {
-            requiredPermissionNames.add("enable and disable questions");
+            context.requirePermission("enable and disable questions");
         }
-        return String.join(",", requiredPermissionNames);
-    }
-    
-    @Override
-    protected Optional<Question> doAction() throws Exception {
-        questionService.save(multiPartitionableQuestion);
-        return Optional.of(multiPartitionableQuestion);
-    }
-    
-    @Override
-    public void initData(Map<?, ?> questionMap) {
-        this.questionDataMap = questionMap;
+        questionService.save(question);
+        context.resolve(new SuccessOutput(question));
     }
 }

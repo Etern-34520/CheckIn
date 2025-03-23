@@ -1,21 +1,32 @@
 package indi.etern.checkIn.action.records;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.ExamDataService;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Action("getExamRecordDetail")
-public class GetExamRecordDetailAction extends TransactionalAction {
+public class GetExamRecordDetailAction extends BaseAction1<GetExamRecordDetailAction.Input, OutputData> {
+    public record Input(String id) implements InputData {
+    }
+    
+    public record SuccessOutput(Map<String, Object> exanData) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
+    
     private final ExamDataService examDataService;
     private final JwtTokenProvider jwtTokenProvider;
-    private ExamData examData;
     
     public GetExamRecordDetailAction(ExamDataService examDataService, JwtTokenProvider jwtTokenProvider) {
         this.examDataService = examDataService;
@@ -23,29 +34,22 @@ public class GetExamRecordDetailAction extends TransactionalAction {
     }
     
     @Override
-    public String requiredPermissionName() {
-        if (examData.getQqNumber() == getCurrentUser().getQQNumber())
-            return null;
-        else
-            return "get exam data";
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
-        LinkedHashMap<String, Object> result = getSuccessMap();
-        final User currentUser = getCurrentUser();
-        final boolean accessibleToOthersSubmissions = jwtTokenProvider.isUserHasPermission(currentUser,"get exam submission data");
-        final LinkedHashMap<String, Object> examDataMap = examData.toDataMap();
-        if (currentUser.getQQNumber() != examData.getQqNumber() && !accessibleToOthersSubmissions) {
-            examDataMap.remove("answers");
-        }
-        result.put("examData", examDataMap);
-        return Optional.of(result);
-    }
-    
-    @Override
-    public void initData(Map<String, Object> initData) {
-        String id = initData.get("id").toString();
-        examData = examDataService.findById(id).orElseThrow(() -> new RuntimeException("ExamData not found"));
+    public void execute(ExecuteContext<Input, OutputData> context) {
+        examDataService.findById(context.getInput().id)
+                .ifPresentOrElse((examData) -> {
+                    final User currentUser = context.getCurrentUser();
+                    final boolean isCurrentUserAccess = examData.getQqNumber() != currentUser.getQQNumber();
+                    if (isCurrentUserAccess) {
+                        context.requirePermission("get exam data");
+                    }
+                    final boolean accessibleToOthersSubmissions = context.hasPermission("get exam submission data");
+                    final LinkedHashMap<String, Object> examDataMap = examData.toDataMap();
+                    if (isCurrentUserAccess && !accessibleToOthersSubmissions) {
+                        examDataMap.remove("answers");
+                    }
+                    context.resolve(new SuccessOutput(examDataMap));
+                }, () -> {
+                    context.resolve(MessageOutput.error("Exam data not found"));
+                });
     }
 }

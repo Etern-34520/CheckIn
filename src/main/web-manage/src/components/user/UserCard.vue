@@ -32,7 +32,9 @@ const deleteUser = () => {
         }
         WebSocketConnector.send({
             type: "deleteUser",
-            qq: props.user.qq
+            data: {
+                qq: props.user.qq
+            }
         });
     }).catch(() => {
     });
@@ -56,8 +58,10 @@ const editGroupButtonOption = ref([{
         editGroupButtonOption.value[0].loading = true;
         WebSocketConnector.send({
             type: "changeUserRole",
-            qq: props.user.qq,
-            roleType: newUserGroupName.value
+            data: {
+                qq: props.user.qq,
+                roleType: newUserGroupName.value
+            }
         }).then(() => {
             showEditUserGroup.value = false;
             ElMessage({
@@ -85,8 +89,10 @@ const editNameButtonOption = ref([{
         editNameButtonOption.value[0].loading = true;
         WebSocketConnector.send({
             type: "changeUserName",
-            qq: props.user.qq,
-            newName: newUserName.value
+            data: {
+                qq: props.user.qq,
+                newName: newUserName.value
+            }
         }).then(() => {
             showEditUserName.value = false;
             ElMessage({

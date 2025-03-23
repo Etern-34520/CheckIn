@@ -19,7 +19,9 @@ onBeforeMount(() => {
     try {
         WebSocketConnector.send({
             type: "getQuestionsByUserQQ",
-            qq: props.qq
+            data: {
+                qq: props.qq
+            }
         }).then((response) => {
             loading.value = false;
             for (const question of response.questions) {

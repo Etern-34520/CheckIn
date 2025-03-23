@@ -66,18 +66,18 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
     }
     
     //    @Convert(converter = ListJsonConverter.class)
-    @ElementCollection(targetClass = Integer.class)
+    @ElementCollection(targetClass = String.class)
     @CollectionTable(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 //    @Column(columnDefinition = "mediumtext")
     @JsonIgnore
-    List<Integer> requiredPartitionIds;
+    List<String> requiredPartitionIds;
     
     //    @Convert(converter = ListJsonConverter.class)
-    @ElementCollection(targetClass = Integer.class)
+    @ElementCollection(targetClass = String.class)
     @CollectionTable(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 //    @Column(columnDefinition = "mediumtext")
     @JsonIgnore
-    List<Integer> selectedPartitionIds;
+    List<String> selectedPartitionIds;
     
     //    @Convert(converter = ListJsonConverter.class)
     @ElementCollection(targetClass = String.class)
@@ -130,9 +130,9 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
             Question question = orderedQuestions.get(index);
             
             Object value = entry.getValue();
-            if (value instanceof List<?> choiceIds && question instanceof MultipleChoicesQuestion multipleChoicesQuestion) {
+            if (value instanceof List<?> choiceIndexes && question instanceof MultipleChoicesQuestion multipleChoicesQuestion) {
                 //noinspection unchecked
-                var choiceAnswer = multipleChoicesQuestion.newAnswerFrom((List<String>) choiceIds);
+                var choiceAnswer = multipleChoicesQuestion.newAnswerFrom((List<Integer>) choiceIndexes);
                 if (questionGroup == null) {
                     this.answersMap.put(multipleChoicesQuestion.getId(), choiceAnswer);
                 } else {

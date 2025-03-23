@@ -99,7 +99,6 @@
                 <filtering>true</filtering>
                 <directory>src/main/resources</directory>
                 <excludes>
-                    <!-- 存在的环境配置，如果不写那么就会把没写配置也打包进去 -->
                     <exclude>application-dev.properties</exclude>
                 </excludes>
             </resource>
@@ -107,7 +106,6 @@
                 <filtering>true</filtering>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <!-- 根据打包命令选择配置后缀 -->
                     <!--suppress UnresolvedMavenProperty -->
                     <include>application-${surroundings}.properties</include>
                 </includes>

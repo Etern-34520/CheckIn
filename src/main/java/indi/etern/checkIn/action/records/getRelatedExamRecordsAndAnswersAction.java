@@ -1,20 +1,31 @@
 package indi.etern.checkIn.action.records;
 
-import indi.etern.checkIn.action.MapResultAction;
+import indi.etern.checkIn.action.BaseAction1;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.exam.ExamData;
-import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.ExamDataService;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-@Action("get related exam records and answers")
-public class getRelatedExamRecordsAndAnswersAction extends MapResultAction {
+@Action("getRelatedExamRecordsAndAnswers")
+public class getRelatedExamRecordsAndAnswersAction extends BaseAction1<getRelatedExamRecordsAndAnswersAction.Input, getRelatedExamRecordsAndAnswersAction.SuccessOutput> {
+    public record Input(String questionId) implements InputData {}
+    public record SuccessOutput(List<Map<String,Object>> examDataAnswerList) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
     
     private final ExamDataService examDataService;
     private final JwtTokenProvider jwtTokenProvider;
-    private String questionId;
     
     public getRelatedExamRecordsAndAnswersAction(ExamDataService examDataService, JwtTokenProvider jwtTokenProvider) {
         this.examDataService = examDataService;
@@ -22,14 +33,8 @@ public class getRelatedExamRecordsAndAnswersAction extends MapResultAction {
     }
     
     @Override
-    public String requiredPermissionName() {
-        return null;
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
-        final User currentUser = getCurrentUser();
-        final boolean accessibleToOthersSubmissions = jwtTokenProvider.isUserHasPermission(currentUser, "get exam submission data");
+    public void execute(ExecuteContext<Input, SuccessOutput> context) {
+        String questionId = context.getInput().questionId;
         List<Map<String,Object>> examDataMapList = examDataService.getExamDataContainsQuestionById(questionId)
                 .stream().sorted(Comparator.comparing(ExamData::getGenerateTime).reversed())
                 .map(examData -> {
@@ -38,13 +43,6 @@ public class getRelatedExamRecordsAndAnswersAction extends MapResultAction {
                     map.put("answer",examData.getAnswersMap().get(questionId));
                     return map;
                 }).toList();
-        final LinkedHashMap<String, Object> result = getSuccessMap();
-        result.put("examDataAnswerList", examDataMapList);
-        return Optional.of(result);
-    }
-    
-    @Override
-    public void initData(Map<String, Object> initData) {
-        questionId = initData.get("questionId").toString();
+        context.resolve(new SuccessOutput(examDataMapList));
     }
 }

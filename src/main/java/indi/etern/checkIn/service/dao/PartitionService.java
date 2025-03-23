@@ -52,15 +52,11 @@ public class PartitionService {
         partitionRepository.delete(partition);
     }
 
-    public boolean existsById(int id) {
-        return partitionRepository.existsById(id);
-    }
-
-    public Optional<Partition> findById(int id) {
+    public Optional<Partition> findById(String id) {
         return partitionRepository.findById(id);
     }
 
-    public List<Partition> findAllByIds(Collection<Integer> partitionId) {
+    public List<Partition> findAllByIds(Collection<String> partitionId) {
         return partitionRepository.findAllById(partitionId);
     }
 

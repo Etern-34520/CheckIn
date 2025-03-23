@@ -2,6 +2,7 @@ package indi.etern.checkIn.service.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.api.webSocket.Connector;
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.user.User;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -31,7 +32,7 @@ public class WebSocketService {
             this.name = name;
         }
         
-        public void sendMessage(String message) {
+        public void sendMessage(Message<?> message) {
             singletonInstance.sendMessages(message, sids);
         }
         
@@ -79,12 +80,42 @@ public class WebSocketService {
         }
     }
     
+    @SneakyThrows
+    private void sendMessages(Message<?> message, HashSet<String> toSids) {
+        String messageStr = objectMapper.writeValueAsString(message);
+        logger.info("webSocket to:{}, msg:{}", toSids, messageStr);
+        for (Connector item : Connector.CONNECTORS) {
+            try {
+                if (toSids.isEmpty()) {
+                    item.sendMessageWithOutLog(messageStr);
+                } else if (toSids.contains(item.getSid())) {
+                    item.sendMessageWithOutLog(messageStr);
+                }
+            } catch (IOException ignored) {
+            }
+        }
+    }
+    
     public void sendMessage(String message, String sid) {
         logger.info("webSocket to:{}, msg:{}", sid, message);
         for (Connector item : Connector.CONNECTORS) {
             try {
                 if (item.getSid().equals(sid)) {
                     item.sendMessage(message);
+                }
+            } catch (IOException ignored) {
+            }
+        }
+    }
+    
+    @SneakyThrows
+    public void sendMessage(Message<?> message, String sid) {
+        String messageStr = objectMapper.writeValueAsString(message);
+        logger.info("webSocket to:{}, msg:{}", sid, messageStr);
+        for (Connector item : Connector.CONNECTORS) {
+            try {
+                if (item.getSid().equals(sid)) {
+                    item.sendMessage(messageStr);
                 }
             } catch (IOException ignored) {
             }

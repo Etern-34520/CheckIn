@@ -1,46 +1,53 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.TransactionalAction;
-import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.utils.QuestionUpdateUtils;
-import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.service.dao.QuestionService;
+import indi.etern.checkIn.action.ActionExecutor;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.interfaces.*;
+import jakarta.annotation.Nonnull;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Action("getQuestionInfos")
-public class GetQuestionInfosAction extends TransactionalAction {
-    private final List<String> questionIds = new java.util.ArrayList<>();
-
-    @Override
-    public String requiredPermissionName() {
-        return null;
+public class GetQuestionInfosAction extends BaseAction1<GetQuestionInfosAction.Input, OutputData> {
+    private final ActionExecutor actionExecutor;
+    
+    public GetQuestionInfosAction(ActionExecutor actionExecutor) {
+        super();
+        this.actionExecutor = actionExecutor;
     }
     
+    public record Input(@Nonnull List<String> questionIds) implements InputData { }
+    
+    public record Output(Result result,
+                         List<Map<String, Object>> questions,
+                         List<String> missingIds) implements OutputData { }
+    
     @Override
-    public void initData(Map<String, Object> dataMap) {
-        //noinspection unchecked
-        questionIds.addAll((List<String>) dataMap.get("questionIds"));
-    }
-
-    @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        var questions = QuestionService.singletonInstance.findAllById(questionIds);
-        LinkedHashMap<String,Object> result = getSuccessMap();
-        ArrayList<Object> questionArray = new ArrayList<>(questions.size());
-        for (Question question : questions) {
-            questionIds.remove(question.getId());
-            questionArray.add(QuestionUpdateUtils.getMapOfQuestion(question));
-        }
-        if (!questionIds.isEmpty()) {
-            for (String questionId : questionIds) {
-                LinkedHashMap<String,Object> notFound = getErrorMap("question not found");
-                notFound.put("type", "question not found");
-                notFound.put("id", questionId);
-                questionArray.add(notFound);
+    @Transactional
+    public void execute(ExecuteContext<Input, OutputData> context) {
+        final Input input = context.getInput();
+        final List<String> questionIds = input.questionIds;
+        final List<Map<String, Object>> dataList = new ArrayList<>(input.questionIds.size());
+        final List<String> missingIds = new ArrayList<>(0);
+        for (String questionId : questionIds) {
+            ResultContext<OutputData> context1 = actionExecutor.execute(GetQuestionInfoAction.class, new GetQuestionInfoAction.Input(questionId));
+            final OutputData output = context1.getOutput();
+            if (output instanceof GetQuestionInfoAction.SuccessOutput(Map<String, Object> questionData)
+                    && output.result().equals(OutputData.Result.SUCCESS)) {
+                dataList.add(questionData);
+            } else {
+                missingIds.add(questionId);
             }
         }
-        result.put("questions", questionArray);
-        return Optional.of(result);
+        if (missingIds.isEmpty()) {
+            context.resolve(new Output(OutputData.Result.SUCCESS, dataList, null));
+        } else if (!dataList.isEmpty()) {
+            context.resolve(new Output(OutputData.Result.WARNING, dataList, missingIds));
+        } else {
+            context.resolve(new Output(OutputData.Result.ERROR, null, missingIds));
+        }
     }
 }

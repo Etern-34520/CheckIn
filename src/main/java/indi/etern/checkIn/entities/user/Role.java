@@ -1,10 +1,14 @@
 package indi.etern.checkIn.entities.user;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import indi.etern.checkIn.service.dao.RoleService;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.util.*;
 
 @Getter
@@ -74,5 +78,12 @@ public class Role {
     @Override
     public int hashCode() {
         return type.hashCode();
+    }
+    
+    public static class TypeSerializer extends JsonSerializer<Role> {
+        @Override
+        public void serialize(Role role, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeString(role.getType());
+        }
     }
 }

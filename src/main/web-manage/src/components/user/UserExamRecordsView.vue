@@ -18,7 +18,9 @@ onBeforeMount(() => {
     try {
         WebSocketConnector.send({
             type: "getExamRecordsByQQ",
-            qq: props.qq
+            data: {
+                qq: props.qq
+            }
         }).then((response) => {
             loading.value = false;
             examRecords.value = response.examRecords;

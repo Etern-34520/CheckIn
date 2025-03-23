@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 @org.springframework.stereotype.Repository
-public interface PartitionRepository extends JpaRepository<Partition,Integer> {
+public interface PartitionRepository extends JpaRepository<Partition,String> {
     boolean existsByName(String partitionName);
     Optional<Partition> findByName(String name);
 }

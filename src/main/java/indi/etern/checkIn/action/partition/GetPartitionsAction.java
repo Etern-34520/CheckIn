@@ -1,32 +1,36 @@
 package indi.etern.checkIn.action.partition;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.NullInput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.OutputData;
+import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
-import indi.etern.checkIn.utils.TransactionTemplateUtil;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
 
 @Action("getPartitions")
-public class GetPartitionsAction extends TransactionalAction {
-    @Override
-    public String requiredPermissionName() {
-        return null;
+public class GetPartitionsAction extends BaseAction1<NullInput, GetPartitionsAction.Output> {
+    public record Output(List<Map<String, Object>> partitionDataList) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
     }
-
+    
+    private final PartitionService partitionService;
+    
+    public GetPartitionsAction(PartitionService partitionService) {
+        this.partitionService = partitionService;
+    }
+    
     @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        LinkedHashMap<String,Object> result = getSuccessMap();
-        TransactionTemplateUtil.getTransactionTemplate().execute((res) -> {
-            ArrayList<Object> partitionList = new ArrayList<>();
-            result.put("partitions", partitionList);
-            PartitionService.singletonInstance.findAll().forEach(partition -> {
-                partitionList.add(partition.toInfoMap());
-            });
-            return null;
-        });
-        return Optional.of(result);
+    @Transactional
+    public void execute(ExecuteContext<NullInput, Output> context) {
+        final List<Map<String, Object>> partitionDataList = partitionService.findAll().stream().map(Partition::toInfoMap).toList();
+        context.resolve(new Output(partitionDataList));
     }
 }

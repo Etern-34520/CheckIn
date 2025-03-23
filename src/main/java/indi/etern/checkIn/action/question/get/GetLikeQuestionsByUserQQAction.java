@@ -1,20 +1,32 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.utils.QuestionUpdateUtils;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
+import indi.etern.checkIn.utils.QuestionUpdateUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Action("getLikeQuestionsByUserQQ")
-public class GetLikeQuestionsByUserQQAction extends TransactionalAction {
-    private long userQQ;
+public class GetLikeQuestionsByUserQQAction extends BaseAction1<GetLikeQuestionsByUserQQAction.Input,OutputData> {
+    public record Input(long qq) implements InputData {}
+    public record Output(List<Map<String,Object>> questions) implements OutputData {
+        @Override
+        public Result result() {
+            return null;
+        }
+    }
+    
     private final UserService userService;
     private final QuestionService questionService;
     
@@ -24,29 +36,18 @@ public class GetLikeQuestionsByUserQQAction extends TransactionalAction {
     }
     
     @Override
-    public String requiredPermissionName() {
-        return null;
-    }
-
-    @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        Optional<User> optionalUser = userService.findByQQNumber(userQQ);
-        LinkedHashMap<String,Object> result;
+    @Transactional
+    public void execute(ExecuteContext<GetLikeQuestionsByUserQQAction.Input, OutputData> context) {
+        final Input input = context.getInput();
+        Optional<User> optionalUser = userService.findByQQNumber(input.qq);
         if (optionalUser.isPresent()) {
-            result = getSuccessMap();
-            ArrayList<Object> questions = new ArrayList<>();
+            ArrayList<Map<String,Object>> questions = new ArrayList<>();
             questionService.findAllByUpVotersContains(optionalUser.get()).forEach(question -> {
                 questions.add(QuestionUpdateUtils.getMapOfQuestion(question));
             });
-            result.put("questions", questions);
+            context.resolve(new GetDislikeQuestionsByUserQQAction.Output(questions));
         } else {
-            result = getErrorMap("user not exist");
+            context.resolve(MessageOutput.error("User not found"));
         }
-        return Optional.of(result);
-    }
-
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        userQQ = ((Number) dataMap.get("qq")).longValue();
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
-public abstract class BaseAction<Res, InitDataType> {
+public abstract class BaseAction<Res, InitDataType> {//TODO
     @Getter(AccessLevel.PROTECTED)
     final User currentUser;
     {

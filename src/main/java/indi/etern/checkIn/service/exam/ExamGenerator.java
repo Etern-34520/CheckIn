@@ -96,8 +96,8 @@ public class ExamGenerator {
             
             SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
             //noinspection unchecked
-            List<Integer> requiredPartitionIds = (List<Integer>) settingItem3.getValue(List.class);
-            List<Integer> selectedPartitionIds = selectedPartitions.stream().map(Partition::getId).toList();
+            List<String> requiredPartitionIds = (List<String>) settingItem3.getValue(List.class);
+            List<String> selectedPartitionIds = selectedPartitions.stream().map(Partition::getId).toList();
             List<Partition> partitions = new ArrayList<>(requiredPartitionIds.size() + selectedPartitionIds.size());
             partitions.addAll(selectedPartitions);
             partitions.addAll(partitionService.findAllByIds(requiredPartitionIds));

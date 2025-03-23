@@ -67,26 +67,26 @@ public class QuestionUpdateUtils {
         result.put("lastModifiedTime", question.getLastModifiedTimeString());
         if (question instanceof MultipleChoicesQuestion multipleChoiceQuestion) {
             ArrayList<Object> choices = new ArrayList<>();
-            List<String> correctIds = new java.util.ArrayList<>(1);
+//            List<String> correctIds = new java.util.ArrayList<>(1);
             for (Choice choice : multipleChoiceQuestion.getChoices()) {
                 LinkedHashMap<String,Object> choiceMap = new LinkedHashMap<>();
-                choiceMap.put("id", choice.getId());
+//                choiceMap.put("id", choice.getId());
                 choiceMap.put("content", choice.getContent());
                 boolean correct = choice.isCorrect();
                 choiceMap.put("correct", correct);
-                if (correct) {
-                    correctIds.add(choice.getId());
-                }
+//                if (correct) {
+//                    correctIds.add(choice.getId());
+//                }
                 choices.add(choiceMap);
             }
             result.put("choices", choices);
-            if (correctIds.size() == 1) {
-                result.put("correctChoiceId", correctIds.getFirst());
-            } else if (correctIds.size() > 1) {
-                ArrayList<Object> correctIdsList = new ArrayList<>();
-                correctIdsList.addAll(correctIds);
-                result.put("correctChoiceIds", correctIdsList);
-            }
+//            if (correctIds.size() == 1) {
+//                result.put("correctChoiceId", correctIds.getFirst());
+//            } else if (correctIds.size() > 1) {
+//                ArrayList<Object> correctIdsList = new ArrayList<>();
+//                correctIdsList.addAll(correctIds);
+//                result.put("correctChoiceIds", correctIdsList);
+//            }
         } else if (question instanceof QuestionGroup questionGroup) {
             Set<ToQuestionGroupLink> questionLinks = questionGroup.getQuestionLinks();
             ArrayList<Object> subQuestions = new ArrayList<>(questionLinks.size());

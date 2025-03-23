@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SpecialPartitionLimit {
-    int partitionId;
+    String partitionId;
     boolean minLimitEnabled;
     int minLimit;
     boolean maxLimitEnabled;

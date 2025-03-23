@@ -1,19 +1,34 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.utils.QuestionUpdateUtils;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
+import indi.etern.checkIn.utils.QuestionUpdateUtils;
+import jakarta.annotation.Nullable;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Action("getQuestionsByUserQQ")
-public class GetQuestionsByUserQQAction extends TransactionalAction {
-    private long userQQ;
-    private int limit = -1;
+public class GetQuestionsByUserQQAction extends BaseAction1<GetQuestionsByUserQQAction.Input, OutputData> {
+    public record Input(long qq,@Nullable Integer limit) implements InputData {}
+    public record Output(List<Map<String,Object>> questions) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
+    
     private final UserService userService;
     private final QuestionService questionService;
     
@@ -23,40 +38,24 @@ public class GetQuestionsByUserQQAction extends TransactionalAction {
     }
     
     @Override
-    public String requiredPermissionName() {
-        return null;
-    }
-
-    @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        Optional<User> optionalUser = userService.findByQQNumber(userQQ);
-        LinkedHashMap<String,Object> result;
+    @Transactional
+    public void execute(ExecuteContext<Input, OutputData> context) {
+        final Input input = context.getInput();
+        Optional<User> optionalUser = userService.findByQQNumber(input.qq);
         if (optionalUser.isPresent()) {
-            result = getSuccessMap();
-            ArrayList<Object> questions = new ArrayList<>();
+            List<Map<String,Object>> questions = new ArrayList<>();
             List<Question> questionList;
-            if (limit == -1) {
+            if (input.limit == null) {
                 questionList = questionService.findAllByAuthor(optionalUser.get());
             } else {
-                questionList = questionService.findFirstLimitByUser(optionalUser.get(), limit);
+                questionList = questionService.findFirstLimitByUser(optionalUser.get(), input.limit);
             }
             questionList.forEach(question -> {
                 questions.add(QuestionUpdateUtils.getMapOfQuestion(question));
             });
-            result.put("questions", questions);
+            context.resolve(new Output(questions));
         } else {
-            result = getErrorMap("user not exist");
+            context.resolve(MessageOutput.error("User not exist"));
         }
-        return Optional.of(result);
-    }
-
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        userQQ = ((Number) dataMap.get("qq")).longValue();
-        Object limit1 = dataMap.get("limit");
-        if (limit1 == null)
-            limit = -1;
-        else
-            limit = ((Number) limit1).intValue();
     }
 }

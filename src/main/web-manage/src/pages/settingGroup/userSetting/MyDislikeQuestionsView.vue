@@ -13,7 +13,9 @@ onBeforeMount(() => {
     try {
         WebSocketConnector.send({
             type: "getDislikeQuestionsByUserQQ",
-            qq: UserDataInterface.getCurrentUser().value.qq
+            data: {
+                qq: UserDataInterface.getCurrentUser().value.qq
+            }
         }).then((response) => {
             loading.value = false;
             for (const question of response.questions) {

@@ -87,10 +87,10 @@ public class QuestionCreateUtils {
             Object o3 = questionDataMap1.get("partitionIds");
             if (o3 instanceof List) {
                 //noinspection unchecked
-                List<Number> partitionIds = (List<Number>) o3;
+                List<String> partitionIds = (List<String>) o3;
                 builder.usePartitionLinks(linkWrapper -> {
-                    for (Number partitionId : partitionIds) {
-                        linkWrapper.getTargets().add(Partition.getInstance(partitionId.intValue()));
+                    for (String partitionId : partitionIds) {
+                        linkWrapper.getTargets().add(Partition.ofId(partitionId));
                     }
                 });
             }
@@ -130,9 +130,9 @@ public class QuestionCreateUtils {
         if (partitionIdsObj instanceof List) {
             builder.getPartitions().clear();
             //noinspection unchecked
-            List<Integer> partitionIds = (List<Integer>) partitionIdsObj;
-            for (Integer partitionId : partitionIds) {
-                builder.addPartition(Partition.getInstance(partitionId));
+            List<String> partitionIds = (List<String>) partitionIdsObj;
+            for (String partitionId : partitionIds) {
+                builder.addPartition(Partition.ofId(partitionId));
             }
         }
         

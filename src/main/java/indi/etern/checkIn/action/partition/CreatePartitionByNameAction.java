@@ -1,48 +1,41 @@
 package indi.etern.checkIn.action.partition;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.utils.PartitionUpdateUtils;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import jakarta.annotation.Nonnull;
+import org.springframework.transaction.annotation.Transactional;
 
 @Action("createPartition")
-public class CreatePartitionByNameAction extends TransactionalAction {
-    private String partitionName;
-    private Partition createdPartition;
-
-    @Override
-    public String requiredPermissionName() {
-        return "create partition";
+public class CreatePartitionByNameAction extends BaseAction1<CreatePartitionByNameAction.Input, OutputData> {
+    public record Input(@Nonnull String name) implements InputData {}
+    public record SuccessOutput(Result result, String id) implements OutputData {}
+    
+    private final PartitionService partitionService;
+    
+    public CreatePartitionByNameAction(PartitionService partitionService) {
+        this.partitionService = partitionService;
     }
     
     @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        if (PartitionService.singletonInstance.existsByName(partitionName)) {
-            LinkedHashMap<String,Object> error = new LinkedHashMap<>();
-            error.put("type", "error");
-            error.put("message", "partition already exists");
-            return Optional.of(error);
+    @Transactional
+    public void execute(ExecuteContext<Input, OutputData> context) {
+        context.requirePermission("create partition");
+        final Input input = context.getInput();
+        
+        if (partitionService.existsByName(input.name)) {
+            context.resolve(new MessageOutput(OutputData.Result.ERROR, "partition already exists"));
+            return;
         }
-        final Partition partition = Partition.getInstance(partitionName);
-        PartitionService.singletonInstance.save(partition);
-        createdPartition = partition;
-        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-        map.put("type", "addPartitionCallBack");
-        map.put("id", partition.getId());
-        if (createdPartition != null) {
-            PartitionUpdateUtils.sendAddPartitionToAll(createdPartition);
-        }
-        return Optional.of(map);
-    }
-
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        partitionName = (String) dataMap.get("name");
-        createdPartition = null;
+        final Partition partition = Partition.ofName(input.name);
+        partitionService.save(partition);
+        PartitionUpdateUtils.sendAddPartitionToAll(partition);
+        context.resolve(new SuccessOutput(OutputData.Result.SUCCESS, partition.getId()));
     }
 }
