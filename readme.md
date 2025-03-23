@@ -3,7 +3,7 @@
 # CheckIn
 #### 更易用的入群测试系统
 ![Static Badge](https://img.shields.io/badge/Language-Java-red)
-![Static Badge](https://img.shields.io/badge/JavaRequire-23-red)
+![Static Badge](https://img.shields.io/badge/JavaRequire-21-red)
 ![Static Badge](https://img.shields.io/badge/Version-2.0.0_beta-blue)
 ![Static Badge](https://img.shields.io/badge/Status-Developing-green)
 ---
@@ -185,7 +185,7 @@ spring.datasource.url=jdbc:mysql://localhost:3306/checkIn?useUnicode=true&charac
 ---
 
 3. 运行jar包，将会自动生成数据库及初始数据
-> 需要Java23
+> 需要Java21
 
 > 注意：此时需要命令行主目录在jar包所在目录下
 > 
