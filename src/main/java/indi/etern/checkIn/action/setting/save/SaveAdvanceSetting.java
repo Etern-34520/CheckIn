@@ -1,64 +1,76 @@
 package indi.etern.checkIn.action.setting.save;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.robotToken.RobotTokenItem;
 import indi.etern.checkIn.service.dao.RobotTokenService;
 import indi.etern.checkIn.utils.SaveSettingCommon;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.FrameworkServlet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 @Action("saveAdvanceSetting")
-public class SaveAdvanceSetting extends TransactionalAction {
+public class SaveAdvanceSetting extends BaseAction1<SaveAdvanceSetting.Input, SaveAdvanceSetting.RobotTokenOutput> {
+    public record Input(Map<String, Object> data) implements InputData {}
+    public record RobotTokenOutput(List<RobotTokenItem> currentTokens) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
+    
     public static final String[] KEYS = {
             "autoCreateUserMode"
     };
     SaveSettingCommon saveSettingCommon;
-    private List<Map<String, String>> createdRobotTokenList;
-    private List<String> deletedRobotTokenList;
+    
     private final RobotTokenService robotTokenService;
     
     public SaveAdvanceSetting(RobotTokenService robotTokenService, FrameworkServlet frameworkServlet) {
         this.robotTokenService = robotTokenService;
     }
     
+    @Transactional
     @Override
-    public String requiredPermissionName() {
-        return "save advance setting";
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
+    public void execute(ExecuteContext<Input, RobotTokenOutput> context) {
+        final Input input = context.getInput();
+        saveSettingCommon = new SaveSettingCommon(input.data,
+                KEYS, "advance");
+        //noinspection unchecked
+        List<Map<String,String>> createdRobotTokenList = (List<Map<String, String>>) input.data.get("createdRobotTokens");
+        //noinspection unchecked
+        List<String> deletedRobotTokenList = (List<String>) input.data.get("deletedRobotTokenIds");
+        context.requirePermission("save advance setting");
+        saveSettingCommon = new SaveSettingCommon(input.data,
+                KEYS, "advance");
+        
         saveSettingCommon.doSave();
-        final LinkedHashMap<String, Object> successMap = getSuccessMap();
         if (createdRobotTokenList != null) {
             List<RobotTokenItem> robotTokenItems = new ArrayList<>();
             for (Map<String, String> tokenData : createdRobotTokenList) {
-                robotTokenItems.add(RobotTokenItem.generateNewToken(tokenData.get("id"), tokenData.get("description"), getCurrentUser()));
+                robotTokenItems.add(RobotTokenItem.generateNewToken(tokenData.get("id"), tokenData.get("description"), context.getCurrentUser()));
             }
             robotTokenService.saveAll(robotTokenItems);
         }
         if (deletedRobotTokenList != null) {
             robotTokenService.deleteAllById(deletedRobotTokenList);
         }
+        RobotTokenOutput robotTokenOutput;
         if (createdRobotTokenList != null || deletedRobotTokenList != null) {
             final List<RobotTokenItem> all = robotTokenService.findAll();
             final List<RobotTokenItem> sortedList = all.stream().sorted(Comparator.comparing(RobotTokenItem::getGenerateTime)).toList();
-            successMap.put("currentTokens",sortedList);
+            robotTokenOutput = new RobotTokenOutput(sortedList);
+        } else {
+            robotTokenOutput = new RobotTokenOutput(null);
         }
-        return Optional.of(successMap);
-    }
-    
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        //noinspection unchecked
-        final Map<String, Object> data = (Map<String, Object>) dataMap.get("data");
-        saveSettingCommon = new SaveSettingCommon(data,
-                KEYS, "advance");
-        //noinspection unchecked
-        createdRobotTokenList = (List<Map<String, String>>) data.get("createdRobotTokens");
-        //noinspection unchecked
-        deletedRobotTokenList = (List<String>) data.get("deletedRobotTokenIds");
+        
+        context.resolve(robotTokenOutput);
     }
 }

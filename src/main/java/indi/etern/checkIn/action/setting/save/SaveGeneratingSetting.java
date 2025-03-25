@@ -1,15 +1,18 @@
 package indi.etern.checkIn.action.setting.save;
 
-import indi.etern.checkIn.action.MapResultAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.utils.SaveSettingCommon;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Action("saveGeneratingSetting")
-public class SaveGeneratingSetting extends MapResultAction {
+public class SaveGeneratingSetting extends BaseAction1<SaveGeneratingSetting.Input,MessageOutput> {
+    public record Input(Map<String, Object> data) implements InputData {}
     public static final String[] KEYS = {
             "questionAmount",
             "questionScore",
@@ -21,23 +24,14 @@ public class SaveGeneratingSetting extends MapResultAction {
             "drawingStrategy",
             "completingStrategy"
     };
-    SaveSettingCommon saveSettingCommon;
     
+    @Transactional
     @Override
-    public String requiredPermissionName() {
-        return "save generating setting";
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
-        saveSettingCommon.doSave();
-        return Optional.of(getSuccessMap());
-    }
-    
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        //noinspection unchecked
-        saveSettingCommon = new SaveSettingCommon((Map<String, Object>) dataMap.get("data"),
+    public void execute(ExecuteContext<SaveGeneratingSetting.Input, MessageOutput> context) {
+        context.requirePermission("save generating setting");
+        SaveSettingCommon saveSettingCommon = new SaveSettingCommon(context.getInput().data,
                 KEYS, "generating");
+        saveSettingCommon.doSave();
+        context.resolve(MessageOutput.success("Generating setting saved"));
     }
 }

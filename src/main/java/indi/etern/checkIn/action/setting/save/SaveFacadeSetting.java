@@ -1,32 +1,28 @@
 package indi.etern.checkIn.action.setting.save;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.utils.SaveSettingCommon;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Action("saveFacadeSetting")
-public class SaveFacadeSetting extends TransactionalAction {
+public class SaveFacadeSetting extends BaseAction1<SaveFacadeSetting.Input, MessageOutput> {
+    public record Input(Map<String, Object> data) implements InputData {}
     public static final String[] KEYS = {"title", "subTitle", "description", "icon"};
-    SaveSettingCommon saveSettingCommon;
-    @Override
-    public String requiredPermissionName() {
-        return "save facade setting";
-    }
     
+    @Transactional
     @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        saveSettingCommon.doSave();
-        return Optional.ofNullable(getSuccessMap());
-    }
-    
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        saveSettingCommon = new SaveSettingCommon((Map<String, Object>) dataMap.get("data"),
+    public void execute(ExecuteContext<Input, MessageOutput> context) {
+        context.requirePermission("save facade setting");
+        SaveSettingCommon saveSettingCommon = new SaveSettingCommon(context.getInput().data,
                 KEYS,
                 "facade");
+        saveSettingCommon.doSave();
+        context.resolve(MessageOutput.success("Facade setting saved"));
     }
 }

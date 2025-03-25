@@ -1,33 +1,40 @@
 package indi.etern.checkIn.action.setting.save;
 
-import indi.etern.checkIn.action.MapResultAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.service.dao.GradingLevelService;
 import indi.etern.checkIn.utils.SaveSettingCommon;
 import jakarta.transaction.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Action("saveGradingSetting")
-public class SaveGradingSetting extends MapResultAction {
+public class SaveGradingSetting extends BaseAction1<SaveGradingSetting.Input, MessageOutput> {
+    public record Input(Map<String, Object> data) implements InputData {}
     public static final String[] KEYS = {"splits", "questionScore"};
-    SaveSettingCommon saveSettingCommon;
     final GradingLevelService gradingLevelService;
-    List<Map<String, Object>> levels;
     
     public SaveGradingSetting(GradingLevelService gradingLevelService) {
         this.gradingLevelService = gradingLevelService;
     }
     
-    @Override
-    public String requiredPermissionName() {
-        return "save grading setting";
-    }
-    
-    @Override
     @Transactional
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
+    @Override
+    public void execute(ExecuteContext<SaveGradingSetting.Input, MessageOutput> context) {
+        context.requirePermission("save grading setting");
+        final SaveGradingSetting.Input input = context.getInput();
+        //noinspection unchecked
+        SaveSettingCommon saveSettingCommon = new SaveSettingCommon((Map<String, Object>) input.data.get("data"),
+                KEYS, "grading");
+        //noinspection unchecked
+        List<Map<String, Object>> levels = (List<Map<String, Object>>) ((Map<String, Object>) input.data.get("data")).get("levels");
+        
         saveSettingCommon.doSave();
         List<GradingLevel> gradingLevels = new ArrayList<>();
         levels.forEach(level -> {
@@ -48,15 +55,6 @@ public class SaveGradingSetting extends MapResultAction {
         });
         gradingLevelService.deleteAll();
         gradingLevelService.saveAll(gradingLevels);
-        return Optional.of(getSuccessMap());
-    }
-    
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        //noinspection unchecked
-        saveSettingCommon = new SaveSettingCommon((Map<String, Object>) dataMap.get("data"),
-                KEYS,"grading");
-        //noinspection unchecked
-        levels = (List<Map<String,Object>>) ((Map<String, Object>) dataMap.get("data")).get("levels");
+        context.resolve(MessageOutput.success("Grading setting saved"));
     }
 }

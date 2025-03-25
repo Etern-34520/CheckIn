@@ -1,17 +1,26 @@
 package indi.etern.checkIn.action.setting.get;
 
-import indi.etern.checkIn.action.MapResultAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.NullInput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.setting.verification.VerificationRule;
 import indi.etern.checkIn.service.dao.VerificationRuleService;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Action("getVerificationSetting")
-public class GetVerificationSettingAction extends MapResultAction {
+public class GetVerificationSettingAction extends BaseAction1<NullInput, GetVerificationSettingAction.SuccessOutput> {
+    public record SuccessOutput(List<Object> data) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
+    
     final VerificationRuleService verificationRuleService;
     
     public GetVerificationSettingAction(VerificationRuleService verificationRuleService) {
@@ -19,14 +28,8 @@ public class GetVerificationSettingAction extends MapResultAction {
     }
     
     @Override
-    public String requiredPermissionName() {
-        return null;
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
+    public void execute(ExecuteContext<NullInput, SuccessOutput> context) {
         List<VerificationRule> ruleList = verificationRuleService.findAll();
-        LinkedHashMap<String,Object> result = getSuccessMap();
         ArrayList<Object> arrayList = new ArrayList<>();
         for (VerificationRule verificationRule : ruleList) {
             LinkedHashMap<String,Object> verificationRuleMap = new LinkedHashMap<>();
@@ -56,7 +59,6 @@ public class GetVerificationSettingAction extends MapResultAction {
             verificationRuleMap.put("values",valuesList);
             arrayList.add(verificationRuleMap);
         }
-        result.put("data", arrayList);
-        return Optional.of(result);
+        context.resolve(new SuccessOutput(arrayList));
     }
 }

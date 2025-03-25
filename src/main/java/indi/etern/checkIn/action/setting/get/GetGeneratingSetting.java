@@ -1,26 +1,27 @@
 package indi.etern.checkIn.action.setting.get;
 
-import indi.etern.checkIn.action.MapResultAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.NullInput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.action.setting.save.SaveGeneratingSetting;
 import indi.etern.checkIn.utils.GetSettingCommon;
 
-import java.util.LinkedHashMap;
-import java.util.Optional;
+import java.util.Map;
 
 @Action("getGeneratingSetting")
-public class GetGeneratingSetting extends MapResultAction {
-    
-    @Override
-    public String requiredPermissionName() {
-        return "get generating setting";
+public class GetGeneratingSetting extends BaseAction1<NullInput, GetGeneratingSetting.SuccessOutput> {
+    public record SuccessOutput(Map<String, Object> data) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
     }
-    
     @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
+    public void execute(ExecuteContext<NullInput, SuccessOutput> context) {
+        context.requirePermission("get generating setting");
         GetSettingCommon getSettingCommon = new GetSettingCommon(SaveGeneratingSetting.KEYS,"generating");
-        final LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-        map.put("data",getSettingCommon.doGet());
-        return Optional.of(map);
+        context.resolve(new SuccessOutput(getSettingCommon.doGet()));
     }
 }
