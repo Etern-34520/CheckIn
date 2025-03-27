@@ -47,9 +47,14 @@ public class QuestionStatistic implements BaseEntity<String> {
     @Fetch(FetchMode.SUBSELECT)
     @JsonIgnore
     List<ExamData> drewExamData;
+    
+    @Builder.Default
     int drewCount = 0;
+    @Builder.Default
     int submittedCount = 0;
+    @Builder.Default
     int correctCount = 0;
+    @Builder.Default
     int wrongCount = 0;
     
     public QuestionStatistic increaseDrewCount() {

@@ -50,7 +50,7 @@ public class JwtTokenProvider {
 
         String token = Jwts.builder()
                 .setSubject(String.valueOf(user.getQQNumber()))
-                .setIssuedAt(new Date())
+                .setIssuedAt(currentDate)
                 .setExpiration(expireDate)
                 .signWith(key())
                 .compact();
@@ -64,7 +64,6 @@ public class JwtTokenProvider {
     }
 
     // 从 Jwt token 获取用户
-//    @Cacheable(value = "token", key = "#token")
     public User getUser(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key())

@@ -88,11 +88,15 @@ const handleError = (data, actionDescription) => {
                 console.error("EXAM IS NOT EXIST");
                 break;
             default:
+                let message = data.message;
+                if (data.response && data.response.data && data.response.data.message) {
+                    message = data.response.data.message;
+                }
                 ElMessage({
                     type: "error",
-                    message: "上传出错: " + data.message
+                    message: "上传出错: " + message
                 })
-                console.error(data.message);
+                console.error(message);
         }
     } else {
         console.error(actionDescription, data);
