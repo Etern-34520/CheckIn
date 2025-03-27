@@ -48,8 +48,7 @@ public class Exam {
         this.questionStatisticService = questionStatisticService;
     }
     
-    public record GenerateRequest(long qq, List<String> partitionIds) {
-    }
+    public record GenerateRequest(long qq, List<String> partitionIds) { }
     
     @PostMapping(path = "/api/generate")
     @Transactional(noRollbackFor = Throwable.class)

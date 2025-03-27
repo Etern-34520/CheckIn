@@ -83,7 +83,7 @@ const back = () => {
 </script>
 
 <template>
-    <div class="auto-padding-center" style="flex:1">
+    <div class="auto-padding-center" style="flex:1;padding-bottom: 200px;">
         <el-button link size="large" @click="back"
                    style="margin-top: 36px;align-self: baseline;padding: 8px 16px !important;font-size: 1em">
             <el-icon><ArrowLeftBold/></el-icon>返回
@@ -136,7 +136,7 @@ const back = () => {
         </div>
         <div class="flex-blank-1"></div>
         <el-button type="primary" size="large" :loading="loadingExam" :loading-icon="_Loading_"
-                   style="margin-top: 36px;margin-bottom: 64px;align-self: center;min-width: 180px"
+                   style="margin-top: 36px;align-self: center;min-width: 180px"
                    @click="startExam" :disabled="!(validate1 && validate2)">开始答题
         </el-button>
     </div>

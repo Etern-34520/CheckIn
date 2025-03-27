@@ -8,7 +8,7 @@
     <name>checkIn</name>
     <description>CheckIn use Spring Boot</description>
     <properties>
-        <java.version>23</java.version>
+        <java.version>21</java.version>
         <spring-boot-starter.version>3.5.0-M2</spring-boot-starter.version>
         <!--        <spring-boot-starter.version>3.4.3</spring-boot-starter.version>-->
     </properties>
@@ -84,6 +84,8 @@
                 <version>3.13.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
+                    <source>21</source>
+                    <target>21</target>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
