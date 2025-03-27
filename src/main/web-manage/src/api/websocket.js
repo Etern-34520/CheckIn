@@ -80,10 +80,17 @@ const WebSocketConnector = {
             // window.cookieStore.get("token").then((result) => {
             //     let date = new Date(result.expires);
             const decoded = jwtDecode(token);
+            console.log(decoded);
             if (decoded.exp * 1000 < Date.now()) {
                 reject("token expired");
             } else {
-                const ws = new WebSocket(`ws://${url}/checkIn/api/websocket/${qq}`);
+                let protocol;
+                if (window.location.protocol === "https:") {
+                    protocol = "wss:"
+                } else {
+                    protocol = "ws:"
+                }
+                const ws = new WebSocket(`${protocol}://${url}/checkIn/api/websocket/${qq}`);
                 ws.onclose = function () {
                     if (!normallyClose && autoRetriedTimes < 3) {
                         autoRetriedTimes++;

@@ -114,7 +114,8 @@ const routeGenerateExam = () => {
                        :show-toolbar-name="UIMeta.mobile.value"
                        :preview="true"/>
             <div>
-                <el-button type="primary" size="large" @click="routeGenerateExam">生成题目</el-button>
+                <el-button type="primary" size="large" style="margin-top: 36px;align-self: center;min-width: 180px"
+                           @click="routeGenerateExam">生成题目</el-button>
             </div>
         </div>
     </div>
@@ -214,7 +215,6 @@ const routeGenerateExam = () => {
     padding: 20px 32px;
     z-index: 1;
     align-self: center;
-    margin-left: 32px;
 
     animation: ani-2 600ms 800ms var(--ease-out-quint);
     animation-fill-mode: backwards;
