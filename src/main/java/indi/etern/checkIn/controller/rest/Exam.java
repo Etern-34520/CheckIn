@@ -73,8 +73,7 @@ public class Exam {
         }
     }
     
-    public record GetQuestionsByIndexRequest(String examId, int[] indexes) {
-    }
+    public record GetQuestionsByIndexRequest(String examId, int[] indexes) {}
     
     @RequestMapping(method = RequestMethod.POST, path = "/api/examQuestions", produces = "application/json;charset=UTF-8")
     @Transactional(propagation = Propagation.NESTED)

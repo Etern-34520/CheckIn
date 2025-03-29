@@ -3,6 +3,7 @@ package indi.etern.checkIn;
 import indi.etern.checkIn.service.dao.UserService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
@@ -12,7 +13,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import javax.sql.DataSource;
 
 @SpringBootApplication
-//@EnableCaching
+@EnableCaching
 public class CheckInApplication {
 	public static ConfigurableApplicationContext applicationContext;
 	private final UserService userService;
