@@ -50,7 +50,7 @@ public class WebSocketService {
     }
     
     public void sendMessages(String message, HashSet<String> toSids) {
-        logger.info("webSocket to:{}, msg:{}", toSids, message);
+        logger.debug("webSocket to:{}, msg:{}", toSids, message);
         for (Connector item : Connector.CONNECTORS) {
             try {
                 if (toSids.isEmpty()) {
@@ -66,7 +66,7 @@ public class WebSocketService {
     @SneakyThrows
     private void sendMessages(Map<?, ?> mapMessage, HashSet<String> toSids) {
         String message = objectMapper.writeValueAsString(mapMessage);
-        logger.info("webSocket to:{}, msg:{}", toSids, message);
+        logger.debug("webSocket to:{}, msg:{}", toSids, message);
         for (Connector item : Connector.CONNECTORS) {
             try {
                 if (toSids.isEmpty()) {
@@ -80,7 +80,7 @@ public class WebSocketService {
     }
     
     public void sendMessage(String message, String sid) {
-        logger.info("webSocket to:{}, msg:{}", sid, message);
+        logger.debug("webSocket to:{}, msg:{}", sid, message);
         for (Connector item : Connector.CONNECTORS) {
             try {
                 if (item.getSid().equals(sid)) {
@@ -92,7 +92,7 @@ public class WebSocketService {
     }
     
     public void sendMessageToAll(String message) {
-        logger.info("webSocket to all, msg:{}", message);
+        logger.debug("webSocket to all, msg:{}", message);
         sendMessageToAllWithoutLog(message);
     }
     
@@ -175,7 +175,7 @@ public class WebSocketService {
     }*/
     
     public void sendMessageToChannel(Map<Object, Object> message, String channelName) {
-        logger.info("webSocket to channel:{}}", channelName);
+        logger.debug("webSocket to channel:{}}", channelName);
         Channel channel = channelHashMap.get(channelName);
         if (channel != null) {
             message.put("channelName", channelName);
@@ -190,7 +190,7 @@ public class WebSocketService {
         }
     */
     public void sendMessageToChannel(Map<?, ?> message, Channel channel) {
-        logger.info("webSocket to channel:{}", channel.getName());
+        logger.debug("webSocket to channel:{}", channel.getName());
         sendMessages(message, channel.sids);
     }
     

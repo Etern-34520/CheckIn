@@ -94,10 +94,6 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<Integer> 
     }
     //    @Override
     
-    public String getStaticHash() {
-        return name;
-    }
-    
     /*public void setSort(Comparator<Question> sortedSet) {
         sortedQuestion = new TreeSet<>(sortedSet);
         sortedQuestion.addAll(questions);

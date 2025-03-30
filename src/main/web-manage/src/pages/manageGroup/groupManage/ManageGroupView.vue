@@ -13,7 +13,7 @@ import _Loading_ from "@/components/common/_Loading_.vue";
 import {ElMessage} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 
-const responsiveSplitpane = ref(null);
+const responsiveSplitpane = ref();
 const filterText = ref("");
 const userGroups = UserDataInterface.userGroups;
 const userGroupsArray = ref([]);
@@ -43,12 +43,10 @@ const doFilter = (userGroup) => {
 }
 
 const stop = router.afterEach((to, from) => {
-    if (to.params.id === undefined) {
-        if (responsiveSplitpane.value)
-            responsiveSplitpane.value.showLeft();
+    if (to.params.type === undefined) {
+        responsiveSplitpane.value.showLeft();
     } else {
-        if (responsiveSplitpane.value)
-            responsiveSplitpane.value.hideLeft();
+        responsiveSplitpane.value.hideLeft();
     }
 });
 
@@ -93,7 +91,8 @@ const switchChangingLevel = () => {
                     type: 'error',
                     message: '修改失败',
                 });
-            }            waitForResponse.value = false;
+            }
+            waitForResponse.value = false;
         }, (err) => {
             ElMessage({
                 type: 'error',
@@ -130,7 +129,8 @@ const cancelCreating = () => {
                             v-if="PermissionInfo.hasPermission('role','create role')">
                     <template #reference>
                         <!--suppress JSValidateTypes -->
-                        <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px;margin-bottom: 8px" class="disable-init-animate">
+                        <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px;margin-bottom: 8px"
+                                   class="disable-init-animate">
                             新建用户组
                         </el-button>
                     </template>
@@ -150,10 +150,10 @@ const cancelCreating = () => {
                         </div>
                     </template>
                 </el-popover>
-<!--                <el-button :icon="Sort" :loading="waitForResponse" :loading-icon="_Loading_" class="disable-init-animate"
-                           @click="switchChangingLevel" style="margin-left: 0">
-                    {{ changingLevel ? "完成" : "调整级别" }}
-                </el-button>-->
+                <!--                <el-button :icon="Sort" :loading="waitForResponse" :loading-icon="_Loading_" class="disable-init-animate"
+                                           @click="switchChangingLevel" style="margin-left: 0">
+                                    {{ changingLevel ? "完成" : "调整级别" }}
+                                </el-button>-->
             </div>
             <el-scrollbar>
                 <VueDraggable

@@ -1,14 +1,14 @@
 package indi.etern.checkIn.api.webSocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.MVCConfig;
+import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.Result;
 import indi.etern.checkIn.action.role.SendPermissionsToUsersAction;
 import indi.etern.checkIn.auth.JwtTokenProvider;
-import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.web.WebSocketService;
+import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -47,7 +47,7 @@ public class Connector implements SubProtocolCapable {
     @Getter
     private String sid = "";
     private User sessionUser;
-    private final ObjectMapper objectMapper = MVCConfig.getObjectMapper();
+    private final ObjectMapper objectMapper = CheckInApplication.getObjectMapper();
     
     public Connector() {
 //        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);

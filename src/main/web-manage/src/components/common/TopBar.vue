@@ -27,6 +27,7 @@ function switchMenuStyle() {
 }
 
 const colorScheme = UI_Meta.colorScheme;
+const mobile = UI_Meta.mobile;
 
 const getIcon = () => {
     if (colorScheme.value === 'light') {
@@ -40,7 +41,7 @@ const getIcon = () => {
 <template>
     <div id="top-bar">
         <el-button v-on:click="switchMenuStyle" class="menu-display-button" link
-                   style="width: 30px;height: 30px;margin-left: 8px;margin-right: 16px">
+                   style="width: 30px;height: 30px;margin-left: 8px;margin-right: 16px;">
             <svg id="menuIcon" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
                 <g>
                     <rect rx="1" id="svg_1" height="2" width="16" y="19" x="7"/>
@@ -59,7 +60,8 @@ const getIcon = () => {
                     </el-breadcrumb-item>
                     <TransitionGroup name="breadcrumb-item">
                         <!--suppress JSValidateTypes -->
-                        <el-breadcrumb-item :key="pathItem.name" v-for="(pathItem,$index) in breadcrumbPathArray" :to="$index!==breadcrumbPathArray.length-1?{path: pathItem.path}:undefined">
+                        <el-breadcrumb-item :key="pathItem.name" v-for="(pathItem,$index) in breadcrumbPathArray"
+                                            :to="$index!==breadcrumbPathArray.length-1?{path: pathItem.path}:undefined">
                             {{ pathItem.name }}
                         </el-breadcrumb-item>
                     </TransitionGroup>
@@ -67,7 +69,7 @@ const getIcon = () => {
             </div>
         </el-scrollbar>
         <div class="flex-blank-1"></div>
-        <el-button @click="router.push({name:'account-base'})" text
+        <el-button @click="router.push({name:'account-base'})" text v-if="!mobile"
                    style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
             <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
                        style="margin-right: 4px"></el-avatar>

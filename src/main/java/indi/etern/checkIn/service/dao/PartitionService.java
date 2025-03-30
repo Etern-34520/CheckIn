@@ -3,6 +3,9 @@ package indi.etern.checkIn.service.dao;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.repositories.PartitionRepository;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -22,32 +25,21 @@ public class PartitionService {
         singletonInstance = this;
         this.transactionTemplate = transactionTemplate;
     }
-
-    public void save(Partition partition) {
-        partitionRepository.save(partition);
+    
+    @CachePut(value = "partition",key = "#partition.id")
+    public Partition save(Partition partition) {
+        return partitionRepository.save(partition);
     }
 
     public List<Partition> findAll() {
         return partitionRepository.findAll();
     }
     
-    public void saveAndFlush(Partition partition) {
-        partitionRepository.saveAndFlush(partition);
-    }
-
     public Optional<Partition> findByName(String name) {
         return partitionRepository.findByName(name);
     }
-
-    public void deleteAll() {
-        partitionRepository.deleteAll();
-    }
-
-    public void deleteByName(String partitionName) {
-        Optional<Partition> optionalPartition = findByName(partitionName);
-        optionalPartition.ifPresent(partition -> partitionRepository.deleteById(partition.getId()));
-    }
-
+    
+    @CacheEvict(value = "partition",key = "#partition.id")
     public void delete(Partition partition) {
         partitionRepository.delete(partition);
     }
@@ -55,7 +47,8 @@ public class PartitionService {
     public boolean existsById(int id) {
         return partitionRepository.existsById(id);
     }
-
+    
+    @Cacheable(value = "partition",key = "#id")
     public Optional<Partition> findById(int id) {
         return partitionRepository.findById(id);
     }
@@ -66,17 +59,5 @@ public class PartitionService {
 
     public boolean existsByName(String partitionName) {
         return partitionRepository.existsByName(partitionName);
-    }
-    
-    public void saveAll(Collection<Partition> partitions) {
-        partitionRepository.saveAll(partitions);
-    }
-    
-    public void flush() {
-        partitionRepository.flush();
-    }
-    
-    public boolean exists(Partition partition) {
-        return partitionRepository.existsById(partition.getId());
     }
 }

@@ -58,6 +58,13 @@ const getData = () => {
         data.value = response.data;
         data.value.deletedRobotTokenIds = [];
         data.value.createdRobotTokens = [];
+        if (!data.value.ipSource) {
+            data.value.ipSource = "request";
+        }
+        if (data.value.useRequestIpIfSourceIsNull === null ||
+                data.value.useRequestIpIfSourceIsNull === undefined) {
+            data.value.useRequestIpIfSourceIsNull = true;
+        }
         loading.value = false;
     }, (err) => {
         ElMessage({
@@ -165,6 +172,21 @@ const deleteToken = (index) => {
                     <div v-if="!loading && !error"
                          style="max-width: 1280px;width: min(70vw,1280px);display: flex;flex-direction: column;align-items: stretch">
                         <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 8px">
+                            <el-text size="large" style="align-self: center;margin-right: 16px">IP 兼容</el-text>
+                            <el-radio-group v-model="data.ipSource" :disabled="!editing">
+                                <el-radio value="request">使用传入 IP (默认)</el-radio>
+                                <el-radio value="x_real_ip">从请求头 "x-real-ip" 解析 IP</el-radio>
+                                <el-radio value="x_forwarded_for">从请求头 "x-forwarded-for" 解析 IP</el-radio>
+                                <el-radio value="remote_host">从请求头 "remote-host" 解析 IP</el-radio>
+                                <el-radio value="cf_connecting_ip">从请求头 "cf-connecting-ip" 解析 IP (Cloudflare)</el-radio>
+                                <el-radio value="true_client_ip">从请求头 "true-client-ip" 解析 IP (Cloudflare Enterprise)</el-radio>
+                            </el-radio-group>
+                        </div>
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 8px">
+                            <el-text size="large" style="align-self: center;margin-right: 16px">无法从请求头中获取 IP 时回退至请求</el-text>
+                            <el-switch v-model="data.useRequestIpIfSourceIsNull" :disabled="!editing"></el-switch>
+                        </div>
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 8px">
                             <el-text size="large" style="align-self: center;margin-right: 16px">robot tokens</el-text>
                             <transition name="blur-scale">
                                 <el-button class="disable-init-animate" link @click="createNewToken" v-if="editing">
@@ -216,7 +238,8 @@ const deleteToken = (index) => {
                                                         <el-text v-else type="info">无</el-text>
                                                     </div>
                                                     <div class="panel-1 clickable disable-init-animate"
-                                                         style="display: flex;flex-direction: row;padding: 4px 8px;margin-right: 4px;" @click="router.push({name: 'user-detail',params: {id: tokenItem.generateByUserQQ}})">
+                                                         style="display: flex;flex-direction: row;padding: 4px 8px;margin-right: 4px;"
+                                                         @click="router.push({name: 'user-detail',params: {id: tokenItem.generateByUserQQ}})">
                                                         <el-text type="info" style="margin-right: 8px;">创建用户
                                                         </el-text>
                                                         <el-avatar shape="circle" :size="24" fit="cover"

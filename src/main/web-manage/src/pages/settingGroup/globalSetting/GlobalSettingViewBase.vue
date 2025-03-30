@@ -1,5 +1,6 @@
 <script setup>
 import router from "@/router/index.js";
+import UI_Meta from "@/utils/UI_Meta.js";
 
 const page = ref(null);
 
@@ -20,10 +21,12 @@ const stop = router.beforeEach((to, from) => {
 onUnmounted(() => {
     stop();
 });
+
+const mobile = UI_Meta.mobile;
 </script>
 
 <template>
-    <div class="panel" style="flex: 1;width: 0;padding: 32px 32px 0;">
+    <div class="panel global-setting-base" :class="{mobile: mobile}" style="flex: 1;width: 0;">
         <div class="slide-switch-base" :class="className">
             <router-view v-slot="{ Component }">
                 <transition :name="transitionName">
@@ -34,17 +37,12 @@ onUnmounted(() => {
     </div>
 </template>
 
-<style scoped>/*
-.transition-page-enter-active,
-.transition-page-leave-active {
-    transition: 400ms var(--ease-in-out-quint);
+<style scoped>
+.global-setting-base {
+    padding: 32px 32px 0;
 }
 
-.transition-page-enter-from {
-    transform: translateX(calc(-100% - 200px));
+.global-setting-base.mobile {
+    padding: 12px 12px 0;
 }
-
-.transition-page-leave-to {
-    transform: translateX(calc(100% + 200px));
-}
-*/</style>
+</style>

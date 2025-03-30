@@ -46,7 +46,7 @@
     --icon-color: var(--icon-color-dark);
     --icon-color-reverse: var(--icon-color-light);
     --front-color: var(--front-color-dark);
-    --front-color-reserse: var(--front-color-light);
+    --front-color-reverse: var(--front-color-light);
     --slider-button-color: rgb(255, 255, 255);
     --dialog-bg-color: rgba(255, 255, 255, 0.9);
     --dialog-footer-color: rgba(220, 220, 220, 0.6);
@@ -74,6 +74,7 @@
     --icon-color-1: var(--icon-color-light-1);
     --icon-color-reverse: var(--icon-color-dark);
     --front-color: var(--front-color-light);
+    --front-color-reverse: var(--front-color-dark);
     --slider-button-color: rgb(60, 60, 60);
     --dialog-bg-color: rgba(30, 30, 30, 0.6);
     --dialog-footer-color: rgba(10, 10, 10, 0.6);
@@ -1231,13 +1232,17 @@ input::-webkit-inner-spin-button {
     transform: none !important;
 }
 
+.el-radio__input.is-disabled.is-checked .el-radio__inner {
+    background-color: var(--el-color-primary-3) !important;
+}
+
 .el-radio__inner {
     width: 16px !important;
     height: 16px !important;
 }
 
 .el-radio__inner:after {
-    background-color: var(--front-color-reserse) !important;
+    background-color: var(--front-color-reverse) !important;
     width: 8px !important;
     height: 8px !important;
 }

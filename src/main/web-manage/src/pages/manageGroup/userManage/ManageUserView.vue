@@ -41,9 +41,11 @@ UserDataInterface.getUsersAsync().then((users1) => {
 });
 
 const openView = (user) => {
-    router.push({name:'user-detail',params:{
-        id:user.qq
-    }});
+    router.push({
+        name: 'user-detail', params: {
+            id: user.qq
+        }
+    });
 }
 
 const doFilter = (user) => {
@@ -60,19 +62,13 @@ const doFilter = (user) => {
     }
 }
 
-const responsiveSplitpane = ref(null)
+const responsiveSplitpane = ref();
 
 const stop = router.afterEach((to, from) => {
     if (to.params.id === undefined) {
-        if (responsiveSplitpane.value) {
-            // noinspection JSUnresolvedReference
-            responsiveSplitpane.value.showLeft();
-        }
+        responsiveSplitpane.value.showLeft();
     } else {
-        if (responsiveSplitpane.value) {
-            // noinspection JSUnresolvedReference
-            responsiveSplitpane.value.hideLeft();
-        }
+        responsiveSplitpane.value.hideLeft();
     }
 });
 
@@ -103,7 +99,7 @@ const buttonsOption = ref([
         })
     }, {
         id: "confirm",
-        content: computed(() => createOver.value?"完成":"确定"),
+        content: computed(() => createOver.value ? "完成" : "确定"),
         type: "primary",
         onclick: () => {
             if (createOver.value) {
@@ -146,7 +142,8 @@ const hideCreatingDialog = () => {
 <template>
     <responsive-double-splitpane ref="responsiveSplitpane" :left-loading="loading" show-left-label="用户列表">
         <template #left>
-            <custom-dialog v-model="showCreateUser" :buttons-option="buttonsOption" ref="createUserDialog" title="新建用户" @closed="hideCreatingDialog">
+            <custom-dialog v-model="showCreateUser" :buttons-option="buttonsOption" ref="createUserDialog"
+                           title="新建用户" @closed="hideCreatingDialog">
                 <div style="display: flex;flex-direction: column;">
                     <div style="width: 56px;height: 56px;align-self: center">
                         <transition name="blur-scale" mode="out-in">
@@ -169,8 +166,9 @@ const hideCreatingDialog = () => {
                     </div>
                     <el-select filterable v-model="groupOfNewUser" placeholder="选择">
                         <template v-for="(userGroup,i) in userGroups">
-                            <el-option :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup.type)"
-                                       :value="userGroup.type" :label="userGroup.type"></el-option>
+                            <el-option
+                                    :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup.type)"
+                                    :value="userGroup.type" :label="userGroup.type"></el-option>
                         </template>
                     </el-select>
                 </div>
@@ -179,7 +177,8 @@ const hideCreatingDialog = () => {
                 <el-input v-model="filterText" placeholder="搜索用户（以&quot;,&quot;分词）" prefix-icon="Search"
                           style="margin-bottom: 8px;flex: 1"/>
                 <!--suppress JSValidateTypes -->
-                <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px" @click="showCreateUser = true" class="disable-init-animate">
+                <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px" @click="showCreateUser = true"
+                           class="disable-init-animate">
                     新建用户
                 </el-button>
             </div>
@@ -197,7 +196,8 @@ const hideCreatingDialog = () => {
         <template #right>
             <router-view v-slot="{ Component }">
                 <transition mode="out-in" name="blur-scale">
-                    <div v-if="!Component" style="width: 100%;height: 100%;display: flex;flex-direction: column;align-items: center;justify-content: center">
+                    <div v-if="!Component"
+                         style="width: 100%;height: 100%;display: flex;flex-direction: column;align-items: center;justify-content: center">
                         <el-text type="info" size="large">
                             选择用户以查看
                         </el-text>

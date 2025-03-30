@@ -28,7 +28,7 @@ public class RestoreVoteAction extends TransactionalAction {
             Question question = optionalQuestion.get();
             question.getUpVoters().remove(currentUser);
             question.getDownVoters().remove(currentUser);
-            QuestionService.singletonInstance.update(question);
+            QuestionService.singletonInstance.save(question);
         } else {
             throw new InstanceNotFoundException("question: "+questionId);
         }

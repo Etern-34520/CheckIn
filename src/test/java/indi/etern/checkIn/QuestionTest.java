@@ -1,13 +1,12 @@
 package indi.etern.checkIn;
 
+import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.entities.question.impl.Partition;
+import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
-import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.Choice;
-import indi.etern.checkIn.service.dao.ChoiceService;
-import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.PartitionService;
+import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.utils.TransactionTemplateUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -26,8 +25,6 @@ public class QuestionTest {
     QuestionService multiPartitionableQuestionService;
     @Autowired
     PartitionService partitionService;
-    @Autowired
-    ChoiceService choiceService;
 
     @Test
     void testInsert() {

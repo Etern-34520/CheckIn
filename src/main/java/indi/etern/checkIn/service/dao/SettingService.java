@@ -2,11 +2,12 @@ package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.repositories.SettingRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class SettingService {
@@ -17,26 +18,7 @@ public class SettingService {
         this.settingRepository = settingRepository;
     }
     
-//    public String get(String key) {
-//        return settingRepository.findById(key).orElse(SettingItem.EMPTY).getValue();
-//    }
-    
-    /*public String set(String key, String value) {
-        Optional<SettingItem> optionalSettingItem = settingRepository.findById(key);
-        if (optionalSettingItem.isPresent()) {
-            SettingItem settingItem = optionalSettingItem.get();
-            settingItem.setValue(value);
-            settingRepository.save(settingItem);
-        } else {
-            settingRepository.save(new SettingItem(key, value));
-        }
-        return value;
-    }*/
-    
-    public SettingItem getItem(String key) {
-        return settingRepository.findById(key).orElseThrow();
-    }
-    
+    @Cacheable(value = "setting", key = "#root+'.'+#name")
     public SettingItem getItem(String root,String name) {
         return settingRepository.findById(root+"."+name).orElseThrow();
     }
@@ -45,28 +27,17 @@ public class SettingService {
         return settingRepository.findAllById(keys);
     }
     
+    @CacheEvict(value = "setting",key = "key")
     public void delete(String key) {
         settingRepository.deleteById(key);
     }
     
+    @CacheEvict(value = "setting",key = "#settingItem.key")
     public void delete(SettingItem settingItem) {
         settingRepository.delete(settingItem);
     }
     
-    public void save(SettingItem settingItem) {
-        settingRepository.save(settingItem);
-    }
-    
-    public void exists(String key) {
-        settingRepository.existsById(key);
-    }
-    
-    public void setAll(Map<String, Object> dataMap) {
-        for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            save(new SettingItem(entry.getKey(), entry.getValue(), entry.getValue().getClass()));
-        }
-    }
-    
+    @CacheEvict(value = "setting",allEntries = true)
     public void setAll(Iterable<SettingItem> settingItems) {
         settingRepository.saveAll(settingItems);
     }

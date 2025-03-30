@@ -27,7 +27,7 @@ const props = defineProps({
                     </div>
                 </transition>
                 <transition name="blur-scale">
-                    <el-text style="margin-bottom: 8px;" v-if="showIp || !Boolean(record.qqnumber)">{{ record.ipString }}</el-text>
+                    <el-text style="margin-bottom: 8px;" v-if="showIp || !Boolean(record.qqnumber)">{{ record.ipString ? record.ipString : "unknown" }}</el-text>
                 </transition>
                 <div class="flex-blank-1"></div>
                 <el-tag :type="record.status === 'ERROR' ? 'danger' : 'info'" style="margin-bottom: 8px;margin-right: 4px;">{{ record.status }}</el-tag>

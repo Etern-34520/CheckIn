@@ -26,7 +26,7 @@ public class DownVoteAction extends TransactionalAction {
             Question question = optionalQuestion.get();
             question.getDownVoters().add(getCurrentUser());
             question.getUpVoters().remove(getCurrentUser());
-            QuestionService.singletonInstance.update(question);
+            QuestionService.singletonInstance.save(question);
         } else {
             throw new InstanceNotFoundException("question: "+questionId);
         }

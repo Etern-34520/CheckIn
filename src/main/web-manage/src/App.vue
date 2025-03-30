@@ -10,13 +10,17 @@ import router from "@/router/index.js";
 
 const {proxy} = getCurrentInstance();
 const showReLogin = ref(false);
+const reLoginText = ref("登录失败");
 
 UserDataInterface.onLoginFailed = (err) => {
     if (err === "token expired") {
         showReLogin.value = true;
+        reLoginText.value = "登录已过期"
     } else {
-        if (router.currentRoute.value.name !== "login")
+        reLoginText.value = "登录失败";
+        if (router.currentRoute.value.name !== "login") {
             showReLogin.value = true;
+        }
         ElMessage({
             type: "error",
             message: "登录失败",
@@ -45,7 +49,7 @@ onMounted(() => {
     <el-dialog :model-value="showReLogin" :width="400" align-center :show-close="false" draggable
                :close-on-click-modal="false" :close-on-press-escape="false">
         <template #header>
-            登录已过期
+            {{ reLoginText}}
         </template>
         <template #default>
             <el-text size="large">重新登录</el-text>

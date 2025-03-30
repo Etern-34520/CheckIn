@@ -12,6 +12,8 @@ import java.util.*;
 @Action("saveAdvanceSetting")
 public class SaveAdvanceSetting extends TransactionalAction {
     public static final String[] KEYS = {
+            "ipSource",
+            "useRequestIpIfSourceIsNull",
             "autoCreateUserMode"
     };
     SaveSettingCommon saveSettingCommon;
