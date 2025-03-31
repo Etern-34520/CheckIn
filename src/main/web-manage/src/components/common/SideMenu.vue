@@ -228,19 +228,19 @@ const props = defineProps({
 
 .default-hidden-menu {
     opacity: 0;
-    transition: transform 200ms ease-in-out 0ms, all 300ms var(--ease-in-out-quint) 0ms;
+    transition: all 300ms var(--ease-in-out-quint) 0ms;
     transform: translateX(-100px);
 }
 
 .menu-expand .default-hidden-menu {
     opacity: 1;
-    transition: transform 150ms var(--ease-out-quint) 0ms, all 300ms var(--ease-in-out-quint) 900ms;
+    transition: all 300ms var(--ease-out-quint) 900ms;
     transform: translateX(0);
 }
 
 .menu-inline .default-hidden-menu {
     opacity: 1;
-    transition: transform 150ms var(--ease-in-quint), all 300ms var(--ease-in-out-quint);
+    transition: 300ms var(--ease-out-quint) 200ms;
     transform: translateX(0);
 }
 </style>

@@ -235,7 +235,6 @@ QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
 });
 
 const openEdit = (questionId) => {
-    responsiveSplitpane.value.hideLeft();
     router.push({
         name: 'question-detail', params: {
             id: questionId
@@ -675,15 +674,13 @@ const currentButton = ref({
     menuVisible: false
 });
 
-const responsiveSplitpane = ref(null)
+const responsiveSplitpane = ref();
 
 const stop = router.afterEach((to, from) => {
-    if (to.params.id === undefined) {
-        if (responsiveSplitpane.value)
-            responsiveSplitpane.value.showLeft();
+    if (errorsDisplay.value || to.params.id === undefined) {
+        responsiveSplitpane.value.showLeft();
     } else {
-        if (responsiveSplitpane.value)
-            responsiveSplitpane.value.hideLeft();
+        responsiveSplitpane.value.hideLeft();
     }
 });
 

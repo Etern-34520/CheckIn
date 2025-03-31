@@ -1,8 +1,7 @@
 <script setup>
 import Collapse from "@/components/common/Collapse.vue";
 import Waterfall from "@/components/common/Waterfall.vue";
-import iconWhite from "@/assets/icons/icon-white.svg";
-import iconBlack from "@/assets/icons/icon-black.svg";
+import icon from "@/assets/icons/icon-accent-light.svg";
 import UI_Meta from "@/utils/UI_Meta.js";
 
 const data = [{
@@ -37,13 +36,8 @@ const data = [{
     }
 ]
 
-const colorScheme = UI_Meta.colorScheme;
 const getIcon = () => {
-    if (colorScheme.value === 'light') {
-        return iconBlack;
-    } else {
-        return iconWhite;
-    }
+    return icon;
 }
 </script>
 
@@ -55,7 +49,7 @@ const getIcon = () => {
                 <img :src="getIcon()" alt="" width="56" height="56" style="margin-right: 16px;"/>
                 <div style="display: flex;flex-direction: column;">
                     <el-text size="large" style="align-self: baseline">CheckIn</el-text>
-                    <el-text type="info" style="align-self: baseline">2.0.0 beta 2</el-text>
+                    <el-text type="info" style="align-self: baseline">2.0.0 beta 3</el-text>
                     <el-link type="info" style="align-self: baseline"
                              href="https://github.com/Etern-34520/CheckIn" target="_blank">Github</el-link>
                 </div>

@@ -93,8 +93,4 @@ public class TestIncludeExcel {
         multiPartitionableQuestionService.saveAll(multiPartitionableQuestionList);
     }
 
-    @Test
-    void TestSize() {
-        System.out.println(multiPartitionableQuestionService.count());
-    }
 }

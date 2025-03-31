@@ -4,11 +4,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.converter.MapConverter;
+import indi.etern.checkIn.entities.setting.SettingItem;
+import indi.etern.checkIn.service.dao.SettingService;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +25,8 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class RequestRecord implements BaseEntity<String> {
+    private static Logger logger = LoggerFactory.getLogger(RequestRecord.class);
+    
     @Id
     @Column(columnDefinition = "char(36)")
     protected String id;
@@ -101,7 +107,32 @@ public class RequestRecord implements BaseEntity<String> {
         requestRecord.id = UUID.randomUUID().toString();
         requestRecord.sessionId = httpServletRequest.getSession().getId();
         requestRecord.time = LocalDateTime.now();
-        requestRecord.ipString = httpServletRequest.getRemoteAddr();
+        IpSourceProcessor ipSourceProcessor;
+        
+        try {
+            final SettingItem item = SettingService.singletonInstance.getItem("advance", "ipSource");
+            String ipSourceType = item.getValue(String.class);
+            ipSourceProcessor = IpSourceProcessor.valueOf(ipSourceType.toUpperCase());
+        } catch (Exception ignored) {
+            logger.warn("Setting: advance.ipSource not found");
+            ipSourceProcessor = IpSourceProcessor.REQUEST;
+        }
+        
+        String ipString = ipSourceProcessor.process(httpServletRequest);
+        
+        boolean useRequestIpIfSourceIsNull = true;
+        
+        try {
+            final SettingItem item = SettingService.singletonInstance.getItem("advance", "useRequestIpIfSourceIsNull");
+            useRequestIpIfSourceIsNull = item.getValue(Boolean.class);
+        } catch (Exception ignored) {
+            logger.warn("Setting: advance.useRequestIpIfSourceIsNull not found");
+        }
+        
+        if (useRequestIpIfSourceIsNull && (ipString == null || ipString.isEmpty())) {
+            ipString = IpSourceProcessor.REQUEST.process(httpServletRequest);
+        }
+        requestRecord.ipString = ipString;
         requestRecord.status = Status.SUCCESS;
         Enumeration<String> requestHeaderNames = httpServletRequest.getHeaderNames();
         Map<String, String> requestHeaderMap = new HashMap<>();
@@ -142,5 +173,41 @@ public class RequestRecord implements BaseEntity<String> {
         throwableMap.put("stackTrace", Arrays.stream(throwable.getStackTrace()).map(StackTraceElement::toString).toList());
         requestRecord.getExtraData().put("throwable", throwableMap);
         return requestRecord;
+    }
+    
+    private enum IpSourceProcessor {
+        REQUEST {
+            @Override
+            String process(HttpServletRequest request) {
+                return request.getRemoteAddr();
+            }
+        },X_REAL_IP {
+            @Override
+            String process(HttpServletRequest request) {
+                return request.getHeader("x-real-ip");
+            }
+        }, X_FORWARDED_FOR {
+            @Override
+            String process(HttpServletRequest request) {
+                final String[] split = request.getHeader("x-forwarded-fot").split(",");
+                return split[split.length - 1].strip();
+            }
+        }, REMOTE_HOST {
+            @Override
+            String process(HttpServletRequest request) {
+                return request.getHeader("remote-host");
+            }
+        }, CF_CONNECTING_IP {
+            @Override
+            String process(HttpServletRequest request) {
+                return request.getHeader("cf-connecting-ip");
+            }
+        }, TRUE_CLIENT_IP {
+            @Override
+            String process(HttpServletRequest request) {
+                return request.getHeader("true-client-ip");
+            }
+        };
+        abstract String process(HttpServletRequest request);
     }
 }

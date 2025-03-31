@@ -67,20 +67,25 @@ getData();
 
 const predefine = ["#F56C6C", "#E6A23C", "#67C23A"];
 const addLevel = () => {
-    console.log(data.value.splits.length);
-    console.log(data.value.levels.length);
-    if (data.value.splits.length < data.value.levels.length + 1) {
-        const number = (extraData.value.questionScore * extraData.value.questionAmount + data.value.splits[data.value.splits.length - 1]) / 2;
-        data.value.splits.push(number);
-        console.log(number)
+    const examFullScore = extraData.value.questionScore * extraData.value.questionAmount;
+    if (examFullScore === 0) {
+        ElMessage({
+            type: "error",
+            message: "没有可用题目"
+        })
+    } else {
+        if (data.value.splits.length < data.value.levels.length + 1) {
+            const number = (examFullScore + data.value.splits[data.value.splits.length - 1]) / 2;
+            data.value.splits.push(number);
+        }
+        data.value.levels.push({
+            id: randomUUIDv4(),
+            name: "new level",
+            colorHex: predefine[data.value.levels.length],
+            description: "",
+            message: "",
+        });
     }
-    data.value.levels.push({
-        id: randomUUIDv4(),
-        name: "new level",
-        colorHex: predefine[data.value.levels.length],
-        description: "",
-        message: "",
-    });
 }
 
 const removeLevel = (index) => {
@@ -97,21 +102,23 @@ const removeLevel = (index) => {
             <div style="display: flex;margin-left: 32px;"
                  v-if="PermissionInfo.hasPermission('setting','save grading setting')">
                 <transition-group name="blur-scale">
-                    <el-button class="disable-init-animate" style="margin-right: 4px;"
-                               @click="editing ? finishEditing():startEditing()"
-                               :disabled="loading || error" key="edit">
-                        {{ editing ? '完成' : '编辑' }}
+                    <el-button-group key="button-group" style="margin: 2px 24px 2px 0;">
+                        <transition-group name="blur-scale">
+                            <el-button class="disable-init-animate" style="margin-right: 4px;"
+                                       @click="editing ? finishEditing():startEditing()"
+                                       :disabled="loading || error" key="edit">
+                                {{ editing ? '完成' : '编辑' }}
+                            </el-button>
+                            <el-button class="disable-init-animate"
+                                       @click="cancel" v-if="editing" key="cancel">
+                                取消
+                            </el-button>
+                        </transition-group>
+                    </el-button-group>
+                    <el-button class="disable-init-animate" key="action" v-if="editing"
+                               style="margin-left: 12px;" link @click="addLevel" :icon="HarmonyOSIcon_Plus">
+                        添加等级
                     </el-button>
-                    <div style="display: flex;flex-direction: row" v-if="editing" key="action">
-                        <el-button class="disable-init-animate" style="margin-right: 24px;"
-                                   @click="cancel" key="cancel">
-                            {{ editing ? '取消' : '编辑' }}
-                        </el-button>
-                        <el-button class="disable-init-animate" style="margin-left: 12px;" link
-                                   @click="addLevel" :icon="HarmonyOSIcon_Plus">
-                            添加等级
-                        </el-button>
-                    </div>
                 </transition-group>
             </div>
         </div>

@@ -74,7 +74,7 @@ const groups = [
             {
                 name: "高级设置",
                 show: showAdvanceSetting,
-                description: "外部API",
+                description: "请求头IP兼容 外部API",
                 icon: MoreFilled,
                 action: () => {
                     router.push({name: "advance-setting"});

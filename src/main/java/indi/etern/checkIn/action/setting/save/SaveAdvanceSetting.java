@@ -27,6 +27,8 @@ public class SaveAdvanceSetting extends BaseAction1<SaveAdvanceSetting.Input, Sa
     }
     
     public static final String[] KEYS = {
+            "ipSource",
+            "useRequestIpIfSourceIsNull",
             "autoCreateUserMode"
     };
     SaveSettingCommon saveSettingCommon;

@@ -16,51 +16,48 @@ import java.util.Optional;
 @Service
 public class PartitionService {
     public static PartitionService singletonInstance;
-    final TransactionTemplate transactionTemplate;
+    final
+    TransactionTemplate transactionTemplate;
     @Resource
     private PartitionRepository partitionRepository;
-    
+
     protected PartitionService(TransactionTemplate transactionTemplate) {
         singletonInstance = this;
         this.transactionTemplate = transactionTemplate;
     }
     
-    @CachePut("partitions")
-    public void save(Partition partition) {
-        partitionRepository.save(partition);
+    @CachePut(value = "partition",key = "#partition.id")
+    public Partition save(Partition partition) {
+        return partitionRepository.save(partition);
     }
-    
-    @Cacheable("partitions")
+
     public List<Partition> findAll() {
         return partitionRepository.findAll();
     }
     
-    @Cacheable("partitions")
     public Optional<Partition> findByName(String name) {
         return partitionRepository.findByName(name);
     }
     
-    @CacheEvict("partition")
+    @CacheEvict(value = "partition",key = "#partition.id")
     public void delete(Partition partition) {
         partitionRepository.delete(partition);
     }
+
+    public boolean existsById(int id) {
+        return partitionRepository.existsById(id);
+    }
     
-    @Cacheable("partitions")
-    public Optional<Partition> findById(String id) {
+    @Cacheable(value = "partition",key = "#id")
+    public Optional<Partition> findById(int id) {
         return partitionRepository.findById(id);
     }
-    
-    @Cacheable("partitions")
-    public List<Partition> findAllByIds(Collection<String> partitionId) {
+
+    public List<Partition> findAllByIds(Collection<Integer> partitionId) {
         return partitionRepository.findAllById(partitionId);
     }
-    
+
     public boolean existsByName(String partitionName) {
         return partitionRepository.existsByName(partitionName);
-    }
-    
-    @CachePut("partitions")
-    public void saveAll(Collection<Partition> partitions) {
-        partitionRepository.saveAll(partitions);
     }
 }

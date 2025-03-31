@@ -89,6 +89,21 @@ const getDates = (from, to) => {
     return dates.reverse();
 }
 
+
+const responsiveSplitpane = ref();
+
+const stop = router.afterEach((to, from) => {
+    if (to.params.id === undefined) {
+        responsiveSplitpane.value.showLeft();
+    } else {
+        responsiveSplitpane.value.hideLeft();
+    }
+});
+
+onUnmounted(() => {
+    stop();
+});
+
 const openRecord = (id) => {
     router.push({name: 'exam-record-detail', params: {id: id}});
 }

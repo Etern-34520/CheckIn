@@ -50,10 +50,6 @@ public class ExamDataService {
         return examDataRepository.findById(id);
     }
     
-    public void saveAndFlush(ExamData examData) {
-        examDataRepository.saveAndFlush(examData);
-    }
-    
     @Transactional(noRollbackFor = Throwable.class)
     public ExamResult handleSubmit(ExamData examData, Map<String, Object> answer) throws ExamException {
         if (examData.getStatus() != ExamData.Status.ONGOING) {

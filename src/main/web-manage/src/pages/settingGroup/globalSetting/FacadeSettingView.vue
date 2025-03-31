@@ -110,27 +110,27 @@ const deleteIcon = () => {
 <template>
     <div style="display: flex;flex-direction: column;">
         <div style="display: flex;flex-direction: row;flex-wrap: wrap">
-            <el-text style="align-self:baseline;font-size: 24px">首页设置</el-text>
-            <div style="display: flex;margin-left: 32px;"
+            <el-text style="align-self:baseline;font-size: 24px;margin-right: 32px;">首页设置</el-text>
+            <template
                  v-if="PermissionInfo.hasPermission('setting','save facade setting')">
                 <transition-group name="blur-scale">
-                    <el-button-group key="button-group">
+                    <el-button-group key="button-group" style="margin: 2px 24px 2px 0;">
                         <transition-group name="blur-scale">
                             <el-button class="disable-init-animate" style="margin-right: 4px;"
                                        @click="editing ? finishEditing():startEditing()"
                                        :disabled="loading || error" key="edit">
                                 {{ editing ? '完成' : '编辑' }}
                             </el-button>
-                            <el-button class="disable-init-animate" style="margin-right: 24px;"
+                            <el-button class="disable-init-animate"
                                        @click="cancel" v-if="editing" key="cancel">
-                                {{ editing ? '取消' : '编辑' }}
+                                取消
                             </el-button>
                         </transition-group>
                     </el-button-group>
                     <el-segmented v-model="mode" key="segmented" v-if="editing" :options="['预览','编辑']" block
-                                  style="margin-right: 16px"/>
+                                  style="margin: 2px 16px 2px 0;"/>
                 </transition-group>
-            </div>
+            </template>
         </div>
         <el-scrollbar v-loading="loading" style="margin-top: 20px;">
             <transition name="blur-scale" mode="out-in">
@@ -140,9 +140,11 @@ const deleteIcon = () => {
                              style="display: inherit;flex-direction: inherit;flex: inherit;align-items:center;width: 100%">
                             <div style="display: flex;flex-direction: row;flex-wrap: wrap;max-width: 80vw;width: 80vw;">
                                 <div v-if="data.icon" class="icon-image" style="position: relative">
-                                    <el-image style="width: 100%;height: 100%;filter: saturate(2) blur(64px);transform: scale(3) translate3d(20%,5%,0);position: absolute"
+                                    <el-image
+                                            style="width: 100%;height: 100%;filter: saturate(2) blur(64px);transform: scale(3) translate3d(20%,5%,0);position: absolute"
                                             :src="data.icon" fit="contain"></el-image>
-                                    <el-image :src="data.icon" fit="contain" style="width: 100%;height: 100%;"></el-image>
+                                    <el-image :src="data.icon" fit="contain"
+                                              style="width: 100%;height: 100%;"></el-image>
                                 </div>
                                 <div style="display: flex;flex-direction: column;margin-left: 32px;margin-right: 16px;margin-bottom: 48px;z-index: 1;justify-content: center;">
                                     <el-text
@@ -158,8 +160,7 @@ const deleteIcon = () => {
                                     </el-text>
                                 </div>
                                 <div class="flex-blank-1"></div>
-                                <div class="panel-1"
-                                     style="display: flex;flex-direction:column;align-items:stretch;justify-content:start;width: 400px;padding: 20px 32px;z-index: 1;align-self: center;margin-left: 32px;">
+                                <div class="panel-1 exam-info">
                                     <el-text size="large" style="align-self: start;">答题信息</el-text>
                                     <div style="display: flex;flex-direction: row;align-items: center;margin-top: 8px;">
                                         <div style="display: flex;flex-direction: column;margin-right: 8px">
@@ -228,7 +229,7 @@ const deleteIcon = () => {
                                 <md-editor no-upload-img placeholder="描述" v-model="data.description"
                                            class="preview-only"
                                            preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                                           style="height: 100vh;max-width:calc(90vw - 100px);"
+                                           style="height: 100vh;"
                                            :theme="UIMeta.colorScheme.value"
                                            :show-toolbar-name="UIMeta.mobile.value"
                                            :preview="true"/>
@@ -281,14 +282,10 @@ const deleteIcon = () => {
                                               style="font-size: 24px;opacity:0.7;--el-input-height: 40px;margin-top:20px;width:30vw;min-width: 240px;"
                                               v-model="data.subTitle"></el-input>
                                 </div>
-                                <div class="flex-blank-1"></div>
-                                <div class="panel-1" style="width: 400px;height: 120px;padding: 20px 32px;">
-                                    <el-text>答题信息</el-text>
-                                </div>
                             </div>
                             <md-editor no-upload-img placeholder="描述" v-model="data.description"
                                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                                       style="height: 100vh;margin-top: 100px;max-width:calc(90vw - 100px);margin-bottom: 120px"
+                                       style="height: 100vh;margin-top: 100px;margin-bottom: 120px"
                                        :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.mobile.value"
                                        :preview="!UIMeta.mobile.value"/>
                         </div>
@@ -346,6 +343,17 @@ const deleteIcon = () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+.exam-info {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: start;
+    width: 400px;
+    padding: 20px 32px !important;
+    z-index: 1;
+    align-self: center;
 }
 
 .score-bar {

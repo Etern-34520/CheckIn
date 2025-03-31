@@ -2,6 +2,9 @@ package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.repositories.GradingLevelRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,14 +18,17 @@ public class GradingLevelService {
         this.gradingLevelRepository = gradingLevelRepository;
     }
     
+    @CacheEvict(value = "gradingLevel",allEntries = true)
     public void saveAll(Iterable<GradingLevel> gradingLevels) {
         gradingLevelRepository.saveAll(gradingLevels);
     }
     
-    public void save(GradingLevel gradingLevel) {
-        gradingLevelRepository.save(gradingLevel);
+    @CachePut(value = "gradingLevel",key = "#gradingLevel.id")
+    public GradingLevel save(GradingLevel gradingLevel) {
+        return gradingLevelRepository.save(gradingLevel);
     }
     
+    @CacheEvict(value = "gradingLevel",allEntries = true)
     public void deleteAll() {
         gradingLevelRepository.deleteAll();
     }
@@ -31,19 +37,13 @@ public class GradingLevelService {
         return gradingLevelRepository.findAll();
     }
     
+    @Cacheable(value = "gradingLevel",key = "#id")
     public GradingLevel findById(String id) {
         return gradingLevelRepository.findById(id).orElseThrow();
     }
     
+    @CacheEvict(value = "gradingLevel",key = "#gradingLevel.id")
     public void delete(GradingLevel gradingLevel) {
         gradingLevelRepository.delete(gradingLevel);
-    }
-    
-    public void deleteById(String id) {
-        gradingLevelRepository.deleteById(id);
-    }
-    
-    public boolean existsById(String id) {
-        return gradingLevelRepository.existsById(id);
     }
 }

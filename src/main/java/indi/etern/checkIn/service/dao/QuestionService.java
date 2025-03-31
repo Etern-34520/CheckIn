@@ -6,17 +6,20 @@ import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.QuestionRepository;
-import indi.etern.checkIn.repositories.ToPartitionLinkRepository;
 import jakarta.annotation.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.*;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -24,44 +27,26 @@ public class QuestionService {
     public static QuestionService singletonInstance;
     final TransactionTemplate transactionTemplate;
     final PartitionService partitionService;
-    final Logger logger = LoggerFactory.getLogger(getClass());
     @Resource
     private QuestionRepository questionRepository;
-    @Resource
-    private ToPartitionLinkRepository partitionLinkRepository;
 
     protected QuestionService(TransactionTemplate transactionTemplate, PartitionService partitionService) {
         singletonInstance = this;
         this.transactionTemplate = transactionTemplate;
         this.partitionService = partitionService;
     }
-
-    public Question save(Question Question) {
-        return questionRepository.save(Question);
+    
+    @CachePut(value = "question",key = "#question.id")
+    public Question save(Question question) {
+        return questionRepository.save(question);
     }
 
-    public List<Question> findAll() {
-        return questionRepository.findAll();
-    }
-
-    public Question getById(String id) {
-        return questionRepository.findById(id).orElse(null);
-    }
-
+    @Cacheable(value = "question",key = "#id")
     public Optional<Question> findById(String id) {
         return questionRepository.findById(id);
     }
     
-    public Question deleteById(String id) {
-        AtomicReference<Question> question = new AtomicReference<>();
-        transactionTemplate.executeWithoutResult(status -> {
-            Question question1 = questionRepository.findById(id).orElseThrow();
-            delete(question1);
-            question.set(question1);
-        });
-        return question.get();
-    }
-    
+    @CacheEvict(value = "question",key = "#question.id")
     public void delete(Question question) {
         if (question instanceof QuestionGroup questionGroup) {
             questionGroup.getQuestionLinks().forEach(link -> {
@@ -72,70 +57,13 @@ public class QuestionService {
         questionRepository.delete(question);
     }
     
-    public void update(Question Question) {
-        questionRepository.save(Question);
-    }
-    
     public List<Question> findAllById(List<String> questionIds) {
         return questionRepository.findAllById(questionIds);
     }
     
-    public long count() {
-        return questionRepository.count();
-    }
-    
-    public Map<String, Question> mapAllById(List<String> questionIds) {
-        Map<String, Question> map = new HashMap<>();
-        List<Question> questions = findAllById(questionIds);
-        for (Question question : questions) {
-            map.put(question.getId(), question);
-        }
-        return map;
-    }
-    
-    public List<Question> findEditedInLastDays(int dayCount, int count) {
-        Pageable pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "lastEditTime"));
-        return questionRepository.findAllByLastModifiedTimeAfter(LocalDateTime.now().minusDays(dayCount), pageable);
-    }
-    
-    public boolean existsById(String questionId) {
-        return questionRepository.existsById(questionId);
-    }
-    
-    public void saveAll(Collection<Question> Questions) {
-        questionRepository.saveAll(Questions);
-    }
-    
-    public void deleteAllById(Collection<String> ids) {
-        for (String id : ids) {
-            deleteById(id);
-        }
-    }
-    
-    public long countEnabled() {
-        return questionRepository.countByEnabledIsTrue();
-    }
-    
-    public List<Question> enableAllById(Collection<String> ids) {
-        List<Question> Questions = new ArrayList<>();
-        for (String id : ids) {
-            Question Question = questionRepository.findById(id).orElseThrow();
-            Question.setEnabled(true);
-            questionRepository.save(Question);
-            Questions.add(Question);
-        }
-        return Questions;
-    }
-    
-    public List<Question> disableAllById(Collection<String> ids) {
-        List<Question> Questions = new ArrayList<>();
-        for (String id : ids) {
-            Question Question = questionRepository.findById(id).orElseThrow();
-            Question.setEnabled(false);
-            questionRepository.save(Question);
-            Questions.add(Question);
-        }
-        return Questions;
+    @CacheEvict(value = "question",allEntries = true)
+    public void saveAll(Collection<Question> questions) {
+        questionRepository.saveAll(questions);
     }
     
     public List<Question> findAllByAuthor(User author) {
@@ -144,6 +72,7 @@ public class QuestionService {
                 .toList();
     }
     
+    @CacheEvict(value = "question",allEntries = true)
     public void flush() {
         questionRepository.flush();
     }
@@ -162,15 +91,9 @@ public class QuestionService {
                 .toList();
     }
     
-    public List<Question> findAllHasPartition() {
-        return partitionLinkRepository.findAll().stream().map(QuestionLinkImpl::getSource).filter(Question::isEnabled).toList();
-    }
-    
     public List<Question> findLatestModifiedQuestions() {
         return questionRepository.findAllByLastModifiedTimeBeforeAndLinkWrapper_LinkType(
                 LocalDateTime.now(), QuestionLinkImpl.LinkType.PARTITION_LINK, Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
-//        return questionRepository.findAll(Question.NOT_SUB_QUESTION_EXAMPLE,LocalDateTime.now(),Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
-//        return questionRepository.findAll(Question.NOT_SUB_QUESTION_EXAMPLE, PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "lastModifiedTime"))).getContent();
     }
 }
 

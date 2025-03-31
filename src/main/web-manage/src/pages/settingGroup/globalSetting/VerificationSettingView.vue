@@ -81,15 +81,21 @@ const varietiesData = [
 <template>
     <div style="display: flex;flex-direction: column">
         <div style="display: flex;flex-direction: row;flex-wrap: wrap">
-            <el-text style="align-self:baseline;font-size: 24px">上传校验设置</el-text>
-            <div style="display: flex;margin-left: 32px" v-if="PermissionInfo.hasPermission('setting','save verification setting')">
+            <el-text style="align-self:baseline;font-size: 24px;margin-right: 32px">上传校验设置</el-text>
+            <template v-if="PermissionInfo.hasPermission('setting','save verification setting')">
                 <transition-group name="blur-scale">
-                    <el-button class="disable-init-animate" style="margin-right: 12px;" @click="editing ? finishEditing():startEditing()"
-                               :disabled="loading || (editing && hasError) || error" key="edit">
-                        {{ editing ? '完成' : '编辑' }}
-                    </el-button>
-                    <div style="display: flex;flex-direction: row" v-if="editing" key="action">
-                        <el-button class="disable-init-animate" @click="cancel">取消</el-button>
+                    <el-button-group key="button-group" style="margin: 2px 24px 2px 0;">
+                        <transition-group name="blur-scale">
+                            <el-button class="disable-init-animate" style="margin-right: 4px;"
+                                       @click="editing ? finishEditing():startEditing()"
+                                       :disabled="loading || (editing && hasError) || error" key="edit">
+                                {{ editing ? '完成' : '编辑' }}
+                            </el-button>
+                            <el-button class="disable-init-animate"
+                                       v-if="editing" @click="cancel" key="cancel">取消</el-button>
+                        </transition-group>
+                    </el-button-group>
+                    <div style="display: flex;flex-direction: row;margin: 4px 0;" v-if="editing" key="action">
                         <el-button class="disable-init-animate" @click="addRule" link style="margin-right: 12px;"
                                    :icon="HarmonyOSIcon_Plus">
                             添加规则
@@ -112,7 +118,7 @@ const varietiesData = [
                         </el-popover>
                     </div>
                 </transition-group>
-            </div>
+            </template>
         </div>
         <el-scrollbar v-loading="loading">
             <div style="padding-bottom: 100px">

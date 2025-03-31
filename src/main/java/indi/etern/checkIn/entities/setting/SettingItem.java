@@ -1,7 +1,7 @@
 package indi.etern.checkIn.entities.setting;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import indi.etern.checkIn.MVCConfig;
+import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.entities.converter.ClassConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -44,17 +44,10 @@ public class SettingItem {
         return !key.isEmpty();
     }
     
-/*
-    @SneakyThrows
-    public <T> T readAs(Class<T> clazz) {
-        return MVCConfig.getObjectMapper().readValue(stringValue, clazz);
-    }
-*/
-    
     @PostLoad
     private void postLoad() throws JsonProcessingException {
         if (clazz != null) {
-            value = stringValue == null ? null : MVCConfig.getObjectMapper().readValue(stringValue, clazz);
+            value = stringValue == null ? null : CheckInApplication.getObjectMapper().readValue(stringValue, clazz);
         } else {
             value = null;
         }
@@ -64,7 +57,7 @@ public class SettingItem {
         try {
             this.key = key;
             this.value = value;
-            stringValue = value == null ? null : MVCConfig.getObjectMapper().writeValueAsString(value);
+            stringValue = value == null ? null : CheckInApplication.getObjectMapper().writeValueAsString(value);
             this.clazz = clazz;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -75,7 +68,7 @@ public class SettingItem {
         try {
             this.key = key;
             this.value = value;
-            stringValue = value == null ? null : MVCConfig.getObjectMapper().writeValueAsString(value);
+            stringValue = value == null ? null : CheckInApplication.getObjectMapper().writeValueAsString(value);
             if (value != null) {
                 this.clazz = value.getClass();
             } else {

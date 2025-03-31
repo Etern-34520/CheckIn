@@ -46,8 +46,9 @@ const routeToRelatedExamRecord = (id) => {
             <transition name="blur-scale" mode="out-in">
                 <div style="display: flex;flex-direction: row;align-items: center;margin-left: 16px;flex-wrap: wrap"
                      :key="data.id">
-                    <div style="display: flex;flex-direction: column;min-width: min(70vw,120px);margin-bottom: 16px;">
-                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px" v-if="data.qqNumber">
+                    <div style="display: flex;flex-direction: column;margin-bottom: 16px;">
+                        <div style="min-width: min(70vw,120px);display: flex;flex-direction: row;align-items: center;margin-bottom: 4px"
+                             v-if="data.qqNumber">
                             <el-avatar size="small" style="align-self: center;margin-right: 8px;"
                                        :src="getAvatarUrlOf(data.qqNumber)"/>
                             <el-text size="large"
@@ -55,9 +56,14 @@ const routeToRelatedExamRecord = (id) => {
                                 {{ data.qqNumber }}
                             </el-text>
                         </div>
-                        <el-text style="align-self: baseline">
-                            {{ data.ipString }}
-                        </el-text>
+                        <div v-if="data.ipString" style="min-width: min(70vw,120px);display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;margin-right: 4px">
+                            <el-text style="align-self: baseline">
+                                {{ data.ipString }}
+                            </el-text>
+                            <el-link type="info" target="_blank" style="margin-left: 8px;" :href="'https://iplark.com/'+data.ipString">
+                                在Iplark上查询
+                            </el-link>
+                        </div>
                     </div>
                     <div style="display: flex;flex-direction: column;margin-right: 16px;margin-bottom: 16px;align-self: center;">
                         <el-tag style="align-self: baseline;margin-bottom: 8px;">{{ data.type }}</el-tag>
@@ -82,12 +88,14 @@ const routeToRelatedExamRecord = (id) => {
                     <transition name="smooth-height" mode="out-in">
                         <div class="smooth-height-base" v-if="data.relatedExamDataId">
                             <div>
-                                <link-panel style="margin-top: 16px;" name="相关试题" description="结果 时间 题目 提交内容"
+                                <link-panel style="margin-top: 16px;" name="相关试题"
+                                            description="结果 时间 题目 提交内容"
                                             icon="Link" @click="routeToRelatedExamRecord(data.relatedExamDataId)"/>
                             </div>
                         </div>
                     </transition>
-                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false" :title-background="false" expanded>
+                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false"
+                              :title-background="false" expanded>
                         <template #title>
                             <div style="margin-top: 12px;margin-bottom: 12px">
                                 <el-text size="large">
@@ -99,7 +107,8 @@ const routeToRelatedExamRecord = (id) => {
                             <object-field-viewer :data="data.requestHeaders"/>
                         </template>
                     </collapse>
-                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false" :title-background="false" expanded>
+                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false"
+                              :title-background="false" expanded>
                         <template #title>
                             <div style="margin-top: 12px;margin-bottom: 12px">
                                 <el-text size="large">
@@ -108,11 +117,14 @@ const routeToRelatedExamRecord = (id) => {
                             </div>
                         </template>
                         <template #content>
-                            <el-empty v-if="!Boolean(data.requestAttributes) || Object.keys(data.requestAttributes).length === 0"></el-empty>
-                            <object-field-viewer v-else :data="data.requestAttributes" name-style="width: max(30vw,240px);"/>
+                            <el-empty
+                                    v-if="!Boolean(data.requestAttributes) || Object.keys(data.requestAttributes).length === 0"></el-empty>
+                            <object-field-viewer v-else :data="data.requestAttributes"
+                                                 name-style="width: max(30vw,240px);"/>
                         </template>
                     </collapse>
-                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false" :title-background="false" expanded>
+                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false"
+                              :title-background="false" expanded>
                         <template #title>
                             <div style="margin-top: 12px;margin-bottom: 12px">
                                 <el-text size="large">
@@ -121,11 +133,13 @@ const routeToRelatedExamRecord = (id) => {
                             </div>
                         </template>
                         <template #content>
-                            <el-empty v-if="!Boolean(data.responseHeaders) || Object.keys(data.responseHeaders).length === 0"></el-empty>
+                            <el-empty
+                                    v-if="!Boolean(data.responseHeaders) || Object.keys(data.responseHeaders).length === 0"></el-empty>
                             <object-field-viewer v-else :data="data.responseHeaders"/>
                         </template>
                     </collapse>
-                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false" :title-background="false" expanded>
+                    <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false"
+                              :title-background="false" expanded>
                         <template #title>
                             <div style="margin-top: 12px;margin-bottom: 12px">
                                 <el-text size="large">
@@ -134,7 +148,8 @@ const routeToRelatedExamRecord = (id) => {
                             </div>
                         </template>
                         <template #content>
-                            <el-empty v-if="!Boolean(data.extraData) || Object.keys(data.extraData).length === 0"></el-empty>
+                            <el-empty
+                                    v-if="!Boolean(data.extraData) || Object.keys(data.extraData).length === 0"></el-empty>
                             <object-field-viewer v-else :data="data.extraData"/>
                         </template>
                     </collapse>

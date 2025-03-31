@@ -94,6 +94,21 @@ const doFilter = (filterText, record) => {
     return false;
 }
 
+
+const responsiveSplitpane = ref();
+
+const stop = router.afterEach((to, from) => {
+    if (to.params.id === undefined) {
+        responsiveSplitpane.value.showLeft();
+    } else {
+        responsiveSplitpane.value.hideLeft();
+    }
+});
+
+onUnmounted(() => {
+    stop();
+});
+
 const openRecord = (id) => {
     router.push({name: 'request-record-detail', params: {id: id}});
 }

@@ -183,6 +183,8 @@ VALUES ('generating.completingPartitions', '[]', 'java.util.ArrayList'),
        ('grading.splits', '[0]', 'java.util.ArrayList'),
        ('other.defaultPartitionName', '"未命名"', 'java.lang.String'),
        ('advance.autoCreateUserMode', '"disabled"', 'java.lang.String'),
+       ('advance.ipSource', '"request"', 'java.lang.String'),
+       ('advance.useRequestIpIfSourceIsNull', 'false', 'java.lang.Boolean'),
        ('exam.expiredPeriod', '"P7D"', 'java.time.Period');
 
 INSERT INTO users (qqnumber, enabled, name, password, role_type)

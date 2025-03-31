@@ -76,7 +76,7 @@ const WebSocketConnector = {
         token1 = token;
         let url = window.location.host;
         // let url = "localhost:8080";
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject)  => {
             // window.cookieStore.get("token").then((result) => {
             //     let date = new Date(result.expires);
             const decoded = jwtDecode(token);
@@ -90,7 +90,7 @@ const WebSocketConnector = {
                 } else {
                     protocol = "ws:"
                 }
-                const ws = new WebSocket(`${protocol}://${url}/checkIn/api/websocket/${qq}`);
+                const ws = new WebSocket(`${protocol}//${url}/checkIn/api/websocket/${qq}`);
                 ws.onclose = function () {
                     if (!normallyClose && autoRetriedTimes < 3) {
                         autoRetriedTimes++;
