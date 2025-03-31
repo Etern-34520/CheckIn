@@ -103,7 +103,7 @@ public class Connector implements SubProtocolCapable {
         }
     }
     
-    private final Map<String, PartMessage> partMessageMap = new HashMap<>();
+    private final Map<String, PartRawMessage> partMessageMap = new HashMap<>();
     
     @SuppressWarnings("unchecked")
     @OnMessage
@@ -116,10 +116,10 @@ public class Connector implements SubProtocolCapable {
             String messageId = contentMap.get("messageId").toString();
             switch (contentMap.get("type").toString()) {
                 case "partMessage" -> {
-                    PartMessage partMessage;
+                    PartRawMessage partMessage;
                     String partId;
                     if (contentMap.get("messageIds") instanceof List<?> messageIds) {
-                        partMessage = new PartMessage((List<String>) messageIds);
+                        partMessage = new PartRawMessage((List<String>) messageIds);
                         partMessageMap.put(messageId, partMessage);
                         partId = messageId;
                         sendMessage("{\"type\":\"success\",\"messageId\":\"" + messageId + "\"}");
@@ -218,7 +218,8 @@ public class Connector implements SubProtocolCapable {
             message.put("role", sessionUser.getRole().getType());
             sendMessage(message);
             
-            actionExecutor.executeByTypeClass(SendPermissionsToUsersAction.class,List.of(sessionUser));
+            final var inputData = new SendPermissionsToUsersAction.Input(List.of(sessionUser));
+            actionExecutor.execute(SendPermissionsToUsersAction.class, inputData);
             return true;
         } else if (sessionUser != null) {
             if (sessionUser.isEnabled()) {

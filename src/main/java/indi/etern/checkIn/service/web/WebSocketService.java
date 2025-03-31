@@ -148,6 +148,11 @@ public class WebSocketService {
     }
     
     @SneakyThrows
+    public void sendMessageToAll(Message<?> message) {
+        sendMessageToAll(objectMapper.writeValueAsString(message));
+    }
+    
+    @SneakyThrows
     public void sendMessageToAllWithoutLog(LinkedHashMap<String, Object> map) {
         sendMessageToAllWithoutLog(objectMapper.writeValueAsString(map));
     }

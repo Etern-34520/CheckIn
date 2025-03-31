@@ -1,52 +1,45 @@
 package indi.etern.checkIn.action.user;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.web.WebSocketService;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Action("deleteUser")
-public class DeleteUserAction extends TransactionalAction {
+public class DeleteUserAction extends BaseAction1<DeleteUserAction.Input, MessageOutput> {
+    public record Input(long qq) implements InputData {}
+    
     private final WebSocketService webSocketService;
     private final UserService userService;
-    private long qqNumber;
     
     public DeleteUserAction(WebSocketService webSocketService, UserService userService) {
         this.webSocketService = webSocketService;
         this.userService = userService;
     }
     
+    @Transactional
     @Override
-    public String requiredPermissionName() {
-        return qqNumber == getCurrentUser().getQQNumber() ? null : "delete user";
-    }
-
-    @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
-        final Optional<User> optionalUser = UserService.singletonInstance.findByQQNumber(qqNumber);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            final String roleName = user.getRole().getType();
-            userService.delete(user);
-            {
-                LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-                map.put("type", "deleteUser");
-                map.put("name", user.getName());
-                map.put("role", roleName);
-                map.put("qq", qqNumber);
-                webSocketService.sendMessageToAll(map);
+    public void execute(ExecuteContext<Input, MessageOutput> context) {
+        final Input input = context.getInput();
+        final Optional<User> optionalUser = userService.findByQQNumber(input.qq);
+        optionalUser.ifPresentOrElse((user) -> {
+            if (!user.equals(context.getCurrentUser())) {
+                context.requirePermission("delete user");
             }
-        }
-        return Optional.of(getSuccessMap());
-    }
-
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        qqNumber = ((Number) dataMap.get("qq")).longValue();
+            userService.delete(user);
+            context.resolve(MessageOutput.success("User deleted"));
+            Message<User> message = Message.of("deleteUser",null, user);
+            webSocketService.sendMessageToAll(message);
+        }, () -> {
+            context.resolve(MessageOutput.error("User not found"));
+        });
     }
 }

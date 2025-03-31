@@ -42,17 +42,6 @@ public class User implements UserDetails {
     @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REFRESH,CascadeType.PERSIST}, fetch = FetchType.EAGER)
     @JoinColumn(name = "ROLE_TYPE", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     protected Role role;
-/*
-    @PostLoad
-    private void postLoad() {
-        final Role role1 = Role.roleMap.get(role.getType());
-        if (role1 != null) {
-            role = role1;
-        } else {
-            Role.roleMap.put(role.getType(), role);
-        }
-    }
-*/
     
     @Setter
     protected boolean enabled = true;

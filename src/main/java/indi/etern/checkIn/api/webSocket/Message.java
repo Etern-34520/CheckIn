@@ -72,19 +72,19 @@ public class Message<D> {
         }
     }
     
-    public static Message<String> success(String contextId, String data) {
+    public static <O> Message<O> success(String contextId, O data) {
         return new Message<>(Type.SUCCESS,contextId,data);
     }
     
-    public static Message<String> warn(String contextId, String data) {
+    public static <O> Message<O> warn(String contextId, O data) {
         return new Message<>(Type.WARN,contextId,data);
     }
     
-    public static Message<String> error(String contextId, String data) {
+    public static <O> Message<O> error(String contextId, O data) {
         return new Message<>(Type.ERROR,contextId,data);
     }
     
-    public static Message<String> of(String typeName, String contextId, String data) {
+    public static <O> Message<O> of(String typeName, String contextId, O data) {
         return new Message<>(Type.of(typeName),contextId,data);
     }
 }

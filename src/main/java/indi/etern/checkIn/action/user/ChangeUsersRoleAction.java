@@ -36,10 +36,8 @@ public class ChangeUsersRoleAction extends TransactionalAction {
         if (targetOptional.isPresent()) {
             final List<User> users = userService.findAllByQQNumber(qqList.stream().map(Number::longValue).toList());
             users.forEach(user -> {
-                Map<String,Object> map = new HashMap<>();
-                map.put("qq",user.getQQNumber());
-                map.put("roleType",targetRole);
-                actionExecutor.executeByTypeClass(ChangeUserRoleAction.class,map);
+                var input = new ChangeUserRoleAction.Input(user.getQQNumber(), targetRole);
+                actionExecutor.execute(ChangeUserRoleAction.class,input);
             });
             return Optional.of(getSuccessMap());
         } else {
