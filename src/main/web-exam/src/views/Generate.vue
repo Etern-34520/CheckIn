@@ -8,32 +8,25 @@ import _Loading_ from "@/components/_Loading_.vue";
 
 const {proxy} = getCurrentInstance();
 const props = defineProps({
-    extraData: {
+    facadeData: {
         required: true,
         type: Object
     },
-    partitions: {
+    extraData: {
         required: true,
         type: Object
     }
 });
-const selectablePartitions = [];
-for (const [id, name] of Object.entries(props.partitions)) {
-    if (!props.extraData.requiredPartitions.includes(Number(id))) {
-        selectablePartitions.push({
-            id: id,
-            name: name,
-        })
-    }
-}
+const requiredPartitionIds = props.extraData.requiredPartitionIds;
+const selectablePartitionIds = props.extraData.selectablePartitionIds;
 
-const selectedPartitions = ref([]);
+const selectedPartitionIds = ref([]);
 const selectPartition = (partitionId) => {
-    const index = selectedPartitions.value.indexOf(partitionId);
+    const index = selectedPartitionIds.value.indexOf(partitionId);
     if (index === -1) {
-        selectedPartitions.value.push(partitionId);
+        selectedPartitionIds.value.push(partitionId);
     } else {
-        selectedPartitions.value.splice(index, 1);
+        selectedPartitionIds.value.splice(index, 1);
     }
 }
 
@@ -44,14 +37,14 @@ const startExam = () => {
     loadingExam.value = true;
     proxy.$http.post("generate", {
         qq: qqNumber.value,
-        partitionIds: selectedPartitions.value
+        partitionIds: selectedPartitionIds.value
     }).then((data) => {
         if (data.type !== "error") {
             proxy.$cookies.set("examInfo", data, "7d");
-            proxy.$cookies.set("phrase", "examining", "7d");
+            proxy.$cookies.set("phrase", "examine", "7d");
             proxy.$cookies.remove("submissions");
             proxy.$cookies.remove("timestamps");
-            router.push({name: "examining"});
+            router.push({name: "examine"});
         } else {
             loadingExam.value = false;
             ElMessageBox.alert(
@@ -73,7 +66,7 @@ const startExam = () => {
     })
 }
 
-const validate1 = computed(() => selectedPartitions.value.length >= props.extraData.partitionRange[0] && selectedPartitions.value.length <= props.extraData.partitionRange[1]);
+const validate1 = computed(() => selectedPartitionIds.value.length >= props.extraData.partitionRange[0] && selectedPartitionIds.value.length <= props.extraData.partitionRange[1]);
 const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 100000000000);
 
 const back = () => {
@@ -88,32 +81,34 @@ const back = () => {
                    style="margin-top: 36px;align-self: baseline;padding: 8px 16px !important;font-size: 1em">
             <el-icon><ArrowLeftBold/></el-icon>返回
         </el-button>
-        <template v-if="(extraData.requiredPartitions && extraData.requiredPartitions.length > 0) || (selectablePartitions.length > 0)">
+<!--        FIXME-->
+        <template v-if="((requiredPartitionIds && requiredPartitionIds.length > 0)
+          || (selectablePartitionIds && selectablePartitionIds.length > 0))">
             <el-text style="font-size: 24px;align-self: baseline;margin-top: 24px">选择分区</el-text>
-            <div class="panel" style="padding: 16px 24px;margin-top: 36px" v-if="extraData.requiredPartitions && extraData.requiredPartitions.length > 0">
+            <div class="panel" style="padding: 16px 24px;margin-top: 36px" v-if="requiredPartitionIds && requiredPartitionIds.length > 0">
                 <el-text size="large" style="align-self: baseline">必选分区</el-text>
                 <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
                     <el-tag size="large" type="info" style="font-size: 14px;margin: 2px"
-                            v-for="requiredPartitionId of extraData.requiredPartitions">
-                        {{ partitions[requiredPartitionId] }}
+                            v-for="requiredPartitionId of requiredPartitionIds">
+                        {{ extraData.partitions[requiredPartitionId] }}
                     </el-tag>
                 </div>
             </div>
-            <div class="panel" v-if="selectablePartitions.length > 0" style="padding: 16px 24px;margin-top: 24px">
+            <div class="panel" v-if="selectablePartitionIds && selectablePartitionIds.length > 0" style="padding: 16px 24px;margin-top: 24px">
                 <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
                     <el-text size="large" style="margin-right: 8px;">可选分区</el-text>
-                    <el-text>{{ selectedPartitions.length }} / {{ selectablePartitions.length }}</el-text>
+                    <el-text>{{ selectedPartitionIds.length }} / {{ selectablePartitionIds.length }}</el-text>
                     <el-text style="margin-left: 8px;"
                              :type="validate1?'info':'danger'">
-                        请选择 {{ extraData.partitionRange[0] }} ~ {{ extraData.partitionRange[1] }} 个
+                        请选择 {{ extraData.partitionRange[0] }} ~ {{ Math.min(selectablePartitionIds.length,extraData.partitionRange[1]) }} 个
                     </el-text>
                 </div>
                 <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-top: 16px;">
                     <el-check-tag size="large" type="info" style="font-size: 14px;margin: 2px;"
-                                  v-for="partition of selectablePartitions"
-                                  :checked="selectedPartitions.includes(Number(partition.id))"
-                                  @click="selectPartition(Number(partition.id))">
-                        {{ partition.name }}
+                                  v-for="partitionId of selectablePartitionIds"
+                                  :checked="selectedPartitionIds.includes(partitionId)"
+                                  @click="selectPartition(partitionId)">
+                        {{ extraData.partitions[partitionId] }}
                     </el-check-tag>
                 </div>
             </div>

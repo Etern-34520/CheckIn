@@ -46,7 +46,7 @@ public class TestGenerateExam {
                     ExamData data = examGenerator.generateExam(114514,partitions);
                     System.out.println(objectMapper.writeValueAsString(data));
                     final int count = QuestionRealCountCounter.count(questionService.findAllById(data.getQuestionIds()));
-                    logger.info("Exam {} has {} questions",i,count);
+                    logger.info("ExamController {} has {} questions",i,count);
                     assert count == 20;
                 }
             } catch (Exception e) {

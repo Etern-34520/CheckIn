@@ -57,11 +57,42 @@ const handleError = (data, actionDescription) => {
                             }
                     ).then(() => {
                         alerting = false;
-                        proxy.$cookies.set("phrase", "generating", "7d");
+                        proxy.$cookies.set("phrase", "generate", "7d");
                         proxy.$cookies.remove("submissions");
                         proxy.$cookies.remove("timestamps");
                         proxy.$cookies.remove("examInfo");
                         router.push({name: "generate"});
+                    });
+                alerting = true;
+                console.error("EXAM INVALIDED");
+                break;
+            case "Exam has already submitted":
+                if (!alerting)
+                    ElMessageBox.alert(
+                            "试题已被提交", actionDescription,
+                            {
+                                type: "info",
+                                draggable: true,
+                                showClose: false,
+                                confirmButtonText: "查看结果",
+                            }
+                    ).then(() => {
+                        alerting = false;
+                        proxy.$http.post("getResult", {
+                            examId: examInfo.value.examId,
+                        }).then((response) => {
+                            if (response.type !== "error") {
+                                proxy.$cookies.set("result", response, "7d");
+                                routeToResult();
+                                console.log(response);
+                            } else {
+                                handleError(response, "获取结果时出错");
+                                submitting.value = false;
+                            }
+                        }, (error) => {
+                            handleError(error, "获取结果时出错");
+                            submitting.value = false;
+                        })
                     });
                 alerting = true;
                 console.error("EXAM INVALIDED");
@@ -78,7 +109,7 @@ const handleError = (data, actionDescription) => {
                             }
                     ).then(() => {
                         alerting = false;
-                        proxy.$cookies.set("phrase", "generating", "7d");
+                        proxy.$cookies.set("phrase", "generate", "7d");
                         proxy.$cookies.remove("submissions");
                         proxy.$cookies.remove("timestamps");
                         proxy.$cookies.remove("examInfo");
@@ -160,9 +191,9 @@ const loadQuestionsByIndexes = (indexes, force = false) => {
 }
 
 if (Boolean(examInfo.value)) {
-    proxy.$cookies.set("phrase", "examining", "7d");
+    proxy.$cookies.set("phrase", "examine", "7d");
 } else {
-    proxy.$cookies.set("phrase", "generating", "7d");
+    proxy.$cookies.set("phrase", "generate", "7d");
     router.push({name: "generate"});
 }
 
@@ -364,12 +395,12 @@ const submitExam = () => {
                 console.log(response);
             } else {
                 handleError(response, "提交时出错");
+                submitting.value = false;
             }
         }, (error) => {
             handleError(error, "提交时出错");
+            submitting.value = false;
         });
-        //TODO
-        submitting.value = false;
     }
     loadQuestionsByIndexes(indexes, true).then(() => {
         if (Object.keys(refreshedQuestion.value).length > 0) {

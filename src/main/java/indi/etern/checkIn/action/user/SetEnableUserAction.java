@@ -1,16 +1,17 @@
 package indi.etern.checkIn.action.user;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.service.dao.UserService;
-import indi.etern.checkIn.utils.UserUpdateUtils;
+import indi.etern.checkIn.service.web.WebSocketService;
 import org.springframework.transaction.annotation.Transactional;
 
 @Action("setEnableUser")
-public class SetEnableUserAction extends BaseAction1<SetEnableUserAction.Input, MessageOutput> {
+public class SetEnableUserAction extends BaseAction<SetEnableUserAction.Input, MessageOutput> {
     public record Input(long qq, boolean enable) implements InputData {
     }
     
@@ -28,7 +29,8 @@ public class SetEnableUserAction extends BaseAction1<SetEnableUserAction.Input, 
         userService.findByQQNumber(input.qq).ifPresentOrElse((user) -> {
             user.setEnabled(input.enable);
             userService.saveAndFlush(user);
-            UserUpdateUtils.sendUpdateUserToAll(user);
+            Message<?> message = Message.of("updateUser", user);
+            WebSocketService.singletonInstance.sendMessageToAll(message);
             context.resolve(MessageOutput.success("User updated"));
         }, () -> {
             context.resolve(MessageOutput.error("User not exist"));

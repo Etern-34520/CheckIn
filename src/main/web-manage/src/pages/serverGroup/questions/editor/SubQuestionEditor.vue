@@ -127,12 +127,16 @@ const switchLike = () => {
         questionInfo.value.question.upVoters.delete(currentUserQQ);
         WebSocketConnector.send({
             type: "restoreVote",
-            questionId: questionInfo.value.question.id
+            data: {
+                questionId: questionInfo.value.question.id
+            }
         });
     } else {
         WebSocketConnector.send({
             type: "upVote",
-            questionId: questionInfo.value.question.id
+            data: {
+                questionId: questionInfo.value.question.id
+            }
         });
         questionInfo.value.question.upVoters.add(currentUserQQ);
         questionInfo.value.question.downVoters.delete(currentUserQQ);
@@ -144,13 +148,17 @@ const switchDisLike = () => {
     if (disLike) {
         WebSocketConnector.send({
             type: "restoreVote",
-            questionId: questionInfo.value.question.id
+            data: {
+                questionId: questionInfo.value.question.id
+            }
         });
         questionInfo.value.question.downVoters.delete(currentUserQQ);
     } else {
         WebSocketConnector.send({
             type: "downVote",
-            questionId: questionInfo.value.question.id
+            data: {
+                questionId: questionInfo.value.question.id
+            }
         });
         questionInfo.value.question.downVoters.add(currentUserQQ);
         questionInfo.value.question.upVoters.delete(currentUserQQ);

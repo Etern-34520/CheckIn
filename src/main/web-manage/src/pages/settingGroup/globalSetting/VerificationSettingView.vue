@@ -34,7 +34,9 @@ const finishEditing = () => {
     if (backupJSON !== JSON.stringify(data.value)) {
         WebSocketConnector.send({
             type: "saveVerificationSetting",
-            data: data.value
+            data: {
+                data: data.value
+            }
         }).then(() => {
             ElMessage({
                 type: "success", message: "保存成功"
@@ -60,7 +62,7 @@ const getData = () => {
         type: "getVerificationSetting"
     }).then((response) => {
         loading.value = false;
-        data.value = response.data;
+        data.value = response.data.data;
     }, () => {
         ElMessage({
             type: "error", message: "获取规则信息失败"
@@ -92,7 +94,8 @@ const varietiesData = [
                                 {{ editing ? '完成' : '编辑' }}
                             </el-button>
                             <el-button class="disable-init-animate"
-                                       v-if="editing" @click="cancel" key="cancel">取消</el-button>
+                                       v-if="editing" @click="cancel" key="cancel">取消
+                            </el-button>
                         </transition-group>
                     </el-button-group>
                     <div style="display: flex;flex-direction: row;margin: 4px 0;" v-if="editing" key="action">
@@ -102,7 +105,8 @@ const varietiesData = [
                         </el-button>
                         <el-popover trigger="click">
                             <template #reference>
-                                <el-button link class="disable-init-animate" :icon="HarmonyOSIcon_InfoCircle" type="info">
+                                <el-button link class="disable-init-animate" :icon="HarmonyOSIcon_InfoCircle"
+                                           type="info">
                                     提示信息可用变量
                                 </el-button>
                             </template>
@@ -135,8 +139,12 @@ const varietiesData = [
                             <div class="slide-hide-base"
                                  v-for="(datum,index) in data" :key="datum.id">
                                 <div class="panel-1 disable-init-animate"
-                                     style="display: flex;min-height: 0;margin: 4px;padding: 4px 12px">
-                                    <div style="width: 32px;display: flex;flex-direction: column;align-items: center;justify-content:center;margin-left: 8px">
+                                     style="display: flex;flex-direction: row;min-height: 0;margin: 4px;padding: 4px 12px;">
+                                    <div style="width: 32px;display: flex;flex-direction: column;align-items: center;justify-content:center;">
+                                        <el-text :type="data[index].error?'danger':'primary'" style="margin-bottom: 8px">{{
+                                                index + 1
+                                            }}
+                                        </el-text>
                                         <transition name="blur-scale" mode="out-in">
                                             <div class="handle" style="cursor: grab;margin-bottom: 8px" v-if="editing">
                                                 <HarmonyOSIcon_Handle :size="20"/>
@@ -150,20 +158,6 @@ const varietiesData = [
                                         </transition>
                                     </div>
                                     <rule-card :editing="editing" v-model="data[index]"/>
-                                    <!--                                    <div class="flex-blank-1"></div>-->
-                                    <div style="display: flex;flex-direction: column;margin: 8px 8px 8px 0;flex: 0">
-                                        <el-tag size="large" type="info">{{
-                                                "优先级：" + (index + 1)
-                                            }}
-                                        </el-tag>
-                                        <transition name="blur-scale" mode="out-in">
-                                            <el-tag v-if="data[index].error" size="large" type="danger"
-                                                    style="margin-top: 2px">
-                                                设置有误
-                                            </el-tag>
-                                        </transition>
-                                        <!--                                        <el-text>{{ data[index] }}</el-text>-->
-                                    </div>
                                 </div>
                             </div>
                         </transition-group>

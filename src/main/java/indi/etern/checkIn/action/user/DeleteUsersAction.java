@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.user;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -10,7 +10,7 @@ import indi.etern.checkIn.service.dao.UserService;
 import java.util.List;
 
 @Action("delete users")
-public class DeleteUsersAction extends BaseAction1<DeleteUsersAction.Input, MessageOutput> {
+public class DeleteUsersAction extends BaseAction<DeleteUsersAction.Input, MessageOutput> {
     public record Input(List<Long> qqList) implements InputData {}
     
     private final UserService userService;

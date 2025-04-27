@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.user;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Action("createUser")
-public class CreateUserAction extends BaseAction1<CreateUserAction.Input, OutputData> {
+public class CreateUserAction extends BaseAction<CreateUserAction.Input, OutputData> {
     private final UserService userService;
     private final WebSocketService webSocketService;
     private final RoleService roleService;
@@ -57,7 +57,7 @@ public class CreateUserAction extends BaseAction1<CreateUserAction.Input, Output
             
             context.resolve(new SuccessOutput(initPassword));
             
-            Message<User> message = Message.of("addUser",null, newUser);
+            Message<User> message = Message.of("addUser", newUser);
             webSocketService.sendMessageToAll(message);
         }
     }

@@ -25,17 +25,7 @@ import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
 import WebSocketConnector from "@/api/websocket.js";
 import LinkPanel from "@/components/common/LinkPanel.vue";
-import {ArrowRightBold, Check, RefreshLeft} from "@element-plus/icons-vue";
-import PermissionInfo from "@/auth/PermissionInfo.js";
-import UserDataInterface from "@/data/UserDataInterface.js";
-
-// let ableToEditOwnQuestion = PermissionInfo.hasPermission('question', 'create and edit owns questions')
-// let ableToEditOthersQuestion = PermissionInfo.hasPermission('question', 'edit others questions')
-// let ableToEditOwnQuestionGroup = PermissionInfo.hasPermission('question group', 'create and edit owns question groups')
-// let ableToEditOthersQuestionGroup = PermissionInfo.hasPermission('question group', 'edit others question groups')
-// let ableToEdit = ref();
-//
-// const currentUser = UserDataInterface.getCurrentUser();
+import {Check, RefreshLeft} from "@element-plus/icons-vue";
 
 const view = ref('编辑');
 watch(() => view.value, () => {
@@ -69,9 +59,13 @@ let update = (newVal, oldVal) => {
     }, (rejectData) => {
         requested = true;
         loading.value = false;
-        if (rejectData.type === "question not found") {
+        if (rejectData.message === "Question not found") {
             error.value = true;
             errorMessage.value = "题目不存在";
+        } else {
+            console.error(rejectData)
+            error.value = true;
+            errorMessage.value = rejectData.message;
         }
     });
 };
@@ -142,12 +136,16 @@ const switchLike = () => {
         questionInfo.value.question.upVoters.delete(currentUserQQ);
         WebSocketConnector.send({
             type: "restoreVote",
-            questionId: questionInfo.value.question.id
+            data: {
+                questionId: questionInfo.value.question.id
+            }
         });
     } else {
         WebSocketConnector.send({
             type: "upVote",
-            questionId: questionInfo.value.question.id
+            data: {
+                questionId: questionInfo.value.question.id
+            }
         });
         questionInfo.value.question.upVoters.add(currentUserQQ);
         questionInfo.value.question.downVoters.delete(currentUserQQ);
@@ -159,13 +157,17 @@ const switchDisLike = () => {
     if (disLike) {
         WebSocketConnector.send({
             type: "restoreVote",
-            questionId: questionInfo.value.question.id
+            data: {
+                questionId: questionInfo.value.question.id
+            }
         });
         questionInfo.value.question.downVoters.delete(currentUserQQ);
     } else {
         WebSocketConnector.send({
             type: "downVote",
-            questionId: questionInfo.value.question.id
+            data: {
+                questionId: questionInfo.value.question.id
+            }
         });
         questionInfo.value.question.downVoters.add(currentUserQQ);
         questionInfo.value.question.upVoters.delete(currentUserQQ);
@@ -204,7 +206,8 @@ onMounted(() => {
                              v-if="questionInfo.question">
                             <div style="display: flex;margin-left: 8px;margin-right:40px;flex: none;justify-content:stretch;flex-wrap: wrap">
                                 <transition name="preview-type-switch">
-                                    <el-segmented v-if="questionInfo.ableToEdit" v-model="view" :options="['编辑','预览']" block
+                                    <el-segmented v-if="questionInfo.ableToEdit" v-model="view"
+                                                  :options="['编辑','预览']" block
                                                   style="margin-right: 16px"/>
                                 </transition>
                                 <transition name="preview-type-switch">
@@ -215,7 +218,7 @@ onMounted(() => {
                                 </transition>
                             </div>
                             <div class="flex-blank-1"></div>
-                            <div style="display: flex;margin: 4px 8px">
+                            <div style="display: flex;margin: 4px 8px;flex-wrap: wrap">
                                 <transition name="blur-scale">
                                     <el-button @click="restoreCurrent" v-if="questionInfo.dirty" :icon="RefreshLeft"
                                                class="disable-init-animate" link type="info">
@@ -225,7 +228,7 @@ onMounted(() => {
                                 <transition name="blur-scale">
                                     <div style="display: flex;align-items: center;margin-right: 24px"
                                          v-if="questionInfo.question.lastModifiedTime">
-                                        <el-tag type="info">最后编辑时间</el-tag>
+                                        <el-tag type="info" style="margin-right: 8px">最后编辑时间</el-tag>
                                         <el-text>
                                             {{ questionInfo.question.lastModifiedTime }}
                                         </el-text>
@@ -243,7 +246,9 @@ onMounted(() => {
                                         <el-button link @click="switchDisLike" style="margin: 4px 0"
                                                    :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
                                             <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
-                                            <el-text style="margin-left: 4px;">{{ questionInfo.question.downVoters.size }}
+                                            <el-text style="margin-left: 4px;">{{
+                                                    questionInfo.question.downVoters.size
+                                                }}
                                             </el-text>
                                         </el-button>
                                     </el-button-group>
@@ -267,7 +272,8 @@ onMounted(() => {
                                         </el-button-group>
                                     </div>
                                 </el-tag>
-                                <el-tag v-for="(warning,id) in questionInfo.warnings" :key="'warning-'+id" type="warning"
+                                <el-tag v-for="(warning,id) in questionInfo.warnings" :key="'warning-'+id"
+                                        type="warning"
                                         :closable="false">
                                     <div style="display: flex;flex-direction: row;align-items: center;">
                                         <el-text type="warning" style="margin: 4px">
@@ -290,7 +296,7 @@ onMounted(() => {
                                 <transition :name="view==='编辑'?'slide-left-to-right':'slide-right-to-left'">
                                     <div v-if="view1">
                                         <transition name="page-content" mode="out-in">
-                                            <el-empty v-if="error" style="height: 100%;"></el-empty>
+                                            <el-empty v-if="error" :description="errorMessage" style="height: 100%;"></el-empty>
                                             <div v-else-if="ready"
                                                  style="display: flex;flex-direction: column;padding: 4px 8px 8px 8px;box-sizing: border-box;height: 100%">
                                                 <basic-question-editor v-model:question-info="questionInfo"/>
@@ -300,7 +306,8 @@ onMounted(() => {
                                                             :question-info="questionInfo" :key="'multipleChoice'"/>
                                                     <div class="panel-1 question-input"
                                                          :class="questionInfo.inputMeta['subquestions-0']"
-                                                         v-else-if="questionInfo.question.type === 'QuestionGroup'" :key="'questionGroup'"
+                                                         v-else-if="questionInfo.question.type === 'QuestionGroup'"
+                                                         :key="'questionGroup'"
                                                          style="display: flex;flex-direction:column;justify-items: stretch;padding: 12px 20px;position: relative">
                                                         <div style="display: flex;flex-direction: row;align-items: center">
                                                             <el-text>子题目</el-text>
@@ -318,7 +325,8 @@ onMounted(() => {
                                                                       @start="onStartDrag"
                                                                       @end="onEndDrag"
                                                         >
-                                                            <transition-group :name="/*dragging ? null:'drag'*/'slide-hide'">
+                                                            <transition-group
+                                                                    :name="/*dragging ? null:'drag'*/'slide-hide'">
                                                                 <div class="slide-hide-base"
                                                                      style="display: grid;margin-top: 4px;grid-template-columns: 0fr 1fr;"
                                                                      v-for="(questionInfo1, $index) of questionInfo.questionInfos"
@@ -329,13 +337,15 @@ onMounted(() => {
                                                                         </div>
                                                                         <transition name="delete-question-button">
                                                                             <el-button class="remove-question-button"
-                                                                                       v-show="questionInfo.questionInfos.length>2" link
+                                                                                       v-show="questionInfo.questionInfos.length>2"
+                                                                                       link
                                                                                        @click="removeQuestion($index)">
                                                                                 <HarmonyOSIcon_Remove/>
                                                                             </el-button>
                                                                         </transition>
                                                                     </div>
-                                                                    <div style="min-height: 0;grid-column: 2" class="question-input"
+                                                                    <div style="min-height: 0;grid-column: 2"
+                                                                         class="question-input"
                                                                          :class="'TODO'">
                                                                         <sub-question-editor
                                                                                 v-model:question-info="questionInfo.questionInfos[$index]"/>
@@ -343,7 +353,8 @@ onMounted(() => {
                                                                 </div>
                                                             </transition-group>
                                                         </VueDraggable>
-                                                        <el-button @click="createQuestion" style="margin-top: 4px" size="large" text>
+                                                        <el-button @click="createQuestion" style="margin-top: 4px"
+                                                                   size="large" text>
                                                             <HarmonyOSIcon_Plus/>
                                                             <el-text>
                                                                 添加子题目
@@ -351,7 +362,8 @@ onMounted(() => {
                                                         </el-button>
                                                     </div>
                                                 </transition>
-                                                <div class="panel-1" style="padding: 12px 20px;margin-top: 40px;min-height: 320px">
+                                                <div class="panel-1"
+                                                     style="padding: 12px 20px;margin-top: 40px;min-height: 320px">
                                                     <el-text>
                                                         统计信息
                                                     </el-text>
@@ -364,7 +376,8 @@ onMounted(() => {
                                                                           :value="questionInfo.question.statistic?questionInfo.question.statistic.submittedCount:0"></el-statistic>
                                                             <el-statistic style="margin: 16px 32px;" title="答对次数"
                                                                           :value="questionInfo.question.statistic?questionInfo.question.statistic.correctCount:0"></el-statistic>
-                                                            <el-statistic style="margin: 16px 48px 16px 32px;" title="答错次数"
+                                                            <el-statistic style="margin: 16px 48px 16px 32px;"
+                                                                          title="答错次数"
                                                                           :value="questionInfo.question.statistic?questionInfo.question.statistic.wrongCount:0"></el-statistic>
                                                             <div class="flex-blank-1"></div>
                                                             <!--                                            <el-button link size="large" style="margin: 8px 16px;min-height: 48px">
@@ -387,8 +400,10 @@ onMounted(() => {
                                     </div>
                                     <div v-else>
                                         <transition name="switch-preview" mode="out-in">
-                                            <question-preview v-if="questionInfo.question" :key="questionInfo.question.id"
-                                                              :questionInfo="questionInfo" :force-mobile="forceMobilePreview"/>
+                                            <question-preview v-if="questionInfo.question"
+                                                              :key="questionInfo.question.id"
+                                                              :questionInfo="questionInfo"
+                                                              :force-mobile="forceMobilePreview"/>
                                             <el-empty v-else/>
                                         </transition>
                                     </div>

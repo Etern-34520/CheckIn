@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
-public class MultipleChoiceAnswer extends Answer<MultipleChoicesQuestion, List<Integer>> implements SingleQuestionAnswer {
+public class MultipleChoiceAnswer extends Answer<MultipleChoicesQuestion, List<String>> implements SingleQuestionAnswer {
     @Setter(AccessLevel.PROTECTED)
     private Set<Choice> selectedChoices;
     @Setter(AccessLevel.PROTECTED)
@@ -25,9 +25,9 @@ public class MultipleChoiceAnswer extends Answer<MultipleChoicesQuestion, List<I
     private MultipleChoicesQuestion source;
     
     @Override
-    protected void initFromSource(MultipleChoicesQuestion multipleChoicesQuestion, List<Integer> source) {
+    protected void initFromSource(MultipleChoicesQuestion multipleChoicesQuestion, List<String> source) {
         this.source = multipleChoicesQuestion;
-        selectedChoices = multipleChoicesQuestion.choices.stream().filter(choice -> source.contains(choice.getOrderIndex())).collect(Collectors.toSet());
+        selectedChoices = multipleChoicesQuestion.choices.stream().filter(choice -> source.contains(choice.getId())).collect(Collectors.toSet());
     }
     
     @Override

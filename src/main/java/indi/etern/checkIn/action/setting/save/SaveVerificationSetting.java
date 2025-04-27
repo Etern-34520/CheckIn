@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.setting.save;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Action("saveVerificationSetting")
-public class SaveVerificationSetting extends BaseAction1<SaveVerificationSetting.Input, MessageOutput> {
+public class SaveVerificationSetting extends BaseAction<SaveVerificationSetting.Input, MessageOutput> {
     public record Input(List<Map<String, Object>> data) implements InputData {}
     final VerificationRuleService verificationRuleService;
     

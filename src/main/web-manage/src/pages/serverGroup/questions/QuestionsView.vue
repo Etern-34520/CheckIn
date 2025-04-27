@@ -44,7 +44,7 @@ const filterNode = (value, node) => {
     return filterQuestionInfo(node.data);
 }
 
-const filterQuestionInfo = (questionInfo) => {//FIXME
+const filterQuestionInfo = (questionInfo) => {
     for (const v of filterText.value.split(",")) {
         if (v !== "" &&
                 (questionInfo.type === 'Partition') || (questionInfo.type === 'Question' && (
@@ -164,6 +164,7 @@ PartitionCache.registerOnPartitionDeleted((partition) => {
     QuestionCache.removePartitionFromAllQuestions(partition);
 });
 
+//FIXME run too fast (?)
 QuestionCache.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) => {
     for (let partitionId of questionInfo.question.partitionIds) {
         if (tree.value.getNode(partitionId + "/" + questionInfo.question.id) === null) {
@@ -178,6 +179,7 @@ QuestionCache.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) =
                     localPartitionQuestionData[partitionId].push(questionNode);
                 } else {
                     let exist = false;
+                    console.debug("localPartitionQuestionData: " + localPartitionQuestionData);
                     for (const questionInfo1 of localPartitionQuestionData[partitionId]) {
                         if (questionInfo1.data.question.id === questionNode.data.question.id) {
                             exist = true;
@@ -269,9 +271,9 @@ const onDrop = (dragNode, dropNode, place, event) => {
         let originalItemPartitionId = treeIdBlock[0];
         let index = 0;
         for (let partitionId of dragNodeData.question.partitionIds) {
-            if (Number(originalItemPartitionId) === partitionId) {
+            if (originalItemPartitionId === partitionId) {
                 dragNode.data.treeId = partitionId + "/" + dragNodeData.question.id;
-                dragNode.data.data.question.partitionIds.splice(index, 1, Number(dropPartitionId));
+                dragNode.data.data.question.partitionIds.splice(index, 1, dropPartitionId);
                 break;
             }
             index++
@@ -368,8 +370,8 @@ const dragLeave = (dragNode, leaveNode, event) => {
 
 const uploading = ref(false);
 
-const failedQuestionReasons = ref({});
-const showfailedQuestionReasons = ref(false);
+const failedQuestionIdReason = ref({});
+const showFailedQuestionIdReason = ref(false);
 
 const upload = () => {
     let hasErrorQuestions = QuestionCache.getErrorQuestions().length > 0;
@@ -378,10 +380,10 @@ const upload = () => {
             uploading.value = false;
             console.log(data);
             console.log(data.succeedQuestionIds);
-            console.log(data.failedQuestionReasons);
-            failedQuestionReasons.value = data.failedQuestionReasons;
-            showfailedQuestionReasons.value = Object.keys(failedQuestionReasons.value).length > 0;
-            showTree.value = showfailedQuestionReasons.value ? false : showTree.value;
+            console.log(data.failedQuestionIdReason);
+            failedQuestionIdReason.value = data.failedQuestionIdReason;
+            showFailedQuestionIdReason.value = Object.keys(failedQuestionIdReason.value).length > 0;
+            showTree.value = showFailedQuestionIdReason.value ? false : showTree.value;
         }, (err) => {
             uploading.value = false;
         });
@@ -405,8 +407,8 @@ const backToTree = () => {
     setTimeout(() => {
         if (showTree.value === true) {
             errorsDisplay.value = false;
-            showfailedQuestionReasons.value = false;
-            failedQuestionReasons.value = {};
+            showFailedQuestionIdReason.value = false;
+            failedQuestionIdReason.value = {};
         }
     }, 600);
 }
@@ -497,7 +499,7 @@ const batchActionSelectPartitionMenuButtons = ref([
             currentButton.menuVisible = false;
             const partitionIdsSet = new Set(partitionIds);
             batchDo(undefined, (questionNode) => {
-                const partitionId = Number(questionNode.treeId.split("/")[0]);
+                const partitionId = questionNode.treeId.split("/")[0];
                 questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId && !partitionIdsSet.has(id));
                 questionNode.data.question.partitionIds.push(...partitionIds);
                 QuestionCache.update(questionNode.data);
@@ -533,7 +535,7 @@ const batchActionButtons = ref([
                 if (questionNode.data.question.partitionIds.length === 1) {
                     QuestionCache.delete(questionNode.data.question.id);
                 } else {
-                    const partitionId = Number(questionNode.treeId.split("/")[0]);
+                    const partitionId = questionNode.treeId.split("/")[0];
                     questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId);
                     QuestionCache.update(questionNode.data);
                 }
@@ -590,7 +592,7 @@ const rectifyCheck = (nodeObj, checkStatus) => {
         const currentPartitionCheckedQuestionIds = new Set();
         for (const checkedNode of checkStatus.checkedNodes) {
             if (checkedNode.data.type === 'Question') {
-                let partitionId = Number(checkedNode.treeId.split("/")[0]);
+                let partitionId = checkedNode.treeId.split("/")[0];
                 if (partitionId === currentPartitionId && checkedNode.data.type === "Question") {
                     currentPartitionCheckedQuestionIds.add(checkedNode.data.question.id);
                 }
@@ -611,7 +613,7 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 
     const dataType = nodeObj.data.type;
     if (dataType === "Question" || dataType === "QuestionGroup") {
-        const currentPartitionId = Number(nodeObj.treeId.split("/")[0]);
+        const currentPartitionId = nodeObj.treeId.split("/")[0];
         rectify1(currentPartitionId);
     } else if (dataType === "Partition") {
         if (!QuestionCache.loadedPartitionIds.has(nodeObj.treeId)) {
@@ -689,7 +691,7 @@ onUnmounted(() => {
 });
 
 const restoreAllErrorUploadChanges = () => {
-    for (const id of Object.keys(failedQuestionReasons.value)) {
+    for (const id of Object.keys(failedQuestionIdReason.value)) {
         QuestionCache.restoreChanges(id);
     }
 }
@@ -898,7 +900,7 @@ const getTypeName = (type) => {
                         </transition>
                     </el-scrollbar>
                 </div>
-                <div class="errorsList" v-show="showfailedQuestionReasons" :class="{hideRight:showTree}">
+                <div class="errorsList" v-show="showFailedQuestionIdReason" :class="{hideRight:showTree}">
                     <el-scrollbar>
                         <el-alert type="error" :closable="false">
                             <div style="display: flex;flex-wrap: wrap;">
@@ -920,7 +922,7 @@ const getTypeName = (type) => {
                             <div>
                                 <transition-group name="slide-hide">
                                     <question-info-panel class="disable-init-animate clickable"
-                                                         v-for="[questionId, reason] of Object.entries(failedQuestionReasons)"
+                                                         v-for="[questionId, reason] of Object.entries(failedQuestionIdReason)"
                                                          :key="questionId" disable-error-and-warning
                                                          @click="openEdit(questionId)"
                                                          :question-info="QuestionCache.reactiveQuestionInfos.value[questionId]">

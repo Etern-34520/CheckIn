@@ -23,10 +23,12 @@ const getRequestRecords = async () => {
     error.value = false;
     WebSocketConnector.send({
         type: "getRequestRecords",
-        from: dateRange.value[0].toISOString(),
-        to: dateRange.value[1].toISOString()
+        data: {
+            from: dateRange.value[0].toISOString(),
+            to: dateRange.value[1].toISOString()
+        }
     }).then((response) => {
-        data.value = response.requestRecords;
+        data.value = response.data.requestRecords;
         loading.value = false;
     }).catch((errorResp) => {
         loading.value = false;

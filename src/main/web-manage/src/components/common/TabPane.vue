@@ -23,7 +23,7 @@ const leftToRight = ref(false);
 const currentComponent = shallowRef(props.tabs[tabNames.value[0]]);
 
 watch(() => selectTab.value, (newVal, oldValue) => {
-    leftToRight.value = tabNames.value.indexOf(oldValue) > tabNames.value.indexOf(newVal);//FIXME
+    leftToRight.value = tabNames.value.indexOf(oldValue) > tabNames.value.indexOf(newVal);
     nextTick(() => {
         currentComponent.value = props.tabs[newVal];
         emit("onSwitchTab", newVal);
@@ -33,8 +33,11 @@ watch(() => selectTab.value, (newVal, oldValue) => {
 
 <template>
     <div style="display: flex;flex-direction: column">
-        <div>
-            <el-segmented v-model="selectTab" :options="tabNames"/>
+        <div style="margin-bottom: 8px">
+            <el-scrollbar>
+                <!--            TODO scrollbar-->
+                <el-segmented v-model="selectTab" :options="tabNames"/>
+            </el-scrollbar>
         </div>
         <div class="slide-switch-base" style="flex: 1;" :class="{'left-to-right':leftToRight}">
             <transition :name="leftToRight?'slide-left-to-right':'slide-right-to-left'">

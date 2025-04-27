@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Action("getQuestionSimpleData")
-public class GetQuestionsSimpleDataAction extends BaseAction1<GetQuestionsSimpleDataAction.Input, OutputData> {
+public class GetQuestionsSimpleDataAction extends BaseAction<GetQuestionsSimpleDataAction.Input, OutputData> {
     public record Input(@Nonnull String partitionId) implements InputData {}
     public record SuccessOutput(List<Map<String,Object>> questionList) implements OutputData {
         @Override

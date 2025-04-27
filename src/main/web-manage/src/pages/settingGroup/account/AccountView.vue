@@ -94,9 +94,11 @@ const groups = [
                     ).then(() => {
                         WebSocketConnector.send({
                             type: "deleteUser",
-                            qq: user.value.qq
-                        }).then((data) => {
-                            console.log(data);
+                            data: {
+                                qq: user.value.qq
+                            }
+                        }).then((response) => {
+                            console.log(response.data);
                             UserDataInterface.logout();
                         });
                     }).catch(() => {
@@ -136,19 +138,20 @@ const confirmChangePassword = () => {
     } else {
         WebSocketConnector.send({
             type: "changeUserPassword",
-            oldPassword: oldPassword.value,
-            newPassword: newPassword.value
-        }).then((resp) => {
-            if (resp.type === 'fail') {
-                resp.failureType === 'previousPasswordIncorrect' ? changePasswordDialog.value.showTip('原密码错误', "error") : changePasswordDialog.value.showTip('修改失败', "error");
-                // message.value = resp.message;
-            } else {
-                changePasswordDialog.value.showTip('修改成功', "success")
-                done.value = true;
+            data: {
+                oldPassword: oldPassword.value,
+                newPassword: newPassword.value
             }
-            // changePasswordDialogVisible.value = false;
+        }).then(() => {
+            changePasswordDialog.value.showTip('修改成功', "success")
+            done.value = true;
         }, (err) => {
-            changePasswordDialog.value.showTip(err.message, "error")
+            err.disableNotification();
+            if (resp.message === 'Previous password incorrect') {
+                changePasswordDialog.value.showTip('原密码错误', "error");
+            } else {
+                changePasswordDialog.value.showTip('修改失败: ' + err.message, "error");
+            }
             return false;
         });
     }
@@ -169,19 +172,16 @@ watch(() => name.value, () => {
 const confirmRename = () => {
     WebSocketConnector.send({
         type: "changeUserName",
-        qq: user.value.qq,
-        newName: name.value
-    }).then((resp) => {
-        if (resp.type === 'fail') {
-            changeUserNameDialog.value.showTip(resp.message, "error")
-        } else {
-            changeUserNameDialog.value.showTip("修改成功", "success")
-            done.value = true;
-            user.value.name = name.value;
+        data: {
+            qq: user.value.qq,
+            newName: name.value
         }
-        // changeNameDialogVisible.value = false;
+    }).then(() => {
+        changeUserNameDialog.value.showTip("修改成功", "success")
+        done.value = true;
+        user.value.name = name.value;
     }, (err) => {
-        changeUserNameDialog.value.showTip(err.message, "error")
+        changeUserNameDialog.value.showTip(err.data.message, "error")
         return false;
     });
 }
@@ -257,7 +257,7 @@ const buttonsOption2 = ref([
 ]);
 </script>
 
-<template><!--FIXME scroll and transition-->
+<template>
     <div>
         <el-scrollbar style="flex: 1">
             <div style="display: flex;flex-direction: column;align-items: center;width: calc(100% - 4px)">

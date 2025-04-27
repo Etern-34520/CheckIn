@@ -50,18 +50,22 @@ public class JwtAuthenticationFilter implements Filter {
                     return;
                 }
                 
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                
-                authenticationToken.setDetails(userDetails);
+                setUserToSecurityContextHolder(userDetails);
                 request.setAttribute("currentUser", userDetails);
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
         filterChain.doFilter(servletRequest, servletResponse);
+    }
+    
+    public static void setUserToSecurityContextHolder(User userDetails) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+        );
+        
+        authenticationToken.setDetails(userDetails);
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
     
     private String getTokenFromRequest(HttpServletRequest request) {

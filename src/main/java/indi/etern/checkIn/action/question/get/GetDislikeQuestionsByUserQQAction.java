@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -15,12 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Action("getDislikeQuestionsByUserQQ")
-public class GetDislikeQuestionsByUserQQAction extends BaseAction1<GetDislikeQuestionsByUserQQAction.Input,OutputData> {
+public class GetDislikeQuestionsByUserQQAction extends BaseAction<GetDislikeQuestionsByUserQQAction.Input,OutputData> {
     public record Input(long qq) implements InputData {}
     public record Output(List<Map<String,Object>> questions) implements OutputData {
         @Override
         public Result result() {
-            return null;
+            return Result.SUCCESS;
         }
     }
     

@@ -1,45 +1,35 @@
 package indi.etern.checkIn.action.role;
 
-import indi.etern.checkIn.action.MapResultAction;
+import indi.etern.checkIn.action.BaseAction;
+import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.RoleService;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-@Action("updateRoleLevels")
-public class UpdateRoleLevelsAction extends MapResultAction {
+@Action("updateRoleLevels")//Unused currently
+public class UpdateRoleLevelsAction extends BaseAction<UpdateRoleLevelsAction.Input, MessageOutput> {
+    public record Input(List<String> levels) implements InputData {}
+    
     private final RoleService roleService;
-    private List<String> roleTypes;
     
     public UpdateRoleLevelsAction(RoleService roleService) {
-        super();
         this.roleService = roleService;
     }
     
     @Override
-    public String requiredPermissionName() {
-        return "update role level";
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String,Object>> doAction() throws Exception {
+    public void execute(ExecuteContext<Input, MessageOutput> context) {
+        context.requirePermission("update role level");
         List<Role> roles = roleService.findAll();
+        final List<String> levels = context.getInput().levels;
         for (Role role : roles) {
-            if (roleTypes.contains(role.getType())) {
-                role.setLevel(roleTypes.indexOf(role.getType()));
+            if (levels.contains(role.getType())) {
+                role.setLevel(levels.indexOf(role.getType()));
             }
         }
         roleService.saveAll(roles);
-        return successOptionalMap;
-    }
-    
-    @Override
-    public void initData(Map<String, Object> dataMap) {
-        //noinspection unchecked
-        roleTypes = (List<String>) dataMap.get("levels");
     }
 }

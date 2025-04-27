@@ -63,7 +63,7 @@ const update = () => {
             id: route.params.id
         }
     }).then((response) => {
-        data.value = response.examData;
+        data.value = response.data.examData;
         reloadRelatedData();
     }, (error) => {
         error.disableNotification();
@@ -134,7 +134,9 @@ const invalidExam = () => {
     }).then(() => {
         WebSocketConnector.send({
             type: "InvalidExam",
-            examId: data.value.id,
+            data: {
+                examId: data.value.id
+            }
         }).then(() => {
         });
     }).catch(() => {

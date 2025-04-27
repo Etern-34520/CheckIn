@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.records;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -9,16 +9,17 @@ import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.ExamDataService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Action("getExamRecordDetail")
-public class GetExamRecordDetailAction extends BaseAction1<GetExamRecordDetailAction.Input, OutputData> {
+public class GetExamRecordDetailAction extends BaseAction<GetExamRecordDetailAction.Input, OutputData> {
     public record Input(String id) implements InputData {
     }
     
-    public record SuccessOutput(Map<String, Object> exanData) implements OutputData {
+    public record SuccessOutput(Map<String, Object> examData) implements OutputData {
         @Override
         public Result result() {
             return Result.SUCCESS;
@@ -33,6 +34,7 @@ public class GetExamRecordDetailAction extends BaseAction1<GetExamRecordDetailAc
         this.jwtTokenProvider = jwtTokenProvider;
     }
     
+    @Transactional
     @Override
     public void execute(ExecuteContext<Input, OutputData> context) {
         examDataService.findById(context.getInput().id)
@@ -49,7 +51,7 @@ public class GetExamRecordDetailAction extends BaseAction1<GetExamRecordDetailAc
                     }
                     context.resolve(new SuccessOutput(examDataMap));
                 }, () -> {
-                    context.resolve(MessageOutput.error("Exam data not found"));
+                    context.resolve(MessageOutput.error("ExamController data not found"));
                 });
     }
 }

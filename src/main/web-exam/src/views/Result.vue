@@ -17,7 +17,13 @@ const backToExam = () => {
     proxy.$cookies.remove("phrase");
     proxy.$cookies.remove("result");
     router.push({name: "generate"}).then(() => {
-        proxy.$cookies.set("phrase", "generating", "7d");
+        proxy.$cookies.set("phrase", "generate", "7d");
+    })
+}
+
+const routeToSignUp = () => {
+    router.push({name: "sign-up"}).then(() => {
+        proxy.$cookies.set("phrase", "sign-up", "7d");
     })
 }
 </script>
@@ -68,9 +74,12 @@ const backToExam = () => {
                         </template>
                     </el-statistic>
                 </div>
-                <div class="flex-blank-1"></div>
-                <el-button type="primary" style="align-self: center" @click="backToExam()">重新答题</el-button>
             </div>
+        </div>
+        <div style="display: flex;flex-direction: row;justify-content: center;flex-wrap: wrap">
+            <el-button @click="backToExam()" style="min-width: 180px">重新答题</el-button>
+            <el-button v-if="result.showCreatingAccountGuide" style="min-width: 180px"
+                       type="primary" @click="routeToSignUp()">注册</el-button>
         </div>
         <div style="flex:1;width: 100%;background: var(--html-bg) var(--lighting-effect-background-2);z-index: 1;margin-top: 64px;display: flex;flex-direction: column;align-items: center;padding-bottom: 200px">
             <md-editor no-upload-img placeholder="结果" v-model="result.message"
@@ -81,8 +90,7 @@ const backToExam = () => {
                        :show-toolbar-name="UIMeta.mobile.value"
                        :preview="true"/>
         </div>
-
-        <!--        {{ result }}-->
+        <div class="flex-blank-1"></div>
     </div>
 </template>
 

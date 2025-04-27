@@ -15,30 +15,26 @@ const getData = () => {
     error.value = false;
     const phrase = proxy.$cookies.get("phrase");
     proxy.$http.get("examData").then((response) => {
-        facadeData.value = response.facadeData.data;
-        gradingData.value = response.gradingData.data;
-        extraData.value = response.facadeData.extraData;
+        facadeData.value = response.facadeData;
+        gradingData.value = response.gradingData;
+        extraData.value = response.extraData;
         console.log(facadeData.value);
         console.log(gradingData.value);
         console.log(extraData.value);
         partitions.value = response.partitions;
         console.log(phrase);
-        if (phrase === "examining") {
-            router.push({name: "examining"}).then(() => {
-                loading.value = false;
-            });
-        } else if (phrase === "generating") {
-            router.push({name: "generate"}).then(() => {
-                loading.value = false;
-            });
-        } else if (phrase === "result") {
-            router.push({name: "result"}).then(() => {
-                loading.value = false;
-            });
-        } else {
-            router.push({name: "facade"}).then(() => {
-                loading.value = false;
-            });
+        switch (phrase) {
+            case "examine" | "generate" | "result" | "sign-up":
+                router.push({name: phrase}).then(() => {
+                    loading.value = false;
+                });
+                break;
+            default:
+                proxy.$cookies.set("phrase", "facade", "7d");
+                router.push({name: "facade"}).then(() => {
+                    loading.value = false;
+                });
+                break;
         }
     }, () => {
         loading.value = false;

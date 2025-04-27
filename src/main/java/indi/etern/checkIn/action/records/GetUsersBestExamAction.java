@@ -1,17 +1,26 @@
 package indi.etern.checkIn.action.records;
 
-import indi.etern.checkIn.action.TransactionalAction;
+import indi.etern.checkIn.action.BaseAction;
+import indi.etern.checkIn.action.MessageOutput;
+import indi.etern.checkIn.action.NullInput;
 import indi.etern.checkIn.action.interfaces.Action;
-import indi.etern.checkIn.entities.exam.ExamData;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.ExamDataService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.Optional;
 
 @Action("getUsersLatestExamRecord")
-public class GetUsersBestExamAction extends TransactionalAction {
+public class GetUsersBestExamAction extends BaseAction<NullInput, OutputData> {
+    public record SuccessOutput(LinkedHashMap<String, Object> examData) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
+        }
+    }
     private final ExamDataService examDataService;
     
     public GetUsersBestExamAction(ExamDataService examDataService) {
@@ -19,25 +28,17 @@ public class GetUsersBestExamAction extends TransactionalAction {
     }
     
     @Override
-    public String requiredPermissionName() {
-        return null;
-    }
-    
-    @Override
-    protected Optional<LinkedHashMap<String, Object>> doAction() throws Exception {
-        final User currentUser = getCurrentUser();
-        Optional<ExamData> optionalExamData = examDataService.findAllByQQ(currentUser.getQQNumber())
-                .stream()
-                .max(Comparator.comparing(examData -> examData));
-        LinkedHashMap<String, Object> result = getSuccessMap();
-        if (optionalExamData.isPresent()) {
-            final LinkedHashMap<String, Object> examDataMap = optionalExamData.get().toDataMap();
-            examDataMap.remove("answers");
-            result.put("examData", examDataMap);
-            return Optional.of(result);
-        } else {
-            result.put("examData", "not found");
-            return Optional.of(result);
-        }
+    @Transactional
+    public void execute(ExecuteContext<NullInput,OutputData> context) {
+        final User currentUser = context.getCurrentUser();
+        examDataService.findAllByQQ(currentUser.getQQNumber()).stream()
+                .max(Comparator.comparing(examData -> examData))
+                .ifPresentOrElse((examData) -> {
+                    final LinkedHashMap<String, Object> examDataMap = examData.toDataMap();
+                    examDataMap.remove("answers");
+                    context.resolve(new SuccessOutput(examDataMap));
+                }, () -> {
+                    context.resolve(MessageOutput.error("ExamController record not found"));
+                });
     }
 }

@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Action("getQuestionsByUserQQ")
-public class GetQuestionsByUserQQAction extends BaseAction1<GetQuestionsByUserQQAction.Input, OutputData> {
+public class GetQuestionsByUserQQAction extends BaseAction<GetQuestionsByUserQQAction.Input, OutputData> {
     public record Input(long qq,@Nullable Integer limit) implements InputData {}
     public record Output(List<Map<String,Object>> questions) implements OutputData {
         @Override

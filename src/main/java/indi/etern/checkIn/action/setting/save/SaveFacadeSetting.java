@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.setting.save;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 
 @Action("saveFacadeSetting")
-public class SaveFacadeSetting extends BaseAction1<SaveFacadeSetting.Input, MessageOutput> {
+public class SaveFacadeSetting extends BaseAction<SaveFacadeSetting.Input, MessageOutput> {
     public record Input(Map<String, Object> data) implements InputData {}
     public static final String[] KEYS = {"title", "subTitle", "description", "icon"};
     

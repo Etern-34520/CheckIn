@@ -39,10 +39,10 @@ const update = (newVal, oldVal) => {
             qq: Number(route.params.id),
             limit: 6
         }
-    }).then((respData) => {
+    }).then((response) => {
         questionLoaded = true;
         const questionInfos = [];
-        for (const question of respData.questions) {
+        for (const question of response.data.questions) {
             questionInfos.push(QuestionCache.wrapToQuestionInfo(question));
         }
         questions.value = questionInfos;
@@ -62,8 +62,10 @@ const newName = ref("");
 const confirmRename = () => {
     WebSocketConnector.send({
         type: "changeUserName",
-        qq: user.value.qq,
-        newName: newName.value
+        data: {
+            qq: user.value.qq,
+            newName: newName.value
+        }
     }).then(() => {
         ElMessage({
             type: 'success',
@@ -83,8 +85,10 @@ const confirmMoveUserGroup = () => {
     moveGroupVisible.value = false;
     WebSocketConnector.send({
         type: "changeUserRole",
-        qq: user.value.qq,
-        roleType: newUserGroupName.value
+        data: {
+            qq: user.value.qq,
+            roleType: newUserGroupName.value
+        }
     }).then(() => {
         ElMessage({
             type: 'success',
@@ -113,7 +117,9 @@ const deleteUser = () => {
         router.back();
         WebSocketConnector.send({
             type: "deleteUser",
-            qq: Number(route.params.id)
+            data: {
+                qq: Number(route.params.id)
+            }
         });
     }).catch(() => {
     });
@@ -125,8 +131,10 @@ const switchEnableUser = () => {
     return new Promise ((resolve, reject) => {
         WebSocketConnector.send({
             type: "setEnableUser",
-            qq: user.value.qq,
-            enable: !user.value.enabled
+            data: {
+                qq: user.value.qq,
+                enable: !user.value.enabled
+            }
         }).then(() => {
             ElMessage({
                 type: 'success',
@@ -145,6 +153,10 @@ const switchEnableUser = () => {
 }
 
 const currentUser = UserDataInterface.getCurrentUser();
+
+const routeToExamRecords = () => {
+    router.push({name: "user-exam-records"});
+}
 </script>
 
 <template>
@@ -235,7 +247,8 @@ const currentUser = UserDataInterface.getCurrentUser();
                     </waterfall>
                     <!--                    <question-info-panel v-for="questionInfo of questions" :question-info="QuestionCache.wrapToQuestionInfo(questionInfo)"/>-->
                 </div>
-                <link-panel description="" name="TA的答题记录" :icon="Finished"/>
+<!--                TODO-->
+                <link-panel @click="routeToExamRecords()" description="" name="TA的答题记录" :icon="Finished"/>
             </div>
         </transition>
     </div>

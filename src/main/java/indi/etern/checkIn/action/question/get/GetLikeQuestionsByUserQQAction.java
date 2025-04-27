@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -18,12 +18,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Action("getLikeQuestionsByUserQQ")
-public class GetLikeQuestionsByUserQQAction extends BaseAction1<GetLikeQuestionsByUserQQAction.Input,OutputData> {
+public class GetLikeQuestionsByUserQQAction extends BaseAction<GetLikeQuestionsByUserQQAction.Input,OutputData> {
     public record Input(long qq) implements InputData {}
     public record Output(List<Map<String,Object>> questions) implements OutputData {
         @Override
         public Result result() {
-            return null;
+            return Result.SUCCESS;
         }
     }
     

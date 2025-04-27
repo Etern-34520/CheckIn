@@ -25,10 +25,12 @@ const loadTodayExamRecords = () => {
     loadingTodayExamRecordsError.value = false;
     WebSocketConnector.send({
         type: "getExamRecords",
-        from: today.toISOString(),
-        to: today.toISOString()
+        data: {
+            from: today.toISOString(),
+            to: today.toISOString()
+        }
     }).then((response) => {
-        todayExamRecords.value = response.examRecords;
+        todayExamRecords.value = response.data.examRecords;
         loadingTodayExamRecords.value = false;
     }, (errorResp) => {
         loadingTodayExamRecords.value = false;
@@ -46,10 +48,11 @@ const loadRecentUpdatedQuestions = () => {
     WebSocketConnector.send({
         type: "getRecentUpdatedQuestionIds"
     }).then((response) => {
-        QuestionCache.getAllAsync(response.questionIds).then((questionInfos) => {
+        QuestionCache.getAllAsync(response.data.questionIds).then((questionInfos) => {
             recentUpdatedQuestions.value = questionInfos;
             loadingRecentUpdatedQuestions.value = false;
-        }, () => {
+        }, (e) => {
+            console.error(e);
             loadingRecentUpdatedQuestions.value = false;
             loadingRecentUpdatedQuestionsError.value = true;
         })
@@ -69,10 +72,10 @@ const loadUsersBestExam = () => {
     WebSocketConnector.send({
         type: "getUsersLatestExamRecord"
     }).then((response) => {
-        if (response.examData !== "not found")
-            usersBestExam.value = response.examData;
+        usersBestExam.value = response.data.examData;
         loadingUsersBestExam.value = false;
-    }, () => {
+    }, (message) => {
+        message.disableNotification();
         loadingUsersBestExam.value = false;
         loadingUsersBestExamError.value = true;
     })
@@ -159,10 +162,12 @@ const openRecord = (id) => {
                     </div>
                     <div style="padding: 16px 16px 0;flex:1" class="panel">
                         <el-text size="large" style="align-self: baseline;margin-top: 4px">今日答题记录</el-text>
-                        <div v-loading="loadingTodayExamRecords" style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">
+                        <div v-loading="loadingTodayExamRecords"
+                             style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">
                             <div style="display: flex;flex-direction: row;align-items:center;"
                                  v-if="loadingTodayExamRecordsError">
-                                <el-text style="align-self: center;margin-right: 12px" type="info">加载数据时出错</el-text>
+                                <el-text style="align-self: center;margin-right: 12px" type="info">加载数据时出错
+                                </el-text>
                                 <el-button link @click="loadTodayExamRecords">重新加载</el-button>
                             </div>
                             <el-scrollbar v-else-if="!loadingTodayExamRecords" style="margin-top: 16px;flex:1">
@@ -190,16 +195,21 @@ const openRecord = (id) => {
                 <pane min-size="40">
                     <div class="panel" style="display: flex;flex-direction: column;padding: 16px">
                         <el-text size="large" style="align-self: baseline;margin-top: 4px">最近更新的题目</el-text>
-                        <div v-loading="loadingRecentUpdatedQuestions" style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">
+                        <div v-loading="loadingRecentUpdatedQuestions"
+                             style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">
                             <div style="display: flex;flex-direction: row;align-items:center"
                                  v-if="loadingRecentUpdatedQuestionsError">
-                                <el-text style="align-self: center;margin-right: 12px" type="info">加载数据时出错</el-text>
+                                <el-text style="align-self: center;margin-right: 12px" type="info">加载数据时出错
+                                </el-text>
                                 <el-button link @click="loadRecentUpdatedQuestions">重新加载</el-button>
                             </div>
-                            <el-scrollbar v-else-if="recentUpdatedQuestions && !loadingRecentUpdatedQuestions" style="position: relative">
-                                <waterfall :data="recentUpdatedQuestions" :min-row-width="400" style="max-width: calc(100% - 4px)">
+                            <el-scrollbar v-else-if="recentUpdatedQuestions && !loadingRecentUpdatedQuestions"
+                                          style="position: relative">
+                                <waterfall :data="recentUpdatedQuestions" :min-row-width="400"
+                                           style="max-width: calc(100% - 4px)">
                                     <template #item="{item,index}">
-                                        <question-info-panel :question-info="item" class="clickable" disable-error-and-warning
+                                        <question-info-panel :question-info="item" class="clickable"
+                                                             disable-error-and-warning
                                                              style="margin: 4px"
                                                              @click="router.push({name:'question-detail',params: {id:item.question.id}})"/>
                                     </template>

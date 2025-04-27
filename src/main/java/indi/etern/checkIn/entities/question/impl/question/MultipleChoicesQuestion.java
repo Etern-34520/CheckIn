@@ -17,11 +17,10 @@ import lombok.Getter;
 
 import java.util.*;
 
-//@JsonSerialize(using = ExamQuestionSerializer.class)
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
-public class MultipleChoicesQuestion extends Question implements RandomOrderable, Answerable<List<Integer>> {
+public class MultipleChoicesQuestion extends Question implements RandomOrderable, Answerable<List<String>> {
     protected boolean randomOrdered;
     
     protected MultipleChoicesQuestion() {
@@ -60,9 +59,9 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
     }
     
     @Override
-    public MultipleChoiceAnswer newAnswerFrom(List<Integer> choiceIndexes) {
+    public MultipleChoiceAnswer newAnswerFrom(List<String> choiceIds) {
         final MultipleChoiceAnswer multipleChoiceAnswer = new MultipleChoiceAnswer();
-        multipleChoiceAnswer.initFromSource(this, choiceIndexes);
+        multipleChoiceAnswer.initFromSource(this, choiceIds);
         return multipleChoiceAnswer;
     }
     

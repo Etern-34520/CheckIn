@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.setting.get;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.NullInput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Action("getAdvanceSetting")
-public class GetAdvanceSetting extends BaseAction1<NullInput, GetAdvanceSetting.SuccessOutput> {
+public class GetAdvanceSetting extends BaseAction<NullInput, GetAdvanceSetting.SuccessOutput> {
     public record SuccessOutput(Map<String, Object> data) implements OutputData {
         @Override
         public Result result() {

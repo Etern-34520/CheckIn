@@ -6,11 +6,13 @@ import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.action.interfaces.ResultJsonContext;
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import lombok.SneakyThrows;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
+@Component("jsonContext")
+@Scope("prototype")
 public class JsonContext<I extends InputData, O extends OutputData> extends Context<I, O> implements ResultJsonContext<O> {
     private final ObjectMapper objectMapper;
     

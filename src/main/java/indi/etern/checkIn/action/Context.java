@@ -21,6 +21,7 @@ public class Context<I extends InputData, O extends OutputData> implements Resul
     @Getter
     final User currentUser;
     {
+        //FIXME
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             Object object = authentication.getPrincipal();

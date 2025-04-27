@@ -63,9 +63,9 @@ const contentVerification = (type, defaultTip, targetInputName) => {
         type: type,
         inputType: {
             types: {
-                slider: {
-                    dataPosition: 0
-                }, number: {
+                /*                slider: {
+                                    dataPosition: 0
+                                }, */number: {
                     dataPosition: 0
                 }, label: {
                     dataPosition: 1,
@@ -212,7 +212,7 @@ const choiceLengthVerification = (type, defaultTip, targetInputName) => {
                 {
                     default: 100,
                     min: 1,
-                    max: 2566,
+                    max: 256,
                 }
             ]
         },
@@ -282,7 +282,7 @@ const choiceOption = {
                     name: "数量", verificationTypes: {
                         max: quantityVerification("上限", 5, 1, 20, "错误选项数量超过${limit}", "choices"),
                         min: quantityVerification("下限", 5, 1, 20, "错误选项数量少于${limit}", "choices"),
-                        empty: emptyVerification("无错误选项", "无正确选项时", "无错误选项时", "choices"),
+                        empty: emptyVerification("无错误选项", "无错误选项时", "无错误选项时", "choices"),
                     }
                 }
             }
@@ -414,39 +414,30 @@ const addToValues = (datum, index) => {
 <template>
     <div class="rule-card-base">
         <div style="display: flex;flex-direction: row;flex-wrap: wrap;min-height: 42px;align-items: center">
-            <div style="display: flex;flex-direction: row;margin-right: 8px" v-if="editing">
-                <el-text style="margin-right: 4px;">对象</el-text>
-                <!--                <el-check-tag class="panel-1 clickable" type="info" v-for="option of optionValues" :checked="model.objectNames.includes(option)" @click="toggleSelect(option)">
-                                    <el-text>{{ optionNames[option] }}</el-text>
-                                </el-check-tag>-->
-                <el-segmented :options="optionValues" v-model="model.objectName" style="margin: 4px 0">
-                    <template #default="{item}">
-                        <el-text>{{ optionNames[item] }}</el-text>
-                    </template>
-                </el-segmented>
-            </div>
-            <div style="display:flex;margin-right: 8px;padding: 0 12px;height: 32px" class="panel-1 disable-init-animate"
-                 v-else>
-                <el-text>
+            <div style="display: flex;margin-right: 8px;flex-direction: row;flex-wrap: wrap;"><!--FIXME OVERFLOW-->
+                <div style="display: flex;flex-direction: row;" v-if="editing">
+                    <el-text style="margin-right: 4px;">对象</el-text>
+                    <el-segmented :options="optionValues" v-model="model.objectName">
+                        <template #default="{item}">
+                            <el-text>{{ optionNames[item] }}</el-text>
+                        </template>
+                    </el-segmented>
+                </div>
+                <el-text v-else style="margin-right: 12px;margin-bottom: 2px;margin-top: 2px">
                     {{ optionNames[model.objectName] }}
                 </el-text>
-            </div>
-            <div class="disable-init-animate" :class="{'panel-1':!editing}"
-                 style="display: flex;padding: 4px 12px;margin-right: 8px;flex-wrap: wrap;">
-                <property-selector ref="propertySelector"
+                <property-selector ref="propertySelector" style="margin-bottom: 2px;margin-top: 2px"
                                    v-if="objectMap[model.objectName] && objectMap[model.objectName].properties"
                                    :properties="objectMap[model.objectName].properties" v-model="model.property"
                                    :editing="editing"/>
             </div>
             <template v-if="!editing && model.level">
-                <el-tag size="large" :type="model.level==='error'?'danger':model.level"
-                        style="display: flex;padding: 0 12px;margin-right: 8px">
-                    {{ "级别：" + model.level }}
-                </el-tag>
+                <div class="flex-blank-1"></div>
                 <div style="display: flex;flex-direction: row;align-items:center">
-                    <el-tag type="info" style="margin-right: 4px;display: flex;padding: 0 12px;" size="large">提示信息
-                    </el-tag>
-                    <el-text type="info">{{ model.tipTemplate }}</el-text>
+                    <el-text type="info"
+                             style="display: flex;padding: 0 12px;margin: 4px 4px 4px 0;">提示信息
+                    </el-text>
+                    <el-text :type="model.level==='error'?'danger':model.level">{{ model.tipTemplate }}</el-text>
                 </div>
             </template>
         </div>
@@ -455,7 +446,8 @@ const addToValues = (datum, index) => {
                  v-if="verificationOption"
                  :key="transitionCaller">
                 <transition name="blur-scale" mode="out-in">
-                    <div style="display: flex;flex-wrap: wrap;margin-bottom: 8px" :key="verificationOption.inputType.types">
+                    <div style="display: flex;flex-wrap: wrap;margin-bottom: 8px"
+                         :key="verificationOption.inputType.types">
                         <template v-for="(option,type,index) in verificationOption.inputType.types">
                             <el-slider v-if="type==='slider'"
                                        v-model="model.values[option.dataPosition]"
@@ -463,7 +455,7 @@ const addToValues = (datum, index) => {
                                        :min="getOptionOrDefault(option.dataPosition,'min',0)"
                                        :max="getOptionOrDefault(option.dataPosition,'max',1000)"
                                        :step="getOptionOrDefault(option.dataPosition,'step',1)"
-                                       style="margin: 0 16px;width:400px"/>
+                                       style="margin: 0 16px;max-width:400px"/>
                             <el-input-number v-else-if="type==='number'"
                                              v-model="model.values[option.dataPosition]"
                                              class="disable-init-animate" :disabled="!editing"
@@ -492,10 +484,10 @@ const addToValues = (datum, index) => {
                                 </el-option>
                             </el-select>
                         </div>
-                        <div style="display: flex;flex-direction: row;margin-right: 32px">
+                        <div style="display: flex;flex-direction: row;">
                             <el-text style="margin-right: 8px;text-wrap: nowrap;">提示信息</el-text>
                             <el-input v-model="model.tipTemplate" class="disable-init-animate"
-                                      style="width: 350px;margin-right: 20px"/>
+                                      style="max-width: 350px;"/>
                         </div>
                     </div>
                 </transition>
@@ -507,8 +499,7 @@ const addToValues = (datum, index) => {
 <style scoped>
 .rule-card-base {
     min-height: 80px;
-    min-width: 400px;
-    padding: 8px 16px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
     flex: 1;

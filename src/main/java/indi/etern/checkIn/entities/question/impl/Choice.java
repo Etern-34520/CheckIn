@@ -1,15 +1,21 @@
 package indi.etern.checkIn.entities.question.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Getter
 @Embeddable
 public class Choice implements Serializable {//TODO use temp id in front-face
+    @Column(columnDefinition = "char(36)", unique = true, nullable = false)
+    public String id;
+    
+    @Column(columnDefinition = "varchar(256)")
     private String content;
     
     @JsonIgnore
@@ -20,9 +26,11 @@ public class Choice implements Serializable {//TODO use temp id in front-face
     private int orderIndex;
     
     protected Choice() {
+        this.id = UUID.randomUUID().toString();
     }
     
     public Choice(String content, boolean isCorrect) {
+        this.id = UUID.randomUUID().toString();
         this.content = content;
         this.isCorrect = isCorrect;
     }

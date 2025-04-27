@@ -26,6 +26,19 @@ public class GradingLevel {
     private String colorHex;
     private String description;
     private String message;
+    private CreatingUserStrategy creatingUserStrategy;
     
     protected GradingLevel() {}
+    
+    public enum CreatingUserStrategy {
+        NOT_CREATE, CREATE_DISABLED, CREATE_ENABLED_AFTER_VALIDATED, CREATE_ENABLED;
+        
+        public static CreatingUserStrategy ofOrElse(String creatingUserStrategy, CreatingUserStrategy creatingUserStrategy1) {
+            try {
+                return CreatingUserStrategy.valueOf(creatingUserStrategy);
+            } catch (IllegalArgumentException e) {
+                return creatingUserStrategy1;
+            }
+        }
+    }
 }

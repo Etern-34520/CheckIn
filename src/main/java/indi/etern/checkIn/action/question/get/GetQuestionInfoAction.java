@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question.get;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -16,9 +16,9 @@ import java.util.Map;
 import java.util.Optional;
 
 @Action("getQuestionInfo")
-public class GetQuestionInfoAction extends BaseAction1<GetQuestionInfoAction.Input,OutputData> {
+public class GetQuestionInfoAction extends BaseAction<GetQuestionInfoAction.Input,OutputData> {
     public record Input(@Nonnull String questionId) implements InputData {}
-    public record SuccessOutput(Map<String,Object> questionData) implements OutputData {
+    public record SuccessOutput(Map<String,Object> question) implements OutputData {
         @Override
         public Result result() {
             return Result.SUCCESS;

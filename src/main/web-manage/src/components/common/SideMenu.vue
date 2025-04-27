@@ -31,7 +31,7 @@ const pageGroups = [
         groupName: "设置",
         paths: [
             {pathName: 'global-setting-base', name: '服务器设置', icon: "Tools"},
-            {pathName: 'account-base', name: '用户设置', icon: "SetUp"},
+            {pathName: 'account-base', name: '账户', icon: "SetUp"},
         ]
     }
 ]
@@ -72,9 +72,9 @@ const props = defineProps({
 
 <template>
     <div id="menu-container" :class="{'menu-container-inline': inlineBool && (!UI_Meta.mobile.value)}">
-        <div style="position: absolute;width: 100vw;height: calc(100vh - 32px);z-index: 2001"
+        <div style="position: absolute;width: 100vw;height: calc(100vh - 32px);"
              @click="inlineBool = false" v-if="inlineBool && (UI_Meta.mobile.value)"></div>
-        <div id="menu" class="container"
+        <div id="menu" class="container" style="z-index: 2004"
              :class="{'menu-inline': inlineBool,'menu-expand': expandBool || inlineBool}"
              @mouseenter="expandMenu" @mouseleave="shrinkMenu" @click.stop>
             <el-scrollbar style="margin-bottom: 8px;" view-style="overflow-x: hidden;">

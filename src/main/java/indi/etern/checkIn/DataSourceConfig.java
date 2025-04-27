@@ -21,7 +21,7 @@ public class DataSourceConfig {
     public DataSourceInitializer dataSourceInitializer(final DataSource dataSource) {
         if (userService.findAll().isEmpty()) {
             ResourceDatabasePopulator resourceDatabasePopulator = new ResourceDatabasePopulator();
-            resourceDatabasePopulator.addScript(new ClassPathResource("/data.sql"));
+            resourceDatabasePopulator.addScript(new ClassPathResource("/db/initialization/data.sql"));
             DataSourceInitializer dataSourceInitializer = new DataSourceInitializer();
             dataSourceInitializer.setDataSource(dataSource);
             dataSourceInitializer.setDatabasePopulator(resourceDatabasePopulator);

@@ -39,6 +39,7 @@ const mobile = UI_Meta.mobile;
 
 <style scoped>
 .global-setting-base {
+    transition: padding 0.3s var(--ease-in-out-quint);
     padding: 32px 32px 0;
 }
 

@@ -19,13 +19,17 @@ const router = createRouter({
                     name: 'generate',
                     component: () => import("@/views/Generate.vue")
                 }, {
-                    path: 'examining/',
-                    name: 'examining',
+                    path: 'examine/',
+                    name: 'examine',
                     component: () => import("@/views/Exam.vue")
                 }, {
                     path: 'result/',
                     name: 'result',
                     component: () => import("@/views/Result.vue")
+                }, {
+                    path: 'sign-up/',
+                    name: 'sign-up',
+                    component: () => import("@/views/SignUp.vue")
                 }
             ]
         }

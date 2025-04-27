@@ -36,7 +36,9 @@ const finishEditing = () => {
     if (backupJSON !== JSON.stringify(data.value)) {
         WebSocketConnector.send({
             type: "saveFacadeSetting",
-            data: data.value
+            data: {
+                data: data.value
+            }
         }).then(() => {
             ElMessage({
                 type: "success", message: "保存成功"
@@ -57,8 +59,8 @@ const getData = () => {
             WebSocketConnector.send({
                 type: "getFacadeSetting",
             }).then((response) => {
-                data.value = response.data;
-                extraData.value = response.extraData;
+                data.value = response.data.data;
+                extraData.value = response.data.extraData;
                 resolve();
             }, (err) => {
                 ElMessage({
@@ -71,7 +73,7 @@ const getData = () => {
             WebSocketConnector.send({
                 type: "getGradingSetting",
             }).then((response) => {
-                gradingData.value = response.data;
+                gradingData.value = response.data.data;
                 if (!gradingData.value.levels) gradingData.value.levels = [];
                 if (!gradingData.value.splits) gradingData.value.splits = [0];
                 if (!gradingData.value.questionScore) gradingData.value.questionScore = 5;

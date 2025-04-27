@@ -522,7 +522,7 @@
 }
 
 .el-checkbox__inner {
-    --el-checkbox-checked-icon-color: var(--front-color-reserse);
+    --el-checkbox-checked-icon-color: var(--front-color-dark);
 }
 
 .el-checkbox__inner:after {

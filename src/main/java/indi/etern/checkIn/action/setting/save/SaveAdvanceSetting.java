@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.setting.save;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Action("saveAdvanceSetting")
-public class SaveAdvanceSetting extends BaseAction1<SaveAdvanceSetting.Input, SaveAdvanceSetting.RobotTokenOutput> {
+public class SaveAdvanceSetting extends BaseAction<SaveAdvanceSetting.Input, SaveAdvanceSetting.RobotTokenOutput> {
     public record Input(Map<String, Object> data) implements InputData {}
     public record RobotTokenOutput(List<RobotTokenItem> currentTokens) implements OutputData {
         @Override

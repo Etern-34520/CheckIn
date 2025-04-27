@@ -21,9 +21,11 @@ const loadData = () => {
         currentQuestionInfo.value = questionInfo;
         WebSocketConnector.send({
             type: "getRelatedExamRecordsAndAnswers",
-            questionId: currentQuestionInfo.value.question.id
+            data: {
+                questionId: currentQuestionInfo.value.question.id
+            }
         }).then((response) => {
-            data.value = response;
+            data.value = response.data;
             loading.value = false;
         }, () => {
             loading.value = false;

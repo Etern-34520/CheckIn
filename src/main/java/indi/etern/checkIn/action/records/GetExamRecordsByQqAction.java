@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.records;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
@@ -11,7 +11,7 @@ import indi.etern.checkIn.service.dao.ExamDataService;
 import java.util.List;
 
 @Action("getExamRecordsByQQ")
-public class GetExamRecordsByQqAction extends BaseAction1<GetExamRecordsByQqAction.Input, GetExamRecordsByQqAction.SuccessOutput>{
+public class GetExamRecordsByQqAction extends BaseAction<GetExamRecordsByQqAction.Input, GetExamRecordsByQqAction.SuccessOutput> {
     public record Input(long qq) implements InputData {}
     public record SuccessOutput(List<ExamData> examRecords) implements OutputData {
         @Override

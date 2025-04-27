@@ -9,14 +9,14 @@
     <description>CheckIn use Spring Boot</description>
     <properties>
         <java.version>21</java.version>
-        <spring-boot-starter.version>3.5.0-M2</spring-boot-starter.version>
-        <!--        <spring-boot-starter.version>3.4.3</spring-boot-starter.version>-->
+        <spring-boot-starter.version>3.5.0-SNAPSHOT</spring-boot-starter.version>
+<!--                <spring-boot-starter.version>3.4.0</spring-boot-starter.version>-->
     </properties>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0-M2</version>
-        <!--        <version>3.4.3</version>-->
+        <version>3.5.0-SNAPSHOT</version>
+<!--                <version>3.4.0</version>-->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <repositories>
@@ -135,6 +135,14 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
             <version>${spring-boot-starter.version}</version>
         </dependency>
+<!--        TODO use Netty-->
+<!--
+        <dependency>
+            <groupId>org.yeauty</groupId>
+            <artifactId>netty-websocket-spring-boot-starter</artifactId>
+            <version>0.13.0</version>
+        </dependency>
+-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -157,6 +165,31 @@
             <artifactId>spring-boot-starter-security</artifactId>
             <version>${spring-boot-starter.version}</version>
         </dependency>
+        <!--<dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>11.6.0</version>
+        </dependency>
+        &lt;!&ndash; https://mvnrepository.com/artifact/org.flywaydb/flyway-mysql &ndash;&gt;
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <version>11.6.0</version>
+        </dependency>
+        &lt;!&ndash; https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql &ndash;&gt;
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <version>11.6.0</version>
+            <scope>runtime</scope>
+        </dependency>
+        &lt;!&ndash; https://mvnrepository.com/artifact/org.flywaydb/flyway-database-db2 &ndash;&gt;
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-db2</artifactId>
+            <version>11.6.0</version>
+            <scope>runtime</scope>
+        </dependency>-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>

@@ -9,7 +9,7 @@ let qq1;
 let token1;
 
 let notifications = {};
-let limits = 4 * 1024 * 1024;//4MB
+let limits = 64 * 1024;//64MB
 
 function getCurrentIsoTime() {
     return new Date().toISOString();
@@ -39,7 +39,8 @@ const sendInternal = (objMessage) => {
         let promise1 = new Promise((resolve, reject) => {
             promiseData1["resolve"] = () => {
                 for (const message of messageParts) {
-                    WebSocketConnector.ws.send(JSON.stringify(message));
+                    //todo test
+                    WebSocketConnector.send(JSON.stringify(message));
                 }
                 WebSocketConnector.promises[objMessage["messageId"]] = oldPromise;
             };
@@ -142,7 +143,7 @@ const WebSocketConnector = {
                         }
                     });
                     this.registerAction("updatePermissions", (message) => {
-                        PermissionInfo.init(message.permissions);
+                        PermissionInfo.init(message.data);
                     })
                     if (this.waitingTasks.length > 0) {
                         this.waitingTasks.forEach((promise) => {
@@ -193,13 +194,13 @@ const WebSocketConnector = {
                                 message.disableNotification = () => {
                                     showNotification = false;
                                 }
-                                console.error("websocket error", message);
                                 const doNotification = () => {
                                     delete message.disableNotification;
                                     if (showNotification) {
+                                        console.error("websocket error", message);
                                         ElNotification({
                                             title: '执行操作时出错',
-                                            message: message.message,
+                                            message: message.data,
                                             position: 'bottom-right',
                                             type: 'error',
                                             duration: 3000

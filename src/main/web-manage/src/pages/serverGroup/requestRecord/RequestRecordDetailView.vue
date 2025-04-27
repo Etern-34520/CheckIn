@@ -26,9 +26,11 @@ function update() {
     }, 200);
     WebSocketConnector.send({
         type: "getRequestRecordDetail",
-        id: route.params.id
+        data: {
+            id: route.params.id
+        }
     }).then((response) => {
-        data.value = response.requestRecord;
+        data.value = response.data.requestRecord;
         loading.value = false;
         showLoading.value = false;
     });

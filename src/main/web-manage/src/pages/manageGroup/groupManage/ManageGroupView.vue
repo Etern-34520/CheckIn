@@ -79,7 +79,9 @@ const switchChangingLevel = () => {
         }
         WebSocketConnector.send({
             type: "updateRoleLevels",
-            levels: levels
+            data: {
+                levels: levels
+            }
         }).then((response) => {
             if (response.type === 'success') {
                 ElMessage({
@@ -109,7 +111,9 @@ const createdGroupName = ref("");
 const confirmCreating = () => {
     WebSocketConnector.send({
         type: "createRole",
-        roleType: createdGroupName.value
+        data: {
+            roleType: createdGroupName.value
+        }
     });
     createdGroupName.value = "";
 }

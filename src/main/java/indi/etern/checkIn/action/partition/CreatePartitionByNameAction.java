@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.partition;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -13,7 +13,7 @@ import jakarta.annotation.Nonnull;
 import org.springframework.transaction.annotation.Transactional;
 
 @Action("createPartition")
-public class CreatePartitionByNameAction extends BaseAction1<CreatePartitionByNameAction.Input, OutputData> {
+public class CreatePartitionByNameAction extends BaseAction<CreatePartitionByNameAction.Input, OutputData> {
     public record Input(@Nonnull String name) implements InputData {}
     public record SuccessOutput(Result result, String id) implements OutputData {}
     

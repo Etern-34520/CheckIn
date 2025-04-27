@@ -4,9 +4,9 @@ import UserQuestionsView from "@/components/user/UserQuestionsView.vue";
 import router from "@/router/index.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
 
-const qq = Number(router.currentRoute.value.params.id);
+const qq = ref(Number(router.currentRoute.value.params.id));
 const name = ref("");
-UserDataInterface.getUserOfQQAsync(qq).then((user) => {
+UserDataInterface.getUserOfQQAsync(qq.value).then((user) => {
     name.value = user.name;
 });
 </script>

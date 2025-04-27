@@ -1,5 +1,6 @@
 package indi.etern.checkIn.utils;
 
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.linkUtils.Link;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
@@ -16,18 +17,8 @@ import indi.etern.checkIn.service.web.WebSocketService;
 import java.util.*;
 
 public class QuestionUpdateUtils {
-    public static void sendDeleteQuestionToAll(String questionID) {
-        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-//        Map<String, Object> dataMap = new HashMap<>();
-        map.put("type", "deleteQuestion");
-        map.put("id", questionID);
-//        dataMap.put("type", "deleteQuestion");
-//        dataMap.put("questionID", questionID);
-        WebSocketService.singletonInstance.sendMessageToAllWithoutLog(map);
-    }
-
     public static void sendUpdateQuestionsToAll(List<Question> questions) {
-        ArrayList<Object> arrayList = new ArrayList<>();
+        List<Object> list = new ArrayList<>();
         for (Question question : questions) {
             LinkedHashMap<String,Object> questionObj = new LinkedHashMap<>();
             questionObj.put("id", question.getId());
@@ -42,16 +33,11 @@ public class QuestionUpdateUtils {
             }
 //            link.getPartitions().forEach(partition -> partitions.add(partition.getId()));
             questionObj.put("partitionIds", partitions);
-            arrayList.add(questionObj);
+            list.add(questionObj);
         }
-        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-        map.put("type", "updateQuestions");
-        map.put("questions", arrayList);
-        WebSocketService.singletonInstance.sendMessageToAllWithoutLog(map);
-    }
-
-    public static void sendDeleteQuestionsToAll(List<Question> questions) {
-        sendDeleteQuestionIdsToAll(questions.stream().map(Question::getId).toList());
+        
+        Message<?> message = Message.of("updateQuestions",list);
+        WebSocketService.singletonInstance.sendMessageToAll(message);
     }
 
     public static LinkedHashMap<String,Object> getMapOfQuestion(Question question) {
@@ -70,7 +56,7 @@ public class QuestionUpdateUtils {
 //            List<String> correctIds = new java.util.ArrayList<>(1);
             for (Choice choice : multipleChoiceQuestion.getChoices()) {
                 LinkedHashMap<String,Object> choiceMap = new LinkedHashMap<>();
-//                choiceMap.put("id", choice.getId());
+                choiceMap.put("id", choice.getId());
                 choiceMap.put("content", choice.getContent());
                 boolean correct = choice.isCorrect();
                 choiceMap.put("correct", correct);
@@ -139,6 +125,7 @@ public class QuestionUpdateUtils {
 //        }
     }
     
+    /*FIXME*/
     private static Map<String, Number> getStatisticMap(Question question) {
         QuestionStatistic questionStatistic = question.getQuestionStatistic();
         if (questionStatistic == null) return null;
@@ -151,10 +138,4 @@ public class QuestionUpdateUtils {
         return statisticMap;
     }
     
-    public static void sendDeleteQuestionIdsToAll(List<String> succeedDeletedQuestionIds) {
-        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-        map.put("type", "deleteQuestions");
-        map.put("ids", succeedDeletedQuestionIds);
-        WebSocketService.singletonInstance.sendMessageToAllWithoutLog(map);
-    }
 }

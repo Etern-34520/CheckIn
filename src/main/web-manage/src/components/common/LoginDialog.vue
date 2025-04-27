@@ -26,7 +26,7 @@ function login() {
         console.log(response);
         if (response.result === "success") {
             loginMessage.value = "";
-            UserDataInterface.loginAs({name: response.name, qq: response.qq, token: response.token});
+            UserDataInterface.loginAs({name: response.name, qq: response.qq, role: response.role, token: response.token});
         } else if (response.result === "fail") {
             requesting.value = false;
             loginMessage.value = response.message;

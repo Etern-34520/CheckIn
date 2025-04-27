@@ -1,2 +1,0 @@
-Manifest-Version: 0.0.1             # 用来定义manifest文件的版本
-Created-By: Apache Maven 3.5.0      # 声明该文件的生成者，一般该属性是由 jar 命令行工具生成的

@@ -54,11 +54,11 @@ updateDataTrace();
         <transition name="fadeMove" mode="out-in" appear>
             <div style="display: flex;flex-direction: row;margin-right: 12px;align-items: center"
                  v-if="propertiesDataTrace[order-1]">
-                <el-icon style="margin-right: 6px;align-self: center" v-if="order!==1">
+                <el-icon style="margin-right: 6px;align-self: center">
                     <ArrowRight/>
                 </el-icon>
-                <el-text style="margin-right: 4px;text-wrap: nowrap" v-if="editing">属性</el-text>
-                <el-tag type="info" style="margin-right: 4px;">{{ order }}</el-tag>
+<!--                <el-text style="margin-right: 4px;text-wrap: nowrap" v-if="editing">属性</el-text>-->
+<!--                <el-tag type="info" style="margin-right: 4px;">{{ order }}</el-tag>-->
                 <el-select v-model="model.trace[order-1]" v-if="editing" style="width: 100px;margin-right: 8px" :class="{error:!(model.trace[order-1])}"
                            placeholder="选择属性" @change="delete model.verificationTypeName">
                     <el-option v-for="(property,key) in propertiesDataTrace[order-1]" :key="key" :label="property.name"
@@ -71,10 +71,10 @@ updateDataTrace();
             </div>
             <div v-else-if="propertiesDataTrace[propertiesDataTrace.length-2][model.trace[model.trace.length-1]].verificationTypes"
                  style="display: flex">
-                <el-icon style="margin-right: 6px;align-self: center" v-if="order!==1">
+                <el-icon style="margin-right: 6px;align-self: center">
                     <ArrowRight/>
                 </el-icon>
-                <el-text style="margin-right: 4px;text-wrap: nowrap" v-if="editing">限制类型</el-text>
+<!--                <el-text style="margin-right: 4px;text-wrap: nowrap" v-if="editing">限制类型</el-text>-->
                 <el-select v-model="model.verificationTypeName" style="width: 100px" placeholder="选择限制类型"
                            v-if="editing" :class="{error:!(model.verificationTypeName)}">
                     <el-option

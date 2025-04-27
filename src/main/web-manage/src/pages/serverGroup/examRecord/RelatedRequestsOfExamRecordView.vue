@@ -14,10 +14,12 @@ const loadData = () => {
     error.value = false;
     WebSocketConnector.send({
         type: "getRelatedRequestOfExamData",
-        examDataId: router.currentRoute.value.params.id
-    }).then((res) => {
+        data: {
+            examDataId: router.currentRoute.value.params.id
+        }
+    }).then((response) => {
         loading.value = false;
-        data.value = res.requestRecords;
+        data.value = response.data.requestRecords;
     }, (err) => {
         loading.value = false;
         error.value = true;

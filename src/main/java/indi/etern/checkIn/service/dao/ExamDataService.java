@@ -9,6 +9,7 @@ import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
 import indi.etern.checkIn.throwable.SettingInvalidException;
 import indi.etern.checkIn.throwable.exam.ExamException;
+import indi.etern.checkIn.throwable.exam.ExamSubmittedException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -88,6 +89,7 @@ public class ExamDataService {
         examResult.setLevel(gradingLevel.getName());
         examResult.setMessage(gradingLevel.getMessage());
         examResult.setColorHex(gradingLevel.getColorHex());
+        examResult.setShowCreatingAccountGuide(gradingLevel.getCreatingUserStrategy() != GradingLevel.CreatingUserStrategy.NOT_CREATE);
         
         examData.setExamResult(examResult);
         examData.setSubmitTime(LocalDateTime.now());
@@ -104,7 +106,7 @@ public class ExamDataService {
         return examDataRepository.findAllByGenerateTimeBetween(from.atStartOfDay(), to.plusDays(1).atStartOfDay());
     }
     
-    public Map<String, Object> getExamDataQuestions(int[] indexes, ExamData examData) throws ExamInvalidException {
+    public Map<String, Object> getExamDataQuestions(int[] indexes, ExamData examData) throws ExamException {
         if (examData.getStatus() == ExamData.Status.ONGOING) {
             Map<String, Object> result = new HashMap<>();
             List<String> allQuestionIds = examData.getQuestionIds();
@@ -125,6 +127,9 @@ public class ExamDataService {
             questions.forEach(question -> indexQuestionMap.put(allQuestionIds.indexOf(question.getId()), question));
             result.put("questions", indexQuestionMap);
             return result;
+        } else if (examData.getStatus() == ExamData.Status.SUBMITTED) {
+            logger.debug("Exam[{}] already submitted", examData.getId());
+            throw new ExamSubmittedException();
         } else {
             logger.error("Exam[{}] invalided", examData.getId());
             throw new ExamInvalidException();

@@ -43,7 +43,7 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
     }
     
     public enum Status {
-        ONGOING, SUBMITTED, MANUAL_INVALIDED, EXPIRED
+        ONGOING, SUBMITTED, MANUAL_INVALIDED, EXPIRED, SIGN_UP_COMPLETED
     }
     
     @Id
@@ -132,7 +132,7 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
             Object value = entry.getValue();
             if (value instanceof List<?> choiceIndexes && question instanceof MultipleChoicesQuestion multipleChoicesQuestion) {
                 //noinspection unchecked
-                var choiceAnswer = multipleChoicesQuestion.newAnswerFrom((List<Integer>) choiceIndexes);
+                var choiceAnswer = multipleChoicesQuestion.newAnswerFrom((List<String>) choiceIndexes);
                 if (questionGroup == null) {
                     this.answersMap.put(multipleChoicesQuestion.getId(), choiceAnswer);
                 } else {

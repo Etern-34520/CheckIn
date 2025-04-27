@@ -17,6 +17,7 @@ public final class ExamResult implements Comparable<ExamResult> {
     private int halfCorrectCount;
     private int wrongCount;
     private int questionCount;
+    private boolean showCreatingAccountGuide;
     private String message;
     private String level;
     @JsonIgnore
@@ -48,13 +49,14 @@ public final class ExamResult implements Comparable<ExamResult> {
                 this.halfCorrectCount == that.halfCorrectCount &&
                 this.wrongCount == that.wrongCount &&
                 this.questionCount == that.questionCount &&
+                this.showCreatingAccountGuide == that.showCreatingAccountGuide &&
                 Objects.equals(this.level, that.level) &&
                 Objects.equals(this.message, that.message);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(qq, score, correctCount, halfCorrectCount, wrongCount, questionCount, message, level);
+        return Objects.hash(qq, score, correctCount, halfCorrectCount, wrongCount, questionCount, showCreatingAccountGuide, message, level);
     }
     
     @Override

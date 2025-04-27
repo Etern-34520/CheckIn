@@ -40,9 +40,13 @@ const props = defineProps({
 
 <template>
     <div style="padding: 16px 0;display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1">
-        <div style="display: flex;flex-direction: row;align-items: center;justify-content: start;">
+        <div style="display: flex;flex-direction: row;align-items: center;justify-content: start;flex-wrap: wrap">
             <el-color-picker size="large" style="margin-left: 16px;margin-right: 12px;" :predefine="predefine"
                              v-model="model.colorHex" :disabled="disabled"></el-color-picker>
+            <div style="display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1">
+                <el-text class="field-label disable-init-animate" style="margin-top: 0 !important;">ID</el-text>
+                <el-text class="field-label disable-init-animate" style="margin-top: 0 !important;">{{model.id}}</el-text>
+            </div>
             <div style="display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1">
                 <el-text class="field-label disable-init-animate" style="margin-top: 0 !important;">名称</el-text>
                 <el-input v-model="model.name" class="disable-init-animate" :disabled="disabled"
@@ -75,6 +79,14 @@ const props = defineProps({
                              :disabled="disabled" v-model="split[index+1]"></el-input-number>
             <el-input-number class="disable-init-animate" v-else :model-value="max" disabled></el-input-number>
         </div>
+        <el-text class="field-label disable-init-animate">用户创建策略</el-text>
+        <el-radio-group v-model="model.creatingUserStrategy" style="padding: 4px 20px"
+                        :disabled="disabled">
+            <el-radio value="NOT_CREATE">不创建用户</el-radio>
+            <el-radio value="CREATE_DISABLED">创建用户但不启用</el-radio>
+            <el-radio value="CREATE_ENABLED_AFTER_VALIDATED">创建用户并在验证后启用</el-radio>
+            <el-radio value="CREATE_ENABLED">创建用户并启用</el-radio>
+        </el-radio-group>
     </div>
 </template>
 

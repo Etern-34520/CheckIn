@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question.update;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Action(value = "createOrUpdateQuestion", exposed = false)
-public class CreateOrUpdateQuestion extends BaseAction1<CreateOrUpdateQuestion.Input, CreateOrUpdateQuestion.SuccessOutput> {
+public class CreateOrUpdateQuestion extends BaseAction<CreateOrUpdateQuestion.Input, CreateOrUpdateQuestion.SuccessOutput> {
     public record Input(@Nonnull Map<String,Object> questionDataMap) implements InputData {}
     public record SuccessOutput(Question question) implements OutputData {
         @Override

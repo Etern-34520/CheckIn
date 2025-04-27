@@ -7,6 +7,7 @@ import indi.etern.checkIn.entities.question.statistic.QuestionStatistic;
 import indi.etern.checkIn.repositories.QuestionStatisticRepository;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class QuestionStatisticService {
         this.questionService = questionService;
     }
     
+    @Transactional
     public void appendStatistic(ExamData examData) {
         switch (examData.getStatus()) {
             case ONGOING -> handleStatistics(examData, (questionStatistic) -> {
@@ -71,6 +73,7 @@ public class QuestionStatisticService {
             }
             consumer.accept(statistic);
             questionStatisticRepository.save(statistic);
+            questionService.save(question);
         }
     }
 }

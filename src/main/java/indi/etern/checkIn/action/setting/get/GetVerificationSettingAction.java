@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.setting.get;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.NullInput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 @Action("getVerificationSetting")
-public class GetVerificationSettingAction extends BaseAction1<NullInput, GetVerificationSettingAction.SuccessOutput> {
+public class GetVerificationSettingAction extends BaseAction<NullInput, GetVerificationSettingAction.SuccessOutput> {
     public record SuccessOutput(List<Object> data) implements OutputData {
         @Override
         public Result result() {

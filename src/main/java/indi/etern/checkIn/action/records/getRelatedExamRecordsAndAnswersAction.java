@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.records;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Action("getRelatedExamRecordsAndAnswers")
-public class getRelatedExamRecordsAndAnswersAction extends BaseAction1<getRelatedExamRecordsAndAnswersAction.Input, getRelatedExamRecordsAndAnswersAction.SuccessOutput> {
+public class getRelatedExamRecordsAndAnswersAction extends BaseAction<getRelatedExamRecordsAndAnswersAction.Input, getRelatedExamRecordsAndAnswersAction.SuccessOutput> {
     public record Input(String questionId) implements InputData {}
     public record SuccessOutput(List<Map<String,Object>> examDataAnswerList) implements OutputData {
         @Override

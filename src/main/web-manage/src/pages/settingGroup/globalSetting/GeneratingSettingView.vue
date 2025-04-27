@@ -30,7 +30,9 @@ const finishEditing = () => {
     if (backupJSON !== JSON.stringify(data.value)) {
         WebSocketConnector.send({
             type: "saveGeneratingSetting",
-            data: data.value
+            data: {
+                data: data.value
+            }
         }).then(() => {
             ElMessage({
                 type: "success", message: "保存成功"
@@ -64,12 +66,12 @@ const getData = () => {
             WebSocketConnector.send({
                 type: "getGeneratingSetting",
             }).then((response) => {
-                data.value = response.data;
+                data.value = response.data.data;
                 if (!data.value.specialPartitionLimits) data.value.specialPartitionLimits = ref({});
                 if (!data.value.specialLimitsEnabledPartitions) data.value.specialLimitsEnabledPartitions = ref([]);
-                if (response.data.specialPartitionLimits) {
-                    for (const key in response.data.specialPartitionLimits) {
-                        data.value.specialLimitsEnabledPartitions.push(Number(key));
+                if (data.value.specialPartitionLimits) {
+                    for (const key in data.value.specialPartitionLimits) {
+                        data.value.specialLimitsEnabledPartitions.push(key);
                     }
                 }
                 resolve()
@@ -90,7 +92,7 @@ getData();
 const updateLimits = (partitionIds) => {
     const removedIds = [];
     for (const partitionIdString in data.value.specialPartitionLimits) {
-        removedIds.push(Number(partitionIdString));
+        removedIds.push(partitionIdString);
     }
     for (const removedId of removedIds) {
         delete data.value.specialPartitionLimits[removedId];

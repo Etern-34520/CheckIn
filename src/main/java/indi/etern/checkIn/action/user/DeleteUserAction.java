@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.user;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Action("deleteUser")
-public class DeleteUserAction extends BaseAction1<DeleteUserAction.Input, MessageOutput> {
+public class DeleteUserAction extends BaseAction<DeleteUserAction.Input, MessageOutput> {
     public record Input(long qq) implements InputData {}
     
     private final WebSocketService webSocketService;
@@ -36,7 +36,7 @@ public class DeleteUserAction extends BaseAction1<DeleteUserAction.Input, Messag
             }
             userService.delete(user);
             context.resolve(MessageOutput.success("User deleted"));
-            Message<User> message = Message.of("deleteUser",null, user);
+            Message<User> message = Message.of("deleteUser", user);
             webSocketService.sendMessageToAll(message);
         }, () -> {
             context.resolve(MessageOutput.error("User not found"));

@@ -21,7 +21,7 @@ VALUES ('02c72178-bac2-424c-aa38-1c60a2aa1d6e', '添加用户', 'create user', '
        ('9916879f-457d-4d66-bc82-5c584d601023', '编辑他人的题目', 'edit others questions', 'question'),
        ('4d0be824-2e7b-48fa-aba3-a1a37c452e23', '启/禁用题目', 'enable and disable questions', 'question'),
        ('dc64a9e4-2f97-425b-9e8d-6c32c155094f', '创建和修改自己的题目', 'create and edit owns questions', 'question'),
-       ('e3398957-89a8-4ac2-960a-0a80599d5da2', '删除他人的题目', 'delete others question', 'question'),
+       ('e3398957-89a8-4ac2-960a-0a80599d5da2', '删除他人的题目', 'delete others questions', 'question'),
        ('e49f7e9d-9ff9-4e86-b4a6-d08ecdb353eb', '删除自己的题目', 'delete owns questions', 'question'),
        ('fe15070c-3466-4be9-a529-b15918ad34f8', '修改题目作者', 'change question author', 'question'),
 

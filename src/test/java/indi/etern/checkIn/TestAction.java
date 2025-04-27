@@ -1,6 +1,6 @@
 package indi.etern.checkIn;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
@@ -10,7 +10,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 @Action(value = "test",exposed = false)
-public class TestAction extends BaseAction1<TestAction.Input,TestAction.Output> {
+public class TestAction extends BaseAction<TestAction.Input,TestAction.Output> {
     public record Input (@Nonnull String echo,@Nullable String permissionName) implements InputData {}
     public record Output (Result result,String echo, User currentUser) implements OutputData {}
     

@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.question.delete;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Action(value = "deleteQuestion", exposed = false)
-public class DeleteQuestionAction extends BaseAction1<DeleteQuestionAction.Input, OutputData> {
+public class DeleteQuestionAction extends BaseAction<DeleteQuestionAction.Input, OutputData> {
     public record Input(@Nonnull String questionId) implements InputData {}
     public record Output(Question deletedQuestion) implements OutputData {
         @Override

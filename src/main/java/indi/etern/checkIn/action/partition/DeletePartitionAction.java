@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.partition;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Action("deletePartition")
-public class DeletePartitionAction extends BaseAction1<DeletePartitionAction.Input, OutputData> {
+public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Input, OutputData> {
     public record Input(@Nonnull String partitionId) implements InputData {}
     public record SuccessOutput(List<String> infectedQuestionIds) implements OutputData {
         @Override

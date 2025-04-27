@@ -64,5 +64,6 @@ watch(() => props.data.value, () => {
 
 .waterfall > div {
     flex: 1;
+    width: 0;
 }
 </style>

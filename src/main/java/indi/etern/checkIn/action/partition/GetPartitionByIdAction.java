@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.partition;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -11,13 +11,12 @@ import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.annotation.Nonnull;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Action("getPartitionById")
-public class GetPartitionByIdAction extends BaseAction1<GetPartitionByIdAction.Input, OutputData> {
+public class GetPartitionByIdAction extends BaseAction<GetPartitionByIdAction.Input, OutputData> {
     public record Input(@Nonnull String id) implements InputData {}
-    public record SuccessOutput(Map<String,Object> partitionDataMap) implements OutputData {
+    public record SuccessOutput(Partition partition) implements OutputData {
         @Override
         public Result result() {
             return Result.SUCCESS;
@@ -37,7 +36,7 @@ public class GetPartitionByIdAction extends BaseAction1<GetPartitionByIdAction.I
         Optional<Partition> optionalPartition = partitionService.findById(input.id);
         if (optionalPartition.isPresent()) {
             Partition partition = optionalPartition.get();
-            context.resolve(new SuccessOutput(partition.toInfoMap()));
+            context.resolve(new SuccessOutput(partition));
         } else {
             context.resolve(MessageOutput.error("Partition not found"));
         }

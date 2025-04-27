@@ -23,7 +23,7 @@ onBeforeMount(() => {
             }
         }).then((response) => {
             loading.value = false;
-            examRecords.value = response.examRecords;
+            examRecords.value = response.data.examRecords;
         }, (error) => {
             loading.value = false;
         });
@@ -43,7 +43,6 @@ onBeforeMount(() => {
                 </template>
             </waterfall>
         </el-scrollbar>
-        <!--        {{questions}}-->
     </div>
 </template>
 

@@ -154,11 +154,18 @@ const getTypeName = (type) => {
     padding: 8px;
 }
 
+.question-info-panel > .grid1 > .padding {
+    flex: 1;
+    width: 0;
+}
+
 .question-info-panel > .grid1 > .padding > div {
     min-height: 25px;
 }
 
 .question-info-panel > .grid1 {
+    display: flex;
+    flex-direction: row;
     min-height: 0;
 }
 

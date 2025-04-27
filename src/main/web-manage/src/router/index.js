@@ -79,17 +79,20 @@ const router = createRouter({
                         {
                             path: ":id/",
                             name: "user-view-base",
-                            component: () => import("../pages/manageGroup/userManage/UserViewBase.vue"),
+                            component: () => import("../pages/manageGroup/userManage/UsersView.vue"),
                             children: [
                                 {
                                     path: "",
                                     name: "user-detail",
-                                    component: () => import("../pages/manageGroup/userManage/UserView.vue"),
-                                },
-                                {
+                                    component: () => import("../pages/manageGroup/userManage/UserDetailView.vue"),
+                                }, {
                                     path: "user-questions/",
                                     name: "user-questions",
                                     component: () => import("../pages/manageGroup/userManage/UserOwnQuestionsPage.vue"),
+                                }, {
+                                    path: "user-exam-records/",
+                                    name: "user-exam-records",
+                                    component: () => import("../pages/manageGroup/userManage/UserExamRecordPage.vue")
                                 }
                             ]
                         }
@@ -158,17 +161,17 @@ const router = createRouter({
                 {
                     path: "account/",
                     name: "account",
-                    component: () => import("../pages/settingGroup/userSetting/UserSettingViewBase.vue"),
+                    component: () => import("../pages/settingGroup/account/AccountViewBase.vue"),
                     children: [
                         {
                             path: "",
                             name: "account-base",
-                            component: () => import("../pages/settingGroup/userSetting/UserSettingView.vue")
+                            component: () => import("../pages/settingGroup/account/AccountView.vue")
                         },
                         {
                             path: "my-data/",
                             name: "my-data",
-                            component: () => import("../pages/settingGroup/userSetting/MyDataTab.vue")
+                            component: () => import("../pages/settingGroup/account/MyDataTab.vue")
                         }
                     ]
                 }, {

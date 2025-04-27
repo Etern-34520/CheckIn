@@ -24,10 +24,12 @@ const getExamRecords = async () => {
     error.value = false;
     WebSocketConnector.send({
         type: "getExamRecords",
-        from: dateRange.value[0].toISOString(),
-        to: dateRange.value[1].toISOString()
+        data: {
+            from: dateRange.value[0].toISOString(),
+            to: dateRange.value[1].toISOString()
+        }
     }).then((response) => {
-        data.value = response.examRecords;
+        data.value = response.data.examRecords;
         loading.value = false;
     }, (errorResp) => {
         loading.value = false;

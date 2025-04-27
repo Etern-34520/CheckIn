@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.setting.get;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.NullInput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Action("getGradingSetting")
-public class GetGradingSetting extends BaseAction1<NullInput, GetGradingSetting.SuccessOutput> {
+public class GetGradingSetting extends BaseAction<NullInput, GetGradingSetting.SuccessOutput> {
     public record SuccessOutput(Map<String, Object> data, Map<String, Object> extraData) implements OutputData {
         @Override
         public Result result() {

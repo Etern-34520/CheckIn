@@ -24,7 +24,7 @@ onBeforeMount(() => {
             }
         }).then((response) => {
             loading.value = false;
-            for (const question of response.questions) {
+            for (const question of response.data.questions) {
                 questionInfos.value.push(QuestionCache.wrapToQuestionInfo(question));
             }
         }, (error) => {
@@ -46,7 +46,6 @@ onBeforeMount(() => {
                 </template>
             </waterfall>
         </el-scrollbar>
-        <!--        {{questions}}-->
     </div>
 </template>
 

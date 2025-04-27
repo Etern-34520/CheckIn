@@ -33,14 +33,16 @@ const finishEditing = () => {
     if (backupJSON !== JSON.stringify(data.value)) {
         WebSocketConnector.send({
             type: "saveAdvanceSetting",
-            data: data.value
-        }).then((resp) => {
+            data: {
+                data: data.value
+            }
+        }).then((response) => {
             ElMessage({
                 type: "success", message: "保存成功"
             });
             data.value.deletedRobotTokenIds = [];
             data.value.createdRobotTokens = [];
-            data.value.robotTokenItems = resp.currentTokens;
+            data.value.robotTokenItems = response.data.currentTokens;
         }, (err) => {
             ElMessage({
                 type: "error", message: "保存失败"
@@ -55,7 +57,7 @@ const getData = () => {
     WebSocketConnector.send({
         type: "getAdvanceSetting",
     }).then((response) => {
-        data.value = response.data;
+        data.value = response.data.data;
         data.value.deletedRobotTokenIds = [];
         data.value.createdRobotTokens = [];
         if (!data.value.ipSource) {

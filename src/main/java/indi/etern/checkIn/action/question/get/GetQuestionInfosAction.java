@@ -1,7 +1,7 @@
 package indi.etern.checkIn.action.question.get;
 
 import indi.etern.checkIn.action.ActionExecutor;
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.*;
 import jakarta.annotation.Nonnull;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Action("getQuestionInfos")
-public class GetQuestionInfosAction extends BaseAction1<GetQuestionInfosAction.Input, OutputData> {
+public class GetQuestionInfosAction extends BaseAction<GetQuestionInfosAction.Input, OutputData> {
     private final ActionExecutor actionExecutor;
     
     public GetQuestionInfosAction(ActionExecutor actionExecutor) {

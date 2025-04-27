@@ -21,8 +21,8 @@ const getIcon = () => {
             <div style="display: flex;flex-direction: row;margin-bottom: 4px;">
                 <img :src="getIcon()" class="animate-0" alt="" width="64" height="64" style="margin-bottom: 16px;opacity: 0.6"/>
                 <div style="display: flex;flex-direction: column;margin-left: 16px">
-                    <el-text class="animate-1" style="align-self: baseline;font-size:1.5em">Check In</el-text>
-                    <el-text class="animate-2" style="align-self: baseline;font-size:1.4em" size="large">登录</el-text>
+                    <el-text class="animate-1" style="align-self: baseline;font-size:1.5em;user-select: none">Check In</el-text>
+                    <el-text class="animate-2" style="align-self: baseline;font-size:1.4em;user-select: none" size="large">登录</el-text>
                 </div>
             </div>
             <login-dialog class="animate-3" style="width: 300px;"/>

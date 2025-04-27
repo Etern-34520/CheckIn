@@ -31,7 +31,9 @@ const finishEditing = () => {
     if (backupJSON !== JSON.stringify(data.value)) {
         WebSocketConnector.send({
             type: "saveGradingSetting",
-            data: data.value
+            data: {
+                data: data.value
+            }
         }).then(() => {
             ElMessage({
                 type: "success", message: "保存成功"
@@ -50,11 +52,11 @@ const getData = () => {
         type: "getGradingSetting",
     }).then((response) => {
         loading.value = false;
-        data.value = response.data;
+        data.value = response.data.data;
         if (!data.value.levels) data.value.levels = [];
         if (!data.value.splits || data.value.splits.length === 0) data.value.splits = [0];
         // if (!data.value.questionScore) data.value.questionScore = 5;
-        extraData.value = response.extraData;
+        extraData.value = response.data.extraData;
     }, (err) => {
         ElMessage({
             type: "error", message: "获取设置失败"
@@ -84,6 +86,7 @@ const addLevel = () => {
             colorHex: predefine[data.value.levels.length],
             description: "",
             message: "",
+            creatingUserStrategy: "NOT_CREATE"
         });
     }
 }

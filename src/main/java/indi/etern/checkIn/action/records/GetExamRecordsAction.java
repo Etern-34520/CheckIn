@@ -1,6 +1,6 @@
 package indi.etern.checkIn.action.records;
 
-import indi.etern.checkIn.action.BaseAction1;
+import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
@@ -17,17 +17,15 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 @Action("getExamRecords")
-public class GetExamRecordsAction extends BaseAction1<GetExamRecordsAction.Input, GetExamRecordsAction.SuccessOutput> {
+public class GetExamRecordsAction extends BaseAction<GetExamRecordsAction.Input, GetExamRecordsAction.SuccessOutput> {
     public record Input(String from, String to) implements InputData {}
-    public record SuccessOutput(Map<LocalDate, Map<String,ExamData>> examData) implements OutputData {
+    public record SuccessOutput(Map<LocalDate, Map<String,ExamData>> examRecords) implements OutputData {
         @Override
         public Result result() {
             return Result.SUCCESS;
         }
     }
     private final JwtTokenProvider jwtTokenProvider;
-    private LocalDate from;
-    private LocalDate to;
     private final ExamDataService examDataService;
     
     public GetExamRecordsAction(ExamDataService examDataService, JwtTokenProvider jwtTokenProvider) {
@@ -40,8 +38,8 @@ public class GetExamRecordsAction extends BaseAction1<GetExamRecordsAction.Input
         final Input input = context.getInput();
         final LocalDate fromDate = ZonedDateTime.parse(input.from).withZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
         final LocalDate toDate = ZonedDateTime.parse(input.to).withZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
-        final Set<ExamData> examDataSet = new HashSet<>(examDataService.findAllBySubmitTimeBetween(from, to));
-        examDataSet.addAll(examDataService.findAllByGenerateTimeBetween(from, to));
+        final Set<ExamData> examDataSet = new HashSet<>(examDataService.findAllBySubmitTimeBetween(fromDate, toDate));
+        examDataSet.addAll(examDataService.findAllByGenerateTimeBetween(fromDate, toDate));
         LinkedHashMap<LocalDate, Map<String,ExamData>> map = new LinkedHashMap<>();
         final User currentUser = context.getCurrentUser();
         final boolean accessibleToAll = jwtTokenProvider.isUserHasPermission(currentUser,"get exam data");

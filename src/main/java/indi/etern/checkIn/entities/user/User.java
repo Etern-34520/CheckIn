@@ -1,6 +1,7 @@
 package indi.etern.checkIn.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.auth.Authority;
@@ -28,6 +29,7 @@ public class User implements UserDetails {
     @Getter
     protected String name;
     
+    @JsonProperty("qq")
     @Getter
     @Id
     protected long QQNumber;
@@ -54,8 +56,7 @@ public class User implements UserDetails {
 //        role = Role.ofName("user",null);
     }
     
-    public User() {
-    }
+    public User() {}
     
     public static User exampleOfName(String name) {
         final User user = new User();
@@ -89,25 +90,6 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return "{value:\"" + name + "\",QQ:\"" + QQNumber + "\",password:\"" + password + "\",role:\"" + role.getType() + "\"}";
-    }
-    
-    public Map<String, Object> toDataMap() {
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("name", name);
-        dataMap.put("qq", QQNumber);
-        dataMap.put("role", role.getType());
-//        dataMap.put("userStatus",enabled?"启用":"禁用");
-        dataMap.put("enabled", enabled);
-        return dataMap;
-    }
-    
-    public LinkedHashMap<String,Object> toMap() {
-        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-        map.put("name", name);
-        map.put("qq", QQNumber);
-        map.put("role", role.getType());
-        map.put("enabled", enabled);
-        return map;
     }
     
     @Override

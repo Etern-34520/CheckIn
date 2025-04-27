@@ -1,5 +1,7 @@
 package indi.etern.checkIn.entities.question.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.linkUtils.LinkTarget;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
@@ -28,6 +30,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     @Column(name = "name", unique = true, nullable = false)
     String name;
     
+    @JsonIgnore
     //    FIXME foreign key
     @ManyToMany(mappedBy = "targets")
 //    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -110,12 +113,19 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
         return questionSet;
     }
     
+    @JsonProperty("enabledQuestionCount")
     public int getEnabledQuestionCount() {
         return questionLinks.stream().filter(questionLink -> questionLink.getSource().isEnabled())
                 .mapToInt(questionLink -> questionLink.getSource() instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size():1)
                 .sum();
     }
     
+    @JsonProperty("questionAmount")
+    public int getQuestionAmount() {
+        return questionLinks.size();
+    }
+    
+    @JsonIgnore
     public List<Question> getEnabledQuestionsList() {
         List<Question> questionList = new ArrayList<>();
         for (ToPartitionsLink questionLink : questionLinks) {
@@ -145,7 +155,6 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
         Map<String,Object> partitionInfo = new LinkedHashMap<>();
         partitionInfo.put("id", id);
         partitionInfo.put("name", name);
-        partitionInfo.put("empty", questionLinks.isEmpty());
         partitionInfo.put("enabledQuestionCount", getEnabledQuestionCount());
         partitionInfo.put("questionAmount", questionLinks.size());
         return partitionInfo;

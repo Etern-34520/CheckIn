@@ -1,26 +1,21 @@
 package indi.etern.checkIn.api.webSocket;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import indi.etern.checkIn.api.webSocket.interfaces.IMessage;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.IOException;
+import java.util.UUID;
 
 @Getter
-public class Message<D> {
+public class Message<D> implements IMessage<D> {
     private Type type;
-    protected D data;
     @Setter
-    private String contextId;
+    private String messageId;
+    protected D data;
     
-    public Message(Type type, String contextId, D data) {
+    public Message(Type type, String messageId, D data) {
         this.type = type;
-        this.contextId = contextId;
+        this.messageId = messageId;
         this.data = data;
     }
     
@@ -32,52 +27,12 @@ public class Message<D> {
     protected Message() {
     }
     
-    @Getter
-    @JsonSerialize(using = ToStringSerializer.class)
-    @JsonDeserialize(using = Type.Deserializer.class)
-    public static class Type {
-        public static class Deserializer extends StdDeserializer<Type> {
-            protected Deserializer(Class<?> vc) {super(vc);}
-            
-            @Override
-            public Type deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-                return Type.of(jsonParser.getText());
-            }
-        }
-        
-        public static Type SUCCESS = new Type("success");
-        public static Type WARN = new Type("warn");
-        public static Type ERROR = new Type("error");
-        
-        private final String name;
-        
-        public Type(String name) {
-            this.name = name;
-        }
-        
-        public static Type of(String name) {
-            return new Type(name);
-        }
-        
-        public String toString() {
-            return name;
-        }
-        
-        public boolean equals(Type other) {
-            return other != null && name.equals(other.name);
-        }
-        
-        public int hashCode() {
-            return name.hashCode();
-        }
-    }
-    
     public static <O> Message<O> success(String contextId, O data) {
         return new Message<>(Type.SUCCESS,contextId,data);
     }
     
     public static <O> Message<O> warn(String contextId, O data) {
-        return new Message<>(Type.WARN,contextId,data);
+        return new Message<>(Type.WARNING,contextId,data);
     }
     
     public static <O> Message<O> error(String contextId, O data) {
@@ -86,5 +41,9 @@ public class Message<D> {
     
     public static <O> Message<O> of(String typeName, String contextId, O data) {
         return new Message<>(Type.of(typeName),contextId,data);
+    }
+    
+    public static <O> Message<O> of(String typeName, O data) {
+        return new Message<>(Type.of(typeName), UUID.randomUUID().toString(),data);
     }
 }

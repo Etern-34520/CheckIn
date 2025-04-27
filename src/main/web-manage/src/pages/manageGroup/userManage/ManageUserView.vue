@@ -118,13 +118,15 @@ const confirmCreate = () => {
     waitingResponse.value = true;
     WebSocketConnector.send({
         type: "createUser",
-        name: nameOfNewUser.value ? nameOfNewUser.value : "新用户",
-        qq: QQOfNewUser.value,
-        roleType: groupOfNewUser.value
+        data: {
+            name: nameOfNewUser.value ? nameOfNewUser.value : "新用户",
+            qq: QQOfNewUser.value,
+            roleType: groupOfNewUser.value
+        }
     }).then((response) => {
         waitingResponse.value = false;
         createOver.value = true;
-        createUserDialog.value.showTip(`初始密码（只显示一次）：${response.initPassword}`, "primary");
+        createUserDialog.value.showTip(`初始密码（只显示一次）：${response.data.initPassword}`, "primary");
     }, (err) => {
         waitingResponse.value = false;
     });

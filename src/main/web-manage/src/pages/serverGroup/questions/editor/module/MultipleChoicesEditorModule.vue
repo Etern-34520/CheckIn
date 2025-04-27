@@ -57,7 +57,7 @@ const onEndDrag = () => {
                     </div>
                     <el-checkbox v-model="choice.correct" class="choice-correct-checkbox"
                                  size="large"></el-checkbox>
-                    <el-input type="text" size="large" placeholder="选项内容"
+                    <el-input class="disable-init-animate" type="text" size="large" placeholder="选项内容"
                               v-model="choice.content" :class="questionInfo.inputMeta['choice$content-' + $index]"></el-input>
                     <transition name="delete-choice-button">
                         <el-button class="remove-choice-button"

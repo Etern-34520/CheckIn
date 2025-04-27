@@ -126,4 +126,8 @@ public class RoleService {
     public void saveAll(List<Role> roles) {
         roleRepository.saveAll(roles);
     }
+    
+    public boolean existByType(String type) {
+        return roleRepository.existsById(type);
+    }
 }
