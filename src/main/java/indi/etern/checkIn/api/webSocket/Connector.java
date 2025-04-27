@@ -79,8 +79,8 @@ public class Connector implements SubProtocolCapable {
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) {
         this.session = session;
-        session.setMaxTextMessageBufferSize(8 * 1024 * 1024);//8MB
-        session.setMaxBinaryMessageBufferSize(8 * 1024 * 1024);//8MB
+        session.setMaxTextMessageBufferSize(64 * 1024);//64 KB
+        session.setMaxBinaryMessageBufferSize(0);
         CONNECTORS.add(this);
         this.sid = sid;
         addOnlineCount();

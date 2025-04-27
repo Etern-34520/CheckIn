@@ -9,7 +9,7 @@ let qq1;
 let token1;
 
 let notifications = {};
-let limits = 4 * 1024 * 1024;//4MB
+let limits = 64 * 1024;//64KB
 
 function getCurrentIsoTime() {
     return new Date().toISOString();
@@ -53,7 +53,7 @@ const sendInternal = (objMessage) => {
 
         console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (part message [count: ${partMessageIds.length}]):`, objMessage);
 
-        WebSocketConnector.ws.send(JSON.stringify({
+        WebSocketConnector.send(JSON.stringify({
             messageId: objMessage["messageId"],
             type: "partMessage",
             messageIds: partMessageIds,
