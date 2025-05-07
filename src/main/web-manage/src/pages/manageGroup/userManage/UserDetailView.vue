@@ -199,7 +199,7 @@ const routeToExamRecords = () => {
                                 </div>
                             </template>
                         </el-popover>
-                        <el-popover :visible="moveGroupVisible" v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('role','change role to ' + user.role)"
+                        <el-popover :visible="moveGroupVisible" v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('role','operate role ' + user.role)"
                                     :width="400" @before-enter="newUserGroupName = user.role">
                             <template #reference>
                                 <el-button @click="moveGroupVisible = !moveGroupVisible">修改用户组</el-button>
@@ -212,7 +212,7 @@ const routeToExamRecords = () => {
                                             style="flex:1;margin-right: 4px"
                                             placeholder="用户组">
                                         <template v-for="(userGroup,i) in UserDataInterface.userGroups">
-                                            <el-option :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup.type)"
+                                            <el-option :disabled="!PermissionInfo.hasPermission('role','operate role ' + userGroup.type)"
                                                        :value="userGroup.type" :label="userGroup.type"></el-option>
                                         </template>
                                     </el-select>
@@ -228,9 +228,9 @@ const routeToExamRecords = () => {
                         <el-button v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('manage user','delete user')">
                             <el-text type="danger" @click="deleteUser">删除</el-text>
                         </el-button>
-                        <!--                        <el-button>修改特有权限</el-button>-->
-                        <!--                        TODO-->
-                        <div style="margin-left: 12px" v-if="currentUser.qq!==user.qq">
+                        <div style="margin-left: 12px" v-if="currentUser.qq!==user.qq
+                         && PermissionInfo.hasPermission('manage user','change user state')
+                         && PermissionInfo.hasPermission('role','operate role ' + user.role)">
                             <el-text style="line-height: 20px;margin-right: 4px">启用</el-text>
                             <el-switch v-model="user.enabled" :loading="switching" :before-change="switchEnableUser"/>
                         </div>

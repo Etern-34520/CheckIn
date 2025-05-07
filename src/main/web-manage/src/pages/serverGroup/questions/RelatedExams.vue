@@ -149,7 +149,7 @@ const getTagType = (checkedResultType) => {
                                             {{ answerDatum.content }}
                                         </el-tag>
                                     </div>
-                                    <div style="margin-top: 8px;display: flex;flex-direction: row">
+                                    <div style="margin-top: 8px;display: flex;flex-direction: row" v-if="item.answer && item.answer.result">
                                         <el-tag type="info" size="large"
                                                 style="border-radius: 4px 0 0 4px;">
                                             总分

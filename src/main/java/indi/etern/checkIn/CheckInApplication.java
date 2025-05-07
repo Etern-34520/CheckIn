@@ -39,9 +39,9 @@ public class CheckInApplication {
 	@Bean
 	public Cache<String, Object> caffeineCache() {
 		return Caffeine.newBuilder()
-				.expireAfterWrite(60, TimeUnit.SECONDS)
+				.expireAfterWrite(30, TimeUnit.SECONDS)
 				.initialCapacity(100)
-				.maximumSize(1000)
+				.maximumSize(2000)
 				.build();
 	}
 }

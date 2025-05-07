@@ -40,7 +40,10 @@ public class getRelatedExamRecordsAndAnswersAction extends BaseAction<getRelated
                 .map(examData -> {
                     Map<String,Object> map = new LinkedHashMap<>();
                     map.put("examData",examData);
-                    map.put("answer",examData.getAnswersMap().get(questionId));
+                    final var answersMap = examData.getAnswersMap();
+                    if (answersMap != null) {
+                        map.put("answer", answersMap.get(questionId));
+                    }
                     return map;
                 }).toList();
         context.resolve(new SuccessOutput(examDataMapList));

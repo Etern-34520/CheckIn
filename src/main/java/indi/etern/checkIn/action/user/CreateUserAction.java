@@ -44,7 +44,7 @@ public class CreateUserAction extends BaseAction<CreateUserAction.Input, OutputD
     public void execute(ExecuteContext<Input, OutputData> context) {
         context.requirePermission("create user");
         final Input input = context.getInput();
-        context.requirePermission("change role to " + input.roleType);
+        context.requirePermission("operate role " + input.roleType);
         Optional<LinkedHashMap<String, Object>> result;
         if (userService.existsByQQNumber(input.qq)) {
             context.resolve(MessageOutput.error("user already exists"));

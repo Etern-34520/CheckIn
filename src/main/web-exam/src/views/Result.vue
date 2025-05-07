@@ -14,22 +14,22 @@ proxy.$cookies.remove("examInfo");
 proxy.$cookies.remove("timestamps");
 
 const backToExam = () => {
-    proxy.$cookies.remove("phrase");
+    proxy.$cookies.remove("phase");
     proxy.$cookies.remove("result");
     router.push({name: "generate"}).then(() => {
-        proxy.$cookies.set("phrase", "generate", "7d");
+        proxy.$cookies.set("phase", "generate", "7d");
     })
 }
 
 const routeToSignUp = () => {
     router.push({name: "sign-up"}).then(() => {
-        proxy.$cookies.set("phrase", "sign-up", "7d");
+        proxy.$cookies.set("phase", "sign-up", "7d");
     })
 }
 </script>
 
 <template>
-    <div class="result" style="flex:1">
+    <div class="result" style="flex:1;padding-bottom: 200px;">
         <div class="auto-padding-center" style="flex:1">
             <el-text style="font-size: 24px;align-self: baseline;margin-top: 64px">答题结果</el-text>
             <div style="display: flex;flex-direction: row;align-items: stretch;margin-top: 16px;margin-left: 16px;flex-wrap: wrap">
@@ -76,11 +76,6 @@ const routeToSignUp = () => {
                 </div>
             </div>
         </div>
-        <div style="display: flex;flex-direction: row;justify-content: center;flex-wrap: wrap">
-            <el-button @click="backToExam()" style="min-width: 180px">重新答题</el-button>
-            <el-button v-if="result.showCreatingAccountGuide" style="min-width: 180px"
-                       type="primary" @click="routeToSignUp()">注册</el-button>
-        </div>
         <div style="flex:1;width: 100%;background: var(--html-bg) var(--lighting-effect-background-2);z-index: 1;margin-top: 64px;display: flex;flex-direction: column;align-items: center;padding-bottom: 200px">
             <md-editor no-upload-img placeholder="结果" v-model="result.message"
                        class="preview-only"
@@ -91,6 +86,11 @@ const routeToSignUp = () => {
                        :preview="true"/>
         </div>
         <div class="flex-blank-1"></div>
+        <div style="display: flex;flex-direction: row;justify-content: center;flex-wrap: wrap">
+            <el-button @click="backToExam()" style="min-width: 180px">重新答题</el-button>
+            <el-button v-if="result.showCreatingAccountGuide" style="min-width: 180px"
+                       type="primary" @click="routeToSignUp()">注册</el-button>
+        </div>
     </div>
 </template>
 

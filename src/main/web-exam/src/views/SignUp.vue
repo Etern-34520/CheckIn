@@ -11,19 +11,83 @@ const {proxy} = getCurrentInstance();
 
 const result = proxy.$cookies.get("result");
 
-const signingUp = ref(false);
+const username = ref();
 const password = ref();
 const repeatPassword = ref();
 const tip = ref();
+const disabled = ref(true);
+const buttonLoading = ref(false);
+const disableAllFields = ref(false);
+const buttonText = ref("注册");
 
 const back = () => {
-    proxy.$cookies.set("phrase", "result", "7d");
+    proxy.$cookies.set("phase", "result", "7d");
     router.push({name: "result"});
 }
 
 const signUp = () => {
+    buttonLoading.value = true;
+    tip.value = null;
+    const handleError = (err) => {
+        buttonLoading.value = false;
+        let errDescription = "unknown";
+        if (typeof err === "string") {
+            errDescription = err
+        } else if (err.response && err.response.data.message) {
+            errDescription = err.response.data.message;
+        } else if (typeof err.message === "string") {
+            errDescription = err.message;
+        }
+        tip.value = {
+            content: "注册时遇到错误：" + errDescription,
+            type: "danger"
+        }
+    }
+    proxy.$http.post("sign-up", {
+        examId: result.examDataId,
+        name: username.value,
+        password: password.value,
+    }).then((response) => {
+        buttonLoading.value = false;
+        disableAllFields.value = true;
+        if (response.type === success) {
+            tip.value = {
+                content: "注册成功",
+                type: "success"
+            }
+            //TODO
+        } else {
+            handleError(response)
+        }
+    }, (err) => {
+        handleError(err);
+    })
     //TODO
 }
+
+const checkDisable = () => {
+    if (!password.value) {
+        disabled.value = true;
+        tip.value = null;
+    } else if (password.value.length < 6) {
+        disabled.value = true;
+        tip.value = {
+            content: "密码过短",
+        };
+    } else if (repeatPassword.value && password.value !== repeatPassword.value) {
+        disabled.value = true;
+        tip.value = {
+            content: "重复密码不一致",
+        };
+    } else if (!repeatPassword.value) {
+        disabled.value = true;
+        tip.value = null;
+    } else {
+        disabled.value = false;
+        tip.value = null;
+    }
+}
+
 </script>
 
 <template>
@@ -40,23 +104,29 @@ const signUp = () => {
             <el-text style="min-width: min(70vw,200px)">{{ result.qq }}</el-text>
         </div>
         <div style="display: flex;flex-direction: column;width: 300px;margin-top: 32px;">
-            <el-text style="align-self: baseline">密码</el-text>
-            <el-input v-model="password"/>
+            <el-text style="align-self: baseline">用户名</el-text>
+            <el-input v-model="username"/>
+        </div>
+        <div style="display: flex;flex-direction: column;width: 300px;margin-top: 4px;">
+            <el-text style="align-self: baseline">密码 *</el-text>
+            <el-input type="password" @focusout="checkDisable" v-model="password"/>
         </div>
         <div style="display: flex;flex-direction: column;width: 300px">
-            <el-text style="align-self: baseline">重复密码</el-text>
-            <el-input v-model="repeatPassword"/>
+            <el-text style="align-self: baseline">重复密码 *</el-text>
+            <el-input type="password" @focusout="checkDisable" v-model="repeatPassword"/>
         </div>
-<!--        <div class="flex-blank-1"></div>-->
-        <div style="min-height: 32px">
+        <!--        <div class="flex-blank-1"></div>-->
+        <div style="min-height: 32px;margin-top: 8px">
             <transition name="blur-scale" mode="out-in">
-                <el-text :key="tip" v-if="tip !== ''">{{ tip }}</el-text>
+                <el-text truncated style="max-width: 300px" :key="tip.content" v-if="tip" :type="tip.type">{{ tip.content }}</el-text>
             </transition>
         </div>
-        <el-button type="primary" size="large" :loading="signingUp" :loading-icon="_Loading_"
-                   style="margin-top: 36px;align-self: center;width: 300px"
-                   @click="signUp">注册
+        <el-button type="primary" size="large" :loading="buttonLoading" :loading-icon="_Loading_"
+                   style="margin-top: 24px;align-self: center;width: 300px" :disabled="disabled"
+                   @click="signUp">
+            {{ buttonText }}
         </el-button>
+        {{ result }}
     </div>
 </template>
 

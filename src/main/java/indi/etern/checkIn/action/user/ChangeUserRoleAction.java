@@ -37,8 +37,8 @@ public class ChangeUserRoleAction extends BaseAction<ChangeUserRoleAction.Input,
     public void execute(ExecuteContext<Input, MessageOutput> context) {
         final Input input = context.getInput();
         User user = userService.findByQQNumber(input.qq).orElseThrow();
-        context.requirePermission("change role to " + input.roleType);
-        context.requirePermission("change role to " + user.getRole().getType());
+        context.requirePermission("operate role " + input.roleType);
+        context.requirePermission("operate role " + user.getRole().getType());
         Optional<LinkedHashMap<String, Object>> optionalMap;
         Role role = roleService.findByType(input.roleType).orElseThrow();
         user.setRole(role);

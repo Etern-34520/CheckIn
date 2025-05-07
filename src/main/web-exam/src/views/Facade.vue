@@ -20,7 +20,7 @@ const props = defineProps({
 })
 
 const routeGenerateExam = () => {
-    proxy.$cookies.set("phrase", "generate", "7d");
+    proxy.$cookies.set("phase", "generate", "7d");
     router.push({name: 'generate'});
 }
 </script>

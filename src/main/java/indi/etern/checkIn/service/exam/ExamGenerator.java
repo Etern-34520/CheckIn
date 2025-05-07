@@ -26,11 +26,13 @@ public class ExamGenerator {
     private final SettingService settingService;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final QuestionService questionService;
+    private final SpecialPartitionLimitService specialPartitionLimitService;
     
-    public ExamGenerator(PartitionService partitionService, SettingService settingService, QuestionService questionService, QuestionStatisticService questionStatisticService) {
+    public ExamGenerator(PartitionService partitionService, SettingService settingService, QuestionService questionService, QuestionStatisticService questionStatisticService, SpecialPartitionLimitService specialPartitionLimitService) {
         this.partitionService = partitionService;
         this.settingService = settingService;
         this.questionService = questionService;
+        this.specialPartitionLimitService = specialPartitionLimitService;
     }
     
     private void drawQuestions(Set<Question> drewQuestions, List<Partition> partitions, int questionAmount, Random random, DrawingStrategy drawingStrategy, CompletingStrategy completingStrategy) throws NotEnoughQuestionsForExamException, MinQuestionLimitOutOfBoundsException {
@@ -63,7 +65,7 @@ public class ExamGenerator {
     }
     
     private void getQuestions(List<Partition> partitions, Random random, DrawingStrategy drawingStrategy, int questionAmount, Set<Question> drewQuestions) throws NotEnoughQuestionsForExamException, MinQuestionLimitOutOfBoundsException {
-        Map<Partition, SpecialPartitionLimit> specialPartitionLimitMap = SpecialPartitionLimitService.singletonInstance.getLimits(partitions);
+        Map<Partition, SpecialPartitionLimit> specialPartitionLimitMap = specialPartitionLimitService.getLimits(partitions);
         Map<Partition, PartitionQuestionDrawer> drawersMap = new HashMap<>();
         partitions.forEach((partition) -> {
             final PartitionQuestionDrawer drawer = new PartitionQuestionDrawer(partition, random);
@@ -100,9 +102,12 @@ public class ExamGenerator {
             List<String> selectedPartitionIds = selectedPartitions.stream().map(Partition::getId).toList();
             List<Partition> partitions = new ArrayList<>(requiredPartitionIds.size() + selectedPartitionIds.size());
             partitions.addAll(selectedPartitions);
+            //TODO improve throughput
             partitions.addAll(partitionService.findAllByIds(requiredPartitionIds));
-            logger.debug("required partitions: {}", partitionService.findAllByIds(requiredPartitionIds));
-            logger.debug("selected partitions: {}", partitionService.findAllByIds(selectedPartitionIds));
+            if (logger.isDebugEnabled()) {
+                logger.debug("required partitions: {}", partitionService.findAllByIds(requiredPartitionIds));
+                logger.debug("selected partitions: {}", partitionService.findAllByIds(selectedPartitionIds));
+            }
             
             SettingItem expireTimeSetting = settingService.getItem("exam", "expiredPeriod");
             Period expiredPeriod = expireTimeSetting.getValue(Period.class);

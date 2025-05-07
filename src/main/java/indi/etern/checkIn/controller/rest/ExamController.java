@@ -9,11 +9,13 @@ import indi.etern.checkIn.action.setting.get.GetFacadeSetting;
 import indi.etern.checkIn.action.setting.get.GetGradingSetting;
 import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.question.impl.Partition;
-import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.service.dao.*;
 import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
+import indi.etern.checkIn.throwable.entity.UserExistsException;
 import indi.etern.checkIn.throwable.exam.ExamException;
+import indi.etern.checkIn.throwable.exam.ExamIllegalStateException;
 import indi.etern.checkIn.throwable.exam.ExamSubmittedException;
 import indi.etern.checkIn.throwable.exam.generate.ExamGenerateFailedException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
@@ -26,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 public class ExamController {
@@ -45,8 +46,9 @@ public class ExamController {
     private final SettingService settingService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final GradingLevelService gradingLevelService;
     
-    public ExamController(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService, SettingService settingService, UserService userService, PasswordEncoder passwordEncoder) {
+    public ExamController(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService, SettingService settingService, UserService userService, PasswordEncoder passwordEncoder, GradingLevelService gradingLevelService) {
         this.partitionService = partitionService;
         this.actionExecutor = actionExecutor;
         this.examGenerator = examGenerator;
@@ -56,6 +58,7 @@ public class ExamController {
         this.settingService = settingService;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.gradingLevelService = gradingLevelService;
     }
     
     public record GenerateRequest(long qq, List<String> partitionIds) {
@@ -128,7 +131,7 @@ public class ExamController {
     public record SubmitRequest(String examId, Map<String, Object> answer) {
     }
         
-        @SneakyThrows
+    @SneakyThrows
     @Transactional
     @RequestMapping(method = RequestMethod.POST, path = "/api/submit")
     public String submit(@RequestBody SubmitRequest submitRequest) {
@@ -171,18 +174,7 @@ public class ExamController {
         List<String> selectablePartitionIds = new ArrayList<>();
         
         ResultContext<GetPartitionsAction.Output> context = actionExecutor.execute(GetPartitionsAction.class);
-        List<Partition> partitions = context.getOutput().partitions();
-        Map<String, String> userdPartitionsNameMap = new HashMap<>();
-        partitions.forEach((partition) -> {
-            if (!requiredPartitionIdSet.contains(partition.getId())) {
-                if (!partition.getEnabledQuestions().isEmpty()) {
-                    selectablePartitionIds.add(partition.getId());
-                    userdPartitionsNameMap.put(partition.getId(), partition.getName());
-                }
-            } else {
-                userdPartitionsNameMap.put(partition.getId(), partition.getName());
-            }
-        });
+        final Map<String, String> usedPartitionsNameMap = getPartitionsNameMap(context, requiredPartitionIdSet, selectablePartitionIds);
         
         final GetFacadeSetting.SuccessOutput output = facadeSettingContext.getOutput();
         result.put("facadeData", output.data());
@@ -190,7 +182,7 @@ public class ExamController {
         result.put("gradingData", gradingSettingContext.getOutput().data());
         
         Map<String, Object> extraData = output.extraData();
-        extraData.put("partitions", userdPartitionsNameMap);
+        extraData.put("partitions", usedPartitionsNameMap);
         extraData.put("selectablePartitionIds", selectablePartitionIds);
         if (showRequiredPartitions)
             extraData.put("requiredPartitionIds", requiredPartitionIds);
@@ -198,34 +190,53 @@ public class ExamController {
         return result;
     }
     
+    private static Map<String, String> getPartitionsNameMap(ResultContext<GetPartitionsAction.Output> context, Set<String> requiredPartitionIdSet, List<String> selectablePartitionIds) {
+        List<Partition> partitions = context.getOutput().partitions();
+        Map<String, String> usedPartitionsNameMap = new HashMap<>();
+        partitions.forEach((partition) -> {
+            if (!requiredPartitionIdSet.contains(partition.getId())) {
+                if (!partition.getEnabledQuestions().isEmpty()) {
+                    selectablePartitionIds.add(partition.getId());
+                    usedPartitionsNameMap.put(partition.getId(), partition.getName());
+                }
+            } else {
+                usedPartitionsNameMap.put(partition.getId(), partition.getName());
+            }
+        });
+        return usedPartitionsNameMap;
+    }
+    
     public record SignUpRequest(String examId, String name, String password) {}
     
-    @Transactional
+    @Transactional()
     @RequestMapping(method = RequestMethod.POST, path = "/api/sign-up")
-    public String signUpWith(@RequestBody SignUpRequest signUpRequest) {
-        AtomicReference<String> result = new AtomicReference<>();
-        examDataService.findById(signUpRequest.examId).ifPresentOrElse(
-                (examData) -> {
-                    if (examData.getStatus() == ExamData.Status.ONGOING) {
-                        result.set(EXAM_NOT_SUBMITTED_JSON);
-                    } else if (examData.getStatus() == ExamData.Status.SUBMITTED) {
-                        if (userService.existsByQQNumber(examData.getQqNumber())) {
-                            result.set(USER_EXISTS_JSON);
-                        } else {
-                            final String encodedPassword = passwordEncoder.encode(signUpRequest.password);
-                            User user = new User(signUpRequest.name, examData.getQqNumber(), encodedPassword);
-                            userService.save(user);
-                            examData.setStatus(ExamData.Status.SIGN_UP_COMPLETED);
-                            examDataService.save(examData);
-                            result.set("{\"type\":\"success\",\"message\":\"Signed up successfully\"}");
-                        }
-                    } else {
-                        result.set(EXAM_INVALIDED_JSON);
-                    }
-                }, () -> {
-                    result.set(EXAM_IS_NOT_EXIST_JSON);
-                }
-        );
-        return result.get();
+    public String signUpWith(@RequestBody SignUpRequest signUpRequest) throws JsonProcessingException, ExamException {
+        final Optional<ExamData> optionalExamData = examDataService.findById(signUpRequest.examId);
+        if (optionalExamData.isPresent()) {
+            ExamData examData = optionalExamData.get();
+            try {
+                final String levelId = examData.getExamResult().getLevelId();
+                GradingLevel level = gradingLevelService.findById(levelId);
+                userService.handleSignUp(examData, signUpRequest.name, passwordEncoder.encode(signUpRequest.password), level.getCreatingUserRole());
+                examData.setStatus(ExamData.Status.SIGN_UP_COMPLETED);
+                examDataService.save(examData);
+                return "{\"type\":\"success\",\"message\":\"Signed up successfully\"}";
+            } catch (ExamIllegalStateException e) {
+                return EXAM_NOT_SUBMITTED_JSON;
+            } catch (ExamInvalidException e) {
+                return EXAM_INVALIDED_JSON;
+            } catch (ExamException e) {
+                throw e;
+            } catch (UserExistsException e) {
+                return USER_EXISTS_JSON;
+            } catch (Exception e) {
+                Map<String,String> message = new HashMap<>();
+                message.put("type", "error");
+                message.put("message", e.getMessage());
+                return objectMapper.writeValueAsString(message);
+            }
+        } else {
+            return EXAM_IS_NOT_EXIST_JSON;
+        }
     }
 }

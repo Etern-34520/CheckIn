@@ -169,7 +169,7 @@ const hideCreatingDialog = () => {
                     <el-select filterable v-model="groupOfNewUser" placeholder="选择">
                         <template v-for="(userGroup,i) in userGroups">
                             <el-option
-                                    :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup.type)"
+                                    :disabled="!PermissionInfo.hasPermission('role','operate role ' + userGroup.type)"
                                     :value="userGroup.type" :label="userGroup.type"></el-option>
                         </template>
                     </el-select>
@@ -180,6 +180,7 @@ const hideCreatingDialog = () => {
                           style="margin-bottom: 8px;flex: 1"/>
                 <!--suppress JSValidateTypes -->
                 <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px" @click="showCreateUser = true"
+                           v-if="PermissionInfo.hasPermission('manage user', 'create user')"
                            class="disable-init-animate">
                     新建用户
                 </el-button>

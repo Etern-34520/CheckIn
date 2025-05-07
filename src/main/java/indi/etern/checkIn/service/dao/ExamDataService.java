@@ -7,7 +7,7 @@ import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.repositories.ExamDataRepository;
 import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
-import indi.etern.checkIn.throwable.SettingInvalidException;
+import indi.etern.checkIn.throwable.entity.SettingInvalidException;
 import indi.etern.checkIn.throwable.exam.ExamException;
 import indi.etern.checkIn.throwable.exam.ExamSubmittedException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
@@ -87,6 +87,7 @@ public class ExamDataService {
         }
         final GradingLevel gradingLevel = gradingLevels.get(levelIndex);
         examResult.setLevel(gradingLevel.getName());
+        examResult.setLevelId(gradingLevel.getId());
         examResult.setMessage(gradingLevel.getMessage());
         examResult.setColorHex(gradingLevel.getColorHex());
         examResult.setShowCreatingAccountGuide(gradingLevel.getCreatingUserStrategy() != GradingLevel.CreatingUserStrategy.NOT_CREATE);

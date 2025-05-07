@@ -34,7 +34,7 @@ public class RoleService {
     }
     
     public Permission save(Role role) {
-        final String name = "change role to " + role.getType();
+        final String name = "operate role " + role.getType();
         if (!permissionRepository.existsByName(name)) {
             final Permission permission = new Permission(name);
             permission.setDescription("修改用户所属组组到 " + role.getType());
@@ -95,7 +95,7 @@ public class RoleService {
     
     @Transactional
     public void delete(Role role) {
-        final String permissionName = "change role to " + role.getType();
+        final String permissionName = "operate role " + role.getType();
         final Optional<Permission> byName = permissionRepository.findByName(permissionName);
         if (byName.isPresent()) {
             final Permission permission = byName.get();

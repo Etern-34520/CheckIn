@@ -7,6 +7,7 @@ import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.QuestionRepository;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,6 +24,7 @@ import java.util.Optional;
 
 
 @Service
+@CacheConfig(cacheNames = "question")
 public class QuestionService {
     public static QuestionService singletonInstance;
     final TransactionTemplate transactionTemplate;
@@ -36,17 +38,17 @@ public class QuestionService {
         this.partitionService = partitionService;
     }
     
-    @CachePut(value = "question",key = "#question.id")
+    @CachePut(key = "#question.id")
     public Question save(Question question) {
         return questionRepository.save(question);
     }
 
-    @Cacheable(value = "question",key = "#id")
+    @Cacheable(key = "#id")
     public Optional<Question> findById(String id) {
         return questionRepository.findById(id);
     }
     
-    @CacheEvict(value = "question",key = "#question.id")
+    @CacheEvict(key = "#question.id")
     public void delete(Question question) {
         if (question instanceof QuestionGroup questionGroup) {
             questionGroup.getQuestionLinks().forEach(link -> {
@@ -61,7 +63,7 @@ public class QuestionService {
         return questionRepository.findAllById(questionIds);
     }
     
-    @CacheEvict(value = "question",allEntries = true)
+    @CacheEvict(allEntries = true)
     public void saveAll(Collection<Question> questions) {
         questionRepository.saveAll(questions);
     }
@@ -72,7 +74,7 @@ public class QuestionService {
                 .toList();
     }
     
-    @CacheEvict(value = "question",allEntries = true)
+    @CacheEvict(allEntries = true)
     public void flush() {
         questionRepository.flush();
     }

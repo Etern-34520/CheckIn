@@ -136,7 +136,7 @@ const buttonsOption = ref([{
                     <el-option value="delete" label="删除"
                                :disabled="!PermissionInfo.hasPermission('manage user','delete user')"/>
                     <el-option value="move" label="移动到"
-                               :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup.type)"/>
+                               :disabled="!PermissionInfo.hasPermission('role','operate role ' + userGroup.type)"/>
                 </el-select>
                 <transition name="blur-scale">
                     <el-select filterable v-if="optionType === 'move'"
@@ -144,7 +144,7 @@ const buttonsOption = ref([{
                                style="margin-top: 8px;" placeholder="用户组">
                         <template v-for="(userGroup1,i) in UserDataInterface.userGroups">
                             <el-option v-if="userGroup1.type !== userGroup.type"
-                                       :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup1.type)"
+                                       :disabled="!PermissionInfo.hasPermission('role','operate role ' + userGroup1.type)"
                                        :value="userGroup1.type" :label="userGroup1.type"></el-option>
                         </template>
                     </el-select>

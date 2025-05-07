@@ -751,6 +751,7 @@ const getTypeName = (type) => {
                     <div style="flex:1;overflow:overlay;">
                         <el-scrollbar>
                             <div style="flex: 1">
+<!--                                TODO Replace with virtual tree-->
                                 <el-tree ref="tree" icon="ArrowRightBold" node-key="treeId" :props="props"
                                          @node-click="onEdit" :show-checkbox="showCheckBox"
                                          draggable :allow-drag="allowDrag" :allow-drop="allowDrop"
@@ -805,8 +806,11 @@ const getTypeName = (type) => {
                                                 <!--                                                :class="{'disable-tree-checkbox': !(nodeObj.data.type === 'Partition'?true:nodeObj.data.ableToEdit)}"-->
                                                 <div class="question-tree-node">
                                                     <el-text v-if="nodeObj.data.type === 'Question'" size="small"
-                                                             type="info" style="margin-right: 8px;">
+                                                             type="info">
                                                         {{ getTypeName(nodeObj.data.question.type) }}
+                                                    </el-text>
+                                                    <el-text size="small" type="info" v-if="nodeObj.data.question&&!nodeObj.data.ableToEdit">
+                                                        [只读]
                                                     </el-text>
                                                     <el-text class="question-tree-node-content"
                                                              :class="{
@@ -827,7 +831,7 @@ const getTypeName = (type) => {
                                                         <template #reference>
                                                             <el-button class="node-button" size="small"
                                                                        @click.stop="nodeObj.data.editing = false"
-                                                                       v-if="nodeObj.data.type === 'Partition'">
+                                                                       v-if="nodeObj.data.type === 'Partition' && PermissionInfo.hasPermission('partition','edit partition name')">
                                                                 <div style="margin: 0 4px">
                                                                     <HarmonyOSIcon_Rename/>
                                                                 </div>
@@ -981,6 +985,7 @@ const getTypeName = (type) => {
 .question-tree-node-content {
     width: 0;
     flex: 1;
+    margin-left: 8px;
 }
 
 .node-button {

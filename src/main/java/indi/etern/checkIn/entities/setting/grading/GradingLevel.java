@@ -1,10 +1,8 @@
 package indi.etern.checkIn.entities.setting.grading;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import indi.etern.checkIn.entities.user.Role;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +25,11 @@ public class GradingLevel {
     private String description;
     private String message;
     private CreatingUserStrategy creatingUserStrategy;
+    private int levelIndex;
+    @OneToOne
+    @JoinColumn(name = "role_type", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonSerialize(using = Role.TypeSerializer.class)
+    private Role creatingUserRole;
     
     protected GradingLevel() {}
     

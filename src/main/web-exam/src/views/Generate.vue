@@ -41,7 +41,7 @@ const startExam = () => {
     }).then((data) => {
         if (data.type !== "error") {
             proxy.$cookies.set("examInfo", data, "7d");
-            proxy.$cookies.set("phrase", "examine", "7d");
+            proxy.$cookies.set("phase", "examine", "7d");
             proxy.$cookies.remove("submissions");
             proxy.$cookies.remove("timestamps");
             router.push({name: "examine"});
@@ -70,7 +70,7 @@ const validate1 = computed(() => selectedPartitionIds.value.length >= props.extr
 const validate2 = computed(() => qqNumber.value > 10000 && qqNumber.value < 100000000000);
 
 const back = () => {
-    proxy.$cookies.remove("phrase");
+    proxy.$cookies.remove("phase");
     router.push({name: "facade"});
 }
 </script>

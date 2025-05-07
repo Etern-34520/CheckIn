@@ -125,7 +125,6 @@ public class QuestionUpdateUtils {
 //        }
     }
     
-    /*FIXME*/
     private static Map<String, Number> getStatisticMap(Question question) {
         QuestionStatistic questionStatistic = question.getQuestionStatistic();
         if (questionStatistic == null) return null;

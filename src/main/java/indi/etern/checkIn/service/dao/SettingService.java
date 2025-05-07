@@ -2,6 +2,7 @@ package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.repositories.SettingRepository;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Service
+@CacheConfig(cacheNames = "setting")
 public class SettingService {
     public static SettingService singletonInstance;
     final SettingRepository settingRepository;
@@ -18,7 +20,7 @@ public class SettingService {
         this.settingRepository = settingRepository;
     }
     
-    @Cacheable(value = "setting", key = "#root+'.'+#name")
+    @Cacheable(key = "#name")
     public SettingItem getItem(String root,String name) {
         return settingRepository.findById(root+"."+name).orElseThrow();
     }
@@ -27,17 +29,17 @@ public class SettingService {
         return settingRepository.findAllById(keys);
     }
     
-    @CacheEvict(value = "setting",key = "key")
+    @CacheEvict(key = "key")
     public void delete(String key) {
         settingRepository.deleteById(key);
     }
     
-    @CacheEvict(value = "setting",key = "#settingItem.key")
+    @CacheEvict(key = "#settingItem.key")
     public void delete(SettingItem settingItem) {
         settingRepository.delete(settingItem);
     }
     
-    @CacheEvict(value = "setting",allEntries = true)
+    @CacheEvict(allEntries = true)
     public void setAll(Iterable<SettingItem> settingItems) {
         settingRepository.saveAll(settingItems);
     }

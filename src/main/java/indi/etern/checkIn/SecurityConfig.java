@@ -66,7 +66,6 @@ public class SecurityConfig {
             return authenticationManager;
         }
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
-//        authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
         authenticationManager = new ProviderManager(authenticationProvider);
         return authenticationManager;
@@ -89,10 +88,7 @@ public class SecurityConfig {
 
     @Bean
     JwtAuthenticationFilter jwtAuthenticationFilter() {
-//        if (authenticationManager == null) {
-//            authenticationManager = authenticationManager(userDetailsService(), passwordEncoder());
-//        }
-        return new JwtAuthenticationFilter(/*authenticationManager*/);
+        return new JwtAuthenticationFilter();
     }
 
 }

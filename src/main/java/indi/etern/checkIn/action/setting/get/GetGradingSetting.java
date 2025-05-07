@@ -10,6 +10,7 @@ import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.service.dao.GradingLevelService;
 import indi.etern.checkIn.service.dao.SettingService;
 import indi.etern.checkIn.utils.GetSettingCommon;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class GetGradingSetting extends BaseAction<NullInput, GetGradingSetting.S
     }
     
     @Override
+    @Transactional(readOnly = true)
     public void execute(ExecuteContext<NullInput, SuccessOutput> context) {
         GetSettingCommon getSettingCommon = new GetSettingCommon(SaveGradingSetting.KEYS,"grading");
         final LinkedHashMap<String, Object> data = getSettingCommon.doGet();

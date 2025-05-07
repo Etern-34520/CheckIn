@@ -1,18 +1,21 @@
 package indi.etern.checkIn.service.dao;
 
+import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.RoleRepository;
 import indi.etern.checkIn.repositories.UserRepository;
+import indi.etern.checkIn.throwable.entity.UserExistsException;
+import indi.etern.checkIn.throwable.exam.ExamException;
+import indi.etern.checkIn.throwable.exam.ExamIllegalStateException;
+import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,14 +27,12 @@ public class UserService implements UserDetailsService {
     @Resource
     private UserRepository userRepository;
     private final RoleService roleService;
-    private final TransactionTemplate template;
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
     
-    protected UserService(RoleService roleService, TransactionTemplate template) {
+    protected UserService(RoleService roleService, RoleRepository roleRepository) {
         singletonInstance = this;
         this.roleService = roleService;
-        this.template = template;
+        this.roleRepository = roleRepository;
     }
     
     public boolean check(long qq, String password) {
@@ -44,7 +45,6 @@ public class UserService implements UserDetailsService {
     
     public void save(User user) {
         roleService.save(user.getRole());
-//        userRepository.save(user);
     }
     
     public List<User> findAllByName(String name) {
@@ -77,30 +77,6 @@ public class UserService implements UserDetailsService {
         }
     }
     
-    
-    
-    public void unbindAndDeleteById(long id) {
-        template.execute(status -> {
-            final Optional<User> optionalUser = findByQQNumber(id);
-            if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
-                final Role role = user.getRole();
-                role.getUsers().remove(user);
-                user.setRole(null);
-                userRepository.deleteById(id);
-                roleService.save(role);
-            }
-            return Boolean.TRUE;
-        });
-    }
-    
-/*
-    public void unbindAndDelete(User user) {
-        unbindAndDeleteById(user.getQQNumber());
-        userRepository.flush();
-    }
-*/
-    
     public boolean existsByQQNumber(long qqNumber) {
         return userRepository.existsById(qqNumber);
     }
@@ -123,5 +99,21 @@ public class UserService implements UserDetailsService {
     
     public void delete(User user) {
         userRepository.delete(user);
+    }
+    
+    public void handleSignUp(ExamData examData, String name, String encodedPassword, Role role) throws ExamException {
+        if (examData.getStatus() == ExamData.Status.ONGOING) {
+            throw new ExamIllegalStateException();
+        } else if (examData.getStatus() == ExamData.Status.SUBMITTED) {
+            if (existsByQQNumber(examData.getQqNumber())) {
+                throw new UserExistsException();
+            } else {
+                User user = new User(name, examData.getQqNumber(), encodedPassword);
+                user.setRole(role);
+                save(user);
+            }
+        } else {
+            throw new ExamInvalidException();
+        }
     }
 }

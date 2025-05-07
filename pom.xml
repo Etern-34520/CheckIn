@@ -9,14 +9,16 @@
     <description>CheckIn use Spring Boot</description>
     <properties>
         <java.version>21</java.version>
-        <spring-boot-starter.version>3.5.0-SNAPSHOT</spring-boot-starter.version>
-<!--                <spring-boot-starter.version>3.4.0</spring-boot-starter.version>-->
+<!--        <spring-boot-starter.version>3.5.0-RC1</spring-boot-starter.version>-->
+        <spring-boot-starter.version>3.5.0-M2</spring-boot-starter.version>
+<!--                <spring-boot-starter.version>3.4.5</spring-boot-starter.version>-->
     </properties>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0-SNAPSHOT</version>
-<!--                <version>3.4.0</version>-->
+<!--        <version>3.5.0-RC1</version>-->
+        <version>3.5.0-M2</version>
+<!--                <version>3.4.5</version>-->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <repositories>
@@ -90,7 +92,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.36</version>
+<!--                            <version>1.18.36</version>-->
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -135,14 +137,6 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
             <version>${spring-boot-starter.version}</version>
         </dependency>
-<!--        TODO use Netty-->
-<!--
-        <dependency>
-            <groupId>org.yeauty</groupId>
-            <artifactId>netty-websocket-spring-boot-starter</artifactId>
-            <version>0.13.0</version>
-        </dependency>
--->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -165,31 +159,35 @@
             <artifactId>spring-boot-starter-security</artifactId>
             <version>${spring-boot-starter.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <version>11.6.0</version>
         </dependency>
-        &lt;!&ndash; https://mvnrepository.com/artifact/org.flywaydb/flyway-mysql &ndash;&gt;
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-mysql -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-mysql</artifactId>
             <version>11.6.0</version>
         </dependency>
-        &lt;!&ndash; https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql &ndash;&gt;
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql -->
+<!--
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
             <version>11.6.0</version>
             <scope>runtime</scope>
         </dependency>
-        &lt;!&ndash; https://mvnrepository.com/artifact/org.flywaydb/flyway-database-db2 &ndash;&gt;
+-->
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-database-db2 -->
+<!--
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-db2</artifactId>
             <version>11.6.0</version>
             <scope>runtime</scope>
-        </dependency>-->
+        </dependency>
+-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -239,17 +237,21 @@
             <version>8.2.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+<!--
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.5</version>
         </dependency>
+-->
         <!-- https://mvnrepository.com/artifact/com.ibm.db2/jcc -->
+<!--
         <dependency>
             <groupId>com.ibm.db2</groupId>
             <artifactId>jcc</artifactId>
             <version>12.1.0.0</version>
         </dependency>
+-->
         <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
         <dependency>
             <groupId>com.h2database</groupId>

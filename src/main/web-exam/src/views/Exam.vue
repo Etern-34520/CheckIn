@@ -18,7 +18,7 @@ const answerData = ref(proxy.$cookies.get("submissions"));
 if (!answerData.value) answerData.value = {};
 
 const routeToResult = () => {
-    proxy.$cookies.set("phrase", "result", "7d");
+    proxy.$cookies.set("phase", "result", "7d");
     router.push({name: "result"});
 }
 onBeforeMount(() => {
@@ -57,7 +57,7 @@ const handleError = (data, actionDescription) => {
                             }
                     ).then(() => {
                         alerting = false;
-                        proxy.$cookies.set("phrase", "generate", "7d");
+                        proxy.$cookies.set("phase", "generate", "7d");
                         proxy.$cookies.remove("submissions");
                         proxy.$cookies.remove("timestamps");
                         proxy.$cookies.remove("examInfo");
@@ -109,7 +109,7 @@ const handleError = (data, actionDescription) => {
                             }
                     ).then(() => {
                         alerting = false;
-                        proxy.$cookies.set("phrase", "generate", "7d");
+                        proxy.$cookies.set("phase", "generate", "7d");
                         proxy.$cookies.remove("submissions");
                         proxy.$cookies.remove("timestamps");
                         proxy.$cookies.remove("examInfo");
@@ -191,9 +191,9 @@ const loadQuestionsByIndexes = (indexes, force = false) => {
 }
 
 if (Boolean(examInfo.value)) {
-    proxy.$cookies.set("phrase", "examine", "7d");
+    proxy.$cookies.set("phase", "examine", "7d");
 } else {
-    proxy.$cookies.set("phrase", "generate", "7d");
+    proxy.$cookies.set("phase", "generate", "7d");
     router.push({name: "generate"});
 }
 

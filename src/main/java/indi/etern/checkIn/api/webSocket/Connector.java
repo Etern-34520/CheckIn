@@ -79,6 +79,7 @@ public class Connector implements SubProtocolCapable {
     public void onOpen(Session session, @PathParam("sid") String sid) {
         this.session = session;
         session.setMaxTextMessageBufferSize(64 * 1024);//64 KB
+//        session.setMaxTextMessageBufferSize(64 * 1024 * 1024);//64 MB
         session.setMaxBinaryMessageBufferSize(0);
         CONNECTORS.add(this);
         this.sid = sid;
@@ -170,7 +171,7 @@ public class Connector implements SubProtocolCapable {
                                 case WARNING -> IMessage.Type.WARNING;
                             };
                             JsonRawMessage jsonRawMessage = new JsonRawMessage(type,contextId,optionalJsonResult.get());
-                            sendMessage(jsonRawMessage);
+                            sendMessage(jsonRawMessage);//FIXME force closed when the message is too long
                         }
                     } catch (Exception e) {
                         if (logger.isDebugEnabled()) {

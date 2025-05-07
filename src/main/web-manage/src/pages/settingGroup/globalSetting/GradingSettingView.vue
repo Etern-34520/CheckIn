@@ -100,9 +100,9 @@ const removeLevel = (index) => {
 
 <template>
     <div style="display: flex;flex-direction: column;">
-        <div style="display: flex;flex-direction: row;">
-            <el-text style="align-self:baseline;font-size: 24px">评级设置</el-text>
-            <div style="display: flex;margin-left: 32px;"
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap">
+            <el-text style="align-self:baseline;font-size: 24px;margin-right: 32px;">评级设置</el-text>
+            <div style="display: flex;"
                  v-if="PermissionInfo.hasPermission('setting','save grading setting')">
                 <transition-group name="blur-scale">
                     <el-button-group key="button-group" style="margin: 2px 24px 2px 0;">
@@ -119,7 +119,7 @@ const removeLevel = (index) => {
                         </transition-group>
                     </el-button-group>
                     <el-button class="disable-init-animate" key="action" v-if="editing"
-                               style="margin-left: 12px;" link @click="addLevel" :icon="HarmonyOSIcon_Plus">
+                               style="margin-left: 4px;" link @click="addLevel" :icon="HarmonyOSIcon_Plus">
                         添加等级
                     </el-button>
                 </transition-group>
@@ -167,26 +167,27 @@ const removeLevel = (index) => {
                                              class="panel-1 disable-init-animate ">
                                             <div :style="{background: data.levels[$index].colorHex}"
                                                  style="width: 4px;align-self: stretch;border-radius: 4px 0 0 4px"></div>
-                                            <div style="display: flex;flex-direction: column">
-                                                <div class="handle" style="margin: 22px 16px;flex: 1"
-                                                     :style="{cursor: editing?'grab':'not-allowed'}">
-                                                    <HarmonyOSIcon_Handle :size="24"/>
-                                                </div>
-                                                <transition name="blur-scale">
-                                                    <el-button class="disable-init-animate"
-                                                               style="min-height: 32px;margin-bottom: 16px"
-                                                               v-show="editing" link
-                                                               @click="removeLevel($index)">
-                                                        <HarmonyOSIcon_Remove/>
-                                                    </el-button>
-                                                </transition>
-                                            </div>
+<!--                                            <div style="display: flex;flex-direction: column"></div>-->
                                             <grading-level-card :disabled="!editing" v-model="data.levels[$index]"
                                                                 v-model:split="data.splits"
                                                                 :min="0"
                                                                 :max="extraData.questionScore * extraData.questionAmount"
                                                                 :predefine="predefine"
-                                                                :index="$index"></grading-level-card>
+                                                                :index="$index">
+
+                                                <div class="handle" style="width: 32px;height: 32px;display: flex;align-items: center;justify-content: center;margin-right: 16px"
+                                                     :style="{cursor: editing?'grab':'not-allowed'}">
+                                                    <HarmonyOSIcon_Handle :size="24"/>
+                                                </div>
+                                                <transition name="blur-scale">
+                                                    <el-button class="disable-init-animate"
+                                                               style="min-height: 32px;"
+                                                               v-show="editing" link
+                                                               @click="removeLevel($index)">
+                                                        <HarmonyOSIcon_Remove/>
+                                                    </el-button>
+                                                </transition>
+                                            </grading-level-card>
                                         </div>
                                     </div>
                                 </transition-group>

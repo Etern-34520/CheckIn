@@ -6,22 +6,28 @@ import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.entities.setting.grading.GradingLevel;
+import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.GradingLevelService;
+import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.utils.SaveSettingCommon;
 import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Action("saveGradingSetting")
 public class SaveGradingSetting extends BaseAction<SaveGradingSetting.Input, MessageOutput> {
+    private final RoleService roleService;
+    
     public record Input(Map<String, Object> data) implements InputData {}
     public static final String[] KEYS = {"splits", "questionScore"};
     final GradingLevelService gradingLevelService;
     
-    public SaveGradingSetting(GradingLevelService gradingLevelService) {
+    public SaveGradingSetting(GradingLevelService gradingLevelService, RoleService roleService) {
         this.gradingLevelService = gradingLevelService;
+        this.roleService = roleService;
     }
     
     @Transactional
@@ -39,6 +45,7 @@ public class SaveGradingSetting extends BaseAction<SaveGradingSetting.Input, Mes
         levels.forEach(level -> {
             GradingLevel.GradingLevelBuilder gradingLevelBuilder = GradingLevel.builder()
                     .id((String) level.get("id"))
+                    .levelIndex(levels.indexOf(level))
                     .name((String) level.get("name"));
             if (level.containsKey("description")) {
                 gradingLevelBuilder.description((String) level.get("description"));
@@ -52,6 +59,10 @@ public class SaveGradingSetting extends BaseAction<SaveGradingSetting.Input, Mes
             var creatingUserStrategy = GradingLevel.CreatingUserStrategy.ofOrElse(level.get("creatingUserStrategy").toString(),
                     GradingLevel.CreatingUserStrategy.NOT_CREATE);
             gradingLevelBuilder.creatingUserStrategy(creatingUserStrategy);
+            if (creatingUserStrategy != GradingLevel.CreatingUserStrategy.NOT_CREATE) {
+                final Optional<Role> creatingUserRole = roleService.findByType((String) level.get("creatingUserRole"));
+                gradingLevelBuilder.creatingUserRole(creatingUserRole.orElse(null));
+            }
             
             GradingLevel gradingLevel = gradingLevelBuilder.build();
             gradingLevels.add(gradingLevel);

@@ -4,13 +4,12 @@ import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.record.RequestRecord;
 import indi.etern.checkIn.service.dao.RequestRecordService;
 import indi.etern.checkIn.service.web.WebSocketService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -23,8 +22,6 @@ import java.util.Map;
 public class ExamLoggerAspects {
     final RequestRecordService requestRecordService;
     private final WebSocketService webSocketService;
-    @PersistenceContext
-    EntityManager entityManager;
     
     public ExamLoggerAspects(RequestRecordService requestRecordService, WebSocketService webSocketService) {
         this.requestRecordService = requestRecordService;
@@ -36,8 +33,12 @@ public class ExamLoggerAspects {
         void process(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, RequestRecord requestRecord);
     }
     
-    private RequestRecord record(RequestRecord.Type type, RequestProcessor processor) {
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+    private void record(RequestRecord.Type type, RequestProcessor processor) {
+        final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes == null) {
+            return;
+        }
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         HttpServletResponse httpServletResponse = servletRequestAttributes.getResponse();
         RequestRecord requestRecord = RequestRecord.from(httpServletRequest, httpServletResponse);
@@ -47,11 +48,14 @@ public class ExamLoggerAspects {
         }
         sendUpdateRequestRecord(requestRecord);
         requestRecordService.save(requestRecord);
-        return requestRecord;
     }
     
-    private RequestRecord record(RequestRecord.Type type, Throwable throwable, RequestProcessor processor) {
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+    private void record(RequestRecord.Type type, Throwable throwable, RequestProcessor processor) {
+        final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes == null) {
+            return;
+        }
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         HttpServletResponse httpServletResponse = servletRequestAttributes.getResponse();
         RequestRecord requestRecord = RequestRecord.from(httpServletRequest, httpServletResponse, throwable);
@@ -61,7 +65,6 @@ public class ExamLoggerAspects {
         }
         sendUpdateRequestRecord(requestRecord);
         requestRecordService.save(requestRecord);
-        return requestRecord;
     }
     
     private void sendUpdateRequestRecord(RequestRecord requestRecord) {
@@ -86,16 +89,16 @@ public class ExamLoggerAspects {
     }
     
     @AfterReturning(pointcut = "generateExam()", returning = "examData")
-    public void afterGenerate(JoinPoint joinPoint,ExamData examData) {
-        record(RequestRecord.Type.GENERATE, getGenerateProcessor(joinPoint,examData));
+    public void afterGenerate(JoinPoint joinPoint, ExamData examData) {
+        record(RequestRecord.Type.GENERATE, getGenerateProcessor(joinPoint, examData));
     }
     
     @AfterThrowing(pointcut = "generateExam()", throwing = "throwable")
     public void afterGenerate(JoinPoint joinPoint, Throwable throwable) {
-        record(RequestRecord.Type.GENERATE, throwable, getGenerateProcessor(joinPoint,null));
+        record(RequestRecord.Type.GENERATE, throwable, getGenerateProcessor(joinPoint, null));
     }
     
-    private RequestProcessor getGenerateProcessor(JoinPoint joinPoint,ExamData examData) {
+    private RequestProcessor getGenerateProcessor(JoinPoint joinPoint, ExamData examData) {
         return (httpServletRequest, httpServletResponse, requestRecord) -> {
             long qq = (long) joinPoint.getArgs()[0];
             if (examData != null) {
@@ -153,6 +156,32 @@ public class ExamLoggerAspects {
             if (arg instanceof ExamData examData) {
                 trafficRecord.setRelatedExamDataId(examData.getId());
                 trafficRecord.setQQNumber(examData.getQqNumber());
+            }
+        };
+    }
+    
+    //TODO test
+    @Pointcut("execution(* indi.etern.checkIn.service.dao.UserService.handleSignUp(..))")
+    public void signUp() {}
+    
+    @AfterReturning("signUp()")
+    public void afterSignUp(JoinPoint joinPoint) {
+        record(RequestRecord.Type.SIGN_UP, getSignUpProcessor(joinPoint));
+    }
+    
+    @AfterThrowing(pointcut = "signUp()", throwing = "throwable")
+    public void afterSignUpThrowing(JoinPoint joinPoint, Throwable throwable) {
+        record(RequestRecord.Type.SIGN_UP, throwable, getSignUpProcessor(joinPoint));
+    }
+    private RequestProcessor getSignUpProcessor(JoinPoint joinPoint) {
+        return (httpServletRequest, httpServletResponse, trafficRecord) -> {
+            final Object[] args = joinPoint.getArgs();
+            if (args[0] instanceof ExamData examData) {
+                trafficRecord.setRelatedExamDataId(examData.getId());
+                trafficRecord.setQQNumber(examData.getQqNumber());
+            }
+            if (args[1] instanceof String name) {
+                trafficRecord.getExtraData().put("signUpName", name);
             }
         };
     }

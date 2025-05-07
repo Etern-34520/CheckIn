@@ -1,4 +1,4 @@
-package indi.etern.checkIn.throwable;
+package indi.etern.checkIn.throwable.entity;
 
 import indi.etern.checkIn.throwable.exam.ExamException;
 import lombok.extern.slf4j.Slf4j;

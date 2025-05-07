@@ -9,7 +9,7 @@ let qq1;
 let token1;
 
 let notifications = {};
-let limits = 64 * 1024;//64MB
+let limits = 64 * 1024;//64KB
 
 function getCurrentIsoTime() {
     return new Date().toISOString();
@@ -30,8 +30,10 @@ const sendInternal = (objMessage) => {
             messageParts.push({
                 messageId: messageId,
                 type: "partMessage",
-                partId: objMessage["messageId"],
-                messagePart: message.substring(i * limits, (i + 1) * limits),
+                data: {
+                    partId: objMessage["messageId"],
+                    messagePart: message.substring(i * limits, (i + 1) * limits),
+                }
             });
         }
         const oldPromise = WebSocketConnector.promises[objMessage["messageId"]];
@@ -40,7 +42,7 @@ const sendInternal = (objMessage) => {
             promiseData1["resolve"] = () => {
                 for (const message of messageParts) {
                     //todo test
-                    WebSocketConnector.send(JSON.stringify(message));
+                    WebSocketConnector.ws.send(JSON.stringify(message));
                 }
                 WebSocketConnector.promises[objMessage["messageId"]] = oldPromise;
             };
@@ -57,7 +59,9 @@ const sendInternal = (objMessage) => {
         WebSocketConnector.ws.send(JSON.stringify({
             messageId: objMessage["messageId"],
             type: "partMessage",
-            messageIds: partMessageIds,
+            data: {
+                messageIds: partMessageIds,
+            }
         }));
     } else {
         console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (simple message):`, objMessage);

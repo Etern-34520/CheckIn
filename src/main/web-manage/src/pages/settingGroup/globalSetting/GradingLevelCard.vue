@@ -3,6 +3,8 @@ import 'md-editor-v3/lib/style.css';
 import {MdEditor} from "md-editor-v3";
 import UIMeta from "@/utils/UI_Meta.js";
 import Collapse from "@/components/common/Collapse.vue";
+import UserDataInterface from "@/data/UserDataInterface.js";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const model = defineModel({
     type: Object,
@@ -36,18 +38,24 @@ const props = defineProps({
     }
 });
 
+const userGroups = UserDataInterface.userGroups;
+UserDataInterface.getReactiveUserGroupsAsync();
 </script>
 
 <template>
-    <div style="padding: 16px 0;display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1">
-        <div style="display: flex;flex-direction: row;align-items: center;justify-content: start;flex-wrap: wrap">
-            <el-color-picker size="large" style="margin-left: 16px;margin-right: 12px;" :predefine="predefine"
+    <div style="padding: 8px 8px 8px 16px;display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;justify-content: start;">
+            <el-color-picker size="large" style="margin-right: 12px;" :predefine="predefine"
                              v-model="model.colorHex" :disabled="disabled"></el-color-picker>
-            <div style="display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1">
+            <slot/>
+        </div>
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;justify-content: start;">
+            <div style="display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1;min-width: 160px">
                 <el-text class="field-label disable-init-animate" style="margin-top: 0 !important;">ID</el-text>
-                <el-text class="field-label disable-init-animate" style="margin-top: 0 !important;">{{model.id}}</el-text>
+                <el-text class="field-label disable-init-animate" style="margin-top: 0 !important;">{{ model.id }}
+                </el-text>
             </div>
-            <div style="display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1">
+            <div style="display: flex;flex-direction: column;align-items: stretch;justify-content: stretch;flex: 1;min-width: 160px">
                 <el-text class="field-label disable-init-animate" style="margin-top: 0 !important;">名称</el-text>
                 <el-input v-model="model.name" class="disable-init-animate" :disabled="disabled"
                           :class="{error: !(model.name)}"></el-input>
@@ -87,6 +95,21 @@ const props = defineProps({
             <el-radio value="CREATE_ENABLED_AFTER_VALIDATED">创建用户并在验证后启用</el-radio>
             <el-radio value="CREATE_ENABLED">创建用户并启用</el-radio>
         </el-radio-group>
+        <transition name="blur-scale" mode="out-in">
+            <div v-if="model.creatingUserStrategy !== 'NOT_CREATE'">
+                <el-text>
+                    选择新用户所属组
+                </el-text>
+                <el-select v-model="model.creatingUserRole"
+                           :disabled="disabled"
+                           placeholder="选择用户组"
+                           filterable style="max-width: 200px;margin-left: 8px">
+                    <el-option v-for="[userGroupType,userGroup] of Object.entries(userGroups)"
+                               :disabled="!PermissionInfo.hasPermission('role','operate role ' + userGroup.type)"
+                               :value="userGroup.type" :label="userGroup.type"/>
+                </el-select>
+            </div>
+        </transition>
     </div>
 </template>
 

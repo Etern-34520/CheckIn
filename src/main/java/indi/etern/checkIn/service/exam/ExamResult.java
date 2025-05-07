@@ -18,8 +18,10 @@ public final class ExamResult implements Comparable<ExamResult> {
     private int wrongCount;
     private int questionCount;
     private boolean showCreatingAccountGuide;
+    private String examDataId;
     private String message;
     private String level;
+    private String levelId;
     @JsonIgnore
     private ExamData examData;
     @JsonIgnore
@@ -33,8 +35,11 @@ public final class ExamResult implements Comparable<ExamResult> {
         ExamResult examResult = new ExamResult();
         examResult.qq = examData.getQqNumber();
         examResult.examData = examData;
+        //noinspection DataFlowIssue (used by jackson)
         examResult.questionCount = examResult.getQuestionCount();
+        //noinspection DataFlowIssue (used by jackson)
         examResult.questionIds = examResult.getQuestionIds();
+        examResult.examDataId = examData.getId();
         return examResult;
     }
     
@@ -51,12 +56,13 @@ public final class ExamResult implements Comparable<ExamResult> {
                 this.questionCount == that.questionCount &&
                 this.showCreatingAccountGuide == that.showCreatingAccountGuide &&
                 Objects.equals(this.level, that.level) &&
+                Objects.equals(this.levelId, that.levelId) &&
                 Objects.equals(this.message, that.message);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(qq, score, correctCount, halfCorrectCount, wrongCount, questionCount, showCreatingAccountGuide, message, level);
+        return Objects.hash(qq, score, correctCount, halfCorrectCount, wrongCount, questionCount, showCreatingAccountGuide, message, level, levelId);
     }
     
     @Override

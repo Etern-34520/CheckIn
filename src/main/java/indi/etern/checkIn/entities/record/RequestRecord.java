@@ -95,7 +95,7 @@ public class RequestRecord implements BaseEntity<String> {
     }
     
     public enum Type {
-        VISIT, GENERATE, SUBMIT, GET_EXAM_DATA, GET_EXAM_QUESTIONS
+        VISIT, GENERATE, SUBMIT, GET_EXAM_DATA, GET_EXAM_QUESTIONS, SIGN_UP
     }
     
     public enum Status {

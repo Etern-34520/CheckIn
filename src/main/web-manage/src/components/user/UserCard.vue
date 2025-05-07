@@ -123,7 +123,7 @@ const currentUser = UserDataInterface.getCurrentUser();
 
 const showDropdown = (user) => {
     return (currentUser.value.qq !== user.qq && PermissionInfo.hasPermission('manage user', 'delete user')) ||
-            (currentUser.value.qq !== user.qq && PermissionInfo.hasPermission('role', /^change role to /)) ||
+            (currentUser.value.qq !== user.qq && PermissionInfo.hasPermission('role', /^operate role /)) ||
             (currentUser.value.qq === user.qq || PermissionInfo.hasPermission('manage user', 'change user name'));
 }
 </script>
@@ -148,7 +148,7 @@ const showDropdown = (user) => {
             <el-select filterable v-model="newUserGroupName"
                        style="flex:1;margin-right: 4px" placeholder="用户组">
                 <template v-for="(userGroup,i) in UserDataInterface.userGroups">
-                    <el-option :disabled="!PermissionInfo.hasPermission('role','change role to ' + userGroup.type)"
+                    <el-option :disabled="!PermissionInfo.hasPermission('role','operate role ' + userGroup.type)"
                                :value="userGroup.type" :label="userGroup.type"></el-option>
                 </template>
             </el-select>
@@ -197,7 +197,7 @@ const showDropdown = (user) => {
                     修改用户名
                 </el-dropdown-item>
                 <el-dropdown-item @click="editUserGroup"
-                                  v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('role','change role to ' + user.role)">
+                                  v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('role','operate role ' + user.role)">
                     修改用户组
                 </el-dropdown-item>
                 <el-dropdown-item
