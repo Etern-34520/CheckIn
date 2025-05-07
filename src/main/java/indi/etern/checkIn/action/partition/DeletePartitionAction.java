@@ -16,6 +16,7 @@ import indi.etern.checkIn.utils.QuestionUpdateUtils;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Action("deletePartition")
+// FIXME
 public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Input, OutputData> {
     public record Input(@Nonnull String partitionId) implements InputData {}
     public record SuccessOutput(List<String> infectedQuestionIds) implements OutputData {
@@ -42,6 +44,7 @@ public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Inpu
     }
     
     @Override
+    @Transactional
     public void execute(ExecuteContext<Input, OutputData> context) {
         context.requirePermission("delete partition");
         
@@ -49,14 +52,15 @@ public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Inpu
         Optional<Partition> optionalPartition = partitionService.findById(input.partitionId);
         if (optionalPartition.isPresent()) {
             List<Question> infectedQuestions = new ArrayList<>();
-            if (optionalPartition.get().getQuestionLinks().isEmpty()) {
-                logger.debug("deleting empty partition \"" + optionalPartition.get().getName() + "\"");
+            final Partition partition = optionalPartition.get();
+            if (partition.getQuestionLinks().isEmpty()) {
+                logger.debug("deleting empty partition \"" + partition.getName() + "\"");
                 partitionService.delete(optionalPartition.orElse(null));
             } else {
-                logger.debug("partition \"" + optionalPartition.get().getName() + "\" is not empty");
-                for (ToPartitionsLink questionLink : optionalPartition.get().getQuestionLinks()) {
+                logger.debug("partition \"" + partition.getName() + "\" is not empty");
+                for (ToPartitionsLink questionLink : partition.getQuestionLinks()) {
                     final Set<Partition> partitions = questionLink.getTargets();
-                    partitions.remove(optionalPartition);
+                    partitions.remove(partition);
                     final Question question = questionLink.getSource();
                     infectedQuestions.add(question);
                     if (partitions.isEmpty()) {
@@ -78,7 +82,7 @@ public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Inpu
                 context.resolve(new SuccessOutput(infectedQuestions.stream().map(Question::getId).toList()));
             }
         } else {
-            context.resolve(MessageOutput.error("Partitionn not exist"));
+            context.resolve(MessageOutput.error("Partition not exist"));
         }
     }
 }
