@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.SubProtocolCapable;
@@ -42,15 +43,14 @@ public class Connector implements SubProtocolCapable {
     private static WebSocketService webSocketService;
     private static JwtTokenProvider jwtTokenProvider;
     private static ActionExecutor actionExecutor;
+    private final int BUFFER_SIZE = 64 * 1024;
+    @Value("${websocket.logTruncateSize}")
+    private int LOG_TRUNCATE_SIZE;
     private Session session;
     @Getter
     private String sid = "";
     private User sessionUser;
     private final ObjectMapper objectMapper = CheckInApplication.getObjectMapper();
-    
-    public Connector() {
-//        this.partitionService = CheckInApplication.applicationContext.getBean(PartitionService.class);
-    }
     
     public static void addOnlineCount() {
         onlineCount.getAndIncrement();
@@ -78,13 +78,12 @@ public class Connector implements SubProtocolCapable {
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) {
         this.session = session;
-        session.setMaxTextMessageBufferSize(64 * 1024);//64 KB
-//        session.setMaxTextMessageBufferSize(64 * 1024 * 1024);//64 MB
+        session.setMaxTextMessageBufferSize(BUFFER_SIZE);//64 KB
         session.setMaxBinaryMessageBufferSize(0);
         CONNECTORS.add(this);
         this.sid = sid;
         addOnlineCount();
-        logger.info("sid_" + sid + ":connected");
+        logger.info("sid_{}:connected", sid);
     }
     
     @SneakyThrows
@@ -93,72 +92,67 @@ public class Connector implements SubProtocolCapable {
         CONNECTORS.remove(this);
         webSocketService.unsubscribeAllChannels(sid);
         subOnlineCount();
-        logger.info("sid_" + sid + ":close");
-//        releaseResource();
-        if (sessionUser != null) {
-            Map<String, String> dataMap = new HashMap<>();
-            dataMap.put("type", "userOffline");
-            dataMap.put("qq", String.valueOf(sessionUser.getQQNumber()));
-            webSocketService.sendMessageToAll(objectMapper.writeValueAsString(dataMap));
-        }
+        logger.info("sid_{}:close", sid);
     }
     
-    private final Map<String, PartRawMessage> partMessageMap = new HashMap<>();
+    private final Map<String, PartRawMessageProcessor> partMessageMap = new HashMap<>();
     
-    private record PartMessageData(List<String> messageIds, String partId, String messagePart) {}
-    private record ChannelMessageData(@NonNull String channel) {}
+    private record PartMessageData(List<String> messageIds, String partId, String messagePart) {
+    }
+    
+    private record ChannelMessageData(@NonNull String channel) {
+    }
+    
     @OnMessage
     public void onMessage(String message) {
+        final byte[] decoded = Base64.getDecoder().decode(message);
         try {
-            JsonRawMessage contextJsonMessage = objectMapper.readValue(message,JsonRawMessage.class);
-//            Map<String, Object> contentMap = objectMapper.readValue(message, HashMap.class);
-            //TODO
-//            JwtAuthenticationFilter.setUserToSecurityContextHolder(sessionUser);
+            JsonRawMessage contextJsonMessage = objectMapper.readValue(decoded, JsonRawMessage.class);
             if (!checkToken(contextJsonMessage)) {
-                return;//TODO
+                return;
             }
             String contextId = contextJsonMessage.getMessageId();
             
             final String typeName = contextJsonMessage.getType().getName();
             switch (typeName) {
                 case "partMessage" -> {
-                    PartMessageData partMessageData = objectMapper.readValue(contextJsonMessage.getData(),PartMessageData.class);
-                    PartRawMessage partRawMessage;
+                    PartMessageData partMessageData = objectMapper.readValue(contextJsonMessage.getData(), PartMessageData.class);
+                    PartRawMessageProcessor partRawMessageProcessor;
                     String partId;
                     if (partMessageData.messageIds != null) {
-                        partRawMessage = new PartRawMessage(partMessageData.messageIds);
-                        partMessageMap.put(contextId, partRawMessage);
+                        partRawMessageProcessor = new PartRawMessageProcessor(partMessageData.messageIds);
+                        partMessageMap.put(contextId, partRawMessageProcessor);
                         partId = contextId;
                         sendMessage("{\"type\":\"success\",\"messageId\":\"" + contextId + "\"}");
                     } else if (partMessageData.partId != null && partMessageData.messagePart != null) {
                         partId = partMessageData.partId;
-                        partRawMessage = partMessageMap.get(partId);
-                        partRawMessage.put(contextId, partMessageData.messagePart);
+                        partRawMessageProcessor = partMessageMap.get(partId);
+                        partRawMessageProcessor.put(contextId, partMessageData.messagePart);
                     } else {
                         sendMessage("{\"type\":\"error\",\"message\":\"not supported message format\",\"messageId\":\"" + contextId + "\"}");
                         return;
                     }
-                    if (partRawMessage.isComplete()) {
-                        onMessage(partRawMessage.toString());
+                    if (partRawMessageProcessor.isComplete()) {
+                        onMessage(partRawMessageProcessor.toString());
                         partMessageMap.remove(partId);
                     }
                 }
                 case "subscribe" -> {
-                    ChannelMessageData channelMessageData = objectMapper.readValue(contextJsonMessage.getData(),ChannelMessageData.class);
+                    ChannelMessageData channelMessageData = objectMapper.readValue(contextJsonMessage.getData(), ChannelMessageData.class);
                     final String channelName = channelMessageData.channel;
-                    logger.debug("websocket subscribe from {}({}): channel \"{}\"", sessionUser.getName(),sessionUser.getQQNumber(),channelName);
+                    logger.debug("websocket subscribe from {}({}): channel \"{}\"", sessionUser.getName(), sessionUser.getQQNumber(), channelName);
                     webSocketService.subscribeChannel(sid, channelName);
                     sendMessage("{\"type\":\"success\",\"messageId:\":\"" + contextId + "\"}");
                 }
                 case "unsubscribe" -> {
-                    ChannelMessageData channelMessageData = objectMapper.readValue(contextJsonMessage.getData(),ChannelMessageData.class);
+                    ChannelMessageData channelMessageData = objectMapper.readValue(contextJsonMessage.getData(), ChannelMessageData.class);
                     final String channelName = channelMessageData.channel;
-                    logger.debug("websocket unsubscribe from {}({}): channel \"{}\"", sessionUser.getName(),sessionUser.getQQNumber(),channelName);
+                    logger.debug("websocket unsubscribe from {}({}): channel \"{}\"", sessionUser.getName(), sessionUser.getQQNumber(), channelName);
                     webSocketService.unsubscribeChannel(sid, channelName);
                     sendMessage("{\"type\":\"success\",\"messageId:\":\"" + contextId + "\"}");
                 }
                 default -> {
-                    String logMessage = message.length() > 4096 ? message.substring(0, 4096) : message;
+                    String logMessage = Arrays.toString(Arrays.copyOf(decoded, Math.min(decoded.length, LOG_TRUNCATE_SIZE)));
                     try {
                         ResultJsonContext<OutputData> context = actionExecutor.executeWithJson(typeName, contextJsonMessage.data);
                         logger.debug("{}({}):{}", sessionUser.getName(), sid, logMessage);
@@ -170,15 +164,16 @@ public class Connector implements SubProtocolCapable {
                                 case ERROR -> IMessage.Type.ERROR;
                                 case WARNING -> IMessage.Type.WARNING;
                             };
-                            JsonRawMessage jsonRawMessage = new JsonRawMessage(type,contextId,optionalJsonResult.get());
-                            sendMessage(jsonRawMessage);//FIXME force closed when the message is too long
+                            JsonRawMessage jsonRawMessage = new JsonRawMessage(type, contextId, optionalJsonResult.get());
+                            sendMessage(jsonRawMessage);
                         }
                     } catch (Exception e) {
                         if (logger.isDebugEnabled()) {
                             e.printStackTrace();
                         }
                         logger.error("{} : {}", e.getClass().getName(), e.getMessage());
-                        logger.debug("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, logMessage);
+                        String errorRawMessage = Arrays.toString(decoded);
+                        logger.debug("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, errorRawMessage);
                         if (e instanceof PermissionDeniedException permissionDeniedException) {
                             sendError(contextId, permissionDeniedException.getMessage());
                         } else
@@ -189,10 +184,12 @@ public class Connector implements SubProtocolCapable {
         } catch (Exception e) {
             try {
                 logger.error("{}:{}", e.getClass().getName(), e.getMessage());
-                String messageId = objectMapper.readValue(message, HashMap.class).get("messageId").toString();
+                String messageId = objectMapper.readValue(decoded, HashMap.class).get("messageId").toString();
                 sendError(messageId, e.getClass().getSimpleName() + ":" + e.getMessage());
             } catch (IOException exception) {
-                logger.error("while sending message:{}to {}({}):{}", message, sessionUser.getName(), sid, exception.getMessage());
+                String logMessage = Arrays.toString(decoded);
+                logger.error("while sending error message (caused by \"{}\") to {}({}):{}", logMessage, sessionUser.getName(), sid, exception.getMessage());
+                exception.printStackTrace();
             }
             e.printStackTrace();
         }
@@ -203,7 +200,8 @@ public class Connector implements SubProtocolCapable {
         sendMessage(message);
     }
     
-    private record TokenMessage(String token){}
+    private record TokenMessage(String token) {
+    }
     
     private boolean checkToken(JsonRawMessage message) throws IOException {
         if (message.getType().equals(Message.Type.of("token"))) {
@@ -216,24 +214,11 @@ public class Connector implements SubProtocolCapable {
             }
             
             actionExecutor.execute(SendPermissionsToUsersAction.class,
-                    new SendPermissionsToUsersAction.Input(List.of(sessionUser)));;
+                    new SendPermissionsToUsersAction.Input(List.of(sessionUser)));
+            ;
             return false;
         } else if (sessionUser != null) {
             JwtAuthenticationFilter.setUserToSecurityContextHolder(sessionUser);
-/*
-            if (sessionUser.isEnabled()) {
-*/
-/*
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        sessionUser,
-                        null,
-                        sessionUser.getAuthorities()
-                );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-*//*
-
-            }
-*/
             if (!sessionUser.isEnabled()) {
                 Map<String, String> dataMap = new HashMap<>();
                 dataMap.put("type", "error");
@@ -247,27 +232,22 @@ public class Connector implements SubProtocolCapable {
         }
     }
     
-    @OnError
-    public void onError(Session session, Throwable error) {
-        logger.error(session.getBasicRemote().toString(),error);
-    }
-    
-    public void sendMessage(LinkedHashMap<String,Object> map) throws IOException {
-        sendMessage(objectMapper.writeValueAsString(map));
-    }
-    
     public void sendMessage(IMessage<?> message) throws IOException {
-        sendMessage(objectMapper.writeValueAsString(message));
+        final String messageString = objectMapper.writeValueAsString(message);
+        sendMessage(messageString);
     }
     
-    public void sendMessageWithOutLog(String message) throws IOException {
-        this.session.getBasicRemote().sendText(message);
+    public void sendMessageWithOutLog(String messageString) throws IOException {
+        this.session.getBasicRemote().sendText(Base64.getEncoder().encodeToString(messageString.getBytes()));
     }
     
-    public void sendMessage(String message) throws IOException {
-        this.session.getBasicRemote().sendText(message);
-        if (message.length() > 8192) message = message.substring(0, 8192) + "\n=========(truncated)=========";
-        logger.debug("webSocket to {}({}):{}", sessionUser.getName(), sid, message);
+    public void sendMessage(String messageString) throws IOException {
+        sendMessageWithOutLog(messageString);
+        if (logger.isDebugEnabled()) {
+            if (messageString.length() > LOG_TRUNCATE_SIZE)
+                messageString = messageString.substring(0, LOG_TRUNCATE_SIZE) + "\n=========(truncated)=========";
+            logger.debug("webSocket to {}({}):{}", sessionUser.getName(), sid, messageString);
+        }
     }
     
     @NonNull

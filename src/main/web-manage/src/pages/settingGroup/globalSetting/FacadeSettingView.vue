@@ -114,7 +114,7 @@ const deleteIcon = () => {
         <div style="display: flex;flex-direction: row;flex-wrap: wrap">
             <el-text style="align-self:baseline;font-size: 24px;margin-right: 32px;">首页设置</el-text>
             <template
-                 v-if="PermissionInfo.hasPermission('setting','save facade setting')">
+                    v-if="PermissionInfo.hasPermission('setting','save facade setting')">
                 <transition-group name="blur-scale">
                     <el-button-group key="button-group" style="margin: 2px 24px 2px 0;">
                         <transition-group name="blur-scale">
@@ -148,16 +148,13 @@ const deleteIcon = () => {
                                     <el-image :src="data.icon" fit="contain"
                                               style="width: 100%;height: 100%;"></el-image>
                                 </div>
-                                <div style="display: flex;flex-direction: column;margin-left: 32px;margin-right: 16px;margin-bottom: 48px;z-index: 1;justify-content: center;">
-                                    <el-text
-                                            style="font-size: 44px;font-weight: bolder;height: 60px;margin-top:20px;min-width: 300px;align-self: baseline;"
-                                            :type="data.title?undefined:'info'">{{
+                                <div style="margin: 32px 16px;z-index: 1">
+                                    <el-text class="title" :type="data.title?undefined:'info'">{{
                                             data.title ? data.title : "[无标题]"
                                         }}
                                     </el-text>
-                                    <el-text
-                                            style="font-size: 24px;height: 40px;margin-top:20px;min-width: 240px;margin-bottom: 40px;align-self: baseline;"
-                                            :type="data.subTitle?undefined:'info'">
+                                    <br/>
+                                    <el-text class="subtitle" :type="data.subTitle?undefined:'info'">
                                         {{ data.subTitle ? data.subTitle : "[无副标题]" }}
                                     </el-text>
                                 </div>
@@ -340,11 +337,26 @@ const deleteIcon = () => {
     aspect-ratio: 1;
     height: 20vh;
     margin-right: 40px;
-    margin-bottom: 48px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+.title {
+    font-size: 44px;
+    font-weight: bolder;
+    height: 60px;
+    margin-top: 20px;
+    min-width: 300px;
+}
+
+.subtitle {
+    font-size: 24px;
+    height: 40px;
+    margin-top: 20px;
+    min-width: 240px;
+    margin-bottom: 40px;
 }
 
 .exam-info {
@@ -353,7 +365,7 @@ const deleteIcon = () => {
     align-items: stretch;
     justify-content: start;
     width: 400px;
-    padding: 20px 32px !important;
+    padding: 20px 32px;
     z-index: 1;
     align-self: center;
 }

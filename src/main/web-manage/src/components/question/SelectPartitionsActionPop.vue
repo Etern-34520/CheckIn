@@ -63,7 +63,7 @@ defineExpose({
 <style scoped>
 /*noinspection CssUnusedSymbol*/
 .creatingPartition-enter-active, .creatingPartition-leave-active {
-    transition: all 0.3s var(--ease-in-bounce-1);
+    transition: all 0.3s var(--ease-in-bounce);
 }
 
 /*noinspection CssUnusedSymbol*/

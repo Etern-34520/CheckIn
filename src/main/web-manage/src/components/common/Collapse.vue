@@ -118,7 +118,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
 }
 
 .action-button-pointer {
-    transition: transform 500ms var(--ease-in-bounce-1) 100ms;
+    transition: transform 500ms var(--ease-in-bounce) 100ms;
 }
 
 .collapse-title > .action-button {

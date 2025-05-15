@@ -1,5 +1,6 @@
 package indi.etern.checkIn.aop;
 
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.record.RequestRecord;
 import indi.etern.checkIn.service.dao.RequestRecordService;
@@ -13,9 +14,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @Aspect
@@ -68,10 +67,7 @@ public class ExamLoggerAspects {
     }
     
     private void sendUpdateRequestRecord(RequestRecord requestRecord) {
-        Map<Object, Object> updateData = new HashMap<>();
-        updateData.put("type", "updateRequestRecord");
-        updateData.put("requestRecord", requestRecord);
-        webSocketService.sendMessageToChannel(updateData, "requestRecords");
+        webSocketService.sendMessageToChannel(Message.of("updateRequestRecord", requestRecord), "requestRecords");
     }
     
     

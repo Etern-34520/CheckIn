@@ -124,7 +124,7 @@ const props = defineProps({
 
 <style scoped>
 #menu-container {
-    transition: all 300ms var(--ease-in-bounce-1);
+    transition: all 300ms var(--ease-in-bounce);
     transition-delay: 100ms;
     margin-right: 46px;
 }
@@ -148,7 +148,7 @@ const props = defineProps({
     height: calc(100% - 44px);
     width: 36px;
     padding: 0 4px 4px;
-    transition: all 300ms var(--ease-in-bounce-1);
+    transition: all 300ms var(--ease-in-bounce);
     transition-delay: 100ms;
     overflow-x: hidden;
     overflow-y: auto;

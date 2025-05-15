@@ -7,6 +7,7 @@ import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.service.dao.ExamDataService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class ManualInvalidExamAction extends BaseAction<ManualInvalidExamAction.
     }
     
     @Override
+    @Transactional
     public void execute(ExecuteContext<Input, MessageOutput> context) {
         context.requirePermission("manual invalid exam");
         Optional<ExamData> optionalExamData = examDataService.findById(context.getInput().id);

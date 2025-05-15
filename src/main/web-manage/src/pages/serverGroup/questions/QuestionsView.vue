@@ -1011,7 +1011,7 @@ const getTypeName = (type) => {
     margin-right: 4px;
     border-radius: 50%;
     align-self: center;
-    transition: 300ms var(--ease-in-bounce);
+    transition: 300ms var(--ease-in-quint);
 }
 
 .point.changed {

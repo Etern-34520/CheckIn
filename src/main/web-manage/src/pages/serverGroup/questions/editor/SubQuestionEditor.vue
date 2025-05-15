@@ -317,7 +317,7 @@ const ableToChangeAuthor = () => {
 
 /*noinspection CssUnusedSymbol*/
 .alert-enter-active {
-    transition: all 300ms var(--ease-in-bounce-1) 300ms,
+    transition: all 300ms var(--ease-in-bounce) 300ms,
     grid-template-columns 200ms var(--ease-in-out-quint),
     max-height 200ms var(--ease-in-out-quint),
     padding 200ms var(--ease-in-out-quint);
@@ -325,7 +325,7 @@ const ableToChangeAuthor = () => {
 
 /*noinspection CssUnusedSymbol*/
 .alert-leave-active {
-    transition: all 300ms var(--ease-in-bounce-1) 0ms,
+    transition: all 300ms var(--ease-in-bounce) 0ms,
     grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
     max-height 200ms var(--ease-in-out-quint) 350ms,
     padding 200ms var(--ease-in-out-quint) 350ms;

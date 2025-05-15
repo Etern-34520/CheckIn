@@ -37,7 +37,6 @@ public class GradingLevelService {
     }
     
     public List<GradingLevel> findAll() {
-        //FIXME
         return gradingLevelRepository.findAll(Sort.by(Sort.Order.by("levelIndex")));
     }
     

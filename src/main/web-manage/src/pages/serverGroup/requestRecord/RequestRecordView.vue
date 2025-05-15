@@ -39,7 +39,7 @@ const getRequestRecords = async () => {
 getRequestRecords();
 const channel = WebSocketConnector.subscribe("requestRecords", (data1) => {
     // console.log(data1);
-    const requestRecord = data1.requestRecord;
+    const requestRecord = data1.data;
     const date = requestRecord.time.split(" ")[0];
     // console.log(data.value);
     if (data.value[date]) {

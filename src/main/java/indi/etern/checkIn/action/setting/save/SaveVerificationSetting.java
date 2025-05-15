@@ -31,7 +31,6 @@ public class SaveVerificationSetting extends BaseAction<SaveVerificationSetting.
         for (Map<String, Object> data : dataList) {
             Map<String, Object> property = (Map<String, Object>) data.get("property");
             List<String> trace = (List<String>) property.get("trace");
-//            List<String> verificationTypeNames = (List<String>) property.get("verificationTypeNames");
             String verificationTypeName = property.get("verificationTypeName").toString();
             VerificationRule verificationRule = VerificationRule.builder()
                     .id((String) data.get("id"))

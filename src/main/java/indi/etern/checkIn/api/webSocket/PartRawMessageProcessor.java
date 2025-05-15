@@ -4,10 +4,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PartRawMessage {
+public class PartRawMessageProcessor {
     private Map<String, String> partMap = new LinkedHashMap<>();
 
-    public PartRawMessage(List<String> partIds) {
+    public PartRawMessageProcessor(List<String> partIds) {
         for (String partId : partIds) {
             partMap.put(partId, "");
         }

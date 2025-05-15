@@ -10,7 +10,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,15 +20,12 @@ import java.util.Optional;
 @CacheConfig(cacheNames = "partition")
 public class PartitionService {
     public static PartitionService singletonInstance;
-    final
-    TransactionTemplate transactionTemplate;
     @Resource
     private PartitionRepository partitionRepository;
     private final Cache cache;
 
-    protected PartitionService(TransactionTemplate transactionTemplate, CacheManager cacheManager) {
+    protected PartitionService(CacheManager cacheManager) {
         singletonInstance = this;
-        this.transactionTemplate = transactionTemplate;
         cache = cacheManager.getCache("partition");
     }
     

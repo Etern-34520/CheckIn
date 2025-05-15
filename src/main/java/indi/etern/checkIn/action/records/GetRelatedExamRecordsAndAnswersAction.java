@@ -5,7 +5,6 @@ import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.interfaces.OutputData;
-import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.service.dao.ExamDataService;
 
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Action("getRelatedExamRecordsAndAnswers")
-public class getRelatedExamRecordsAndAnswersAction extends BaseAction<getRelatedExamRecordsAndAnswersAction.Input, getRelatedExamRecordsAndAnswersAction.SuccessOutput> {
+public class GetRelatedExamRecordsAndAnswersAction extends BaseAction<GetRelatedExamRecordsAndAnswersAction.Input, GetRelatedExamRecordsAndAnswersAction.SuccessOutput> {
     public record Input(String questionId) implements InputData {}
     public record SuccessOutput(List<Map<String,Object>> examDataAnswerList) implements OutputData {
         @Override
@@ -25,11 +24,9 @@ public class getRelatedExamRecordsAndAnswersAction extends BaseAction<getRelated
     }
     
     private final ExamDataService examDataService;
-    private final JwtTokenProvider jwtTokenProvider;
     
-    public getRelatedExamRecordsAndAnswersAction(ExamDataService examDataService, JwtTokenProvider jwtTokenProvider) {
+    public GetRelatedExamRecordsAndAnswersAction(ExamDataService examDataService) {
         this.examDataService = examDataService;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
     
     @Override

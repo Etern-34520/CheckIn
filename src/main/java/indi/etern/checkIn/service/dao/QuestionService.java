@@ -2,53 +2,62 @@ package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
+import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.QuestionRepository;
 import jakarta.annotation.Resource;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Service
-@CacheConfig(cacheNames = "question")
+//@CacheConfig(cacheNames = "question")
 public class QuestionService {
     public static QuestionService singletonInstance;
-    final TransactionTemplate transactionTemplate;
     final PartitionService partitionService;
     @Resource
     private QuestionRepository questionRepository;
-
-    protected QuestionService(TransactionTemplate transactionTemplate, PartitionService partitionService) {
+    private final Cache partitionCache;
+    
+    protected QuestionService(PartitionService partitionService, CacheManager cacheManager) {
         singletonInstance = this;
-        this.transactionTemplate = transactionTemplate;
         this.partitionService = partitionService;
+        partitionCache = cacheManager.getCache("partition");
     }
     
-    @CachePut(key = "#question.id")
+    private void evictRelatedPartitionCache(Question question) {
+        if (question.getLinkWrapper() instanceof ToPartitionsLink toPartitionsLink) {
+            final Set<Partition> partitions = toPartitionsLink.getTargets();
+            for (Partition partition : partitions) {
+                partitionCache.evict(partition.getId());
+            }
+        }
+    }
+    
+//    @CachePut(key = "#question.id")
     public Question save(Question question) {
+        evictRelatedPartitionCache(question);
         return questionRepository.save(question);
     }
-
-    @Cacheable(key = "#id")
+    
+//    @Cacheable(key = "#id")
     public Optional<Question> findById(String id) {
         return questionRepository.findById(id);
     }
     
-    @CacheEvict(key = "#question.id")
+//    @CacheEvict(key = "#question.id")
     public void delete(Question question) {
         if (question instanceof QuestionGroup questionGroup) {
             questionGroup.getQuestionLinks().forEach(link -> {
@@ -56,6 +65,7 @@ public class QuestionService {
                 questionRepository.delete(subQuestion);
             });
         }
+        evictRelatedPartitionCache(question);
         questionRepository.delete(question);
     }
     
@@ -63,8 +73,11 @@ public class QuestionService {
         return questionRepository.findAllById(questionIds);
     }
     
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     public void saveAll(Collection<Question> questions) {
+        for (Question question : questions) {
+            evictRelatedPartitionCache(question);
+        }
         questionRepository.saveAll(questions);
     }
     
@@ -72,11 +85,6 @@ public class QuestionService {
         return questionRepository.findAllByAuthor(author)
                 .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink)
                 .toList();
-    }
-    
-    @CacheEvict(allEntries = true)
-    public void flush() {
-        questionRepository.flush();
     }
     
     public List<Question> findAllByUpVotersContains(User user) {

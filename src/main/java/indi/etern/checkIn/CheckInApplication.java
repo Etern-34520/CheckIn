@@ -40,8 +40,8 @@ public class CheckInApplication {
 	public Cache<String, Object> caffeineCache() {
 		return Caffeine.newBuilder()
 				.expireAfterWrite(30, TimeUnit.SECONDS)
-				.initialCapacity(100)
-				.maximumSize(2000)
+				.initialCapacity(128)
+				.maximumSize(8192)
 				.build();
 	}
 }

@@ -4,10 +4,12 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
 import indi.etern.checkIn.service.dao.QuestionService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+@Slf4j
 @SpringBootTest(classes = CheckInApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("dev")
@@ -29,9 +32,20 @@ public class TestIncludeExcel {
     private ObjectMapper objectMapper;
     @Autowired
     private QuestionService multiPartitionableQuestionService;
+    
+    @Test
+    void include2000() {
+        for (int i = 0; i < 10; i++) {
+            includeInternal("test from excel " + i);
+        }
+    }
 
     @Test
-    void include() {
+    void include1() {
+        includeInternal("test from excel");
+    }
+    
+    void includeInternal(String partitionName) {
         String fileName = ".\\question.xlsx";
         List<Question> multiPartitionableQuestionList = new ArrayList<>(250);
         // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
@@ -77,6 +91,10 @@ public class TestIncludeExcel {
                             multipleQuestionBuilder.addChoice(choice);
                             index++;
                         }
+                        multipleQuestionBuilder.usePartitionLinks((link) -> {
+                            link.getTargets().add(Partition.ofName(partitionName));
+                        });
+                        multipleQuestionBuilder.setEnable(true);
                         Question build = multipleQuestionBuilder.build();
 //                        multiPartitionableQuestionService.save(build);
                         multiPartitionableQuestionList.add(build);

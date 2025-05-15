@@ -9,7 +9,6 @@ import indi.etern.checkIn.entities.robotToken.RobotTokenItem;
 import indi.etern.checkIn.service.dao.RobotTokenService;
 import indi.etern.checkIn.utils.SaveSettingCommon;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.FrameworkServlet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,7 +34,7 @@ public class SaveAdvanceSetting extends BaseAction<SaveAdvanceSetting.Input, Sav
     
     private final RobotTokenService robotTokenService;
     
-    public SaveAdvanceSetting(RobotTokenService robotTokenService, FrameworkServlet frameworkServlet) {
+    public SaveAdvanceSetting(RobotTokenService robotTokenService) {
         this.robotTokenService = robotTokenService;
     }
     

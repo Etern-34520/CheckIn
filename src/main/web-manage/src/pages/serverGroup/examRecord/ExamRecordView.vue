@@ -52,7 +52,7 @@ const putItem = (date, examRecord) => {
     }
 }
 const channel = WebSocketConnector.subscribe("examRecord", (data1) => {
-    const examRecord = data1.examRecord;
+    const examRecord = data1.data;
     const generateDate = examRecord.generateTime.split(" ")[0];
     const submitDate = examRecord.submitTime ? examRecord.submitTime.split(" ")[0] : null;
     putItem(generateDate, examRecord);

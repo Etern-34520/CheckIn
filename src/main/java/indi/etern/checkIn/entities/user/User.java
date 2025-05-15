@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import indi.etern.checkIn.CheckInApplication;
-import indi.etern.checkIn.auth.Authority;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.*;
+import java.util.Collection;
 
 @Entity
 @Table(name = "Users")
@@ -30,7 +29,6 @@ public class User implements UserDetails {
     protected String name;
     
     @JsonProperty("qq")
-    @Getter
     @Id
     protected long QQNumber;
     
@@ -58,22 +56,9 @@ public class User implements UserDetails {
     
     public User() {}
     
-    public static User exampleOfName(String name) {
-        final User user = new User();
-        user.name = name;
-        user.QQNumber = 0;
-        return user;
-    }
-    
-    public static User exampleOfQQNumber(int qqNumber) {
-        final User user = new User();
-        user.QQNumber = qqNumber;
-        user.name = "";
-        return user;
-    }
-    
-    public void setQQNumber(int QQNumber) {
-        this.QQNumber = QQNumber;
+    @JsonIgnore
+    public long getQQNumber() {
+        return QQNumber;
     }
     
     public void setRole(Role role) {
@@ -107,22 +92,15 @@ public class User implements UserDetails {
     }
     
     @Override
+    @JsonIgnore
     public String getUsername() {
         return name;
-    }
-    
-    public void setUsername(String username) {
-        this.name = username;
     }
     
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<Authority> authorities = new ArrayList<>();
-        for (Permission permission : role.getPermissions()) {
-            authorities.add(new Authority(permission.getName()));
-        }
-        return authorities;
+        return role.getPermissions();
     }
     
     /**
@@ -155,7 +133,6 @@ public class User implements UserDetails {
     /**
      * @return 账户是否可用
      */
-    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return enabled;

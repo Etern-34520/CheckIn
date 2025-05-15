@@ -2,6 +2,7 @@ package indi.etern.checkIn.entities.exam;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.converter.ObjectJsonConverter;
@@ -189,9 +190,6 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
     }
     
     public void sendUpdateExamRecord() {
-        Map<Object, Object> updateData = new HashMap<>();
-        updateData.put("type", "updateExamRecord");
-        updateData.put("examRecord", this);
-        WebSocketService.singletonInstance.sendMessageToChannel(updateData, "examRecord");
+        WebSocketService.singletonInstance.sendMessageToChannel(Message.of("updateExamRecord", this), "examRecord");
     }
 }

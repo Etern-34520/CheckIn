@@ -6,7 +6,6 @@ import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.interfaces.OutputData;
-import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.ExamDataService;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,15 +26,13 @@ public class GetExamRecordDetailAction extends BaseAction<GetExamRecordDetailAct
     }
     
     private final ExamDataService examDataService;
-    private final JwtTokenProvider jwtTokenProvider;
     
-    public GetExamRecordDetailAction(ExamDataService examDataService, JwtTokenProvider jwtTokenProvider) {
+    public GetExamRecordDetailAction(ExamDataService examDataService) {
         this.examDataService = examDataService;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
     
-    @Transactional
     @Override
+    @Transactional
     public void execute(ExecuteContext<Input, OutputData> context) {
         examDataService.findById(context.getInput().id)
                 .ifPresentOrElse((examData) -> {

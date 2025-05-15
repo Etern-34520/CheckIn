@@ -11,11 +11,6 @@ public class GetSettingCommon {
     private final String rootName;
     List<String> keys;
     
-    public GetSettingCommon(List<String> keys, String rootName) {
-        this.keys = keys;
-        this.rootName = rootName;
-    }
-    
     public GetSettingCommon(String[] keys, String rootName) {
         this.keys = List.of(keys);
         this.rootName = rootName;

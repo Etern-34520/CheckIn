@@ -1,13 +1,5 @@
 @import './base.css';
 
-/*
-@font-face {
-    font-family: 'HarmonyOS Sans SC1';
-    src: url('/checkIn/fonts/HarmonyOS_Sans_SC_Regular.ttf') format('ttf');
-    font-weight: normal;
-    font-style: normal;
-}
-*/
 :not(.disable-init-animate):not(.el-loading-mask) {
     --init-animation: init 400ms var(--ease-out-quint) 100ms;
 }
@@ -108,11 +100,7 @@ div.panel {
 }
 
 * {
-    font-family: "HarmonyOS Sans SC", "微软雅黑", sans-serif;
-}
-
-*:focus-visible {
-    /*outline: solid 2px var(--el-color-primary);*/
+    font-family: "HarmonyOS Sans SC", system-ui, "微软雅黑", sans-serif;
 }
 
 #top-bar, #menu-container {
@@ -134,15 +122,6 @@ div.panel {
     max-width: 100%;
 }
 
-.main-router-enter-active .manage-page-router {
-    transition: all 0.6s var(--ease-in-bounce-1);
-    transition-delay: 0.3s;
-}
-
-.main-router-enter-from .manage-page-router {
-    opacity: 0;
-    transform: translateX(-100px);
-}
 
 .el-upload--picture-card {
     transition: 0.2s var(--ease-in-out-quint);
@@ -160,22 +139,6 @@ div.panel {
 .node-button svg {
     margin-left: 0 !important;
 }
-
-/*
-
-.el-select-dropdown__list {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-}
-
-.el-select-dropdown__warp {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: stretch !important;
-    justify-items: stretch !important;
-}*/
 
 .circular {
     display: none !important;

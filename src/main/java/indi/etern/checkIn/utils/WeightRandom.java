@@ -84,8 +84,10 @@ public class WeightRandom<T> {
         this.weightsArray = weights;
         //noinspection unchecked
         this.partsArray = partsArray;
-        logger.debug("weight flushed: {}", Arrays.toString(weights));
-        logger.debug("parts flushed: {}", Arrays.toString(partsArray));
+        if (logger.isDebugEnabled()) {
+            logger.debug("weight flushed: {}", Arrays.toString(weights));
+            logger.debug("parts flushed: {}", Arrays.toString(partsArray));
+        }
         dirty = false;
     }
     public T weightedRandomOne() {

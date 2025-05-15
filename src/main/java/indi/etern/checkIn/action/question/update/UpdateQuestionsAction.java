@@ -48,8 +48,8 @@ public class UpdateQuestionsAction extends BaseAction<UpdateQuestionsAction.Inpu
         this.webSocketService = webSocketService;
     }
     
-    @Transactional
     @Override
+    @Transactional
     public void execute(ExecuteContext<Input, Output> context) {
         final Input input = context.getInput();
         final List<Map<String, Object>> questions = input.updatedQuestions;

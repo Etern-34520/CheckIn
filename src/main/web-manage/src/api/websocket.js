@@ -9,17 +9,40 @@ let qq1;
 let token1;
 
 let notifications = {};
-let limits = 64 * 1024;//64KB
+let limits = 64 * 1024 / 2 - 1;//64KB
 
 function getCurrentIsoTime() {
     return new Date().toISOString();
+}
+
+
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
+
+function encode(message) {
+    return StringToBase64(JSON.stringify(message));
+}
+
+function decode(message) {
+    return JSON.parse(base64ToString(message));
+}
+
+function StringToBase64(bytes) {
+    const binString = Array.from(textEncoder.encode(bytes), (byte) =>
+        String.fromCodePoint(byte),
+    ).join("");
+    return btoa(binString);
+
+}
+function base64ToString(base64) {
+    return textDecoder.decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
 }
 
 let autoRetriedTimes = 0;
 let normallyClose = false;
 
 const sendInternal = (objMessage) => {
-    let message = JSON.stringify(objMessage);
+    let message = encode(objMessage);
     if (message.length > limits) {
         const messageParts = [];
         const partCount = Math.ceil(message.length / limits);
@@ -40,9 +63,8 @@ const sendInternal = (objMessage) => {
         const promiseData1 = {};
         let promise1 = new Promise((resolve, reject) => {
             promiseData1["resolve"] = () => {
-                for (const message of messageParts) {
-                    //todo test
-                    WebSocketConnector.ws.send(JSON.stringify(message));
+                for (const message1 of messageParts) {
+                    WebSocketConnector.ws.send(encode(message1));
                 }
                 WebSocketConnector.promises[objMessage["messageId"]] = oldPromise;
             };
@@ -56,7 +78,7 @@ const sendInternal = (objMessage) => {
 
         console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (part message [count: ${partMessageIds.length}]):`, objMessage);
 
-        WebSocketConnector.ws.send(JSON.stringify({
+        WebSocketConnector.ws.send(encode({
             messageId: objMessage["messageId"],
             type: "partMessage",
             data: {
@@ -68,6 +90,57 @@ const sendInternal = (objMessage) => {
 
         WebSocketConnector.ws.send(message);
     }
+}
+
+const onMessageInternal = (message) => {
+        if (WebSocketConnector.actions[message.type] instanceof Array) {
+            console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
+            for (const callback of WebSocketConnector.actions[message.type]) {
+                callback(message);
+            }
+        } else if (WebSocketConnector.channels[message.channelName]) {
+            const channel1 = WebSocketConnector.channels[message.channelName];
+            console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
+            if (channel1 && channel1.actions instanceof Array) {
+                channel1.actions.forEach((callback) => {
+                    callback(message);
+                });
+            }
+        } else if (message.messageId) {
+            const promise = WebSocketConnector.promises[message.messageId];
+            if (promise && promise instanceof Promise) {
+                if (message.type === "error") {
+                    let showNotification = true;
+                    message.disableNotification = () => {
+                        showNotification = false;
+                    }
+                    const doNotification = () => {
+                        delete message.disableNotification;
+                        if (showNotification) {
+                            console.error("websocket error", message);
+                            ElNotification({
+                                title: '执行操作时出错',
+                                message: message.data,
+                                position: 'bottom-right',
+                                type: 'error',
+                                duration: 3000
+                            });
+                        }
+                    }
+                    promise.catch(doNotification);
+                    promise.reject(message);
+                } else {
+                    console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
+                    promise.resolve(message);
+                }
+            }
+        } else {
+            console.warn(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (no handler):`, message);
+        }
+}
+const onMessage = (event) => {
+    const message = decode(event.data);
+    onMessageInternal(message);
 }
 const WebSocketConnector = {
     ws: null,
@@ -81,7 +154,7 @@ const WebSocketConnector = {
         token1 = token;
         let url = window.location.host;
         // let url = "localhost:8080";
-        return new Promise((resolve, reject)  => {
+        return new Promise((resolve, reject) => {
             // window.cookieStore.get("token").then((result) => {
             //     let date = new Date(result.expires);
             const decoded = jwtDecode(token);
@@ -174,54 +247,7 @@ const WebSocketConnector = {
                     }
                     resolve();
                 }.bind(this);
-                ws.onmessage = function (event) {
-                    const message = JSON.parse(event.data);
-                    // delete message.messageId;
-                    if (WebSocketConnector.actions[message.type] instanceof Array) {
-                        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
-                        for (const callback of WebSocketConnector.actions[message.type]) {
-                            callback(message);
-                        }
-                    } else if (WebSocketConnector.channels[message.channelName]) {
-                        const channel1 = WebSocketConnector.channels[message.channelName];
-                        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
-                        if (channel1 && channel1.actions instanceof Array) {
-                            channel1.actions.forEach((callback) => {
-                                callback(message);
-                            });
-                        }
-                    } else if (message.messageId) {
-                        const promise = this.promises[message.messageId];
-                        if (promise && promise instanceof Promise) {
-                            if (message.type === "error") {
-                                let showNotification = true;
-                                message.disableNotification = () => {
-                                    showNotification = false;
-                                }
-                                const doNotification = () => {
-                                    delete message.disableNotification;
-                                    if (showNotification) {
-                                        console.error("websocket error", message);
-                                        ElNotification({
-                                            title: '执行操作时出错',
-                                            message: message.data,
-                                            position: 'bottom-right',
-                                            type: 'error',
-                                            duration: 3000
-                                        });
-                                    }
-                                }
-                                promise.catch(doNotification);
-                                promise.reject(message);
-                            } else {
-                                console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
-                                promise.resolve(message);
-                            }
-                        }
-                    } else {
-                        console.warn(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (no handler):`, message);
-                    }
-                }.bind(this);
+                ws.onmessage = onMessage;
                 this.ws = ws;
             }
         });

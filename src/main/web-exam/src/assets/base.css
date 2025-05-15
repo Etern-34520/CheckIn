@@ -1,7 +1,6 @@
 :root {
     --el-mask-color: rgba(0, 0, 0, 0.3) !important;
-    --ease-in-bounce: cubic-bezier(0.845, 0.545, 0.565, 1.335);
-    --ease-in-bounce-1: cubic-bezier(0.42, 0.62, 0.09, 1.23);
+    --ease-in-bounce: cubic-bezier(0.42, 0.62, 0.09, 1.23);
     --ease-in-out-bounce: cubic-bezier(0.860, 0.000, 0.235, 1.195);
     --ease-in-out-quint: cubic-bezier(0.860, 0.000, 0.070, 1.000);
     --ease-out-quint: cubic-bezier(0.230, 1.000, 0.320, 1.000);
@@ -339,7 +338,7 @@
     filter: blur(2px);
     background: var(--el-color-primary);
     border-radius: 1.5px;
-    transition: 200ms var(--ease-in-bounce-1);
+    transition: 200ms var(--ease-in-bounce);
 }
 
 .el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:before {
@@ -435,7 +434,7 @@
 }
 
 .el-tree__drop-indicator {
-    transition: 0.2s var(--ease-in-bounce-1);
+    transition: 0.2s var(--ease-in-bounce);
 }
 
 .el-tree-node__content {
@@ -472,7 +471,7 @@
 
 .el-upload-list--picture-card .el-list-enter-active,
 .el-upload-list--picture-card .el-list-leave-active {
-    transition: 0.6s var(--ease-in-bounce-1) !important;
+    transition: 0.6s var(--ease-in-bounce) !important;
 }
 
 .el-upload-list--picture-card .el-upload-list__item {
@@ -511,7 +510,7 @@
     left: 7px !important;
     border-width: 2px !important;
     border-radius: 1px;
-    transition: 200ms var(--ease-in-bounce-1) !important;
+    transition: 200ms var(--ease-in-bounce) !important;
 }
 
 .el-checkbox__inner:before {
@@ -914,7 +913,7 @@
     border-radius: 50%;
     border: 1.5px solid;
     border-color: var(--front-color) #0000;
-    animation: l1 0.8s var(--ease-in-bounce-1) infinite;
+    animation: l1 0.8s var(--ease-in-bounce) infinite;
 }
 
 @keyframes l1 {
@@ -945,7 +944,7 @@
     border-radius: 50%;
     border: 3px solid;
     border-color: var(--front-color) #0000 !important;
-    animation: l1 0.8s var(--ease-in-bounce-1) infinite;
+    animation: l1 0.8s var(--ease-in-bounce) infinite;
 }
 
 @keyframes l1 {
@@ -967,7 +966,7 @@
 #app .el-switch__core .el-switch__action {
     left: 4px;
     background-color: var(--front-color);
-    transition: 400ms var(--ease-in-bounce-1);
+    transition: 400ms var(--ease-in-bounce);
     width: 12px;
     height: 12px;
 }
@@ -1036,7 +1035,7 @@
 
 .dialog-fade-enter-active > div[role="dialog"],
 .is-message-box.fade-in-linear-enter-active > div[role="dialog"] {
-    transition: 400ms var(--ease-in-bounce-1);
+    transition: 400ms var(--ease-in-bounce);
 }
 
 .dialog-fade-leave-active > div[role="dialog"],

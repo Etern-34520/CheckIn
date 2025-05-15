@@ -82,12 +82,12 @@ const user = UserDataInterface.getCurrentUser();
 <style scoped>
 /*noinspection CssUnusedSymbol*/
 .route-page-enter-active {
-    transition: all 0.4s var(--ease-out-quint);
+    transition: all 0.4s var(--ease-out-quint) !important;
 }
 
 /*noinspection CssUnusedSymbol*/
 .route-page-leave-active {
-    transition: all 0.4s var(--ease-in-quint);
+    transition: all 0.4s var(--ease-in-quint) !important;
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -118,5 +118,16 @@ const user = UserDataInterface.getCurrentUser();
 #manage-base > *:nth-of-type(2) {
     flex: 1;
     width: 0;
+}
+</style>
+<style>
+.main-router-enter-active .manage-page-router {
+    transition: all 0.6s var(--ease-in-bounce) !important;
+    transition-delay: 0.4s;
+}
+
+.main-router-enter-from .manage-page-router {
+    opacity: 0;
+    transform: scale(0.95);
 }
 </style>

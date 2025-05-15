@@ -75,7 +75,7 @@ const update = () => {
 watch(() => route.params.id, update, {immediate: true});
 
 const channel = WebSocketConnector.subscribe("examRecord", (data1) => {
-    const examRecord = data1.examRecord;
+    const examRecord = data1.data;
     if (examRecord.id === data.value.id) {
         update();
     }

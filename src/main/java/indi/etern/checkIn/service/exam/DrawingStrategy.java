@@ -40,6 +40,7 @@ public enum DrawingStrategy {
                 } catch (IllegalStateException|ArrayIndexOutOfBoundsException e) {
                     throw new NotEnoughQuestionsForExamException(e);
                 }
+                
                 PartitionQuestionDrawer partitionQuestionDrawer = partitionQuestionDrawerPart.getT();
                 try {
                     final int rest = targetQuestionAmount - count;
@@ -49,7 +50,7 @@ public enum DrawingStrategy {
                 } catch (PartitionMaxLimitReachedException|PartitionEmptiedException e) {
                     logger.warn("WEIGHTED:{} removed due to strategy or empty", partitionQuestionDrawer.getPartition());
                     partitionQuestionDrawerWeightRandom.removeItem(partitionQuestionDrawerPart);
-                    map.values().forEach(partitionQuestionDrawer1 -> partitionQuestionDrawer1.invalidIdentical(partitionQuestionDrawer.getPartition().getEnabledQuestions()));
+                    map.values().forEach(partitionQuestionDrawer1 -> partitionQuestionDrawer1.invalidAll(partitionQuestionDrawer.getPartitionAllEnabledQuestions()));
                 }
             }
         }
@@ -77,7 +78,7 @@ public enum DrawingStrategy {
                     logger.debug("RANDOM: {} added, previous has {}, rest {}", question, count, rest);
                 } catch (PartitionMaxLimitReachedException | PartitionEmptiedException e) {
                     map.remove(partitionQuestionDrawer.getPartition());
-                    map.values().forEach(partitionQuestionDrawer1 -> partitionQuestionDrawer1.invalidIdentical(partitionQuestionDrawer.getPartition().getEnabledQuestions()));
+                    map.values().forEach(partitionQuestionDrawer1 -> partitionQuestionDrawer1.invalidAll(partitionQuestionDrawer.getPartitionAllEnabledQuestions()));
                     logger.warn("RANDOM: {} removed due to strategy or empty", partitionQuestionDrawer.getPartition());
                 }
             }

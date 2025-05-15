@@ -227,16 +227,19 @@ const hideCreatingDialog = () => {
     max-height 0.2s var(--ease-in-out-quint) 0.3s;
 }
 
+/*noinspection CssUnusedSymbol*/
 .filter-enter-from, .filter-leave-to {
     max-height: 0;
     transform: translateX(-100%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .filter-leave-from, .filter-enter-to {
     max-height: 37px;
     transform: translateX(0);
 }
 
+/*noinspection CssUnusedSymbol*/
 .hide-cancel-enter-active,
 .hide-cancel-leave-active {
     transition: opacity 200ms var(--ease-in-out-quint) 0ms,
@@ -244,6 +247,7 @@ const hideCreatingDialog = () => {
     scale 400ms var(--ease-out-quint) 200ms;
 }
 
+/*noinspection CssUnusedSymbol*/
 .hide-cancel-enter-from,
 .hide-cancel-leave-to {
     scale: 0;

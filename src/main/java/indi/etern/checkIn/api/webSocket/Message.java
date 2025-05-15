@@ -12,6 +12,8 @@ public class Message<D> implements IMessage<D> {
     @Setter
     private String messageId;
     protected D data;
+    @Setter
+    private String channelName;
     
     public Message(Type type, String messageId, D data) {
         this.type = type;

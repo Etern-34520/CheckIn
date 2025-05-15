@@ -12,6 +12,7 @@ import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestio
 import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
 import indi.etern.checkIn.entities.question.statistic.QuestionStatistic;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.service.dao.QuestionStatisticService;
 import indi.etern.checkIn.service.web.WebSocketService;
 
 import java.util.*;
@@ -126,15 +127,19 @@ public class QuestionUpdateUtils {
     }
     
     private static Map<String, Number> getStatisticMap(Question question) {
-        QuestionStatistic questionStatistic = question.getQuestionStatistic();
-        if (questionStatistic == null) return null;
-        Map<String,Number> statisticMap = new LinkedHashMap<>();
-        statisticMap.put("drewCount",questionStatistic.getDrewCount());
-        statisticMap.put("submittedCount",questionStatistic.getSubmittedCount());
-        statisticMap.put("correctCount",questionStatistic.getCorrectCount());
-        statisticMap.put("wrongCount",questionStatistic.getWrongCount());
-        statisticMap.put("examDataCount",questionStatistic.getDrewExamData().size());
-        return statisticMap;
+        Optional<QuestionStatistic> questionStatisticOptional = QuestionStatisticService.singletonInstance.findById(question.getId());
+        if (questionStatisticOptional.isEmpty()) {
+            return null;
+        } else {
+            final QuestionStatistic questionStatistic = questionStatisticOptional.get();
+            Map<String,Number> statisticMap = new LinkedHashMap<>();
+            statisticMap.put("drewCount",questionStatistic.getDrewCount());
+            statisticMap.put("submittedCount",questionStatistic.getSubmittedCount());
+            statisticMap.put("correctCount",questionStatistic.getCorrectCount());
+            statisticMap.put("wrongCount",questionStatistic.getWrongCount());
+            statisticMap.put("examDataCount",questionStatistic.getDrewExamData().size());
+            return statisticMap;
+        }
     }
     
 }

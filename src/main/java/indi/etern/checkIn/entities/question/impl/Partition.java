@@ -31,9 +31,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     String name;
     
     @JsonIgnore
-    //    FIXME foreign key
     @ManyToMany(mappedBy = "targets")
-//    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @Fetch(value = FetchMode.SUBSELECT)
     Set<ToPartitionsLink> questionLinks;
     
@@ -76,10 +74,6 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
         return partitionIdMap.get(partitionId);
     }
     
-    public static Partition getExample(String name) {
-        return new Partition(name);
-    }
-    
     public void setName(String newName) {
         name = newName;
         partitionNameMap.remove(name);
@@ -90,33 +84,11 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     public String toString() {
         return name + "(" + id + ")";
     }
-    //    @Override
-    
-    /*public void setSort(Comparator<Question> sortedSet) {
-        sortedQuestion = new TreeSet<>(sortedSet);
-        sortedQuestion.addAll(questions);
-    }
-    
-    @PostLoad
-    public void initSort() {
-        setSort(Comparator.comparing(Question::getContent));
-    }*/
-    
-    public Set<Question> getEnabledQuestions() {
-        Set<Question> questionSet = new HashSet<>();
-        for (ToPartitionsLink questionLink : questionLinks) {
-            Question question = questionLink.getSource();
-            if (question.isEnabled()) {
-                questionSet.add(question);
-            }
-        }
-        return questionSet;
-    }
     
     @JsonProperty("enabledQuestionCount")
     public int getEnabledQuestionCount() {
         return questionLinks.stream().filter(questionLink -> questionLink.getSource().isEnabled())
-                .mapToInt(questionLink -> questionLink.getSource() instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size():1)
+                .mapToInt(questionLink -> questionLink.getSource() instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size() : 1)
                 .sum();
     }
     
@@ -125,23 +97,51 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
         return questionLinks.size();
     }
     
+    @Transient
     @JsonIgnore
-    public List<Question> getEnabledQuestionsList() {
-        List<Question> questionList = new ArrayList<>();
+    volatile private Set<Question> questionSet;
+    
+    @Transient
+    @JsonIgnore
+    volatile private boolean enabledQuestionMayDirtied = true;
+    
+    @PostPersist
+    @PostUpdate
+    void markDirty() {
+        enabledQuestionMayDirtied = true;
+    }
+    
+    private void updateEnabledInternal() {
+        Set<Question> questionList = new HashSet<>();
         for (ToPartitionsLink questionLink : questionLinks) {
             Question question = questionLink.getSource();
             if (question.isEnabled()) {
                 questionList.add(question);
             }
         }
-        return questionList;
+        questionSet = questionList;
     }
-
+    
+    @JsonIgnore
+    public Set<Question> getEnabledQuestionsSet() {
+        if (enabledQuestionMayDirtied) {
+            synchronized (this.id + "-enabledQuestions") {
+                if (enabledQuestionMayDirtied) {
+                    updateEnabledInternal();
+                    enabledQuestionMayDirtied = false;
+                }
+                return questionSet;
+            }
+        } else {
+            return questionSet;
+        }
+    }
+    
     @Override
     public int hashCode() {
         return name.hashCode();
     }
-
+    
     @Override
     public boolean equals(Object object) {
         if (object instanceof Partition partition) {
@@ -149,14 +149,5 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
         } else {
             return false;
         }
-    }
-    
-    public Map<String,Object> toInfoMap() {
-        Map<String,Object> partitionInfo = new LinkedHashMap<>();
-        partitionInfo.put("id", id);
-        partitionInfo.put("name", name);
-        partitionInfo.put("enabledQuestionCount", getEnabledQuestionCount());
-        partitionInfo.put("questionAmount", questionLinks.size());
-        return partitionInfo;
     }
 }

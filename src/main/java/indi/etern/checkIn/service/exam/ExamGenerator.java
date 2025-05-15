@@ -1,11 +1,15 @@
 package indi.etern.checkIn.service.exam;
 
 import indi.etern.checkIn.entities.exam.ExamData;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.entities.setting.SettingItem;
-import indi.etern.checkIn.service.dao.*;
+import indi.etern.checkIn.service.dao.PartitionService;
+import indi.etern.checkIn.service.dao.QuestionService;
+import indi.etern.checkIn.service.dao.QuestionStatisticService;
+import indi.etern.checkIn.service.dao.SettingService;
 import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLimit;
 import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLimitService;
 import indi.etern.checkIn.throwable.exam.generate.MinQuestionLimitOutOfBoundsException;
@@ -36,22 +40,31 @@ public class ExamGenerator {
     }
     
     private void drawQuestions(Set<Question> drewQuestions, List<Partition> partitions, int questionAmount, Random random, DrawingStrategy drawingStrategy, CompletingStrategy completingStrategy) throws NotEnoughQuestionsForExamException, MinQuestionLimitOutOfBoundsException {
-        List<Question> allEnabledQuestions = new ArrayList<>();
-        partitions.forEach(partition -> allEnabledQuestions.addAll(partition.getEnabledQuestions()));//避免重复计算
-        AtomicInteger allEnabledQuestionsCount = new AtomicInteger();
-        allEnabledQuestions.forEach(question -> {
-            if (question instanceof QuestionGroup questionGroup) {
-                allEnabledQuestionsCount.addAndGet(questionGroup.getQuestionLinks().size());
-            } else {
-                allEnabledQuestionsCount.getAndIncrement();
-            }
-        });
-        List<Question> allActivePartitionEnabledQuestions = new ArrayList<>(partitions.stream().map(Partition::getEnabledQuestions).flatMap(Collection::stream).toList());
+        if (logger.isDebugEnabled()) {
+            List<Question> allEnabledQuestions = new ArrayList<>();
+            partitions.forEach(partition -> {
+                Set<Question> questionList = new HashSet<>();
+                final Set<ToPartitionsLink> questionLinks = partition.getQuestionLinks();
+                for (ToPartitionsLink questionLink : questionLinks) {
+                    Question question = questionLink.getSource();
+                    if (question.isEnabled()) {
+                        questionList.add(question);
+                    }
+                }
+                allEnabledQuestions.addAll(questionList);
+            });
+            AtomicInteger allEnabledQuestionsCount = new AtomicInteger();
+            allEnabledQuestions.forEach(question -> {
+                if (question instanceof QuestionGroup questionGroup) {
+                    allEnabledQuestionsCount.addAndGet(questionGroup.getQuestionLinks().size());
+                } else {
+                    allEnabledQuestionsCount.getAndIncrement();
+                }
+            });
+            logger.debug("all enabled questions[{}]: {}", allEnabledQuestionsCount, allEnabledQuestions.stream().map(Question::getId).toList());
+            logger.debug("draw questions({}) for partitions({})", questionAmount, partitions);
+        }
         
-        if (logger.isDebugEnabled())
-            logger.debug("all enabled questions[{}]: {}", allEnabledQuestionsCount, allActivePartitionEnabledQuestions.stream().map(Question::getId).toList());
-        
-        logger.debug("draw questions({}) for partitions({})", questionAmount, partitions);
         try {
             getQuestions(partitions, random, drawingStrategy, questionAmount, drewQuestions);
         } catch (NotEnoughQuestionsForExamException e) {
@@ -73,11 +86,10 @@ public class ExamGenerator {
             drawersMap.put(partition, drawer);
         });
         drawersMap.values().forEach(drawer -> {
-            drawer.invalidIdentical(drewQuestions);
+            drawer.invalidAll(drewQuestions);
             drewQuestions.addAll(drawer.initLeastQuestions());
         });
-
-//        questionAmount = questionAmount - QuestionRealCountCounter.count(drewQuestions);
+        
         if (questionAmount < 0) {
             throw new MinQuestionLimitOutOfBoundsException();
         } else if (questionAmount == 0) {

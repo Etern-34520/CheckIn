@@ -1,6 +1,5 @@
 package indi.etern.checkIn.action.role;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.BasicOutput;
 import indi.etern.checkIn.action.interfaces.Action;
@@ -14,15 +13,14 @@ import lombok.SneakyThrows;
 
 import java.util.*;
 
-@Action(value = "send permissions to users",exposed = false)
+@Action(value = "sendPermissionsToUsers",exposed = false)
 public class SendPermissionsToUsersAction extends BaseAction<SendPermissionsToUsersAction.Input, BasicOutput> {
     public record Input(Collection<User> users) implements InputData {}
     
     private final WebSocketService webSocketService;
-    private final ObjectMapper objectMapper;
-    public SendPermissionsToUsersAction(WebSocketService webSocketService, ObjectMapper objectMapper) {
+    
+    public SendPermissionsToUsersAction(WebSocketService webSocketService) {
         this.webSocketService = webSocketService;
-        this.objectMapper = objectMapper;
     }
     
     @Override

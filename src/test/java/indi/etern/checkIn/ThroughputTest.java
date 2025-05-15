@@ -23,16 +23,17 @@ import java.util.concurrent.TimeUnit;
 
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = CheckInApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = CheckInApplication.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+//@SpringBootTest(classes = CheckInApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 @EnableCaching
 public class ThroughputTest {
     // 每个线程处理请求的数量
 //    private static final int REQUESTS_PER_THREAD = 500000;
-    private static final int REQUESTS_PER_THREAD = 10000;
+    private static final int REQUESTS_PER_THREAD = 200000;
     // 线程的数量
 //    private static final int NUMBER_OF_THREADS = 20;
-    private static final int NUMBER_OF_THREADS = 10;
+    private static final int NUMBER_OF_THREADS = 8;
     @Autowired
     private ExamGenerator examGenerator;
     @Autowired

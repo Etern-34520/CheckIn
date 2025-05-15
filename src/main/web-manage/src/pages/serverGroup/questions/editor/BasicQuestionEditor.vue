@@ -227,9 +227,9 @@ const ableToChangeAuthor = () => {
                 style="flex:4;width:0">
             <el-option v-for="(partition,id) in partitions" :key="partition.id"
                        :label="partition.name" :value="partition.id"></el-option>
-            <template #footer>
+            <template #footer v-if="PermissionInfo.hasPermission('partition', 'create partition')">
                 <transition name="creatingPartition" mode="out-in">
-                    <el-button v-if="!isAdding" text bg size="small" style="width: 100%"
+                    <el-button v-if="!isAdding" class="disable-init-animate" text bg style="width: 100%"
                                @click="onCreatingPartition">
                         创建新分区
                     </el-button>
@@ -278,7 +278,7 @@ const ableToChangeAuthor = () => {
 
 /*noinspection CssUnusedSymbol*/
 .creatingPartition-enter-active, .creatingPartition-leave-active {
-    transition: all 0.3s var(--ease-in-bounce-1);
+    transition: all 0.3s var(--ease-in-bounce);
 }
 
 /*noinspection CssUnusedSymbol*/

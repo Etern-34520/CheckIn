@@ -42,6 +42,7 @@ public class ExamController {
     private final String EXAM_SUBMITTED_JSON = "{\"type\":\"error\",\"message\":\"Exam has already submitted\"}";
     private final String EXAM_NOT_SUBMITTED_JSON = "{\"type\":\"error\",\"message\":\"Exam has not been submitted\"}";
     private final String USER_EXISTS_JSON = "{\"type\":\"error\",\"message\":\"User already exists\"}";
+    private final String NOT_SUPPORTED_LEVEL_FOR_SIGN_UP_JSON = "{\"type\":\"error\",\"message\":\"Not a supported level for sign up\"}";
     private final QuestionStatisticService questionStatisticService;
     private final SettingService settingService;
     private final UserService userService;
@@ -144,6 +145,7 @@ public class ExamController {
             } else {
                 try {
                     final ExamResult examResult = examDataService.handleSubmit(examData, submitRequest.answer);
+                    examResult.setSignUpCompleted(userService.existsByQQNumber(examResult.getQq()));
                     examData.sendUpdateExamRecord();
                     questionStatisticService.appendStatistic(examData);
                     return objectMapper.writeValueAsString(examResult);
@@ -190,12 +192,12 @@ public class ExamController {
         return result;
     }
     
-    private static Map<String, String> getPartitionsNameMap(ResultContext<GetPartitionsAction.Output> context, Set<String> requiredPartitionIdSet, List<String> selectablePartitionIds) {
+    private Map<String, String> getPartitionsNameMap(ResultContext<GetPartitionsAction.Output> context, Set<String> requiredPartitionIdSet, List<String> selectablePartitionIds) {
         List<Partition> partitions = context.getOutput().partitions();
         Map<String, String> usedPartitionsNameMap = new HashMap<>();
         partitions.forEach((partition) -> {
             if (!requiredPartitionIdSet.contains(partition.getId())) {
-                if (!partition.getEnabledQuestions().isEmpty()) {
+                if (partition.getEnabledQuestionCount() != 0) {
                     selectablePartitionIds.add(partition.getId());
                     usedPartitionsNameMap.put(partition.getId(), partition.getName());
                 }
@@ -217,10 +219,20 @@ public class ExamController {
             try {
                 final String levelId = examData.getExamResult().getLevelId();
                 GradingLevel level = gradingLevelService.findById(levelId);
-                userService.handleSignUp(examData, signUpRequest.name, passwordEncoder.encode(signUpRequest.password), level.getCreatingUserRole());
-                examData.setStatus(ExamData.Status.SIGN_UP_COMPLETED);
-                examDataService.save(examData);
-                return "{\"type\":\"success\",\"message\":\"Signed up successfully\"}";
+                final GradingLevel.CreatingUserStrategy creatingUserStrategy = level.getCreatingUserStrategy();
+                if (creatingUserStrategy == GradingLevel.CreatingUserStrategy.NOT_CREATE) {
+                    return NOT_SUPPORTED_LEVEL_FOR_SIGN_UP_JSON;
+                } else {
+                    final boolean enabled = creatingUserStrategy == GradingLevel.CreatingUserStrategy.CREATE_AND_ENABLED;
+                    userService.handleSignUp(examData, signUpRequest.name, signUpRequest.password, level.getCreatingUserRole(), enabled);
+                    examData.setStatus(ExamData.Status.SIGN_UP_COMPLETED);
+                    examDataService.save(examData);
+                    Map<String,String> message = new HashMap<>();
+                    message.put("type", "success");
+                    message.put("message", "Signed up successfully");
+                    message.put("completingType", creatingUserStrategy.name());
+                    return objectMapper.writeValueAsString(message);
+                }
             } catch (ExamIllegalStateException e) {
                 return EXAM_NOT_SUBMITTED_JSON;
             } catch (ExamInvalidException e) {

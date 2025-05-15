@@ -20,29 +20,34 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-@Getter
 @Entity
 @Table(name = "questions")
 public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<String> {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
     
     @Id
+    @Getter
     @Column(columnDefinition = "char(36)")
     @JsonIgnore
     protected String id;
     
+    @Getter
     @Column(name = "content",columnDefinition = "text")
     protected String content;
     
+    @Getter
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinColumn(name = "author_qqnumber", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @NotFound(action = NotFoundAction.IGNORE)
     @JsonIgnore
     protected User author = null;
     
+    @Getter
     @Column(name = "last_modified_time")
     protected LocalDateTime lastModifiedTime;
     
+    @SuppressWarnings("unused")
+    //only used as orphanRemoval
     @OneToOne(mappedBy = "question", orphanRemoval = true)
     @JsonIgnore
     @NotFound(action = NotFoundAction.IGNORE)
@@ -76,11 +81,13 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @JsonIgnore
     protected Set<User> downVoters = new HashSet<>();
     
+    @Getter
     @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL,orphanRemoval = true)
     @JoinColumn(name = "id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnore
     protected QuestionLinkImpl<?> linkWrapper;
     
+    @Getter
     @Setter
     @Convert(converter = MapConverter.class)
     @Basic(fetch = FetchType.LAZY)
@@ -117,11 +124,6 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @SuppressWarnings("unused")
     public String getLastModifiedTimeString() {
         return dateTimeFormatter.format(lastModifiedTime);
-    }
-    
-    @Override
-    public QuestionLinkImpl<?> getLinkWrapper() {
-        return linkWrapper;
     }
     
     @Override

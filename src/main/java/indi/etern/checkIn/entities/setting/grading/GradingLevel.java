@@ -34,7 +34,7 @@ public class GradingLevel {
     protected GradingLevel() {}
     
     public enum CreatingUserStrategy {
-        NOT_CREATE, CREATE_DISABLED, CREATE_ENABLED_AFTER_VALIDATED, CREATE_ENABLED;
+        NOT_CREATE, CREATE_AND_DISABLED, CREATE_AND_ENABLED_AFTER_VALIDATED, CREATE_AND_ENABLED;
         
         public static CreatingUserStrategy ofOrElse(String creatingUserStrategy, CreatingUserStrategy creatingUserStrategy1) {
             try {

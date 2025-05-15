@@ -9,6 +9,7 @@ import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.role.SendPermissionsToUsersAction;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.service.dao.RoleService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class SavePermissionAction extends BaseAction<SavePermissionAction.Input,
         this.actionExecutor = actionExecutor;
     }
     
+    @Transactional
     @Override
     public void execute(ExecuteContext<Input, MessageOutput> context) {
         synchronized (roleService) {

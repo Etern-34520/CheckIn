@@ -8,6 +8,7 @@ import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ public class RestoreVoteAction extends BaseAction<RestoreVoteAction.Input, Messa
     public record Input(String questionId) implements InputData {}
     
     @Override
+    @Transactional
     public void execute(ExecuteContext<Input, MessageOutput> context) {
         String questionId = context.getInput().questionId;
         User currentUser = context.getCurrentUser();

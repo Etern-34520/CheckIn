@@ -1,10 +1,12 @@
 package indi.etern.checkIn.auth;
 
+import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.RobotTokenService;
 import indi.etern.checkIn.service.dao.RoleService;
+import indi.etern.checkIn.service.dao.SettingService;
 import indi.etern.checkIn.service.dao.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -16,7 +18,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 @Component
 public class JwtTokenProvider {
@@ -24,7 +29,7 @@ public class JwtTokenProvider {
     public static JwtTokenProvider singletonInstance;
     private final RobotTokenService robotTokenService;
     
-    @Value("${jwt-secret}")
+    /*@Value("${jwt-secret}")*/
     private String jwtSecret;
 
     @Value("${jwt-expiration-milliseconds}")
@@ -34,27 +39,34 @@ public class JwtTokenProvider {
     
     final RoleService roleService;
 
-    public JwtTokenProvider(UserService userService, RoleService roleService, RobotTokenService robotTokenService) {
+    public JwtTokenProvider(UserService userService, RoleService roleService, RobotTokenService robotTokenService, SettingService settingService) {
         this.userService = userService;
         this.roleService = roleService;
         singletonInstance = this;
         this.robotTokenService = robotTokenService;
+        try {
+            final SettingItem item = settingService.getItem("other", "jwtSecret");
+            jwtSecret = item.getValue(String.class);
+        } catch (NoSuchElementException e) {
+            logger.info("setting \"other.jwtRawSecret\" not found, now generating new secret and save");
+            byte[] bytes = new byte[64];
+            new SecureRandom().nextBytes(bytes);
+            jwtSecret = Base64.getEncoder().encodeToString(bytes);
+            SettingItem settingItem = new SettingItem("other.jwtSecret", jwtSecret, String.class);
+            settingService.setSetting(settingItem);
+        }
     }
 
     // 生成 JWT token
     public String generateToken(User user) {
-
         Date currentDate = new Date();
-
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
-
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(String.valueOf(user.getQQNumber()))
                 .setIssuedAt(currentDate)
                 .setExpiration(expireDate)
                 .signWith(key())
                 .compact();
-        return token;
     }
 
     private Key key() {

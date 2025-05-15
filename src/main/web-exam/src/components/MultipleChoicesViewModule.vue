@@ -69,7 +69,7 @@ const select = (index) => {
         font-weight: bold;
         text-wrap: wrap !important;
         word-break: auto-phrase !important;
-        color: var(--front-color-reserse) !important;
+        color: var(--front-color-reverse) !important;
     }
 }
 </style>

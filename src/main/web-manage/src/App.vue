@@ -66,7 +66,7 @@ onMounted(() => {
 <style scoped>
 /*noinspection CssUnusedSymbol*/
 .main-router-enter-active, .main-router-leave-active {
-    transition: opacity 0.4s;
+    transition: 0.4s var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/

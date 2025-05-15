@@ -18,6 +18,7 @@ public final class ExamResult implements Comparable<ExamResult> {
     private int wrongCount;
     private int questionCount;
     private boolean showCreatingAccountGuide;
+    private boolean signUpCompleted = false;
     private String examDataId;
     private String message;
     private String level;

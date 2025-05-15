@@ -27,7 +27,7 @@ public class SetEnableUserAction extends BaseAction<SetEnableUserAction.Input, M
         context.requirePermission("change user state");
         final Input input = context.getInput();
         userService.findByQQNumber(input.qq).ifPresentOrElse((user) -> {
-            context.requirePermission("operate role " + user.getRole());
+            context.requirePermission("operate role " + user.getRole().getType());
             user.setEnabled(input.enable);
             userService.saveAndFlush(user);
             Message<?> message = Message.of("updateUser", user);

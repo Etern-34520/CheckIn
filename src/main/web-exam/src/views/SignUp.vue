@@ -25,6 +25,51 @@ const back = () => {
     router.push({name: "result"});
 }
 
+onMounted(() => {
+    checkSignUpCompletingType(result.signUpCompletingType);
+})
+
+const onClick = () => {
+    if (result.signUpCompletingType === "CREATE_AND_ENABLED") {
+        window.location.href = window.location.protocol + "//" + window.location.host + "/checkIn/login/"
+    } else if (!result.signUpCompletingType){
+        signUp();
+    } else {
+        back();
+    }
+}
+
+const checkSignUpCompletingType = (completingType) => {
+    switch (completingType) {
+        case "CREATE_AND_DISABLED":
+            tip.value = {
+                content: "注册成功，请等待管理员启用你的账户",
+                type: "success"
+            }
+            disabled.value = false;
+            disableAllFields.value = true;
+            buttonText.value = "返回结果页"
+            break;
+        case "CREATE_AND_ENABLED_AFTER_VALIDATED":
+            tip.value = {
+                content: "注册成功，请等待验证通过后你的账户被启用",
+                type: "success"
+            }
+            disabled.value = false;
+            disableAllFields.value = true;
+            buttonText.value = "返回结果页"
+            break;
+        case "CREATE_AND_ENABLED":
+            tip.value = {
+                content: "注册成功",
+                type: "success"
+            }
+            disabled.value = false;
+            disableAllFields.value = true;
+            buttonText.value = "前往登录"
+            break;
+    }
+}
 const signUp = () => {
     buttonLoading.value = true;
     tip.value = null;
@@ -50,20 +95,23 @@ const signUp = () => {
     }).then((response) => {
         buttonLoading.value = false;
         disableAllFields.value = true;
-        if (response.type === success) {
-            tip.value = {
-                content: "注册成功",
-                type: "success"
-            }
-            //TODO
+        if (response.type === "success") {
+            result.signUpCompletingType = response.completingType;
+            proxy.$cookies.set("result", result, "7d");
+            checkSignUpCompletingType(response.completingType);
         } else {
             handleError(response)
         }
     }, (err) => {
         handleError(err);
     })
-    //TODO
 }
+
+watch(repeatPassword, () => {
+    if (repeatPassword.value === password.value) {
+        checkDisable();
+    }
+});
 
 const checkDisable = () => {
     if (!password.value) {
@@ -105,28 +153,27 @@ const checkDisable = () => {
         </div>
         <div style="display: flex;flex-direction: column;width: 300px;margin-top: 32px;">
             <el-text style="align-self: baseline">用户名</el-text>
-            <el-input v-model="username"/>
+            <el-input :disabled="disableAllFields" class="disable-init-animate" v-model="username"/>
         </div>
         <div style="display: flex;flex-direction: column;width: 300px;margin-top: 4px;">
             <el-text style="align-self: baseline">密码 *</el-text>
-            <el-input type="password" @focusout="checkDisable" v-model="password"/>
+            <el-input :disabled="disableAllFields" class="disable-init-animate" type="password" @focusout="checkDisable" v-model="password"/>
         </div>
         <div style="display: flex;flex-direction: column;width: 300px">
             <el-text style="align-self: baseline">重复密码 *</el-text>
-            <el-input type="password" @focusout="checkDisable" v-model="repeatPassword"/>
+            <el-input :disabled="disableAllFields" class="disable-init-animate" type="password" @focusout="checkDisable" v-model="repeatPassword"/>
         </div>
-        <!--        <div class="flex-blank-1"></div>-->
         <div style="min-height: 32px;margin-top: 8px">
             <transition name="blur-scale" mode="out-in">
-                <el-text truncated style="max-width: 300px" :key="tip.content" v-if="tip" :type="tip.type">{{ tip.content }}</el-text>
+                <el-text truncated style="max-width: 300px" :key="tip.content" v-if="tip" :type="tip.type">
+                    {{ tip.content }}
+                </el-text>
             </transition>
         </div>
         <el-button type="primary" size="large" :loading="buttonLoading" :loading-icon="_Loading_"
-                   style="margin-top: 24px;align-self: center;width: 300px" :disabled="disabled"
-                   @click="signUp">
+                   style="margin-top: 24px;align-self: center;width: 300px" @click="onClick">
             {{ buttonText }}
         </el-button>
-        {{ result }}
     </div>
 </template>
 

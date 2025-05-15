@@ -21,10 +21,14 @@ const backToExam = () => {
     })
 }
 
-const routeToSignUp = () => {
-    router.push({name: "sign-up"}).then(() => {
-        proxy.$cookies.set("phase", "sign-up", "7d");
-    })
+const routeToSignUpOrLogin = () => {
+    if (result.signUpCompletingType) {
+        window.location.href = window.location.protocol + "//" + window.location.host + "/checkIn/login/";
+    } else {
+        router.push({name: "sign-up"}).then(() => {
+            proxy.$cookies.set("phase", "sign-up", "7d");
+        })
+    }
 }
 </script>
 
@@ -89,7 +93,9 @@ const routeToSignUp = () => {
         <div style="display: flex;flex-direction: row;justify-content: center;flex-wrap: wrap">
             <el-button @click="backToExam()" style="min-width: 180px">重新答题</el-button>
             <el-button v-if="result.showCreatingAccountGuide" style="min-width: 180px"
-                       type="primary" @click="routeToSignUp()">注册</el-button>
+                       :type="result.signUpCompletingType?undefined:'primary'" @click="routeToSignUpOrLogin()">
+                {{ result.signUpCompletingType?"前往登录页":"注册" }}
+            </el-button>
         </div>
     </div>
 </template>

@@ -7,70 +7,73 @@ import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLim
 import indi.etern.checkIn.throwable.exam.generate.PartitionEmptiedException;
 import indi.etern.checkIn.throwable.exam.generate.PartitionMaxLimitReachedException;
 import indi.etern.checkIn.throwable.exam.generate.UnachievableLimitException;
-import indi.etern.checkIn.utils.QuestionRealCountCounter;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class PartitionQuestionDrawer {
     private final Random random;
     @Getter
+    private final Set<Question> partitionAllEnabledQuestions;
+    @Getter
     Partition partition;
     List<Question> availableQuestions;
-    List<Question> unavailableQuestions;
     @Getter
+    int availableCount;
     int unavailableCount = 0;
-    @Getter
     List<Question> drewQuestions;
-    @Getter
     int drewCount = 0;
     @Setter
     @Getter
     SpecialPartitionLimit specialPartitionLimit;
+    private final int allEnabledQuestionCount;
     
     public PartitionQuestionDrawer(Partition partition, Random random) {
         this.partition = partition;
         this.random = random;
-        availableQuestions = partition.getEnabledQuestionsList();
-        unavailableQuestions = new ArrayList<>();
+        partitionAllEnabledQuestions = partition.getEnabledQuestionsSet();
+        availableQuestions = new ArrayList<>(partitionAllEnabledQuestions);
+        availableCount = availableQuestions.size();
         drewQuestions = new ArrayList<>();
+        //TODO improve throughput 68745ms
+        allEnabledQuestionCount = availableQuestions.stream()
+                .mapToInt(question -> question instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size() : 1)
+                .sum();
     }
     
     private int count(Question question) {
         return question instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size() : 1;
     }
     
-    private Question draw(Question question,int count) {
+    private Question draw(Question question, int count) {
         drewCount += count;
         unavailableCount += count;
+        availableCount -= count;
+        //TODO improve throughput 9981ms
         availableQuestions.remove(question);
-        unavailableQuestions.add(question);
         drewQuestions.add(question);
         return question;
     }
     
-    private Question draw(Question question) {
-        return draw(question,count(question));
-    }
-    
-    private Question invalid(Question question, int count) {
+    private void invalid(Question question, int count) {
         unavailableCount += count;
+        availableCount -= count;
         availableQuestions.remove(question);
-        unavailableQuestions.add(question);
-        return question;
     }
     
-    private Question invalid(Question question) {
-        return invalid(question,count(question));
+    public void invalidAll(Collection<Question> questions) {
+        int initCount = availableQuestions.size();
+        //TODO improve throughput 3021ms
+        availableQuestions.removeAll(questions);
+        int removeCount = initCount - availableQuestions.size();
+        unavailableCount += removeCount;
+        availableCount -= removeCount;
     }
     
     public List<Question> initLeastQuestions() {
         if (specialPartitionLimit == null) return drewQuestions;
-        int min = Math.min(specialPartitionLimit.getMinLimit(),partition.getEnabledQuestionCount());
+        int min = Math.min(specialPartitionLimit.getMinLimit(), allEnabledQuestionCount);
         try {
             while (unavailableCount < min && drewCount < min) {
                 drawOneCountLessThanOrEqual(min - drewCount);
@@ -84,10 +87,8 @@ public class PartitionQuestionDrawer {
     public Question drawOneCountLessThanOrEqual(int limit) {
         if (limit <= 0) throw new IllegalArgumentException("limit must greater than 0");
         while (true) {
-            if (specialPartitionLimit != null) {
-                if (!specialPartitionLimit.checkMax(drewCount)) {
-                    throw new PartitionMaxLimitReachedException();
-                }
+            if (specialPartitionLimit != null && !specialPartitionLimit.checkMax(drewCount)) {
+                throw new PartitionMaxLimitReachedException();
             }
             final int bound = availableQuestions.size() - 1;
             if (bound < 0) throw new PartitionEmptiedException();
@@ -95,21 +96,12 @@ public class PartitionQuestionDrawer {
             Question question = availableQuestions.get(randomIndex);
             int count = count(question);
             if (count <= limit) {
-                return draw(question,count);
+                //TODO improve throughput 10177ms
+                return draw(question, count);
             } else {
-                invalid(question,count);
+                invalid(question, count);
             }
         }
-    }
-    
-    public List<Question> invalidIdentical(Collection<Question> questions) {
-        final List<Question> list = availableQuestions.stream().filter(questions::contains).toList();
-        list.forEach(this::invalid);
-        return list;
-    }
-    
-    public int getAvailableCount() {
-        return QuestionRealCountCounter.count(availableQuestions);
     }
     
     public String toString() {

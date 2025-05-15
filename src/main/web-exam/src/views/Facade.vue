@@ -35,17 +35,11 @@ const routeGenerateExam = () => {
                 <el-image class="icon-main" :src="facadeData.icon" fit="contain"
                           style="width: 100%;height: 100%;"></el-image>
             </div>
-            <div style="display: flex;flex-direction: column;margin-left: 32px;margin-right: 16px;margin-bottom: 48px;z-index: 1;justify-content: center;">
-                <el-text class="title"
-                         style="font-size: 44px;font-weight: bolder;height: 60px;margin-top:20px;min-width: 300px;align-self: baseline;"
-                         :type="facadeData.title?undefined:'info'">{{
-                        facadeData.title ? facadeData.title : "[无标题]"
-                    }}
-                </el-text>
-                <el-text class="subtitle"
-                         style="font-size: 24px;height: 40px;margin-top:20px;min-width: 240px;margin-bottom: 40px;align-self: baseline;"
-                         :type="facadeData.subTitle?undefined:'info'">
-                    {{ facadeData.subTitle ? facadeData.subTitle : "[无副标题]" }}
+            <div style="margin: 32px 16px;z-index: 1">
+                <el-text class="title">{{ facadeData.title }}</el-text>
+                <br/>
+                <el-text class="subtitle">
+                    {{ facadeData.subTitle }}
                 </el-text>
             </div>
             <div class="flex-blank-1"></div>
@@ -115,7 +109,8 @@ const routeGenerateExam = () => {
                        :preview="true"/>
             <div>
                 <el-button type="primary" size="large" style="margin-top: 36px;align-self: center;min-width: 180px"
-                           @click="routeGenerateExam">生成题目</el-button>
+                           @click="routeGenerateExam">生成题目
+                </el-button>
             </div>
         </div>
     </div>
@@ -138,7 +133,6 @@ const routeGenerateExam = () => {
     aspect-ratio: 1;
     height: 20vh;
     margin-right: 40px;
-    margin-bottom: 48px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -187,11 +181,21 @@ const routeGenerateExam = () => {
 }
 
 .title {
+    font-size: 44px;
+    font-weight: bolder;
+    height: 60px;
+    margin-top: 20px;
+    min-width: 300px;
     animation: ani-0 600ms 400ms var(--ease-out-quint);
     animation-fill-mode: backwards;
 }
 
 .subtitle {
+    font-size: 24px;
+    height: 40px;
+    margin-top: 20px;
+    min-width: 240px;
+    margin-bottom: 40px;
     animation: ani-0 600ms 800ms var(--ease-out-quint);
     animation-fill-mode: backwards;
 }

@@ -46,17 +46,7 @@ public class GetVerificationSettingAction extends BaseAction<NullInput, GetVerif
             verificationRuleMap.put("targetInputName",verificationRule.getTargetInputName());
             verificationRuleMap.put("tipTemplate",verificationRule.getTipTemplate());
             final List<Object> values = verificationRule.getValues();
-            ArrayList<Object> valuesList = new ArrayList<>(values.size());
-            for (Object value : values) {
-                if (value instanceof Number) {
-                    valuesList.add((Number) value);
-                } else if (value instanceof String) {
-                    valuesList.add((String) value);
-                } else if (value instanceof Boolean) {
-                    valuesList.add((Boolean) value);
-                }
-            }
-            verificationRuleMap.put("values",valuesList);
+            verificationRuleMap.put("values",values);
             arrayList.add(verificationRuleMap);
         }
         context.resolve(new SuccessOutput(arrayList));

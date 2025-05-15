@@ -1,16 +1,18 @@
 package indi.etern.checkIn.entities.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import indi.etern.checkIn.auth.Authority;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.UUID;
 
 @Getter
 @Entity
 @Table(name = "PERMISSIONS")
-public class Permission {
+public class Permission implements GrantedAuthority {
     @Setter
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
     @JoinColumn(name = "group_name", referencedColumnName = "name", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -27,21 +29,9 @@ public class Permission {
     @Setter
     private String name;
     
-    /*@Getter
-    @ManyToMany(mappedBy = "permissions")//FIXME foreign
-    @JsonIgnore
-    private List<Role> rolesHasThisPermission;
-    */
-/*
-    @Column(value = "type", nullable = false)
-    @Setter
-    private PermissionType type;
-*/
-    
     public Permission(String name) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
-//        this.type = type;
     }
     
     protected Permission() {
@@ -55,5 +45,10 @@ public class Permission {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+    
+    @Override
+    public String getAuthority() {
+        return name;
     }
 }

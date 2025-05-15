@@ -24,9 +24,10 @@ import java.util.Optional;
 import java.util.Set;
 
 @Action("deletePartition")
-// FIXME
 public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Input, OutputData> {
-    public record Input(@Nonnull String partitionId) implements InputData {}
+    public record Input(@Nonnull String partitionId) implements InputData {
+    }
+    
     public record SuccessOutput(List<String> infectedQuestionIds) implements OutputData {
         @Override
         public Result result() {
@@ -54,20 +55,24 @@ public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Inpu
             List<Question> infectedQuestions = new ArrayList<>();
             final Partition partition = optionalPartition.get();
             if (partition.getQuestionLinks().isEmpty()) {
-                logger.debug("deleting empty partition \"" + partition.getName() + "\"");
+                if (logger.isDebugEnabled())
+                    logger.debug("deleting empty partition \"{}\"", partition.getName());
                 partitionService.delete(optionalPartition.orElse(null));
             } else {
-                logger.debug("partition \"" + partition.getName() + "\" is not empty");
+                if (logger.isDebugEnabled())
+                    logger.debug("partition \"{}\" is not empty", partition.getName());
                 for (ToPartitionsLink questionLink : partition.getQuestionLinks()) {
                     final Set<Partition> partitions = questionLink.getTargets();
                     partitions.remove(partition);
                     final Question question = questionLink.getSource();
                     infectedQuestions.add(question);
                     if (partitions.isEmpty()) {
-                        logger.debug("deleting question (not belonged to other partitions) \"" + question.getId() + "\"");
+                        if (logger.isDebugEnabled())
+                            logger.debug("deleting question (not belonged to other partitions) \"{}\"", question.getId());
                         questionService.delete(question);
                     } else {
-                        logger.debug("updating question \"" + question.getId() + "\"");
+                        if (logger.isDebugEnabled())
+                            logger.debug("updating question \"{}\"", question.getId());
                         questionService.save(question);
                     }
                 }

@@ -1,17 +1,17 @@
 package indi.etern.checkIn.service.dao;
 
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.RoleRepository;
 import indi.etern.checkIn.repositories.UserRepository;
+import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.throwable.entity.UserExistsException;
 import indi.etern.checkIn.throwable.exam.ExamException;
 import indi.etern.checkIn.throwable.exam.ExamIllegalStateException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,11 +28,13 @@ public class UserService implements UserDetailsService {
     private UserRepository userRepository;
     private final RoleService roleService;
     private final RoleRepository roleRepository;
+    private final WebSocketService webSocketService;
     
-    protected UserService(RoleService roleService, RoleRepository roleRepository) {
+    protected UserService(RoleService roleService, RoleRepository roleRepository, WebSocketService webSocketService) {
         singletonInstance = this;
         this.roleService = roleService;
         this.roleRepository = roleRepository;
+        this.webSocketService = webSocketService;
     }
     
     public boolean check(long qq, String password) {
@@ -48,12 +50,7 @@ public class UserService implements UserDetailsService {
     }
     
     public List<User> findAllByName(String name) {
-        User exampleUser = User.exampleOfName(name);
-        ExampleMatcher exampleMatcher = ExampleMatcher
-                .matching()
-                .withIgnorePaths("password", "QQNumber", "role", "enabled");
-        Example<User> userExample = Example.of(exampleUser, exampleMatcher);
-        return userRepository.findAll(userExample);
+        return userRepository.findAllByName(name);
     }
     
     public Optional<User> findByQQNumber(long qqNumber) {
@@ -101,15 +98,18 @@ public class UserService implements UserDetailsService {
         userRepository.delete(user);
     }
     
-    public void handleSignUp(ExamData examData, String name, String encodedPassword, Role role) throws ExamException {
+    public void handleSignUp(ExamData examData, String name, String rawPassword, Role role, boolean enabled) throws ExamException {
         if (examData.getStatus() == ExamData.Status.ONGOING) {
             throw new ExamIllegalStateException();
         } else if (examData.getStatus() == ExamData.Status.SUBMITTED) {
             if (existsByQQNumber(examData.getQqNumber())) {
                 throw new UserExistsException();
             } else {
-                User user = new User(name, examData.getQqNumber(), encodedPassword);
+                User user = new User(name, examData.getQqNumber(), rawPassword);
                 user.setRole(role);
+                user.setEnabled(enabled);
+                Message<User> message = Message.of("addUser", user);
+                webSocketService.sendMessageToAll(message);
                 save(user);
             }
         } else {
