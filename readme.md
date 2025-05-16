@@ -65,6 +65,8 @@
 > 可配置必选分区、可选分区
 > 
 > 可配置某些分区的特殊限制
+> 
+> 可配置用户注册策略 ( 2.0.0 pre-release )
 
 - 自动校验
 > 根据答题者的答案自动校验，无需人工干预，可自定义任意多个等级配置不同返回信息。
@@ -94,22 +96,25 @@
 - 后台通信采用 WebSocket ，实时数据更新
 - 响应式前端设计，支持各种尺寸的设备
 
----
-<details>
-<summary>
-截图
-</summary>
+[//]: # (---)
 
-![1.png](/screenshots/2.0.0/1.png "1")
-![1.png](/screenshots/2.0.0/2.png "2")
-![1.png](/screenshots/2.0.0/3.png "3")
+[//]: # (<details>)
 
-</details>
+[//]: # (<summary>)
 
----
+[//]: # (截图)
 
-### 不足
-目前 CheckIn 仍然处于早期开发阶段，许多设想中的功能如填空题、操作题、自动创建后台用户等仍未实现
+[//]: # (</summary>)
+
+[//]: # ()
+[//]: # (![1.png]&#40;/screenshots/2.0.0/1.png "1"&#41;)
+
+[//]: # (![1.png]&#40;/screenshots/2.0.0/2.png "2"&#41;)
+
+[//]: # (![1.png]&#40;/screenshots/2.0.0/3.png "3"&#41;)
+
+[//]: # ()
+[//]: # (</details>)
 
 ---
 
@@ -119,7 +124,7 @@
 
 ---
 
-### 试运行
+### 试运行 ( DEMO )
 无需任何操作，直接使用如下命令运行
 ```shell
 java -jar checkIn-x.x.x.jar
@@ -127,7 +132,7 @@ java -jar checkIn-x.x.x.jar
 预期行为：将会在shell当前上下文目录下创建一个文件数据库用于临时储存，可以通过手动删除重置
 
 可在下方 Api 及端点处找到管理入口
-> `初始用户` super admin
+> `初始用户` super admin 或 10000
 > 
 > `密码` 114514
 
@@ -163,10 +168,6 @@ spring.datasource.url=jdbc:mysql://localhost:3306/checkIn?useUnicode=true&charac
 > ```properties
 > spring.datasource.url=jdbc:mysql://localhost:3306/check_in?characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false
 > ```
-> PostgreSQL
-> ```properties
-> spring.datasource.url=jdbc:postgresql://localhost:5432/check_in
-> ```
 > H2Database (文件模式)
 > ```properties
 > spring.datasource.url=jdbc:h2:file:./check_in
@@ -175,10 +176,6 @@ spring.datasource.url=jdbc:mysql://localhost:3306/checkIn?useUnicode=true&charac
 > #===open web console(http://localhost:8080/h2-console)===
 > #spring.h2.console.enabled=true
 > #spring.h2.console.path=/h2-console
-> ```
-> DB2
-> ```properties
-> spring.datasource.url=jdbc:db2://localhost:50000/check_in
 > ```
 </details>
 
