@@ -25,7 +25,7 @@ public class ExposeApi {
     private final GradingLevelService levelService;
     private final UserService userService;
     private final WebSocketService webSocketService;
-    private Logger logger = LoggerFactory.getLogger(ExposeApi.class);
+    private final Logger logger = LoggerFactory.getLogger(ExposeApi.class);
     
     public ExposeApi(ExamDataService examDataService, GradingLevelService levelService, UserService userService, WebSocketService webSocketService) {
         this.examDataService = examDataService;
@@ -47,7 +47,7 @@ public class ExposeApi {
             map.put("examData", examData);
             map.put("level", examData.getExamResult().getLevel());
             map.put("levelId", examData.getExamResult().getLevelId());
-            try { //TODO test
+            try {
                 final GradingLevel level = levelService.findById(examData.getExamResult().getLevelId());
                 if (level.getCreatingUserStrategy() == GradingLevel.CreatingUserStrategy.CREATE_AND_ENABLED_AFTER_VALIDATED) {
                     userService.findByQQNumber(examData.getQqNumber()).ifPresent((user) -> {

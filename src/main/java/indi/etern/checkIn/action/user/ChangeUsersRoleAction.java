@@ -38,8 +38,6 @@ public class ChangeUsersRoleAction extends BaseAction<ChangeUsersRoleAction.Inpu
                 actionExecutor.execute(ChangeUserRoleAction.class,input1);
             });
             context.resolve(MessageOutput.success("Users role changed"));
-        }, () -> {
-            context.resolve(MessageOutput.error("Users role not found"));
-        });
+        }, () -> context.resolve(MessageOutput.error("Users role not found")));
     }
 }

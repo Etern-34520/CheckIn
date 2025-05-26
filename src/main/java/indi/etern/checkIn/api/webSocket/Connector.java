@@ -12,7 +12,10 @@ import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
-import jakarta.websocket.*;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.Getter;
@@ -22,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.SubProtocolCapable;
@@ -44,8 +46,7 @@ public class Connector implements SubProtocolCapable {
     private static JwtTokenProvider jwtTokenProvider;
     private static ActionExecutor actionExecutor;
     private final int BUFFER_SIZE = 64 * 1024;
-    @Value("${websocket.logTruncateSize}")
-    private int LOG_TRUNCATE_SIZE;
+    private final int LOG_TRUNCATE_SIZE = 512;
     private Session session;
     @Getter
     private String sid = "";
@@ -142,17 +143,20 @@ public class Connector implements SubProtocolCapable {
                     final String channelName = channelMessageData.channel;
                     logger.debug("websocket subscribe from {}({}): channel \"{}\"", sessionUser.getName(), sessionUser.getQQNumber(), channelName);
                     webSocketService.subscribeChannel(sid, channelName);
-                    sendMessage("{\"type\":\"success\",\"messageId:\":\"" + contextId + "\"}");
+                    sendMessage("{\"type\":\"success\",\"messageId\":\"" + contextId + "\"}");
                 }
                 case "unsubscribe" -> {
                     ChannelMessageData channelMessageData = objectMapper.readValue(contextJsonMessage.getData(), ChannelMessageData.class);
                     final String channelName = channelMessageData.channel;
                     logger.debug("websocket unsubscribe from {}({}): channel \"{}\"", sessionUser.getName(), sessionUser.getQQNumber(), channelName);
                     webSocketService.unsubscribeChannel(sid, channelName);
-                    sendMessage("{\"type\":\"success\",\"messageId:\":\"" + contextId + "\"}");
+                    sendMessage("{\"type\":\"success\",\"messageId\":\"" + contextId + "\"}");
                 }
                 default -> {
-                    String logMessage = Arrays.toString(Arrays.copyOf(decoded, Math.min(decoded.length, LOG_TRUNCATE_SIZE)));
+                    String logMessage = new String(decoded);
+                    if (logMessage.length() > LOG_TRUNCATE_SIZE) {
+                        logMessage = logMessage.substring(0, LOG_TRUNCATE_SIZE) + "\n=========(truncated)=========";
+                    }
                     try {
                         ResultJsonContext<OutputData> context = actionExecutor.executeWithJson(typeName, contextJsonMessage.data);
                         logger.debug("{}({}):{}", sessionUser.getName(), sid, logMessage);
@@ -172,7 +176,7 @@ public class Connector implements SubProtocolCapable {
                             e.printStackTrace();
                         }
                         logger.error("{} : {}", e.getClass().getName(), e.getMessage());
-                        String errorRawMessage = Arrays.toString(decoded);
+                        String errorRawMessage = new String(decoded);
                         logger.debug("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, errorRawMessage);
                         if (e instanceof PermissionDeniedException permissionDeniedException) {
                             sendError(contextId, permissionDeniedException.getMessage());
@@ -187,7 +191,7 @@ public class Connector implements SubProtocolCapable {
                 String messageId = objectMapper.readValue(decoded, HashMap.class).get("messageId").toString();
                 sendError(messageId, e.getClass().getSimpleName() + ":" + e.getMessage());
             } catch (IOException exception) {
-                String logMessage = Arrays.toString(decoded);
+                String logMessage = new String(decoded);
                 logger.error("while sending error message (caused by \"{}\") to {}({}):{}", logMessage, sessionUser.getName(), sid, exception.getMessage());
                 exception.printStackTrace();
             }

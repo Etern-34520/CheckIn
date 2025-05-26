@@ -3,12 +3,7 @@ import {useRoute} from "vue-router";
 import WebSocketConnector from "@/api/websocket.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import Collapse from "@/components/common/Collapse.vue";
-import {MdEditor} from "md-editor-v3";
-import UI_Meta from "@/utils/UI_Meta.js";
-import PartitionCache from "@/data/PartitionCache.js";
 import router from "@/router/index.js";
-import QuestionCache from "@/data/QuestionCache.js";
-import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import 'md-editor-v3/lib/style.css';
 import LinkPanel from "@/components/common/LinkPanel.vue";
 import ObjectFieldViewer from "@/components/objectViewer/ObjectFieldViewer.vue";
@@ -43,50 +38,48 @@ const routeToRelatedExamRecord = (id) => {
 
 <template>
     <div style="display: flex;flex-direction: column;flex:1;height: 0" v-loading="showLoading">
-        <div style="padding: 32px 16px 4px;display: flex;flex-direction: column;align-items: stretch;flex:1;height: 0"
+        <div style="padding: 16px 16px 4px;display: flex;flex-direction: column;align-items: stretch;flex:1;height: 0"
              v-if="data">
             <transition name="blur-scale" mode="out-in">
-                <div style="display: flex;flex-direction: row;align-items: center;margin-left: 16px;flex-wrap: wrap"
+                <div class="general-info"
                      :key="data.id">
-                    <div style="display: flex;flex-direction: column;margin-bottom: 16px;">
-                        <div style="min-width: min(70vw,120px);display: flex;flex-direction: row;align-items: center;margin-bottom: 4px"
-                             v-if="data.qqNumber">
-                            <el-avatar size="small" style="align-self: center;margin-right: 8px;"
-                                       :src="getAvatarUrlOf(data.qqNumber)"/>
-                            <el-text size="large"
-                                     style="align-self: center;">
-                                {{ data.qqNumber }}
-                            </el-text>
-                        </div>
-                        <div v-if="data.ipString" style="min-width: min(70vw,120px);display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;margin-right: 4px">
-                            <el-text style="align-self: baseline">
-                                {{ data.ipString }}
-                            </el-text>
-                            <el-link type="info" target="_blank" style="margin-left: 8px;" :href="'https://iplark.com/'+data.ipString">
-                                在Iplark上查询
-                            </el-link>
-                        </div>
+                    <div style="min-width: min(70vw,120px);display: flex;flex-direction: row;align-items: center;margin-right: 16px"
+                         v-if="data.qqNumber">
+                        <el-avatar size="small" style="align-self: center;margin-right: 8px;"
+                                   :src="getAvatarUrlOf(data.qqNumber)"/>
+                        <el-text size="large"
+                                 style="align-self: center;">
+                            {{ data.qqNumber }}
+                        </el-text>
                     </div>
-                    <div style="display: flex;flex-direction: column;margin-right: 16px;margin-bottom: 16px;align-self: center;">
-                        <el-tag style="align-self: baseline;margin-bottom: 8px;">{{ data.type }}</el-tag>
-                        <el-tag style="align-self: baseline;" :type="data.status === 'SUCCESS'?'success':'danger'">
-                            {{ data.status }}
-                        </el-tag>
+                    <div v-if="data.ipString"
+                         style="min-width: min(70vw,120px);display: flex;flex-direction: row;align-items: center;margin-right: 16px">
+                        <el-text style="align-self: center;">
+                            {{ data.ipString }}
+                        </el-text>
+                        <el-link type="info" target="_blank" style="margin-left: 8px;"
+                                 :href="'https://iplark.com/'+data.ipString">
+                            在Iplark上查询
+                        </el-link>
                     </div>
-                    <div style="display: flex;flex-direction: column;margin-right: 16px;margin-bottom: 16px;flex:1;">
-                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px;">
-                            <el-text style="margin-right: 12px;" type="info">请求时间</el-text>
-                            <el-text>{{ data.time }}</el-text>
-                        </div>
-                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px;">
-                            <el-text style="margin-right: 12px;" type="info">Session ID</el-text>
-                            <el-text>{{ data.sessionId }}</el-text>
-                        </div>
-                    </div>
+                    <el-tag style="justify-self: center">{{ data.type }}</el-tag>
+                    <el-tag style="justify-self: center" :type="data.status === 'SUCCESS'?'success':'danger'">
+                        {{ data.status }}
+                    </el-tag>
                 </div>
             </transition>
             <el-scrollbar style="flex: 1;height: 0;">
                 <div style="display: flex;flex-direction: column;width:calc(100% - 4px);">
+                    <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 16px;">
+                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px;margin-right: 16px">
+                            <el-text style="margin-right: 12px;" type="info">请求时间</el-text>
+                            <el-text style="text-wrap: wrap;word-break: break-all">{{ data.time }}</el-text>
+                        </div>
+                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px;">
+                            <el-text style="margin-right: 12px;" type="info">Session ID</el-text>
+                            <el-text style="text-wrap: wrap;word-break: break-all">{{ data.sessionId }}</el-text>
+                        </div>
+                    </div>
                     <transition name="smooth-height" mode="out-in">
                         <div class="smooth-height-base" v-if="data.relatedExamDataId">
                             <div>
@@ -162,4 +155,16 @@ const routeToRelatedExamRecord = (id) => {
 </template>
 
 <style scoped>
+.general-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 4px;
+    padding-bottom: 8px;
+    flex-wrap: wrap;
+
+    > * {
+        margin-bottom: 8px !important;
+    }
+}
 </style>

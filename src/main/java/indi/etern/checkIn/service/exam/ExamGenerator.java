@@ -24,6 +24,7 @@ import java.time.Period;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@SuppressWarnings("ALL")
 @Service
 public class ExamGenerator {
     private final PartitionService partitionService;

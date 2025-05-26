@@ -245,9 +245,7 @@ const routeToExamRecords = () => {
                                                  @click="router.push({name:'question-detail',params: {id:item.question.id}})"/>
                         </template>
                     </waterfall>
-                    <!--                    <question-info-panel v-for="questionInfo of questions" :question-info="QuestionCache.wrapToQuestionInfo(questionInfo)"/>-->
                 </div>
-<!--                TODO-->
                 <link-panel @click="routeToExamRecords()" description="" name="TA的答题记录" :icon="Finished"/>
             </div>
         </transition>

@@ -19,6 +19,7 @@ data/
 *.iws
 *.iml
 *.ipr
+.fleet
 
 ### NetBeans ###
 /nbproject/private/
@@ -32,4 +33,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Custom ###
 /data/
+/initialSQL/

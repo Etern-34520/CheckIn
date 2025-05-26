@@ -145,7 +145,9 @@ public class ExamController {
             } else {
                 try {
                     final ExamResult examResult = examDataService.handleSubmit(examData, submitRequest.answer);
-                    examResult.setSignUpCompleted(userService.existsByQQNumber(examResult.getQq()));
+                    if (userService.existsByQQNumber(examResult.getQq())) {
+                        examResult.setSignUpCompletingType("USER_EXISTS");
+                    }
                     examData.sendUpdateExamRecord();
                     questionStatisticService.appendStatistic(examData);
                     return objectMapper.writeValueAsString(examResult);

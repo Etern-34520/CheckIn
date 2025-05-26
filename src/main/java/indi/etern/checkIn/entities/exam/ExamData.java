@@ -190,6 +190,6 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
     }
     
     public void sendUpdateExamRecord() {
-        WebSocketService.singletonInstance.sendMessageToChannel(Message.of("updateExamRecord", this), "examRecord");
+        WebSocketService.singletonInstance.sendMessageToChannel(Message.of("updateExamRecord", this), "examRecords");
     }
 }

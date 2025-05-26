@@ -37,7 +37,7 @@ const transformScroll = (e) => {
             imagesScrollbar.value.setScrollLeft(delta + scrollSyncLeft.value);
             delta = 0;
         }, 150);
-    if (props.forceMobile && !e.shiftKey) {//TODO
+    if (props.forceMobile && !e.shiftKey) {
         delta += e.deltaY * 2;
         e.preventDefault();
     }

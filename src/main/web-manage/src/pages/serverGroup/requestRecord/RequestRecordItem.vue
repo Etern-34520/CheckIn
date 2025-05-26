@@ -1,5 +1,4 @@
 <script setup>
-import UserDataInterface from "@/data/UserDataInterface.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 
 const props = defineProps({
@@ -30,7 +29,7 @@ const props = defineProps({
                     <el-text style="margin-bottom: 8px;" v-if="showIp || !Boolean(record.qqnumber)">{{ record.ipString ? record.ipString : "unknown" }}</el-text>
                 </transition>
                 <div class="flex-blank-1"></div>
-                <el-tag :type="record.status === 'ERROR' ? 'danger' : 'info'" style="margin-bottom: 8px;margin-right: 4px;">{{ record.status }}</el-tag>
+<!--                <el-tag :type="record.status === 'ERROR' ? 'danger' : 'info'" style="margin-bottom: 8px;margin-right: 4px;">{{ record.status }}</el-tag>-->
                 <el-tag style="margin-bottom: 8px">{{ record.type }}</el-tag>
 <!--                {{ record }}-->
             </div>
@@ -66,7 +65,7 @@ const props = defineProps({
     max-width: 4px;
     min-width: 4px;
     width: 4px;
-    margin-left: -12px;
+    margin-left: -8px;
     margin-right: 8px;
     border-radius: 2px;
     background: var(--el-color-success);

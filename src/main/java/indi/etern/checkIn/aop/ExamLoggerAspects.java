@@ -156,7 +156,6 @@ public class ExamLoggerAspects {
         };
     }
     
-    //TODO test
     @Pointcut("execution(* indi.etern.checkIn.service.dao.UserService.handleSignUp(..))")
     public void signUp() {}
     

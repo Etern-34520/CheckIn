@@ -44,7 +44,7 @@ const routeToSignUpOrLogin = () => {
             </div>
             <div style="display: flex;flex-direction: row;align-items: stretch;margin: 16px;flex-wrap: wrap">
                 <div style="margin-right: 80px;margin-bottom: 12px;display: flex;flex-direction: row;align-items: stretch">
-                    <div style="width: 8px;max-width: 8px;min-width: 8px;border-radius: 4px;margin-right: 32px;"
+                    <div style="width: 6px;max-width: 6px;min-width: 6px;border-radius: 3px;margin-right: 32px;"
                          :style="{background: result.colorHex}"></div>
                     <el-text style="align-self: center" size="large">{{ result.level }}</el-text>
                 </div>

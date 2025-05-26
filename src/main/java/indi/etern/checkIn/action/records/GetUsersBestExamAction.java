@@ -37,8 +37,6 @@ public class GetUsersBestExamAction extends BaseAction<NullInput, OutputData> {
                     final LinkedHashMap<String, Object> examDataMap = examData.toDataMap();
                     examDataMap.remove("answers");
                     context.resolve(new SuccessOutput(examDataMap));
-                }, () -> {
-                    context.resolve(MessageOutput.error("ExamController record not found"));
-                });
+                }, () -> context.resolve(MessageOutput.error("ExamController record not found")));
     }
 }

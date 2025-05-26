@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class SaveSettingCommon {
     private final String rootName;
-    Map<String, Object> dataMap;
-    List<String> enabledKeys;
+    final Map<String, Object> dataMap;
+    final List<String> enabledKeys;
     
     public SaveSettingCommon(Map<String, Object> dataMap, String[] enabledKeys, String rootName) {
         this.dataMap = dataMap;

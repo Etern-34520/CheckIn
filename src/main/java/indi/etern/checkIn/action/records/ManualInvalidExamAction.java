@@ -14,7 +14,7 @@ import java.util.Optional;
 @Action("InvalidExam")
 public class ManualInvalidExamAction extends BaseAction<ManualInvalidExamAction.Input, MessageOutput> {
     public record Input(String id) implements InputData {}
-    ;
+    
     private final ExamDataService examDataService;
     
     public ManualInvalidExamAction(ExamDataService examDataService) {
@@ -31,8 +31,6 @@ public class ManualInvalidExamAction extends BaseAction<ManualInvalidExamAction.
             examDataService.save(examData);
             examData.sendUpdateExamRecord();
             context.resolve(MessageOutput.success("ExamController data invalid"));
-        },() -> {
-            context.resolve(MessageOutput.error("ExamController data not found"));
-        });
+        },() -> context.resolve(MessageOutput.error("ExamController data not found")));
     }
 }

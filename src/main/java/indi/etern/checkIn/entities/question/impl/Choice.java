@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Getter
 @Embeddable
-public class Choice implements Serializable {//TODO use temp id in front-face
+public class Choice implements Serializable {
     @Column(columnDefinition = "char(36)", unique = true, nullable = false)
     public String id;
     

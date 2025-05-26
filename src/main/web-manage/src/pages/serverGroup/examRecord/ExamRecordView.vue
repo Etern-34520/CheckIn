@@ -51,7 +51,7 @@ const putItem = (date, examRecord) => {
         data.value[date] = Object.assign(target, data.value[date]);//place in front
     }
 }
-const channel = WebSocketConnector.subscribe("examRecord", (data1) => {
+const channel = WebSocketConnector.subscribe("examRecords", (data1) => {
     const examRecord = data1.data;
     const generateDate = examRecord.generateTime.split(" ")[0];
     const submitDate = examRecord.submitTime ? examRecord.submitTime.split(" ")[0] : null;

@@ -31,11 +31,6 @@ public class JsonContext<I extends InputData, O extends OutputData> extends Cont
     }
     
     @Override
-    public O getOutput() {
-        return super.getOutput();
-    }
-    
-    @Override
     public Optional<String> getOptionalJsonResult() {
         return Optional.ofNullable(jsonResult);
     }

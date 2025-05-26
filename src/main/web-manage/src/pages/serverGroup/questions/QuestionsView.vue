@@ -48,8 +48,7 @@ const filterQuestionInfo = (questionInfo) => {
     for (const v of filterText.value.split(",")) {
         if (v !== "" &&
                 (questionInfo.type === 'Partition') || (questionInfo.type === 'Question' && (
-                        (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase())) ||
-                        (questionInfo.question.id && questionInfo.question.id.toUpperCase().includes(v.toUpperCase()))))
+                        (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase()))))
         ) {
             return true;
         }
@@ -77,12 +76,6 @@ function loadPartitionChildrenNode(partitionId, isPartitionEmpty, resolve, rejec
     const localPartitionQuestionNodes = localPartitionQuestionData[partitionId];
     let data = [];
     data.push(createQuestionButtonData);
-    /*
-        if (PermissionInfo.hasPermission('question','create and edit owns questions') ||
-                PermissionInfo.hasPermission('question group','create and edit owns question groups')) {
-            data.push(createQuestionButtonData);
-        }
-    */
     if (localPartitionQuestionNodes instanceof Array) {
         data.push(...localPartitionQuestionNodes);
     }
@@ -139,7 +132,6 @@ const loadNode = (node, resolve, reject) => {
             loadPartitionChildrenNode(nodeId, node.data.questionAmount === 0, resolve, reject);
         }
     }
-    /*resolve(data);*/
 }
 
 function getTreeNodeDataOfPartition(partition) {
@@ -147,7 +139,6 @@ function getTreeNodeDataOfPartition(partition) {
         id: partition.id,
         treeId: partition.id,
         zones: [],
-        // empty: partition.empty,
         data: {
             editing: false,
             partition: partition,
@@ -164,7 +155,6 @@ PartitionCache.registerOnPartitionDeleted((partition) => {
     QuestionCache.removePartitionFromAllQuestions(partition);
 });
 
-//FIXME run too fast (?)
 QuestionCache.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) => {
     for (let partitionId of questionInfo.question.partitionIds) {
         if (tree.value.getNode(partitionId + "/" + questionInfo.question.id) === null) {
@@ -245,7 +235,6 @@ const openEdit = (questionId) => {
 }
 
 const onEdit = (nodeObj, nodeItem, node, event) => {
-    // console.log(nodeObj,nodeItem,node,event);
     nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup' ? openEdit(nodeObj.data.question.id) : null
 }
 
@@ -255,7 +244,6 @@ const allowDrag = (node) => {
 }
 
 const allowDrop = (draggingNode, dropNode, type) => {
-    // console.log(draggingNode, dropNode, type);
     let nodeDataType = dropNode.data.data.type;
     return ((nodeDataType === "Partition" || nodeDataType === "QuestionGroup") && type === "inner") ||
             (nodeDataType !== "Partition" && nodeDataType !== "createPartition" && type === "next");
@@ -642,7 +630,6 @@ function onDeleteNode(nodeObj) {
             QuestionCache.delete(nodeObj.data.question.id);
         }
     } else {
-        // PartitionCache.getSync(nodeObj.id).then((partition) => {
         const partition = tree.value.getNode(nodeObj.id);
         const alartNotEmpty = () => {
             ElMessageBox.confirm(
@@ -751,7 +738,7 @@ const getTypeName = (type) => {
                     <div style="flex:1;overflow:overlay;">
                         <el-scrollbar>
                             <div style="flex: 1">
-<!--                                TODO Replace with virtual tree-->
+                                <!--TODO Replace with virtual tree-->
                                 <el-tree ref="tree" icon="ArrowRightBold" node-key="treeId" :props="props"
                                          @node-click="onEdit" :show-checkbox="showCheckBox"
                                          draggable :allow-drag="allowDrag" :allow-drop="allowDrop"
@@ -764,7 +751,7 @@ const getTypeName = (type) => {
                                             <create-partition-button/>
                                         </template>
                                         <template v-else-if="nodeObj.data.type==='createQuestion'">
-                                            <!--                                            TODO component-->
+                                            <!--TODO component-->
                                             <el-popover trigger="click" popper-style="min-width: 80px;width: auto;">
                                                 <template #reference>
                                                     <el-button text size="small" :icon="HarmonyOSIcon_Plus"
@@ -785,15 +772,15 @@ const getTypeName = (type) => {
                                                                     @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
                                                                 选择题
                                                             </el-button>
-                                                            <!--                                                            <el-button disabled>排序题</el-button>-->
-                                                            <!--                                                            <el-button disabled>填空题</el-button>-->
+                                                            <!--<el-button disabled>排序题</el-button>-->
+                                                            <!--<el-button disabled>填空题</el-button>-->
                                                         </el-button-group>
                                                     </div>
                                                 </template>
                                             </el-popover>
                                         </template>
                                         <template v-else>
-                                            <!--                                            TODO component-->
+                                            <!--TODO component-->
                                             <div class="tree-node-item"
                                                  :class="{
                                                 dragHover:nodeObj.data.dragHover

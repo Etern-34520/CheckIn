@@ -88,10 +88,10 @@ watch(UIMeta.mobile, (val) => {
 
 .mobile .left-view {
     position: fixed;
-    backdrop-filter: blur(32px) brightness(0.5);
     height: 100vh;
     width: 75vw;
     z-index: 2003;
+    backdrop-filter: blur(32px);
     transform: translateX(calc(-100% - 500px));
     transition: transform 300ms var(--ease-in-out-quint);
 }
@@ -108,8 +108,8 @@ watch(UIMeta.mobile, (val) => {
     position: absolute;
 /*    left: 0;*/
 /*    top: 0;*/
-    width: 100%;
-    height: 100%;
+    width: calc(100% - 46px);
+    height: calc(100% - 46px);
     z-index: 2002;
 }
 </style>

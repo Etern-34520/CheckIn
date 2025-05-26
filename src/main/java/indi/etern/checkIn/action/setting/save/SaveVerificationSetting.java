@@ -21,6 +21,7 @@ public class SaveVerificationSetting extends BaseAction<SaveVerificationSetting.
         this.verificationRuleService = verificationRuleService;
     }
     
+    @SuppressWarnings("unchecked")
     @Transactional
     @Override
     public void execute(ExecuteContext<Input, MessageOutput> context) {

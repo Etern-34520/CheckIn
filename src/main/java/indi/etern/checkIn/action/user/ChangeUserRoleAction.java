@@ -23,12 +23,10 @@ public class ChangeUserRoleAction extends BaseAction<ChangeUserRoleAction.Input,
     }
     
     private final UserService userService;
-    private final TransactionTemplate transactionTemplate;
     private final RoleService roleService;
     
     public ChangeUserRoleAction(UserService userService, TransactionTemplate transactionTemplate, RoleService roleService) {
         this.userService = userService;
-        this.transactionTemplate = transactionTemplate;
         this.roleService = roleService;
     }
     

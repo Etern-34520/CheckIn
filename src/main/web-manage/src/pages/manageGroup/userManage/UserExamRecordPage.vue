@@ -20,7 +20,7 @@ UserDataInterface.getUserOfQQAsync(qq.value).then((user) => {
                 </el-icon>
                 <el-text>返回</el-text>
             </el-button>
-            <el-text style="font-size: 24px">{{ name }} 的题目</el-text>
+            <el-text style="font-size: 24px">{{ name }} 的答题记录</el-text>
         </div>
         <user-exam-records-view :qq="qq"/>
     </div>

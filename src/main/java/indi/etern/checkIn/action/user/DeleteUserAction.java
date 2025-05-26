@@ -38,8 +38,6 @@ public class DeleteUserAction extends BaseAction<DeleteUserAction.Input, Message
             context.resolve(MessageOutput.success("User deleted"));
             Message<User> message = Message.of("deleteUser", user);
             webSocketService.sendMessageToAll(message);
-        }, () -> {
-            context.resolve(MessageOutput.error("User not found"));
-        });
+        }, () -> context.resolve(MessageOutput.error("User not found")));
     }
 }

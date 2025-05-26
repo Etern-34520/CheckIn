@@ -9,7 +9,7 @@ import java.util.List;
 
 public class GetSettingCommon {
     private final String rootName;
-    List<String> keys;
+    final List<String> keys;
     
     public GetSettingCommon(String[] keys, String rootName) {
         this.keys = List.of(keys);

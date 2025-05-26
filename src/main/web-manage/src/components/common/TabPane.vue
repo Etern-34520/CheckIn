@@ -35,7 +35,6 @@ watch(() => selectTab.value, (newVal, oldValue) => {
     <div style="display: flex;flex-direction: column">
         <div style="margin-bottom: 8px">
             <el-scrollbar>
-                <!--            TODO scrollbar-->
                 <el-segmented v-model="selectTab" :options="tabNames"/>
             </el-scrollbar>
         </div>

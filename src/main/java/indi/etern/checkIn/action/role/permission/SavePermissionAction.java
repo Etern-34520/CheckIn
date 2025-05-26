@@ -43,9 +43,7 @@ public class SavePermissionAction extends BaseAction<SavePermissionAction.Input,
                 actionExecutor.execute(SendPermissionsToUsersAction.class,
                         new SendPermissionsToUsersAction.Input(role.getUsers()));
                 context.resolve(MessageOutput.success("Permissions saved successfully"));
-            }, () -> {
-                context.resolve(MessageOutput.error("Role not found"));
-            });
+            }, () -> context.resolve(MessageOutput.error("Role not found")));
         }
     }
 }

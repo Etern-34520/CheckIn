@@ -74,7 +74,7 @@ const update = () => {
 }
 watch(() => route.params.id, update, {immediate: true});
 
-const channel = WebSocketConnector.subscribe("examRecord", (data1) => {
+const channel = WebSocketConnector.subscribe("examRecords", (data1) => {
     const examRecord = data1.data;
     if (examRecord.id === data.value.id) {
         update();
@@ -135,7 +135,7 @@ const invalidExam = () => {
         WebSocketConnector.send({
             type: "InvalidExam",
             data: {
-                examId: data.value.id
+                id: data.value.id
             }
         }).then(() => {
         });
@@ -143,12 +143,14 @@ const invalidExam = () => {
     });
 }
 
+/*
 const banQQ = () => {
     //TODO
 }
+*/
 
 const slideWay = ref(router.currentRoute.value.name === "related-requests");
-const remove = router.afterEach((to,from,failure) => {
+const remove = router.afterEach((to, from, failure) => {
     setTimeout(() => {
         slideWay.value = to.name === "related-requests";
     }, 400);
@@ -165,68 +167,62 @@ onBeforeUnmount(() => {
                  style="flex: 1;display: flex;align-items: center;justify-content: center;">
                 <el-empty/>
             </div>
-            <div style="padding: 32px 16px 4px;display: flex;flex-direction: column;align-items: stretch;flex:1;height: 0"
+            <div style="padding: 12px 16px 4px;display: flex;flex-direction: column;align-items: stretch;flex:1;height: 0"
                  :key="data.id" v-else-if="data">
-                <div style="display: flex;flex-direction: row;align-items: center;margin-left: 16px;flex-wrap: wrap">
+                <div style="display: flex;flex-direction: row;align-items: center;margin-left: 4px;margin-bottom: 8px;flex-wrap: wrap">
                     <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 16px;">
                         <el-avatar style="width: 64px;height: 64px;margin-right: 16px"
                                    :src="getAvatarUrlOf(data.qqNumber)"/>
                         <div style="display: flex;flex-direction: column;min-width: min(70vw,120px);">
                             <el-text size="large"
-                                     style="align-self: baseline;margin-bottom: 8px;">
+                                     style="align-self: baseline;margin-bottom: 6px;">
                                 {{ data.qqNumber }}
                             </el-text>
-                            <el-tag style="align-self: baseline;margin-right: 8px">{{ data.status }}</el-tag>
+                            <div style="display: flex;flex-direction: row;flex-wrap: wrap">
+                                <el-tag style="align-self: center;margin-right: 8px">{{ data.status }}</el-tag>
+                                <div v-if="data.status === 'ONGOING'">
+                                    <el-button-group>
+                                        <el-button @click="invalidExam">无效化该测试</el-button>
+                                        <!--                            <el-button @click="banQQ">将该用户 QQ 加入黑名单</el-button>-->
+                                    </el-button-group>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div style="display: flex;flex-direction: column;margin-right: 16px;margin-bottom: 16px;flex:1;">
-                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px;">
-                            <el-text style="margin-right: 12px;" type="info">生成时间</el-text>
-                            <el-text>{{ data.generateTime }}</el-text>
-                        </div>
-                        <div style="display: flex;flex-direction: row;align-items: center;" v-if="data.submitTime">
-                            <el-text style="margin-right: 12px;" type="info">提交时间</el-text>
-                            <el-text>{{ data.submitTime }}</el-text>
-                        </div>
-                        <div style="display: flex;flex-direction: row;align-items: center;"
-                             v-else-if="data.status === 'ONGOING'">
-                            <el-text style="margin-right: 12px;" type="info">过期时间</el-text>
-                            <el-text>{{ data.expireTime }}</el-text>
-                        </div>
-                        <div style="display: flex;flex-direction: row;align-items: center;" v-else>
-                            <el-text style="margin-right: 12px;" type="info">已无效</el-text>
-                        </div>
-                    </div>
-                    <div style="display: flex;flex-direction: row;align-items: stretch;margin-left: 16px;margin-bottom: 16px;flex-wrap: wrap"
-                         v-if="data.status === 'SUBMITTED' && data.result">
-                        <div style="margin-right: 80px;margin-bottom: 12px;display: flex;flex-direction: row;align-items: stretch">
-                            <div style="width: 8px;max-width: 8px;min-width: 8px;border-radius: 4px;margin-right: 32px;"
-                                 :style="{background: data.result.colorHex}"></div>
-                            <el-text style="align-self: center" size="large">{{ data.result.level }}</el-text>
-                        </div>
-                        <el-statistic style="margin-right: 80px;margin-bottom: 12px;" :value="data.result.score">
-                            <template #title>
-                                <el-text type="primary" size="small">
-                                    总分
-                                </el-text>
-                            </template>
-                        </el-statistic>
-                        <div style="display: flex;flex-direction: row;margin-bottom: 12px;">
-                            <el-statistic style="margin-right: 32px;" :value="data.result.correctCount">
+                    <el-scrollbar v-if="data.status === 'SUBMITTED' && data.result" style="max-height: 68px">
+                        <div style="display: flex;flex-direction: row;align-items: stretch;height: 60px">
+                            <div style="margin-right: 64px;display: flex;flex-direction: row;align-items: stretch">
+                                <div style="width: 6px;max-width: 6px;min-width: 6px;border-radius: 3px;margin-right: 32px;"
+                                     :style="{background: data.result.colorHex}"></div>
+                                <el-text style="align-self: center" size="large">{{ data.result.level }}</el-text>
+                            </div>
+                            <el-statistic class="statistic-items" style="margin-right: 64px"
+                                          :value="data.result.score">
+                                <template #title>
+                                    <el-text type="primary" size="small">
+                                        总分
+                                    </el-text>
+                                </template>
+                            </el-statistic>
+                            <el-statistic class="statistic-items"
+                                          :value="data.result.correctCount">
                                 <template #title>
                                     <el-text type="success" size="small">
                                         答对题数
                                     </el-text>
                                 </template>
                             </el-statistic>
-                            <el-statistic style="margin-right: 32px;" :value="data.result.halfCorrectCount">
+                            <el-statistic class="statistic-items"
+                                          :value="data.result.halfCorrectCount">
                                 <template #title>
                                     <el-text type="warning" size="small">
                                         半对题数
                                     </el-text>
                                 </template>
                             </el-statistic>
-                            <el-statistic style="margin-right: 32px;" title="答错题数" :value="data.result.wrongCount">
+                            <el-statistic class="statistic-items"
+                                          title="答错题数"
+                                          :value="data.result.wrongCount">
                                 <template #title>
                                     <el-text type="danger" size="small">
                                         答错题数
@@ -234,13 +230,7 @@ onBeforeUnmount(() => {
                                 </template>
                             </el-statistic>
                         </div>
-                    </div>
-                    <div v-else-if="data.status === 'ONGOING'" style="margin-right: 16px;">
-                        <el-button-group>
-                            <el-button @click="invalidExam">无效化该测试</el-button>
-                            <!--                            <el-button @click="banQQ">将该用户 QQ 加入黑名单</el-button>-->
-                        </el-button-group>
-                    </div>
+                    </el-scrollbar>
                 </div>
                 <div class="slide-switch-base" :class="slideWay?'left-to-right':''">
                     <router-view v-slot="{ Component }">
@@ -248,6 +238,24 @@ onBeforeUnmount(() => {
                             <component v-if="Component" :is="Component"/>
                             <el-scrollbar v-else style="min-width: 100%;">
                                 <div style="display: flex;flex-direction: column;width:calc(100% - 4px)">
+                                    <div style="display: flex;flex-direction: column;margin-right: 16px;margin-bottom: 16px;flex:1;min-width: 220px">
+                                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px;">
+                                            <el-text style="margin-right: 12px;" type="info">生成时间</el-text>
+                                            <el-text>{{ data.generateTime }}</el-text>
+                                        </div>
+                                        <div style="display: flex;flex-direction: row;align-items: center;" v-if="data.submitTime">
+                                            <el-text style="margin-right: 12px;" type="info">提交时间</el-text>
+                                            <el-text>{{ data.submitTime }}</el-text>
+                                        </div>
+                                        <div style="display: flex;flex-direction: row;align-items: center;"
+                                             v-else-if="data.status === 'ONGOING'">
+                                            <el-text style="margin-right: 12px;" type="info">过期时间</el-text>
+                                            <el-text>{{ data.expireTime }}</el-text>
+                                        </div>
+                                        <div style="display: flex;flex-direction: row;align-items: center;" v-else>
+                                            <el-text style="margin-right: 12px;" type="info">已无效</el-text>
+                                        </div>
+                                    </div>
                                     <collapse v-if="data.result">
                                         <template #title>
                                             <div style="height: 100%;margin-left: 8px;display: flex;flex-direction: row;align-items: center">
@@ -290,7 +298,8 @@ onBeforeUnmount(() => {
                                             </div>
                                         </div>
                                     </div>
-                                    <link-panel style="margin-top: 16px;" name="相关请求" description="生成 获取题目 提交"
+                                    <link-panel style="margin-top: 16px;" name="相关请求"
+                                                description="生成 获取题目 提交"
                                                 v-if="PermissionInfo.hasPermission('request record','get request records')"
                                                 icon="Link" @click="router.push({name: 'related-requests'})"/>
                                     <div style="display:flex;flex-direction: column;margin: 32px -4px -4px;"
@@ -370,9 +379,9 @@ onBeforeUnmount(() => {
                                                 </div>
                                             </div>
                                         </div>
-<!--                                        <div class="panel-1" style="padding: 16px">
-                                            TODO action track
-                                        </div>-->
+                                        <!--                                        <div class="panel-1" style="padding: 16px">
+                                                                                    TODO action track
+                                                                                </div>-->
                                     </div>
                                 </div>
                             </el-scrollbar>
@@ -385,5 +394,8 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-
+.statistic-items {
+    min-width: 24px;
+    margin-right: 8px;
+}
 </style>

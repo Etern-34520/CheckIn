@@ -20,15 +20,12 @@ public class Role {
         ANONYMOUS = new Role();
         ANONYMOUS.type = "";
     }
-    protected static Map<String, Role> roleMap = new HashMap<>();
+    protected static final Map<String, Role> roleMap = new HashMap<>();
     @Id
     private String type;
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<User> users = new HashSet<>();
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH})
-//    @JoinColumn(value = "ROLE_TYPE",referencedColumnName = "TYPE")
-//    @NotFound(action = NotFoundAction.IGNORE)
-//    FIXME foreign
     @JoinTable(name = "ROLE_PERMISSION_MAPPING",
             foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
             inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),

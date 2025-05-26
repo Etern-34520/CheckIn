@@ -33,8 +33,6 @@ public class SetEnableUserAction extends BaseAction<SetEnableUserAction.Input, M
             Message<?> message = Message.of("updateUser", user);
             WebSocketService.singletonInstance.sendMessageToAll(message);
             context.resolve(MessageOutput.success("User updated"));
-        }, () -> {
-            context.resolve(MessageOutput.error("User not exist"));
-        });
+        }, () -> context.resolve(MessageOutput.error("User not exist")));
     }
 }

@@ -109,6 +109,7 @@ const onMessageInternal = (message) => {
         } else if (message.messageId) {
             const promise = WebSocketConnector.promises[message.messageId];
             if (promise && promise instanceof Promise) {
+                delete WebSocketConnector.promises[message.messageId];
                 if (message.type === "error") {
                     let showNotification = true;
                     message.disableNotification = () => {

@@ -39,9 +39,7 @@ public class GetDislikeQuestionsByUserQQAction extends BaseAction<GetDislikeQues
         Optional<User> optionalUser = userService.findByQQNumber(input.qq);
         if (optionalUser.isPresent()) {
             ArrayList<Map<String,Object>> questions = new ArrayList<>();
-            questionService.findAllByDownVotersContains(optionalUser.get()).forEach(question -> {
-                questions.add(QuestionUpdateUtils.getMapOfQuestion(question));
-            });
+            questionService.findAllByDownVotersContains(optionalUser.get()).forEach(question -> questions.add(QuestionUpdateUtils.getMapOfQuestion(question)));
             context.resolve(new Output(questions));
         } else {
             context.resolve(MessageOutput.error("User not found"));

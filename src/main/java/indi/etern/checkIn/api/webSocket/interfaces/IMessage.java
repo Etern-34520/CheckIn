@@ -34,9 +34,9 @@ public interface IMessage<D> {
             }
         }
         
-        public static Type SUCCESS = new Type("success");
-        public static Type WARNING = new Type("warning");
-        public static Type ERROR = new Type("error");
+        public static final Type SUCCESS = new Type("success");
+        public static final Type WARNING = new Type("warning");
+        public static final Type ERROR = new Type("error");
         
         private final String name;
         

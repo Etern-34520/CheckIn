@@ -25,7 +25,7 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class RequestRecord implements BaseEntity<String> {
-    private static Logger logger = LoggerFactory.getLogger(RequestRecord.class);
+    private static final Logger logger = LoggerFactory.getLogger(RequestRecord.class);
     
     @Id
     @Column(columnDefinition = "char(36)")

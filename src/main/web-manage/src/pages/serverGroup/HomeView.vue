@@ -105,7 +105,7 @@ const putItem = (date, examRecord) => {
         todayExamRecords.value[date] = Object.assign(target, todayExamRecords.value[date]);//place in front
     }
 }
-const channel = WebSocketConnector.subscribe("examRecord", (data1) => {
+const channel = WebSocketConnector.subscribe("examRecords", (data1) => {
     const examRecord = data1.data;
     const generateDate = examRecord.generateTime.split(" ")[0];
     const submitDate = examRecord.submitTime ? examRecord.submitTime.split(" ")[0] : null;
@@ -160,7 +160,7 @@ const openRecord = (id) => {
                             </el-text>
                         </div>
                     </div>
-                    <div style="padding: 16px 16px 0;flex:1" class="panel">
+                    <div style="padding: 8px 16px 0;flex:1" class="panel">
                         <el-text size="large" style="align-self: baseline;margin-top: 4px">今日答题记录</el-text>
                         <div v-loading="loadingTodayExamRecords"
                              style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">
@@ -193,7 +193,7 @@ const openRecord = (id) => {
                     </div>
                 </pane>
                 <pane min-size="40">
-                    <div class="panel" style="display: flex;flex-direction: column;padding: 16px">
+                    <div class="panel" style="display: flex;flex-direction: column;padding: 8px 16px 0">
                         <el-text size="large" style="align-self: baseline;margin-top: 4px">最近更新的题目</el-text>
                         <div v-loading="loadingRecentUpdatedQuestions"
                              style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">

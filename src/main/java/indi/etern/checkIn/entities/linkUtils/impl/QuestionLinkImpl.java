@@ -21,6 +21,7 @@ public class QuestionLinkImpl<T extends BaseEntity<?>> implements Link<Question,
     @OneToOne(mappedBy = "linkWrapper")
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     protected Question source;
+    
     @Id
     @Column(columnDefinition = "char(36)")
     protected String id;

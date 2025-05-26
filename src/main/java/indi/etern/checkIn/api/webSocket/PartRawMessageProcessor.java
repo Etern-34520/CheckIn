@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PartRawMessageProcessor {
-    private Map<String, String> partMap = new LinkedHashMap<>();
+    private final Map<String, String> partMap = new LinkedHashMap<>();
 
     public PartRawMessageProcessor(List<String> partIds) {
         for (String partId : partIds) {

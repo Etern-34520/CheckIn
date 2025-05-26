@@ -15,10 +15,6 @@ import java.io.IOException;
 public class JwtAuthenticationFilter implements Filter {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-
-//    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
-//        super(authenticationManager);
-//    }
     
     @Override
     public void doFilter(ServletRequest servletRequest,

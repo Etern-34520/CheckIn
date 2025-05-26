@@ -13,7 +13,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
-    Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
+    final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
     
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)

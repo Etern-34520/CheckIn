@@ -31,8 +31,7 @@ public class QuestionCreateUtils {
         builder.setId(id);
         
         Object content1 = questionDataMap.get("content");
-        if (content1 instanceof String) {
-            String content = (String) content1;
+        if (content1 instanceof String content) {
             builder.setQuestionContent(content);
         }
         
@@ -98,11 +97,9 @@ public class QuestionCreateUtils {
     }
     
     protected static MultipleChoicesQuestion createSubMultipleChoicesQuestion(Map<?, ?> questionDataMap, QuestionGroup questionGroup) {
-        return create(questionDataMap, (questionDataMap1, builder1) -> {
-            builder1.useQuestionGroupLinks(linkWrapper -> {
-                linkWrapper.setTarget(questionGroup);
-            });
-        });
+        return create(questionDataMap, (questionDataMap1, builder1) -> builder1.useQuestionGroupLinks(linkWrapper -> {
+            linkWrapper.setTarget(questionGroup);
+        }));
     }
     
     public static QuestionGroup createQuestionGroup(Map<?, ?> questionDataMap) {

@@ -29,11 +29,10 @@
 .light:root {
     --el-text-color: rgb(10, 10, 10) !important;
     --el-text-color-regular: rgb(10, 10, 10) !important;
-    --el-color-primary-3: #8fa1b3 !important;
-    --el-color-primary-2: #859ba6 !important;
-    --el-color-primary-1: #7a8a99 !important;
-    --el-color-primary: #707e8c !important;
-    /*--el-color-primary: AccentColor !important;*/
+    --el-color-primary: #8fa1b3 !important;
+    --el-color-primary-1: #859ba6 !important;
+    --el-color-primary-2: #7a8a99 !important;
+    --el-color-primary-3: #707e8c !important;
     --html-bg: rgb(240, 245, 245);
     --menu-shadow: 4px 0 32px rgba(0, 0, 0, 0.1);
     --menu-bg-color-alpha: rgba(240, 240, 240, 0.6);
@@ -53,7 +52,7 @@
     --lighting-effect-background-1: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.08) 100%);
     --lighting-effect-background-2: linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.06) 100%);
     --lighting-effect-background-3: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.03) 100%);
-    --primary-button-text-color: rgba(0, 0, 0, 0.95);
+    --primary-button-text-color: rgba(255, 255, 255, 0.95);
 }
 
 .dark:root {
@@ -199,16 +198,19 @@
     display: none !important;
 }
 
+/*noinspection SpellCheckingInspection*/
 .md-editor-resize-operate:hover,
 .splitpanes__splitter:hover {
     background: var(--splitter-bg-hover) !important;
 }
 
+/*noinspection SpellCheckingInspection*/
 .md-editor-resize-operate:active,
 .splitpanes__splitter:active {
     background: var(--splitter-bg-active) !important;
 }
 
+/*noinspection SpellCheckingInspection*/
 .md-editor-resize-operate::after,
 .splitpanes--vertical .splitpanes__splitter::after {
     transition: 200ms var(--ease-in-out-quint);
@@ -223,6 +225,7 @@
     justify-self: center;
 }
 
+/*noinspection SpellCheckingInspection*/
 .splitpanes--horizontal .splitpanes__splitter::after {
     transition: 400ms var(--ease-in-out-quint);
     content: "";
@@ -473,12 +476,6 @@
     background: var(--panel-bg-color-overlay) var(--lighting-effect-background-2) !important;
 }
 
-/*.el-tree-node:not(.disable-init-animate) {
-    animation: var(--init-animation);
-    animation-fill-mode: backwards;
-    animation-delay: 100ms;
-}*/
-
 .el-tree-node__content:has(.disable-tree-item-hover), .el-tree-node__content:has(.disable-tree-item-focus) {
     background: transparent !important;
     cursor: default;
@@ -582,15 +579,10 @@
 }
 
 .el-checkbox__inner, .el-radio__inner {
-    /*background: transparent !important;*/
     border: var(--border-2) !important;
     background-clip: padding-box;
     transition: 200ms var(--ease-in-out-quint);
 }
-
-/*.el-checkbox__input.is-focus > .el-checkbox__inner {
-    background: linear-gradient(180deg, transparent calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
-}*/
 
 .el-date-editor--daterange,
 .el-input:not(.is-focus) > div,
@@ -667,12 +659,6 @@
     flex: 1;
 }
 
-/*.el-textarea > textarea:focus {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 3px calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
-    background-clip: padding-box;
-    transition-delay: 50ms;
-}*/
-
 .question-input {
     position: relative;
     margin-bottom: 8px;
@@ -689,7 +675,6 @@
     left: 50%;
     top: calc(100% - 3px);
     height: 2px;
-    /*    border-radius: 1px;*/
     border-radius: 0 0 2px 2px;
     filter: blur(4px);
     transition: left 500ms cubic-bezier(.34, .26, .19, 1.18),
@@ -848,25 +833,21 @@
     padding: 0 !important;
 }
 
-/*#app .scrollbar__bar,*/
 .el-scrollbar__bar {
     transition: 300ms var(--ease-in-out-quint);
     opacity: 1;
 }
 
-/*#app .scrollbar__bar.is-vertical,*/
 .el-scrollbar__bar.is-vertical {
     display: flex;
     flex-direction: row-reverse;
 }
 
-/*#app .scrollbar__bar.is-horizontal,*/
 .el-scrollbar__bar.is-horizontal {
     display: flex;
     flex-direction: column-reverse;
 }
 
-/*#app .scrollbar__bar.is-vertical .scrollbar__thumb,*/
 .el-scrollbar__bar.is-vertical .el-scrollbar__thumb {
     transition: background-color 150ms var(--ease-in-out-quint),
     width 150ms var(--ease-in-out-quint),
@@ -875,7 +856,6 @@
     background: var(--el-scrollbar-bg-color) !important;
 }
 
-/*#app .scrollbar__bar.is-horizontal .scrollbar__thumb,*/
 .el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
     transition: background-color 100ms var(--ease-in-out-quint),
     height 150ms var(--ease-in-out-quint),
@@ -889,18 +869,14 @@
     opacity: 0.5;
 }
 
-/*#app .scrollbar__bar.is-vertical:hover > .scrollbar__thumb,*/
 #app .el-scrollbar__bar.is-vertical:hover > .el-scrollbar__thumb,
-    /*#app .scrollbar__bar.is-vertical > .scrollbar__thumb:active,*/
 #app .el-scrollbar__bar.is-vertical > .el-scrollbar__thumb:active {
     width: 6px !important;
     background: var(--el-scrollbar-bg-color) !important;
     opacity: 0.75;
 }
 
-/*#app .scrollbar__bar.is-horizontal:hover > .scrollbar__thumb,*/
 #app .el-scrollbar__bar.is-horizontal:hover > .el-scrollbar__thumb,
-    /*#app .scrollbar__bar.is-horizontal > .scrollbar__thumb:active,*/
 #app .el-scrollbar__bar.is-horizontal > .el-scrollbar__thumb:active {
     height: 6px !important;
     background: var(--el-scrollbar-bg-color) !important;
@@ -1023,18 +999,6 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    /*vertical-align: baseline;*/
-}
-
-.el-tree-node__children > .el-tree-node {
-    /*display: block;*/
-    /*vertical-align: bottom;*/
-}
-
-.el-tree-node:not(.is-expanded) .el-tree-node__children {
-    /*visibility: hidden;*/
-    /*display: none !important;*/
-    /*max-height: 0;*/
 }
 
 .el-alert {
@@ -1259,16 +1223,11 @@ input::-webkit-inner-spin-button {
     background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
-/*noinspection CssInvalidPseudoSelector*//*
-input:autofill {
-    transition: 1000000000000000000000s linear 100000000000000000000000s;
-}
-
-input:-webkit-autofill {
-    transition: 1000000000000000000000s linear 100000000000000000000000s;
-}*/
-
 .start-date .el-date-table-cell__text,
 .end-date .el-date-table-cell__text{
     color: var(--front-color-reverse) !important;
+}
+
+.el-anchor {
+    --el-anchor-bg-color: rgba(0,0,0,0) !important;
 }

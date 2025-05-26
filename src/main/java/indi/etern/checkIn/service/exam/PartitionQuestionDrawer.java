@@ -18,11 +18,11 @@ public class PartitionQuestionDrawer {
     private final Set<Question> partitionAllEnabledQuestions;
     @Getter
     Partition partition;
-    List<Question> availableQuestions;
+    final List<Question> availableQuestions;
     @Getter
     int availableCount;
     int unavailableCount = 0;
-    List<Question> drewQuestions;
+    final List<Question> drewQuestions;
     int drewCount = 0;
     @Setter
     @Getter

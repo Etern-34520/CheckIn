@@ -47,8 +47,6 @@ public class GetExamRecordDetailAction extends BaseAction<GetExamRecordDetailAct
                         examDataMap.remove("answers");
                     }
                     context.resolve(new SuccessOutput(examDataMap));
-                }, () -> {
-                    context.resolve(MessageOutput.error("ExamController data not found"));
-                });
+                }, () -> context.resolve(MessageOutput.error("ExamController data not found")));
     }
 }

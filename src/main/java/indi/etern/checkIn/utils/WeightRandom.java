@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WeightRandom<T> {
-    Logger logger = LoggerFactory.getLogger(getClass());
+    final Logger logger = LoggerFactory.getLogger(getClass());
     @FunctionalInterface
     public interface WeightProcessor {
         int process();
@@ -38,8 +38,8 @@ public class WeightRandom<T> {
         }
     }
     private boolean dirty = false;
-    Random random;
-    Set<Part<T>> partsSet = new LinkedHashSet<>();
+    final Random random;
+    final Set<Part<T>> partsSet = new LinkedHashSet<>();
     int[] weightsArray;
     Part<T>[] partsArray;
     public WeightRandom(Random random) {

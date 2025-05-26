@@ -414,7 +414,7 @@ const addToValues = (datum, index) => {
 <template>
     <div class="rule-card-base">
         <div style="display: flex;flex-direction: row;flex-wrap: wrap;min-height: 42px;align-items: center">
-            <div style="display: flex;margin-right: 8px;flex-direction: row;flex-wrap: wrap;"><!--FIXME OVERFLOW-->
+            <div style="display: flex;margin-right: 8px;flex-direction: row;flex-wrap: wrap;">
                 <div style="display: flex;flex-direction: row;" v-if="editing">
                     <el-text style="margin-right: 4px;">对象</el-text>
                     <el-segmented :options="optionValues" v-model="model.objectName">

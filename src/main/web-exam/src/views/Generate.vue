@@ -81,7 +81,6 @@ const back = () => {
                    style="margin-top: 36px;align-self: baseline;padding: 8px 16px !important;font-size: 1em">
             <el-icon><ArrowLeftBold/></el-icon>返回
         </el-button>
-<!--        FIXME-->
         <template v-if="((requiredPartitionIds && requiredPartitionIds.length > 0)
           || (selectablePartitionIds && selectablePartitionIds.length > 0))">
             <el-text style="font-size: 24px;align-self: baseline;margin-top: 24px">选择分区</el-text>

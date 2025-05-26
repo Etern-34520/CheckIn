@@ -4,7 +4,7 @@
 #### 更易用的入群测试系统
 ![Static Badge](https://img.shields.io/badge/Language-Java-red)
 ![Static Badge](https://img.shields.io/badge/JavaRequire-21-red)
-![Static Badge](https://img.shields.io/badge/Version-2.0.0_beta-blue)
+![Static Badge](https://img.shields.io/badge/Version-2.0.0_stable-blue)
 ![Static Badge](https://img.shields.io/badge/Status-Developing-green)
 ---
 

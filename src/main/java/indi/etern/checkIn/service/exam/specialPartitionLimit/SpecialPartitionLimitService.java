@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
 public class SpecialPartitionLimitService {
     private final SettingService settingService;
     private Map<String,SpecialPartitionLimit> specialPartitionLimits;
-    private Logger logger = LoggerFactory.getLogger(SpecialPartitionLimitService.class);
+    private final Logger logger = LoggerFactory.getLogger(SpecialPartitionLimitService.class);
     public static SpecialPartitionLimitService singletonInstance;
     
     public SpecialPartitionLimitService(SettingService settingService) {

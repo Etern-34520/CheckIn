@@ -78,7 +78,7 @@ const getTagType = (checkedResultType) => {
 
 <template>
     <div v-loading="loading" style="height: 100%;display: flex;flex-direction: column">
-        <div style="display: flex;flex-direction: column;padding: 16px;flex: 1">
+        <div style="display: flex;flex-direction: column;padding: 16px;flex: 1;height: 0">
             <div style="display: flex;flex-direction: row">
                 <el-button @click="back" style="margin-right: 16px">
                     <el-icon>
