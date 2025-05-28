@@ -5,7 +5,6 @@ import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
-import indi.etern.checkIn.entities.question.statistic.QuestionStatistic;
 import indi.etern.checkIn.entities.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,38 +23,39 @@ import java.util.UUID;
 @Table(name = "questions")
 public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<String> {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
-    
     @Id
     @Getter
     @Column(columnDefinition = "char(36)")
     @JsonIgnore
-    protected String id;
+    String id;
     
     @Getter
     @Column(name = "content",columnDefinition = "text")
-    protected String content;
+    String content;
     
     @Getter
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinColumn(name = "author_qqnumber", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @NotFound(action = NotFoundAction.IGNORE)
     @JsonIgnore
-    protected User author = null;
+    User author = null;
     
     @Getter
     @Column(name = "last_modified_time")
-    protected LocalDateTime lastModifiedTime;
+    LocalDateTime lastModifiedTime;
     
+/*
     @SuppressWarnings("unused")
     //only used as orphanRemoval
     @OneToOne(mappedBy = "question", orphanRemoval = true)
     @JsonIgnore
     @NotFound(action = NotFoundAction.IGNORE)
-    protected QuestionStatistic questionStatistic;
+    QuestionStatistic questionStatistic;
+*/
     
     @Getter
     @Setter
-    protected boolean enabled = false;
+    boolean enabled = false;
     
     @Getter
     @JoinTable(name = "upvoters_questions_mapping",
@@ -67,7 +67,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
             CascadeType.REFRESH
     }, fetch = FetchType.EAGER)
     @JsonIgnore
-    protected Set<User> upVoters = new HashSet<>();
+    Set<User> upVoters = new HashSet<>();
     
     @Getter
     @ManyToMany(cascade = {
@@ -79,13 +79,13 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
             joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "qqNumber", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)))
     @JsonIgnore
-    protected Set<User> downVoters = new HashSet<>();
+    Set<User> downVoters = new HashSet<>();
     
     @Getter
     @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL,orphanRemoval = true)
     @JoinColumn(name = "id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnore
-    protected QuestionLinkImpl<?> linkWrapper;
+    QuestionLinkImpl<?> linkWrapper;
     
     @Getter
     @Setter

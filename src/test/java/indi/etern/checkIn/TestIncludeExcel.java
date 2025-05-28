@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.Choice;
-import indi.etern.checkIn.entities.question.impl.question.MultipleChoicesQuestion;
+import indi.etern.checkIn.entities.question.impl.MultipleChoicesQuestion;
 import indi.etern.checkIn.service.dao.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

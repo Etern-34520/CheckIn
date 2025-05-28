@@ -367,7 +367,7 @@ const upload = () => {
         QuestionCache.uploadAll().then((data) => {
             uploading.value = false;
             console.log(data);
-            console.log(data.succeedQuestionIds);
+            console.log(data.succeedUpdatedQuestionIds);
             console.log(data.failedQuestionIdReason);
             failedQuestionIdReason.value = data.failedQuestionIdReason;
             showFailedQuestionIdReason.value = Object.keys(failedQuestionIdReason.value).length > 0;

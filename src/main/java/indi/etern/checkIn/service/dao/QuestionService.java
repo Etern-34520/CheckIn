@@ -4,9 +4,10 @@ import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
+import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.QuestionRepository;
+import indi.etern.checkIn.repositories.QuestionStatisticRepository;
 import jakarta.annotation.Resource;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -30,11 +31,13 @@ public class QuestionService {
     @Resource
     private QuestionRepository questionRepository;
     private final Cache partitionCache;
+    private final QuestionStatisticRepository questionStatisticRepository;
     
-    protected QuestionService(PartitionService partitionService, CacheManager cacheManager) {
+    protected QuestionService(PartitionService partitionService, CacheManager cacheManager, QuestionStatisticRepository questionStatisticRepository) {
         singletonInstance = this;
         this.partitionService = partitionService;
         partitionCache = cacheManager.getCache("partition");
+        this.questionStatisticRepository = questionStatisticRepository;
     }
     
     private void evictRelatedPartitionCache(Question question) {
@@ -59,12 +62,19 @@ public class QuestionService {
     
 //    @CacheEvict(key = "#question.id")
     public void delete(Question question) {
+        if (question.getLinkWrapper() instanceof ToPartitionsLink toPartitionsLink) {
+            toPartitionsLink.getTargets().forEach(partition -> {
+                partition.getQuestionLinks().remove(toPartitionsLink);
+                partition.getEnabledQuestionsSet().remove(question);
+            });
+        }
         if (question instanceof QuestionGroup questionGroup) {
             questionGroup.getQuestionLinks().forEach(link -> {
                 Question subQuestion = link.getSource();
                 questionRepository.delete(subQuestion);
             });
         }
+        questionStatisticRepository.deleteById(question.getId());
         evictRelatedPartitionCache(question);
         questionRepository.delete(question);
     }

@@ -7,11 +7,10 @@ import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
+import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.utils.QuestionCreateUtils;
 import jakarta.annotation.Nonnull;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Optional;

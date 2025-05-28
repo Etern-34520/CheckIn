@@ -7,7 +7,7 @@ import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
+import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
 import jakarta.annotation.Nonnull;

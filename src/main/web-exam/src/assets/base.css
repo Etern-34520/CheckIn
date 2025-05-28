@@ -382,7 +382,7 @@
 }
 
 .el-notification {
-    --el-notification-width: 400px !important;
+    --el-notification-width: min(400px,calc(100vw - 32px)) !important;
     transition: 400ms 200ms var(--ease-out-quint) !important;
     background-color: var(--panel-bg-color) !important;
     backdrop-filter: blur(32px);

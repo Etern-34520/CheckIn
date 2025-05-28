@@ -1,4 +1,4 @@
-package indi.etern.checkIn.entities.question.impl.group;
+package indi.etern.checkIn.entities.question.impl;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import indi.etern.checkIn.entities.question.interfaces.answer.Answer;

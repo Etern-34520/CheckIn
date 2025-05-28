@@ -1,11 +1,8 @@
-package indi.etern.checkIn.entities.question.impl.question;
+package indi.etern.checkIn.entities.question.impl;
 
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
-import indi.etern.checkIn.entities.question.impl.Choice;
-import indi.etern.checkIn.entities.question.impl.Partition;
-import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
 import indi.etern.checkIn.entities.question.interfaces.answer.Answerable;
 import indi.etern.checkIn.entities.user.User;
@@ -18,7 +15,6 @@ import lombok.Getter;
 import java.util.*;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
 public class MultipleChoicesQuestion extends Question implements RandomOrderable, Answerable<List<String>> {
     protected boolean randomOrdered;
@@ -126,7 +122,6 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
         User author;
         boolean enable = false;
         QuestionLinkImpl<?> linkWrapper;
-        private boolean manualLink = false;
         private boolean randomOrdered = false;
         
         public static Builder from(MultipleChoicesQuestion multiPartitionableQuestion) {
@@ -144,9 +139,7 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
                 });
             } else if (multiPartitionableQuestion.getLinkWrapper() instanceof ToQuestionGroupLink toQuestionGroupLinkWrapper) {
                 toQuestionGroupLinkWrapper.getTarget().getQuestionLinks().clear();
-                builder.useQuestionGroupLinks((toQuestionGroupLinkWrapper1 -> {
-                    toQuestionGroupLinkWrapper1.setTarget(toQuestionGroupLinkWrapper.getTarget());
-                }));
+                builder.useQuestionGroupLinks((toQuestionGroupLinkWrapper1 -> toQuestionGroupLinkWrapper1.setTarget(toQuestionGroupLinkWrapper.getTarget())));
             }
             return builder;
         }
@@ -160,11 +153,6 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
         public Builder useQuestionGroupLinks(ToQuestionGroupLink.Configurator configurator) {
             linkWrapper = new ToQuestionGroupLink();
             configurator.configure((ToQuestionGroupLink) linkWrapper);
-            return this;
-        }
-        
-        public Builder useManualLinkLater() {
-            manualLink = true;
             return this;
         }
         
@@ -225,7 +213,7 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
                 throw new QuestionBuilderException("Less than two choices");
             }
             if (linkWrapper == null) {
-                String string = SettingService.singletonInstance.getItem("other","defaultPartitionName").getValue(String.class);
+                String string = SettingService.singletonInstance.getItem("other", "defaultPartitionName").getValue(String.class);
                 if (string == null) string = "undefined";
                 String finalString = string;
                 usePartitionLinks(partitionLink -> partitionLink.getTargets().add(Partition.ofName(finalString)));
@@ -243,9 +231,7 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             } else {
                 multipleQuestion.multipleChoiceType = Type.MULTIPLE_CORRECT;
             }
-            if (!manualLink) {
-                multipleQuestion.setLinkWrapper(linkWrapper);
-            }
+            multipleQuestion.setLinkWrapper(linkWrapper);
             multipleQuestion.setImageBase64Strings(imageBase64Strings);
             return multipleQuestion;
         }

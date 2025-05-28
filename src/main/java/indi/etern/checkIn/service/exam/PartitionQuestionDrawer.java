@@ -2,7 +2,7 @@ package indi.etern.checkIn.service.exam;
 
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
+import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLimit;
 import indi.etern.checkIn.throwable.exam.generate.PartitionEmptiedException;
 import indi.etern.checkIn.throwable.exam.generate.PartitionMaxLimitReachedException;

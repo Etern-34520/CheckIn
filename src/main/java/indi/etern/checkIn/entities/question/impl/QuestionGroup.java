@@ -1,4 +1,4 @@
-package indi.etern.checkIn.entities.question.impl.group;
+package indi.etern.checkIn.entities.question.impl;
 
 import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.linkUtils.LinkSource;
@@ -6,8 +6,6 @@ import indi.etern.checkIn.entities.linkUtils.LinkTarget;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
-import indi.etern.checkIn.entities.question.impl.Partition;
-import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
 import indi.etern.checkIn.entities.question.interfaces.answer.Answerable;
 import indi.etern.checkIn.entities.question.interfaces.answer.SingleQuestionAnswer;
@@ -80,6 +78,7 @@ public class QuestionGroup extends Question implements
     @Column(name = "image_base64_strings", columnDefinition = "mediumblob")
     Map<String, String> imageBase64Strings;
     
+    @SuppressWarnings("UnusedReturnValue")
     @Getter
     public static class Builder {
         

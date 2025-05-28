@@ -1,7 +1,6 @@
-package indi.etern.checkIn.entities.question.impl.question;
+package indi.etern.checkIn.entities.question.impl;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.entities.question.interfaces.answer.Answer;
 import indi.etern.checkIn.entities.question.interfaces.answer.SingleQuestionAnswer;
 import indi.etern.checkIn.entities.setting.SettingItem;

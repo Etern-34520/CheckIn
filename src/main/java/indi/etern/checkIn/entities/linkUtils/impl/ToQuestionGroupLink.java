@@ -3,7 +3,7 @@ package indi.etern.checkIn.entities.linkUtils.impl;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import indi.etern.checkIn.entities.linkUtils.ToOneLink;
 import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
+import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

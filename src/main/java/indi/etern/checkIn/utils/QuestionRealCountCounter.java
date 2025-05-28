@@ -1,7 +1,7 @@
 package indi.etern.checkIn.utils;
 
 import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
+import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 
 import java.util.Collection;
 

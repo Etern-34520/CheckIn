@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.linkUtils.LinkTarget;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
-import indi.etern.checkIn.entities.question.impl.group.QuestionGroup;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.persistence.*;
 import lombok.Getter;

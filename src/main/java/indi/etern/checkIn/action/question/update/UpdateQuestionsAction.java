@@ -32,7 +32,8 @@ public class UpdateQuestionsAction extends BaseAction<UpdateQuestionsAction.Inpu
     }
     
     public record Output(OutputData.Result result,
-                         List<String> succeedQuestionIds,
+                         List<String> succeedUpdatedQuestionIds,
+                         List<String> succeedDeletedQuestionIds,
                          Map<String, String> failedQuestionIdReason) implements OutputData {
     }
     
@@ -148,15 +149,15 @@ public class UpdateQuestionsAction extends BaseAction<UpdateQuestionsAction.Inpu
         Message<Collection<Partition>> message = Message.of("updatePartitions", infectedPartitions);
         webSocketService.sendMessageToAll(message);
         
-        final List<String> succeedQuestionIds = succeedQuestions.stream().map(Question::getId).toList();
+        final List<String> succeedUpdatedQuestionIds = succeedQuestions.stream().map(Question::getId).toList();
         OutputData.Result result;
-        if ((succeedQuestionIds.isEmpty() && deletedQuestionIds != null && !failedQuestionIdReasons.isEmpty())) {
+        if (succeedUpdatedQuestionIds.isEmpty() && !failedQuestionIdReasons.isEmpty()) {
             result = OutputData.Result.ERROR;
         } else if (!failedQuestionIdReasons.isEmpty()) {
             result = OutputData.Result.WARNING;
         } else {
             result = OutputData.Result.SUCCESS;
         }
-        context.resolve(new Output(result, succeedQuestionIds, failedQuestionIdReasons));
+        context.resolve(new Output(result, succeedUpdatedQuestionIds, succeedDeletedQuestionIds, failedQuestionIdReasons));
     }
 }
