@@ -87,8 +87,9 @@ public class QuestionUpdateUtils {
             for (Map.Entry<String, String> imageEntry : question.getImageBase64Strings().entrySet()) {
                 LinkedHashMap<String,Object> imageInfo = new LinkedHashMap<>();
                 imageInfo.put("name", imageEntry.getKey());
-                imageInfo.put("size", imageEntry.getValue().length());
-                imageInfo.put("url", imageEntry.getValue());
+                final String url = imageEntry.getValue();
+                imageInfo.put("size", url.length() * 0.75);//FIXME
+                imageInfo.put("url", url);
                 images.add(imageInfo);
             }
             result.put("images", images);

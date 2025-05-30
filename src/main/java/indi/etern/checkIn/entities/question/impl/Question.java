@@ -87,6 +87,11 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @JsonIgnore
     QuestionLinkImpl<?> linkWrapper;
     
+    
+    /**
+     * Notice: data saved as base64
+     * Invalid Data Size: Mediumblob:16MB -> Base64:9MB(around)
+     * */
     @Getter
     @Setter
     @Convert(converter = MapConverter.class)

@@ -21,24 +21,24 @@ import jakarta.websocket.server.ServerEndpoint;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.SubProtocolCapable;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-@Slf4j
 @ServerEndpoint("/api/websocket/{sid}")
 @ConditionalOnWebApplication
-public class Connector implements SubProtocolCapable {
+public class Connector {
     public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
     public static final Logger logger = LoggerFactory.getLogger(Connector.class);
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
@@ -106,9 +106,9 @@ public class Connector implements SubProtocolCapable {
     
     @OnMessage
     public void onMessage(String message) {
-        final byte[] decoded = Base64.getDecoder().decode(message);
+//        final byte[] decoded = Base64.getDecoder().decode(message);
         try {
-            JsonRawMessage contextJsonMessage = objectMapper.readValue(decoded, JsonRawMessage.class);
+            JsonRawMessage contextJsonMessage = objectMapper.readValue(message, JsonRawMessage.class);
             if (!checkToken(contextJsonMessage)) {
                 return;
             }
@@ -153,7 +153,7 @@ public class Connector implements SubProtocolCapable {
                     sendMessage("{\"type\":\"success\",\"messageId\":\"" + contextId + "\"}");
                 }
                 default -> {
-                    String logMessage = new String(decoded);
+                    String logMessage = message;
                     if (logMessage.length() > LOG_TRUNCATE_SIZE) {
                         logMessage = logMessage.substring(0, LOG_TRUNCATE_SIZE) + "\n=========(truncated)=========";
                     }
@@ -176,8 +176,7 @@ public class Connector implements SubProtocolCapable {
                             e.printStackTrace();
                         }
                         logger.error("{} : {}", e.getClass().getName(), e.getMessage());
-                        String errorRawMessage = new String(decoded);
-                        logger.debug("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, errorRawMessage);
+                        logger.debug("Exception caused by message from {}({}):{}", sessionUser.getName(), sid, message);
                         if (e instanceof PermissionDeniedException permissionDeniedException) {
                             sendError(contextId, permissionDeniedException.getMessage());
                         } else
@@ -188,11 +187,10 @@ public class Connector implements SubProtocolCapable {
         } catch (Exception e) {
             try {
                 logger.error("{}:{}", e.getClass().getName(), e.getMessage());
-                String messageId = objectMapper.readValue(decoded, HashMap.class).get("messageId").toString();
+                String messageId = objectMapper.readValue(message, HashMap.class).get("messageId").toString();
                 sendError(messageId, e.getClass().getSimpleName() + ":" + e.getMessage());
             } catch (IOException exception) {
-                String logMessage = new String(decoded);
-                logger.error("while sending error message (caused by \"{}\") to {}({}):{}", logMessage, sessionUser.getName(), sid, exception.getMessage());
+                logger.error("while sending error message (caused by \"{}\") to {}({}):{}", message, sessionUser.getName(), sid, exception.getMessage());
                 exception.printStackTrace();
             }
             e.printStackTrace();
@@ -219,7 +217,6 @@ public class Connector implements SubProtocolCapable {
             
             actionExecutor.execute(SendPermissionsToUsersAction.class,
                     new SendPermissionsToUsersAction.Input(List.of(sessionUser)));
-            ;
             return false;
         } else if (sessionUser != null) {
             JwtAuthenticationFilter.setUserToSecurityContextHolder(sessionUser);
@@ -242,7 +239,7 @@ public class Connector implements SubProtocolCapable {
     }
     
     public void sendMessageWithOutLog(String messageString) throws IOException {
-        this.session.getBasicRemote().sendText(Base64.getEncoder().encodeToString(messageString.getBytes()));
+        this.session.getBasicRemote().sendText(messageString);
     }
     
     public void sendMessage(String messageString) throws IOException {
@@ -252,12 +249,6 @@ public class Connector implements SubProtocolCapable {
                 messageString = messageString.substring(0, LOG_TRUNCATE_SIZE) + "\n=========(truncated)=========";
             logger.debug("webSocket to {}({}):{}", sessionUser.getName(), sid, messageString);
         }
-    }
-    
-    @NonNull
-    @Override
-    public List<String> getSubProtocols() {
-        return new java.util.ArrayList<>();
     }
     
     public boolean isOpen() {

@@ -29,10 +29,10 @@
 .light:root {
     --el-text-color: rgb(10, 10, 10) !important;
     --el-text-color-regular: rgb(10, 10, 10) !important;
-    --el-color-primary: #8fa1b3 !important;
-    --el-color-primary-1: #859ba6 !important;
-    --el-color-primary-2: #7a8a99 !important;
-    --el-color-primary-3: #707e8c !important;
+    --el-color-primary: #6b8399 !important;
+    --el-color-primary-1: #627f8c !important;
+    --el-color-primary-2: #596c80 !important;
+    --el-color-primary-3: #506173 !important;
     --html-bg: rgb(240, 245, 245);
     --menu-shadow: 4px 0 32px rgba(0, 0, 0, 0.1);
     --menu-bg-color-alpha: rgba(240, 240, 240, 0.6);
@@ -518,7 +518,7 @@
 }
 
 .el-checkbox__inner {
-    --el-checkbox-checked-icon-color: var(--front-color-dark);
+    --el-checkbox-checked-icon-color: var(--front-color-reverse);
 }
 
 .el-checkbox__inner:after {
@@ -741,7 +741,7 @@
 .question-input.error::after,
 .el-input-number.error > .el-input::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
-    background: var(--el-color-danger);
+    background: var(--el-color-danger) !important;
 }
 
 .question-input.warning::after,
@@ -946,13 +946,13 @@
 
 .el-switch__core {
     --el-switch-off-color: var(--panel-bg-color);
-    --el-switch-on-color: var(--el-color-primary-1);
+    /*--el-switch-on-color: var(--el-color-primary-1);*/
     border: var(--border-2) !important;
 }
 
-.el-switch__core:not(.is-disabled):hover {
+/*.el-switch__core:not(.is-disabled):hover {
     --el-switch-on-color: var(--el-color-primary);
-}
+}*/
 
 #app .el-switch__core .el-switch__action {
     left: 4px;
@@ -963,7 +963,8 @@
 }
 
 #app .el-switch.is-checked .el-switch__action {
-    --el-switch-on-color: rgb(30, 30, 30);
+    /*--el-switch-on-color: rgb(30, 30, 30);*/
+    --el-switch-on-color: var(--front-color-reverse);
     background-color: var(--el-switch-on-color) !important;
     left: calc(100% - 16px);
 }

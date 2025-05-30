@@ -29,10 +29,10 @@
 .light:root {
     --el-text-color: rgb(10, 10, 10) !important;
     --el-text-color-regular: rgb(10, 10, 10) !important;
-    --el-color-primary: #8fa1b3 !important;
-    --el-color-primary-1: #859ba6 !important;
-    --el-color-primary-2: #7a8a99 !important;
-    --el-color-primary-3: #707e8c !important;
+    --el-color-primary: #6b8399 !important;
+    --el-color-primary-1: #627f8c !important;
+    --el-color-primary-2: #596c80 !important;
+    --el-color-primary-3: #506173 !important;
     --html-bg: rgb(240, 245, 245);
     --menu-shadow: 4px 0 32px rgba(0, 0, 0, 0.1);
     --menu-bg-color-alpha: rgba(240, 240, 240, 0.6);
@@ -42,14 +42,12 @@
     --fullscreen-bg-color: rgba(255, 255, 255, 0.9);
     --popper-bg-color: rgba(255, 255, 255, 0.75);
     --icon-color: var(--icon-color-dark);
-    --icon-color-1: var(--icon-color-dark-1);
     --icon-color-reverse: var(--icon-color-light);
-    --icon-color-reverse-1: var(--icon-color-light-1);
     --front-color: var(--front-color-dark);
     --front-color-reverse: var(--front-color-light);
     --slider-button-color: rgb(255, 255, 255);
-    --dialog-bg-color: rgba(255, 255, 255, 0.6);
-    --dialog-footer-color: rgba(200, 200, 200, 0.6);
+    --dialog-bg-color: rgba(255, 255, 255, 0.9);
+    --dialog-footer-color: rgba(220, 220, 220, 0.6);
     --tree-node-bg-color: rgba(0, 0, 0, 0);
     --lighting-effect-background-1: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.08) 100%);
     --lighting-effect-background-2: linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.06) 100%);
@@ -73,7 +71,6 @@
     --icon-color: var(--icon-color-light);
     --icon-color-1: var(--icon-color-light-1);
     --icon-color-reverse: var(--icon-color-dark);
-    --icon-color-reverse-1: var(--icon-color-dark-1);
     --front-color: var(--front-color-light);
     --front-color-reverse: var(--front-color-dark);
     --slider-button-color: rgb(60, 60, 60);
@@ -106,6 +103,11 @@
 .el-button {
     transform: scale(1);
     transition: all 200ms var(--ease-in-out-quint) !important;
+}
+
+.el-button--info {
+    --el-button-text-color: var(--el-text-color-secondary) !important;
+    --el-button-hover-text-color: var(--el-text-color) !important;
 }
 
 .el-button:not(.disable-init-animate) {
@@ -166,7 +168,20 @@
     overflow: auto !important;
 }
 
-/*noinspection SpellCheckingInspection*/
+#app:has(.md-editor-resize-operate:active) * ,
+#app:has(.splitpanes__splitter:active) * {
+    user-select: none !important;
+}
+
+#app:has(.md-editor-resize-operate:active) * ,
+#app:has(.splitpanes--vertical > .splitpanes__splitter:active) * {
+    cursor: col-resize !important;
+}
+
+#app:has(.splitpanes--horizonal > .splitpanes__splitter:active) * {
+    cursor: row-resize !important;
+}
+
 .md-editor-resize-operate,
 .splitpanes__splitter {
     transition: background-color 300ms var(--ease-in-out-quint);
@@ -322,6 +337,9 @@
     background: var(--panel-bg-color-overlay) !important;
 }
 
+.el-select-dropdown__item.is-disabled {
+    opacity: 0.5;
+}
 
 .el-select-dropdown.is-multiple .el-select-dropdown__item.is-selected:after {
     content: none !important;
@@ -390,6 +408,10 @@
     border: var(--border-1) !important;
 }
 
+.el-notification__group {
+    width: 100%;
+}
+
 .el-notification-fade-leave-active {
     transition: transform 200ms 80ms var(--ease-in-quint), scale 100ms 0ms var(--ease-in-out-quint), bottom 100ms 0ms var(--ease-in-out-quint) !important;
 }
@@ -454,12 +476,6 @@
     background: var(--panel-bg-color-overlay) var(--lighting-effect-background-2) !important;
 }
 
-/*.el-tree-node:not(.disable-init-animate) {
-    animation: var(--init-animation);
-    animation-fill-mode: backwards;
-    animation-delay: 100ms;
-}*/
-
 .el-tree-node__content:has(.disable-tree-item-hover), .el-tree-node__content:has(.disable-tree-item-focus) {
     background: transparent !important;
     cursor: default;
@@ -502,7 +518,7 @@
 }
 
 .el-checkbox__inner {
-    --el-checkbox-checked-icon-color: var(--front-color-dark);
+    --el-checkbox-checked-icon-color: var(--front-color-reverse);
 }
 
 .el-checkbox__inner:after {
@@ -563,15 +579,10 @@
 }
 
 .el-checkbox__inner, .el-radio__inner {
-    /*background: transparent !important;*/
     border: var(--border-2) !important;
     background-clip: padding-box;
     transition: 200ms var(--ease-in-out-quint);
 }
-
-/*.el-checkbox__input.is-focus > .el-checkbox__inner {
-    background: linear-gradient(180deg, transparent calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
-}*/
 
 .el-date-editor--daterange,
 .el-input:not(.is-focus) > div,
@@ -648,12 +659,6 @@
     flex: 1;
 }
 
-/*.el-textarea > textarea:focus {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 3px calc(100% - 3px), var(--el-color-primary) calc(100% - 1.5px) 100%) !important;
-    background-clip: padding-box;
-    transition-delay: 50ms;
-}*/
-
 .question-input {
     position: relative;
     margin-bottom: 8px;
@@ -670,7 +675,6 @@
     left: 50%;
     top: calc(100% - 3px);
     height: 2px;
-    /*    border-radius: 1px;*/
     border-radius: 0 0 2px 2px;
     filter: blur(4px);
     transition: left 500ms cubic-bezier(.34, .26, .19, 1.18),
@@ -737,7 +741,7 @@
 .question-input.error::after,
 .el-input-number.error > .el-input::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
-    background: var(--el-color-danger);
+    background: var(--el-color-danger) !important;
 }
 
 .question-input.warning::after,
@@ -803,10 +807,6 @@
     text-align: start;
 }
 
-.el-tag__content {
-    transition: 200ms var(--ease-in-out-quint);
-}
-
 .md-editor-dropdown,
 .el-popper, .el-message-box, .v-md-editor__tooltip {
     border: var(--border-1) !important;
@@ -833,25 +833,21 @@
     padding: 0 !important;
 }
 
-/*#app .scrollbar__bar,*/
 .el-scrollbar__bar {
     transition: 300ms var(--ease-in-out-quint);
     opacity: 1;
 }
 
-/*#app .scrollbar__bar.is-vertical,*/
 .el-scrollbar__bar.is-vertical {
     display: flex;
     flex-direction: row-reverse;
 }
 
-/*#app .scrollbar__bar.is-horizontal,*/
 .el-scrollbar__bar.is-horizontal {
     display: flex;
     flex-direction: column-reverse;
 }
 
-/*#app .scrollbar__bar.is-vertical .scrollbar__thumb,*/
 .el-scrollbar__bar.is-vertical .el-scrollbar__thumb {
     transition: background-color 150ms var(--ease-in-out-quint),
     width 150ms var(--ease-in-out-quint),
@@ -860,7 +856,6 @@
     background: var(--el-scrollbar-bg-color) !important;
 }
 
-/*#app .scrollbar__bar.is-horizontal .scrollbar__thumb,*/
 .el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
     transition: background-color 100ms var(--ease-in-out-quint),
     height 150ms var(--ease-in-out-quint),
@@ -874,18 +869,14 @@
     opacity: 0.5;
 }
 
-/*#app .scrollbar__bar.is-vertical:hover > .scrollbar__thumb,*/
 #app .el-scrollbar__bar.is-vertical:hover > .el-scrollbar__thumb,
-    /*#app .scrollbar__bar.is-vertical > .scrollbar__thumb:active,*/
 #app .el-scrollbar__bar.is-vertical > .el-scrollbar__thumb:active {
     width: 6px !important;
     background: var(--el-scrollbar-bg-color) !important;
     opacity: 0.75;
 }
 
-/*#app .scrollbar__bar.is-horizontal:hover > .scrollbar__thumb,*/
 #app .el-scrollbar__bar.is-horizontal:hover > .el-scrollbar__thumb,
-    /*#app .scrollbar__bar.is-horizontal > .scrollbar__thumb:active,*/
 #app .el-scrollbar__bar.is-horizontal > .el-scrollbar__thumb:active {
     height: 6px !important;
     background: var(--el-scrollbar-bg-color) !important;
@@ -955,13 +946,13 @@
 
 .el-switch__core {
     --el-switch-off-color: var(--panel-bg-color);
-    --el-switch-on-color: var(--el-color-primary-1);
+    /*--el-switch-on-color: var(--el-color-primary-1);*/
     border: var(--border-2) !important;
 }
 
-.el-switch__core:not(.is-disabled):hover {
+/*.el-switch__core:not(.is-disabled):hover {
     --el-switch-on-color: var(--el-color-primary);
-}
+}*/
 
 #app .el-switch__core .el-switch__action {
     left: 4px;
@@ -972,7 +963,8 @@
 }
 
 #app .el-switch.is-checked .el-switch__action {
-    --el-switch-on-color: rgb(30, 30, 30);
+    /*--el-switch-on-color: rgb(30, 30, 30);*/
+    --el-switch-on-color: var(--front-color-reverse);
     background-color: var(--el-switch-on-color) !important;
     left: calc(100% - 16px);
 }
@@ -1008,18 +1000,6 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    /*vertical-align: baseline;*/
-}
-
-.el-tree-node__children > .el-tree-node {
-    /*display: block;*/
-    /*vertical-align: bottom;*/
-}
-
-.el-tree-node:not(.is-expanded) .el-tree-node__children {
-    /*visibility: hidden;*/
-    /*display: none !important;*/
-    /*max-height: 0;*/
 }
 
 .el-alert {
@@ -1216,7 +1196,7 @@ input::-webkit-inner-spin-button {
     transform: none !important;
 }
 
-.el-radio__input.is-disabled > .el-radio__original {
+.el-radio__input.is-disabled.is-checked .el-radio__inner {
     background-color: var(--el-color-primary-3) !important;
 }
 
@@ -1244,14 +1224,10 @@ input::-webkit-inner-spin-button {
     background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
-/*noinspection CssInvalidPseudoSelector*//*
-input:autofill {
-    transition: 1000000000000000000000s linear 100000000000000000000000s;
+.start-date .el-date-table-cell__text,
+.end-date .el-date-table-cell__text{
+    color: var(--front-color-reverse) !important;
 }
-
-input:-webkit-autofill {
-    transition: 1000000000000000000000s linear 100000000000000000000000s;
-}*/
 
 .el-anchor {
     --el-anchor-bg-color: rgba(0,0,0,0) !important;

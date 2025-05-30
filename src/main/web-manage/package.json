@@ -29,6 +29,7 @@
     "unplugin-vue-components": "^28.5.0",
     "vite-plugin-vue-devtools": "^7.7.6",
     "@vue/language-core": "^2.1.6",
-    "@vue/language-server": "^2.1.6"
+    "@vue/language-server": "^2.1.6",
+    "@ygoe/msgpack": "^1.0.3"
   }
 }

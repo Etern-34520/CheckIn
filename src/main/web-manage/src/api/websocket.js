@@ -4,6 +4,7 @@ import {h} from "vue";
 import randomUUIDv4 from "@/utils/UUID.js";
 import Reconnect from "@/components/common/Reconnect.vue";
 import {jwtDecode} from "jwt-decode";
+// import {encode,decode} from "@ygoe/msgpack"
 
 let qq1;
 let token1;
@@ -16,17 +17,20 @@ function getCurrentIsoTime() {
 }
 
 
-const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
+// const textEncoder = new TextEncoder();
+// const textDecoder = new TextDecoder();
 
-function encode(message) {
-    return StringToBase64(JSON.stringify(message));
+function encodeMessage(message) {//TODO MessagePack
+    // return StringToBase64(JSON.stringify(message));
+    return JSON.stringify(message);
 }
 
-function decode(message) {
-    return JSON.parse(base64ToString(message));
+function decodeMessage(message) {//TODO MessagePack
+    // return JSON.parse(base64ToString(message));
+    return JSON.parse(message);
 }
 
+/*
 function StringToBase64(bytes) {
     const binString = Array.from(textEncoder.encode(bytes), (byte) =>
         String.fromCodePoint(byte),
@@ -34,19 +38,24 @@ function StringToBase64(bytes) {
     return btoa(binString);
 
 }
+*/
+
+/*
 function base64ToString(base64) {
     return textDecoder.decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
 }
+*/
 
 let autoRetriedTimes = 0;
 let normallyClose = false;
 
 const sendInternal = (objMessage) => {
-    let message = encode(objMessage);
+    let message = encodeMessage(objMessage);
     if (message.length > limits) {
         const messageParts = [];
         const partCount = Math.ceil(message.length / limits);
         const partMessageIds = [];
+        const partId = randomUUIDv4();
         for (let i = 0; i < partCount; i++) {
             const messageId = randomUUIDv4();
             partMessageIds.push(messageId);
@@ -54,12 +63,12 @@ const sendInternal = (objMessage) => {
                 messageId: messageId,
                 type: "partMessage",
                 data: {
-                    partId: objMessage["messageId"],
+                    partId: partId,
                     messagePart: message.substring(i * limits, (i + 1) * limits),
                 }
             });
         }
-        const oldPromise = WebSocketConnector.promises[objMessage["messageId"]];
+        /*const oldPromise = WebSocketConnector.promises[objMessage["messageId"]];
         const promiseData1 = {};
         let promise1 = new Promise((resolve, reject) => {
             promiseData1["resolve"] = () => {
@@ -67,6 +76,7 @@ const sendInternal = (objMessage) => {
                     WebSocketConnector.ws.send(encode(message1));
                 }
                 WebSocketConnector.promises[objMessage["messageId"]] = oldPromise;
+                resolve();
             };
             promiseData1["reject"] = reject;
             promiseData1["message"] = objMessage;
@@ -75,16 +85,24 @@ const sendInternal = (objMessage) => {
         promise1["reject"] = promiseData1["reject"];
         promise1["message"] = promiseData1["message"];
         WebSocketConnector.promises[objMessage["messageId"]] = promise1;
-
+        */
         console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (part message [count: ${partMessageIds.length}]):`, objMessage);
 
-        WebSocketConnector.ws.send(encode({
-            messageId: objMessage["messageId"],
+        WebSocketConnector.send({
+            messageId: partId,
             type: "partMessage",
             data: {
                 messageIds: partMessageIds,
             }
-        }));
+        }).then((response) => {
+            for (const message1 of messageParts) {
+                WebSocketConnector.ws.send(encodeMessage(message1));
+            }
+            const promise = WebSocketConnector.promises[objMessage.messageId];
+            if (promise.message.type === "partMessage") {
+                onResponseInternal(objMessage.messageId, response);
+            }
+        });
     } else {
         console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (simple message):`, objMessage);
 
@@ -92,55 +110,61 @@ const sendInternal = (objMessage) => {
     }
 }
 
-const onMessageInternal = (message) => {
-        if (WebSocketConnector.actions[message.type] instanceof Array) {
-            console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
-            for (const callback of WebSocketConnector.actions[message.type]) {
-                callback(message);
-            }
-        } else if (WebSocketConnector.channels[message.channelName]) {
-            const channel1 = WebSocketConnector.channels[message.channelName];
-            console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
-            if (channel1 && channel1.actions instanceof Array) {
-                channel1.actions.forEach((callback) => {
-                    callback(message);
-                });
-            }
-        } else if (message.messageId) {
-            const promise = WebSocketConnector.promises[message.messageId];
-            if (promise && promise instanceof Promise) {
-                delete WebSocketConnector.promises[message.messageId];
-                if (message.type === "error") {
-                    let showNotification = true;
-                    message.disableNotification = () => {
-                        showNotification = false;
-                    }
-                    const doNotification = () => {
-                        delete message.disableNotification;
-                        if (showNotification) {
-                            console.error("websocket error", message);
-                            ElNotification({
-                                title: '执行操作时出错',
-                                message: message.data,
-                                position: 'bottom-right',
-                                type: 'error',
-                                duration: 3000
-                            });
-                        }
-                    }
-                    promise.catch(doNotification);
-                    promise.reject(message);
-                } else {
-                    console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
-                    promise.resolve(message);
+const onResponseInternal = (messageId, message) => {
+    if (messageId) {
+        const promise = WebSocketConnector.promises[messageId];
+        if (promise && promise instanceof Promise) {
+            delete WebSocketConnector.promises[messageId];
+            if (message.type === "error") {
+                let showNotification = true;
+                message.disableNotification = () => {
+                    showNotification = false;
                 }
+                const doNotification = () => {
+                    delete message.disableNotification;
+                    if (showNotification) {
+                        console.error("websocket error", message);
+                        ElNotification({
+                            title: '执行操作时出错',
+                            message: message.data,
+                            position: 'bottom-right',
+                            type: 'error',
+                            duration: 3000
+                        });
+                    }
+                }
+                promise.catch(doNotification);
+                promise.reject(message);
+            } else {
+                console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (response for: "${message.messageId}"):`, message);
+                promise.resolve(message);
             }
-        } else {
-            console.warn(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (no handler):`, message);
         }
+    } else {
+        console.warn(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (no handler):`, message);
+    }
+}
+const onMessageInternal = (message) => {
+    if (WebSocketConnector.actions[message.type] instanceof Array) {
+        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (action: "${message.type}"):`, message);
+        for (const callback of WebSocketConnector.actions[message.type]) {
+            callback(message);
+        }
+    } else if (WebSocketConnector.channels[message.channelName]) {
+        const channel1 = WebSocketConnector.channels[message.channelName];
+        console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] server to client (channel: "${message.channelName}"):`, message, channel1);
+        if (channel1 && channel1.actions instanceof Array) {
+            channel1.actions.forEach((callback) => {
+                callback(message);
+            });
+        }
+    } else {
+        const messageId = message.messageId;
+        onResponseInternal(messageId, message);
+    }
 }
 const onMessage = (event) => {
-    const message = decode(event.data);
+    const message = decodeMessage(event.data);
     onMessageInternal(message);
 }
 const WebSocketConnector = {
@@ -259,10 +283,11 @@ const WebSocketConnector = {
     },
     send: function (/** Object*/objMessage) {
         let ableToSend = this.ws !== null && this.ws.readyState === WebSocket.OPEN;
-        objMessage.messageId = randomUUIDv4();
-        let promise;
+        if (!objMessage.messageId) {
+            objMessage.messageId = randomUUIDv4();
+        }
         const promiseData = {};
-        promise = new Promise((resolve, reject) => {
+        const promise = new Promise((resolve, reject) => {
             promiseData.resolve = resolve;
             promiseData.reject = reject;
             promiseData.message = objMessage;
@@ -270,7 +295,7 @@ const WebSocketConnector = {
         promise.resolve = promiseData.resolve;
         promise.reject = promiseData.reject;
         promise.message = promiseData.message;
-        this.promises[objMessage.messageId] = promise;
+        WebSocketConnector.promises[objMessage.messageId] = promise;
         if (ableToSend) {
             sendInternal(objMessage);
         } else {

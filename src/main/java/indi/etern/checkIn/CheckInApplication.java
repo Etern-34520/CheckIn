@@ -2,6 +2,7 @@ package indi.etern.checkIn;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -33,6 +34,9 @@ public class CheckInApplication {
 		objectMapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
 		objectMapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
 		objectMapper.registerModule(new JavaTimeModule());
+		StreamReadConstraints.overrideDefaultStreamReadConstraints(
+				StreamReadConstraints.builder().maxStringLength(64 * 1024 * 1024).build()
+		);//TODO
 		return objectMapper;
 	}
 	
