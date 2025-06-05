@@ -28,8 +28,8 @@ const hideLeft = () => {
 }
 
 defineExpose({
-    showLeft:showLeft,
-    hideLeft:hideLeft
+    showLeft: showLeft,
+    hideLeft: hideLeft
 })
 
 const mobile = ref(false);
@@ -54,22 +54,27 @@ watch(UIMeta.mobile, (val) => {
             <pane :min-size="mobile?0:20" :size="mobile?0:30">
                 <div class="panel left-view" :class="{show:mobileShowLeftView,'no-transition':noTreeViewTransition}"
                      style="display: flex;" v-loading="leftLoading">
-                    <div style="flex: none;height: 28px" v-if="mobile">
-                        <el-button @click="mobileShowLeftView = false" link><el-icon><arrow-left-bold/></el-icon>返回</el-button>
+                    <div style="flex: none;height: 32px" v-if="mobile">
+                        <el-button @click="mobileShowLeftView = false" link>
+                            <el-icon>
+                                <arrow-left-bold/>
+                            </el-icon>
+                            返回
+                        </el-button>
                     </div>
                     <slot name="left"/>
                 </div>
             </pane>
             <pane :min-size="mobile?100:50" :size="mobile?100:70">
-                <div class="panel"
-                     style="display:flex;flex-direction:row;flex: none;overflow:hidden;align-items:center;height: 24px;padding: 4px;margin-bottom: 4px!important;"
+                <div class="main-top"
                      v-if="mobile">
                     <el-button @click="mobileShowLeftView = true" link>
                         <el-icon>
-                            <list/>
+                            <arrow-left-bold/>
                         </el-icon>
                         {{ showLeftLabel }}
                     </el-button>
+                    <div class="flex-blank-1"></div>
                     <slot name="right-top"/>
                 </div>
                 <div class="panel" style="padding: 0;display: flex;flex-direction: column" v-loading="RightLoading">
@@ -106,11 +111,22 @@ watch(UIMeta.mobile, (val) => {
 
 .mobile-view-mask {
     position: absolute;
-/*    left: 0;*/
-/*    top: 0;*/
-    width: calc(100% - 46px);
-    height: calc(100% - 46px);
+    /*    left: 0;*/
+    /*    top: 0;*/
+    width: 100vw;
+    height: calc(100vh - 36px);
     z-index: 2002;
+}
+
+.main-top {
+    display: flex;
+    flex-direction: row;
+    flex: none;
+    overflow: hidden;
+    align-items: center;
+    height: 24px;
+    margin-bottom: 8px;
+    padding: 4px 8px;
 }
 </style>
 

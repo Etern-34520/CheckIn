@@ -125,7 +125,7 @@ const removeLevel = (index) => {
                 </transition-group>
             </div>
         </div>
-        <div style="display: flex;flex-direction: column;flex:1;height:0;max-width: 1280px;width: min(70vw,1280px);align-self: center">
+        <div style="display: flex;flex-direction: column;flex:1;height:0;max-width: 1080px;width: min(95%, 1080px);align-self: center">
             <div v-if="!loading && !error" style="display: flex;flex-wrap: wrap;margin-top: 20px;">
                 <div style="display: flex;margin-right: 32px;align-items: center">
                     <el-text type="info" style="margin-right: 16px;">题数</el-text>

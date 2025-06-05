@@ -91,9 +91,9 @@ UserDataInterface.getReactiveUserGroupsAsync();
         <el-radio-group v-model="model.creatingUserStrategy" style="padding: 4px 20px"
                         :disabled="disabled">
             <el-radio value="NOT_CREATE">不创建用户</el-radio>
-            <el-radio value="CREATE_DISABLED">创建用户但不启用</el-radio>
-            <el-radio value="CREATE_ENABLED_AFTER_VALIDATED">创建用户并在验证后启用</el-radio>
-            <el-radio value="CREATE_ENABLED">创建用户并启用</el-radio>
+            <el-radio value="CREATE_AND_DISABLED">创建用户但不启用</el-radio>
+            <el-radio value="CREATE_AND_ENABLED_AFTER_VALIDATED">创建用户并在验证后启用</el-radio>
+            <el-radio value="CREATE_AND_ENABLED">创建用户并启用</el-radio>
         </el-radio-group>
         <transition name="blur-scale" mode="out-in">
             <div v-if="model.creatingUserStrategy !== 'NOT_CREATE'">

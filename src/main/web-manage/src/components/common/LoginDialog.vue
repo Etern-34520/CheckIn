@@ -1,6 +1,8 @@
 <script setup>
 import {DArrowRight} from "@element-plus/icons-vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
+import router from "@/router/index.js";
+import {ElMessage} from "element-plus";
 
 const usernameOrQQ = ref('');
 const password = ref('');
@@ -8,7 +10,7 @@ const {proxy} = getCurrentInstance();
 
 const loginMessage = ref('');
 const key = ref(true);
-const requesting = ref(false);
+const requesting = ref(false);//FIXME
 
 const props = defineProps({
     primary: {
@@ -26,7 +28,18 @@ function login() {
         console.log(response);
         if (response.result === "success") {
             loginMessage.value = "";
-            UserDataInterface.loginAs({name: response.name, qq: response.qq, role: response.role, token: response.token});
+            UserDataInterface.loginAs({
+                name: response.name,
+                qq: response.qq,
+                role: response.role,
+                token: response.token
+            }).then(
+                    () => {
+                    }, () => {
+                        requesting.value = false;
+                        loginMessage.value = "服务器连接失败";
+                    }
+            )
         } else if (response.result === "fail") {
             requesting.value = false;
             loginMessage.value = response.message;
@@ -50,7 +63,8 @@ function login() {
                   type="text" size="large"></el-input>
         <el-input v-model="password" placeholder="密码" type="password" show-password clearable class="login-input"
                   size="large"></el-input>
-        <el-button :text="!primary" :type="primary?'primary':null" bg :disabled="requesting" :loading="requesting" loading-icon="_Loading_" :icon="DArrowRight" style="margin-top: 8px"
+        <el-button :text="!primary" :type="primary?'primary':null" bg :disabled="requesting" :loading="requesting"
+                   loading-icon="_Loading_" :icon="DArrowRight" style="margin-top: 8px"
                    @click="login">登录
         </el-button>
         <div style="height: 30px;display: flex;place-items: stretch;place-content: center;">

@@ -44,7 +44,7 @@ const getIcon = () => {
 <template>
     <el-scrollbar>
         <div style="display: flex;flex-direction: column;align-items: center;">
-            <div style="max-width: 1280px; width: min(75vw, 1280px); display: flex; flex-direction: column;">
+            <div style="max-width: 1080px; width: min(95%, 1080px); display: flex; flex-direction: column;">
                 <el-text style="font-size: 24px;align-self: baseline;margin-bottom: 16px">关于</el-text>
                 <div class="panel-1" style="display: flex;flex-direction: row;margin-bottom: 8px;padding: 24px">
                     <img :src="getIcon()" alt="" width="56" height="56" style="margin-right: 16px;"/>

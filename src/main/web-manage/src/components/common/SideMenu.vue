@@ -59,6 +59,16 @@ function shrinkMenu() {
 function routeTo(name) {
     router.push({name: name});
     shrinkMenu();
+    if (UI_Meta.mobile.value) {
+        inlineBool.value = false;
+    }
+}
+
+function routeToAccount() {
+    router.push({name: 'account-base'});
+    if (UI_Meta.mobile.value) {
+        inlineBool.value = false;
+    }
 }
 
 const props = defineProps({
@@ -74,7 +84,7 @@ const props = defineProps({
     <div id="menu-container" :class="{'menu-container-inline': inlineBool && (!UI_Meta.mobile.value)}">
         <div style="position: absolute;width: 100vw;height: calc(100vh - 32px);"
              @click="inlineBool = false" v-if="inlineBool && (UI_Meta.mobile.value)"></div>
-        <div id="menu" class="container" style="z-index: 2004"
+        <div id="menu" class="container"
              :class="{'menu-inline': inlineBool,'menu-expand': expandBool || inlineBool}"
              @mouseenter="expandMenu" @mouseleave="shrinkMenu" @click.stop>
             <el-scrollbar style="margin-bottom: 8px;" view-style="overflow-x: hidden;">
@@ -94,7 +104,7 @@ const props = defineProps({
             <div style="flex: 1"></div>
             <div style="display: flex;flex-direction: row;" class="default-hidden-menu">
                 <el-button-group style="display:flex;flex-direction: row;align-items: stretch">
-                    <el-button id="menu-avatar-button" @click="router.push({name: 'account-base'})" text
+                    <el-button id="menu-avatar-button" @click="routeToAccount" text
                                style="width: 150px;height: 52px;display: flex;flex-direction: row;padding: 4px;">
                         <div>
                             <el-avatar shape="circle" size="default"
@@ -119,6 +129,7 @@ const props = defineProps({
                 </el-button-group>
             </div>
         </div>
+        <div class="mobile-menu-mask" v-if="inlineBool" @click="inlineBool = false;"></div>
     </div>
 </template>
 
@@ -154,7 +165,25 @@ const props = defineProps({
     overflow-y: auto;
     /*border-right-color: var(--el-border-color-lighter) !important;*/
     border-radius: 0;
-    z-index: 2001;
+    z-index: 2005;
+}
+
+.mobile {
+    #menu-container {
+        margin-right: 0;
+    }
+    #menu:not(.menu-expand) {
+        width: 0;
+    }
+    .mobile-menu-mask {
+        display: block;
+        position: absolute;
+        top: 38px;
+        left: 0;
+        width: 100vw;
+        height: calc(100vh - 38px);
+        z-index: 2004;
+    }
 }
 
 .menu-group {

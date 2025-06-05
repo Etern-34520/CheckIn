@@ -4,41 +4,40 @@ import WebSocketConnector from "@/api/websocket.js";
 import Router from "@/router/index.js";
 import LoginDialog from "@/components/common/LoginDialog.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
-import {ElMessage, ElMessageBox} from "element-plus";
+import {ElMessage} from "element-plus";
 import router from "@/router/index.js";
-// import {getCurrentInstance, onMounted} from 'vue';
 
 const {proxy} = getCurrentInstance();
 const showReLogin = ref(false);
 const reLoginText = ref("登录失败");
 
-UserDataInterface.onLoginFailed = (err) => {
-    if (err === "token expired") {
-        showReLogin.value = true;
-        reLoginText.value = "登录已过期"
-    } else {
-        reLoginText.value = "登录失败";
-        if (router.currentRoute.value.name !== "login") {
-            showReLogin.value = true;
-        }
-        ElMessage({
-            type: "error",
-            message: "登录失败",
-        });
+watch(() => UserDataInterface.logined.value, () => {
+    WebSocketConnector.showGlobalNotifications = UserDataInterface.logined.value;
+    if (UserDataInterface.logined.value) {
+        showReLogin.value = false;
     }
-}
-UserDataInterface.onLoginSucceed = () => {
-    showReLogin.value = false;
-}
+})
 
 onMounted(() => {
-    if (proxy.$cookies.get("token") !== null) {
-        const name = proxy.$cookies.get("name", "/checkIn");
-        const qq = proxy.$cookies.get("qq", "/checkIn");
-        const token = proxy.$cookies.get("token", "/checkIn");
-        const user = {name: name, qq: Number(qq), token: token};
-        console.log(user);
-        UserDataInterface.loginAs(user);
+    const user = proxy.$cookies.get("user", "/checkIn");
+    if (user !== null) {
+        console.debug("Login from cookie:", user);
+        UserDataInterface.loginAs(user).then(() => {
+        }, (err) => {
+            if (err === "token expired") {
+                showReLogin.value = true;
+                reLoginText.value = "登录已过期"
+            } else {
+                reLoginText.value = "登录失败";
+                if (router.currentRoute.value.name !== "login") {
+                    showReLogin.value = true;
+                }
+                ElMessage({
+                    type: "error",
+                    message: "登录失败",
+                });
+            }
+        });
     } else {
         Router.push({name: "login"});
     }
@@ -49,7 +48,7 @@ onMounted(() => {
     <el-dialog :model-value="showReLogin" :width="400" align-center :show-close="false" draggable
                :close-on-click-modal="false" :close-on-press-escape="false">
         <template #header>
-            {{ reLoginText}}
+            {{ reLoginText }}
         </template>
         <template #default>
             <el-text size="large">重新登录</el-text>
@@ -58,7 +57,10 @@ onMounted(() => {
     </el-dialog>
     <router-view v-slot="{ Component }">
         <transition name="main-router" mode="out-in" duration="1000">
-            <component :is="Component"/>
+            <component v-if="Component" :is="Component"/>
+            <div v-else class="global-loading">
+                <Loading_ style="scale: 2"></Loading_>
+            </div>
         </transition>
     </router-view>
 </template>
@@ -77,5 +79,15 @@ onMounted(() => {
 /*noinspection CssUnusedSymbol*/
 .main-router-enter-to, .main-router-leave-from {
     opacity: 1;
+}
+
+.global-loading {
+    opacity: 0.5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
 }
 </style>

@@ -45,7 +45,7 @@ if (group) {
 
 watch(() => questionInfo.value.question, (newVal, oldVal) => {
     const groupInfo = questionInfo.value.getGroup();
-    groupInfo.verify();
+    // groupInfo.verify();
     QuestionCache.update(groupInfo);
 }, {deep: true});
 

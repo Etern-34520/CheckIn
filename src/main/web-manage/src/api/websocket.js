@@ -122,7 +122,7 @@ const onResponseInternal = (messageId, message) => {
                 }
                 const doNotification = () => {
                     delete message.disableNotification;
-                    if (showNotification) {
+                    if (WebSocketConnector.showGlobalNotifications && showNotification) {
                         console.error("websocket error", message);
                         ElNotification({
                             title: '执行操作时出错',
@@ -174,6 +174,7 @@ const WebSocketConnector = {
     waitingTasks: [],
     actions: {},
     channels: {},
+    showGlobalNotifications: false,
     connect: function (qq, token) {
         qq1 = qq;
         token1 = token;
@@ -208,7 +209,8 @@ const WebSocketConnector = {
                         autoRetriedTimes = 0;
                         if (!normallyClose) {
                             console.info('WebSocket Closed');
-                            if (!notifications["closed"])
+                            if (WebSocketConnector.showGlobalNotifications
+                                && !notifications["closed"])
                                 notifications["closed"] = ElNotification({
                                     title: '与服务器的连接已断开',
                                     message: h(Reconnect, {}, {}),
@@ -227,7 +229,8 @@ const WebSocketConnector = {
                 ws.onerror = function (error) {
                     console.error('WebSocket error', error);
                     if (autoRetriedTimes === 3) {
-                        if (!notifications["error"])
+                        if (WebSocketConnector.showGlobalNotifications
+                            && !notifications["error"])
                             notifications["error"] = ElNotification({
                                 title: '连接服务器失败',
                                 message: '请检查网络连接',

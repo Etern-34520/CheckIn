@@ -35,7 +35,14 @@ watch(() => view.value, () => {
 })
 const view1 = ref(true);
 
+let unwatch1;
+let unwatch2;
+
 let update = (newVal, oldVal) => {
+    if (unwatch1)
+        unwatch1();
+    if (unwatch2)
+        unwatch2();
     requested = false;
     setTimeout(() => {
         if (!requested) {
@@ -56,12 +63,26 @@ let update = (newVal, oldVal) => {
         } else {
             view.value = "预览";
         }
+        // nextTick(() => {
+        //
+        // })
+        // questionInfo.value.verify();
+        unwatch1 = watch(() => questionInfo.value.question, (newVal, oldVal) => {
+            if (error.value) return;
+            if (newVal && oldVal && oldVal.id === newVal.id) {
+                QuestionCache.update(questionInfo.value);
+            }
+        }, {deep: true});
+        unwatch2 = watch(() => questionInfo.value.questionInfos, (newVal, oldVal) => {
+            QuestionCache.update(questionInfo.value);
+        })
     }, (rejectData) => {
         requested = true;
         loading.value = false;
         if (rejectData.message === "Question not found") {
             error.value = true;
             errorMessage.value = "题目不存在";
+            questionInfo.value = {};
         } else {
             console.error(rejectData)
             error.value = true;
@@ -70,23 +91,7 @@ let update = (newVal, oldVal) => {
     });
 };
 // let changeLoop1 = false;
-watch(() => router.currentRoute.value.params.id, update);
-watch(() => questionInfo.value.question, (newVal, oldVal) => {
-    if (error.value) return;
-    if (newVal && oldVal && oldVal.id === newVal.id) {
-        QuestionCache.update(questionInfo);
-    }
-    questionInfo.value.verify();
-}, {deep: true});
-
-watch(() => questionInfo.value.questionInfos, (newVal, oldVal) => {
-    QuestionCache.update(questionInfo);
-    questionInfo.value.verify();
-});
-
-onBeforeMount(() => {
-    update(router.currentRoute.value.params.id, null);
-});
+watch(() => router.currentRoute.value.params.id, update, {immediate: true});
 
 const createQuestion = () => {
     QuestionCache.appendToGroup(
@@ -202,101 +207,99 @@ onMounted(() => {
                 <transition :name="switchType?'slide-left-to-right':'slide-right-to-left'">
                     <component ref="page" v-if="Component" :is="Component"/>
                     <div v-else v-loading="loading" style="height: 100%;display: flex;flex-direction: column;">
-                        <div style="display: flex;align-items: center;margin: 8px 8px 4px 2px;flex-wrap: wrap"
-                             v-if="questionInfo.question">
-                            <div style="display: flex;margin-left: 8px;margin-right:40px;flex: none;justify-content:stretch;flex-wrap: wrap">
-                                <transition name="preview-type-switch">
-                                    <el-segmented v-if="questionInfo.ableToEdit" v-model="view"
-                                                  :options="['编辑','预览']" block
-                                                  style="margin-right: 16px"/>
-                                </transition>
-                                <transition name="preview-type-switch">
-                                    <div style="display: flex;margin-left: 16px" v-if="view==='预览'">
-                                        <el-text style="margin-right: 4px;">移动端预览</el-text>
-                                        <el-switch v-model="forceMobilePreview"/>
-                                    </div>
-                                </transition>
-                            </div>
-                            <div class="flex-blank-1"></div>
-                            <div style="display: flex;margin: 4px 8px;flex-wrap: wrap">
-                                <transition name="blur-scale">
-                                    <el-button @click="restoreCurrent" v-if="questionInfo.dirty" :icon="RefreshLeft"
-                                               class="disable-init-animate" link type="info">
-                                        重置更改
-                                    </el-button>
-                                </transition>
-                                <transition name="blur-scale">
-                                    <div style="display: flex;align-items: center;margin-right: 24px"
-                                         v-if="questionInfo.question.lastModifiedTime">
-                                        <el-tag type="info" style="margin-right: 8px">最后编辑时间</el-tag>
-                                        <el-text>
-                                            {{ questionInfo.question.lastModifiedTime }}
-                                        </el-text>
-                                    </div>
-                                </transition>
-                                <div style="display: flex;align-items: center;">
-                                    <el-tag type="info">评价</el-tag>
-                                    <el-button-group>
-                                        <el-button link @click="switchLike" style="margin: 4px 0"
-                                                   :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
-                                            <like :filled="questionInfo.question.upVoters.has(currentUserQQ)"/>
-                                            <el-text style="margin-left: 4px;">{{ questionInfo.question.upVoters.size }}
-                                            </el-text>
-                                        </el-button>
-                                        <el-button link @click="switchDisLike" style="margin: 4px 0"
-                                                   :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
-                                            <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
-                                            <el-text style="margin-left: 4px;">{{
-                                                    questionInfo.question.downVoters.size
-                                                }}
-                                            </el-text>
-                                        </el-button>
-                                    </el-button-group>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="display: flex;justify-self: stretch;flex-wrap: wrap;margin-left: 8px;margin-right: 8px"
-                             class="alerts">
+                        <div class="alerts" v-if="questionInfo.question">
                             <transition-group name="alert">
-                                <el-tag v-for="(error,id) in questionInfo.errors" :key="'error-'+id" type="danger"
-                                        :closable="false">
-                                    <div style="display: flex;flex-direction: row;align-items: center;">
-                                        <el-text type="danger" style="margin: 4px">
-                                            {{ error.content }}
-                                        </el-text>
-                                        <el-button-group>
-                                            <el-button v-for="errorButton of error.buttons" link
-                                                       @click="errorButton.action" :type="errorButton.type">
-                                                {{ errorButton.content }}
-                                            </el-button>
-                                        </el-button-group>
+                                <div v-if="questionInfo.ableToEdit" key="page-switch">
+                                    <el-segmented v-model="view" style="height: 26px;margin-top: 2px;margin-bottom: 2px;"
+                                                  :options="['编辑','预览']" block/>
+                                </div>
+                                <div key="preview-type-switch" v-if="view==='预览'">
+                                    <div style="display: flex">
+                                        <el-text style="margin-right: 4px;margin-left: 8px;align-self: center">移动端预览</el-text>
+                                        <el-switch style="align-self: center;margin-right: 8px;" v-model="forceMobilePreview"/>
                                     </div>
-                                </el-tag>
-                                <el-tag v-for="(warning,id) in questionInfo.warnings" :key="'warning-'+id"
-                                        type="warning"
-                                        :closable="false">
-                                    <div style="display: flex;flex-direction: row;align-items: center;">
-                                        <el-text type="warning" style="margin: 4px">
-                                            {{ warning.content }}
-                                        </el-text>
-                                        <el-button-group>
-                                            <el-button v-for="warningButton of warning.buttons" link
-                                                       @click="warningButton.action" :type="warningButton.type">
-                                                {{ warningButton.content }}
-                                            </el-button>
-                                        </el-button-group>
-                                    </div>
-                                </el-tag>
+                                </div>
+                                <div v-for="(error,id) in questionInfo.errors" :key="'error-'+id" class="alert-item">
+                                    <el-tag type="danger"
+                                            :closable="false">
+                                        <div style="display: flex;flex-direction: row;align-items: center;">
+                                            <el-text type="danger" style="margin: 4px">
+                                                {{ error.content }}
+                                            </el-text>
+                                            <el-button-group>
+                                                <el-button v-for="errorButton of error.buttons" link
+                                                           @click="errorButton.action" :type="errorButton.type">
+                                                    {{ errorButton.content }}
+                                                </el-button>
+                                            </el-button-group>
+                                        </div>
+                                    </el-tag>
+                                </div>
+                                <div v-for="(warning,id) in questionInfo.warnings" :key="'warning-'+id" class="alert-item">
+                                    <el-tag type="warning"
+                                            :closable="false">
+                                        <div style="display: flex;flex-direction: row;align-items: center;">
+                                            <el-text type="warning" style="margin: 4px">
+                                                {{ warning.content }}
+                                            </el-text>
+                                            <el-button-group>
+                                                <el-button v-for="warningButton of warning.buttons" link
+                                                           @click="warningButton.action" :type="warningButton.type">
+                                                    {{ warningButton.content }}
+                                                </el-button>
+                                            </el-button-group>
+                                        </div>
+                                    </el-tag>
+                                </div>
                             </transition-group>
                         </div>
                         <el-scrollbar style="flex: 1">
-                            <div class="slide-switch-base" :class="{
-                'left-to-right':view==='编辑'
-            }">
+                            <transition name="blur-scale">
+                                <div v-if="questionInfo.question" style="display: flex;margin: 4px 8px;flex-wrap: wrap">
+                                    <transition name="blur-scale">
+                                        <div style="display: flex;align-items: center;margin-right: 24px"
+                                             v-if="questionInfo.question.lastModifiedTime">
+                                            <el-tag type="info" style="margin-right: 8px">最后编辑时间</el-tag>
+                                            <el-text>
+                                                {{ questionInfo.question.lastModifiedTime }}
+                                            </el-text>
+                                        </div>
+                                    </transition>
+                                    <div style="display: flex;align-items: center;">
+                                        <el-tag type="info">评价</el-tag>
+                                        <el-button-group>
+                                            <el-button link @click="switchLike" style="margin: 4px 0"
+                                                       :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
+                                                <like :filled="questionInfo.question.upVoters.has(currentUserQQ)"/>
+                                                <el-text style="margin-left: 4px;">
+                                                    {{ questionInfo.question.upVoters.size }}
+                                                </el-text>
+                                            </el-button>
+                                            <el-button link @click="switchDisLike" style="margin: 4px 0"
+                                                       :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
+                                                <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
+                                                <el-text style="margin-left: 4px;">{{
+                                                        questionInfo.question.downVoters.size
+                                                    }}
+                                                </el-text>
+                                            </el-button>
+                                        </el-button-group>
+                                    </div>
+                                    <div class="flex-blank-1"></div>
+                                    <transition name="blur-scale">
+                                        <el-button @click="restoreCurrent" v-if="questionInfo.dirty" :icon="RefreshLeft"
+                                                   class="disable-init-animate" link type="info">
+                                            重置更改
+                                        </el-button>
+                                    </transition>
+                                </div>
+                            </transition>
+                            <div class="slide-switch-base" :class="{'left-to-right':view==='编辑'}">
                                 <transition :name="view==='编辑'?'slide-left-to-right':'slide-right-to-left'">
                                     <div v-if="view1">
                                         <transition name="page-content" mode="out-in">
-                                            <el-empty v-if="error" :description="errorMessage" style="height: 100%;"></el-empty>
+                                            <el-empty v-if="error" :description="errorMessage"
+                                                      style="height: 100%;"></el-empty>
                                             <div v-else-if="ready"
                                                  style="display: flex;flex-direction: column;padding: 4px 8px 8px 8px;box-sizing: border-box;height: 100%">
                                                 <basic-question-editor v-model:question-info="questionInfo"/>
@@ -476,18 +479,18 @@ onMounted(() => {
     aspect-ratio: 1;
 }
 
-/*noinspection CssUnusedSymbol*/
+/*!*noinspection CssUnusedSymbol*!
 .preview-type-switch-enter-active,
 .preview-type-switch-leave-active {
     transition: 250ms var(--ease-in-out-quint);
 }
 
-/*noinspection CssUnusedSymbol*/
+!*noinspection CssUnusedSymbol*!
 .preview-type-switch-enter-from,
 .preview-type-switch-leave-to {
     filter: blur(8px);
     opacity: 0;
-}
+}*/
 
 /*noinspection CssUnusedSymbol*/
 .switch-preview-enter-active, .switch-preview-leave-active {
@@ -504,42 +507,68 @@ onMounted(() => {
 
 /*noinspection CssUnusedSymbol*/
 .alert-enter-active {
-    transition: all 300ms var(--ease-in-bounce) 300ms,
-    grid-template-columns 200ms var(--ease-in-out-quint),
+    transition: grid-template-columns 200ms var(--ease-in-out-quint),
     max-height 200ms var(--ease-in-out-quint),
-    padding 200ms var(--ease-in-out-quint);
+    opacity 300ms var(--ease-in-bounce) 350ms,
+    filter 300ms var(--ease-in-bounce) 350ms;
+
+    > * {
+        transition: margin 200ms var(--ease-in-out-quint) 0ms,
+        padding 200ms var(--ease-in-out-quint) 0ms;
+    }
 }
 
 /*noinspection CssUnusedSymbol*/
 .alert-leave-active {
-    transition: all 300ms var(--ease-in-bounce) 0ms,
-    grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
+    transition: grid-template-columns 200ms var(--ease-in-out-quint) 350ms,
     max-height 200ms var(--ease-in-out-quint) 350ms,
-    padding 200ms var(--ease-in-out-quint) 350ms;
+    opacity 300ms var(--ease-in-out-quint) 0ms,
+    filter 300ms var(--ease-in-out-quint) 0ms;
+
+    > * {
+        transition: margin 200ms var(--ease-in-out-quint) 350ms,
+        padding 200ms var(--ease-in-out-quint) 350ms;
+    }
 }
 
 /*noinspection CssUnusedSymbol*/
 .alert-enter-from, .alert-leave-to {
     opacity: 0;
-    /*    margin-top: -40px;*/
-    overflow: hidden;
     filter: blur(16px);
     grid-template-columns: 0fr !important;
-    /*    max-width: 0 !important;*/
     max-height: 0 !important;
-    padding: 0;
+
+    > * {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+
+/*noinspection CssUnusedSymbol*/
+.alert-enter-to, .alert-leave-from {
+    max-height: 36px !important;
+}
+
+.alerts {
+    display: flex;
+    justify-self: stretch;
+    flex-wrap: wrap;
+    margin: 4px 8px 8px;
+}
+
+.alert-item > * {
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
 }
 
 .alerts > * {
-    max-height: 24px;
-    margin-top: 4px !important;
-    margin-bottom: 4px !important;
+    max-height: 36px;
     display: grid;
     grid-template-columns: 1fr;
     /*    max-width: 500px;*/
 }
 
-.alerts > *:not(:last-child) {
+.alerts > *:not(:last-child) > * {
     margin-right: 4px;
 }
 </style>

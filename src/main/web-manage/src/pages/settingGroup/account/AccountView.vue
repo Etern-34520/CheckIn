@@ -261,7 +261,7 @@ const buttonsOption2 = ref([
     <div>
         <el-scrollbar style="flex: 1">
             <div style="display: flex;flex-direction: column;align-items: center;width: calc(100% - 4px)">
-                <div style="max-width: 1280px; width: min(75vw, 1280px); display: flex; flex-direction: column;">
+                <div style="max-width: 1080px; width: min(95%, 1080px); display: flex; flex-direction: column;">
                     <custom-dialog v-model="changePasswordDialogVisible" ref="changePasswordDialog" @closed="onclose"
                                    title="修改密码" :buttons-option="buttonsOption1">
                         <div class="dialog-input-label">
@@ -286,10 +286,10 @@ const buttonsOption2 = ref([
                         <el-input v-model="name" :disabled="done" placeholder=""/>
                     </custom-dialog>
                     <div style="display: flex;flex-direction: row;margin-bottom: 28px">
-                        <el-avatar shape="circle" style="width: 84px;height: 84px;margin-right: 16px;"
+                        <el-avatar shape="circle" style="min-width: 84px;min-height: 84px;margin-right: 16px;"
                                    :src="getAvatarUrlOf(user.qq)"/>
                         <div style="display:flex;flex-direction: column;justify-content: center;">
-                            <el-text style="font-size: 24px;align-self: baseline">{{ user.name }}</el-text>
+                            <el-text style="font-size: 24px;align-self: baseline;word-break: break-all">{{ user.name }}</el-text>
                             <el-text style="font-size: 16px;align-self: baseline" type="info">{{ user.qq }}</el-text>
                             <el-text style="font-size: 16px;align-self: baseline" type="info">{{ user.role }}</el-text>
                         </div>

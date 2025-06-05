@@ -189,7 +189,7 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
                     </div>
-                    <el-scrollbar v-if="data.status === 'SUBMITTED' && data.result" style="max-height: 68px">
+                    <el-scrollbar v-if="data.status === 'SUBMITTED' && data.result" style="max-height: 70px">
                         <div style="display: flex;flex-direction: row;align-items: stretch;height: 60px">
                             <div style="margin-right: 64px;display: flex;flex-direction: row;align-items: stretch">
                                 <div style="width: 6px;max-width: 6px;min-width: 6px;border-radius: 3px;margin-right: 32px;"

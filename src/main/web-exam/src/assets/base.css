@@ -14,11 +14,7 @@
     --el-fill-color-blank: rgba(0, 0, 0, 0) !important;
     --text-color: var(--el-text-color);
     --border-color-1: rgba(128, 128, 128, 0.1);
-    --border-color-2: rgba(128, 128, 128, 0.25);
-    --border-color-3: rgba(128, 128, 128, 0.25);
     --border-1: solid 1px var(--border-color-1);
-    --border-2: solid 1px var(--border-color-2);
-    --border-3: solid 1px var(--border-color-3);
     --icon-color-dark: rgba(0, 0, 0, 0.95);
     --icon-color-dark-1: rgba(0, 0, 0, 0.5);
     --icon-color-light: rgba(255, 255, 255, 0.95);
@@ -53,6 +49,8 @@
     --lighting-effect-background-2: linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.06) 100%);
     --lighting-effect-background-3: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.03) 100%);
     --primary-button-text-color: rgba(255, 255, 255, 0.95);
+    --border-color-2: rgba(50, 50, 50, 0.4);
+    --border-2: solid 1px var(--border-color-2);
 }
 
 .dark:root {
@@ -82,6 +80,8 @@
     --lighting-effect-background-2: linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.08) 100%);
     --lighting-effect-background-3: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0, transparent 1px calc(100% - 2px), rgba(0, 0, 0, 0.06) 100%);
     --primary-button-text-color: rgba(0, 0, 0, 0.95);
+    --border-color-2: rgba(200, 200, 200, 0.4);
+    --border-2: solid 1px var(--border-color-2);
 }
 
 *:not(.el-divider) {
@@ -1021,6 +1021,10 @@
 .dialog-fade-leave-active > div[role="dialog"],
 .is-message-box.fade-in-linear-leave-active > div[role="dialog"] {
     transition: 200ms var(--ease-in-quint);
+}
+
+.el-overlay {
+    --el-overlay-color-lighter: rgba(0,0,0,0.2) !important;
 }
 
 .dialog-fade-enter-active .el-overlay-dialog,

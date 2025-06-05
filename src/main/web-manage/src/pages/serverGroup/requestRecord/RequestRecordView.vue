@@ -139,7 +139,7 @@ const showIP = ref(false);
                                 <el-switch v-model="showEmptyDates"/>
                             </div>
                             <div style="display: flex;flex-direction: row;margin-left: 16px">
-                                <el-text style="align-self: center;margin-right: 8px;">存在QQ时显示IP</el-text>
+                                <el-text style="align-self: center;margin-right: 8px;">始终显示IP</el-text>
                                 <el-switch v-model="showIP"/>
                             </div>
                         </div>

@@ -52,7 +52,7 @@ updateDataTrace();
 <template>
     <template v-for="order in (model.trace.length+1)" :key="order">
         <transition name="fadeMove" mode="out-in" appear>
-            <div style="display: flex;flex-direction: row;margin-right: 12px;align-items: center"
+            <div style="display: flex;flex-direction: row;margin-right: 12px;align-items: center;margin-bottom: 2px;margin-top: 2px"
                  v-if="propertiesDataTrace[order-1]">
                 <el-icon style="margin-right: 6px;align-self: center">
                     <ArrowRight/>

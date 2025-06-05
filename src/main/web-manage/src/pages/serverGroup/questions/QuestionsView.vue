@@ -20,6 +20,7 @@ import UIMeta from "@/utils/UI_Meta.js";
 import ResponsiveSplitpane from "@/components/common/ResponsiveDoubleSplitpane.vue";
 import {ElMessageBox} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
+import UserDataInterface from "@/data/UserDataInterface.js";
 
 const {proxy} = getCurrentInstance();
 
@@ -298,7 +299,7 @@ const onDragEnd = (node, dropNode, event) => {
 
 const createQuestionGroup = (partitionId) => {
     if (PermissionInfo.hasPermission('question group', 'create and edit owns question groups')) {
-        const authorQQ = Number(proxy.$cookies.get("qq"));
+        const authorQQ = Number(UserDataInterface.currentUser.value.qq);
         let question = {
             id: randomUUIDv4(),
             content: "",
@@ -325,7 +326,7 @@ const createMultipleChoiceQuestion = (partitionId) => {
             type: "MultipleChoicesQuestion",
             enabled: false,
             partitionIds: [partitionId],
-            authorQQ: Number(proxy.$cookies.get("qq")),
+            authorQQ: Number(UserDataInterface.currentUser.value.qq),
             upVoters: new Set(),
             downVoters: new Set(),
             localNew: true,

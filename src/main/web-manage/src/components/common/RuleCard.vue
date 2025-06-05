@@ -282,7 +282,7 @@ const choiceOption = {
                     name: "数量", verificationTypes: {
                         max: quantityVerification("上限", 5, 1, 20, "错误选项数量超过${limit}", "choices"),
                         min: quantityVerification("下限", 5, 1, 20, "错误选项数量少于${limit}", "choices"),
-                        empty: emptyVerification("无错误选项", "无错误选项时", "无错误选项时", "choices"),
+                        empty: emptyVerification("无错误选项", "无错误选项时", "无错误选项", "choices"),
                     }
                 }
             }
@@ -360,7 +360,7 @@ watch(() => model.value.property.verificationTypeName, (value, oldValue, onClean
         for (const traceItem of model.value.property.trace) {
             currentOption = currentOption.properties[traceItem];
         }
-        const lastVerificationOption = verificationOption.value;
+        // const lastVerificationOption = oldValue;
         verificationOption.value = currentOption.verificationTypes[model.value.property.verificationTypeName];
         model.value.targetInputName = verificationOption.value.targetInputName;
         if (!firstWatch) {
@@ -376,8 +376,8 @@ watch(() => model.value.property.verificationTypeName, (value, oldValue, onClean
                 }
             }
         }
-        if ((!model.value.tipTemplate) || model.value.tipTemplate.length === 0 ||
-                (lastVerificationOption && lastVerificationOption.defaultTip && model.value.tipTemplate === lastVerificationOption.defaultTip))
+        // if ((!model.value.tipTemplate) || model.value.tipTemplate.length === 0 ||
+        //         (lastVerificationOption && lastVerificationOption.defaultTip && model.value.tipTemplate === lastVerificationOption.defaultTip))
             model.value.tipTemplate = verificationOption.value.defaultTip;
     } else {
         verificationOption.value = undefined;
@@ -426,7 +426,7 @@ const addToValues = (datum, index) => {
                 <el-text v-else style="margin-right: 12px;margin-bottom: 2px;margin-top: 2px">
                     {{ optionNames[model.objectName] }}
                 </el-text>
-                <property-selector ref="propertySelector" style="margin-bottom: 2px;margin-top: 2px"
+                <property-selector ref="propertySelector"
                                    v-if="objectMap[model.objectName] && objectMap[model.objectName].properties"
                                    :properties="objectMap[model.objectName].properties" v-model="model.property"
                                    :editing="editing"/>
