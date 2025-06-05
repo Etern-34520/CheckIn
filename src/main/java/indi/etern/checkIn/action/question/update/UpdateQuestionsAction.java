@@ -98,8 +98,8 @@ public class UpdateQuestionsAction extends BaseAction<UpdateQuestionsAction.Inpu
 //                        throw e;
                         } catch (Exception e) {
                             failedQuestionIdReasons.put(questionDataMap.get("id").toString(), e.getMessage());
-                            logger.error("When executing UpdateQuestionsAction: ", e);
-                            if (logger.isTraceEnabled()) {
+                            logger.error("When executing UpdateQuestionsAction: {} : {}", e.getClass().getSimpleName(), e.getMessage());
+                            if (logger.isDebugEnabled()) {
                                 e.printStackTrace();
                             }
 //                        throw e;

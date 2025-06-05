@@ -12,7 +12,7 @@ import EditPartitionNameDialog from "@/components/question/EditPartitionNameDial
 import HarmonyOSIcon_Upload from "@/components/icons/HarmonyOSIcon_Upload.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
-import {ArrowLeftBold, List, RefreshLeft} from "@element-plus/icons-vue";
+import {ArrowLeftBold, RefreshLeft} from "@element-plus/icons-vue";
 import CreatePartitionButton from "@/components/question/CreatePartitionButton.vue";
 import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import SelectPartitionsActionPop from "@/components/question/SelectPartitionsActionPop.vue";
@@ -21,8 +21,7 @@ import ResponsiveSplitpane from "@/components/common/ResponsiveDoubleSplitpane.v
 import {ElMessageBox} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
-
-const {proxy} = getCurrentInstance();
+import _Loading_ from "@/components/common/_Loading_.vue";
 
 QuestionCache.reset();
 PartitionCache.reset();
@@ -371,8 +370,12 @@ const upload = () => {
             console.log(data.succeedUpdatedQuestionIds);
             console.log(data.failedQuestionIdReason);
             failedQuestionIdReason.value = data.failedQuestionIdReason;
-            showFailedQuestionIdReason.value = Object.keys(failedQuestionIdReason.value).length > 0;
-            showTree.value = showFailedQuestionIdReason.value ? false : showTree.value;
+            let showFailedQuestionIdReason1 = Object.keys(failedQuestionIdReason.value).length > 0;
+            showFailedQuestionIdReason.value = showFailedQuestionIdReason1;
+            showTree.value = showFailedQuestionIdReason1 ? false : showTree.value;
+            if (showFailedQuestionIdReason1) {
+                responsiveSplitpane.value.showLeft();
+            }
         }, (err) => {
             uploading.value = false;
         });
@@ -696,9 +699,8 @@ const getTypeName = (type) => {
         <template #left>
             <el-input prefix-icon="Search" v-model="filterText" placeholder="搜索 (以 &quot;;&quot; 分词)"/>
             <el-button type="primary" style="margin-top: 8px" @click="upload" :loading="uploading"
-                       loading-icon="_Loading_"
+                       :loading-icon="_Loading_" :icon="HarmonyOSIcon_Upload"
                        :disabled="!QuestionCache.reactiveDirty.value">
-                <HarmonyOSIcon_Upload style="margin-right: 8px"/>
                 <el-text>{{ errorsDisplay ? "确认上传" : "上传题目更改" }}</el-text>
             </el-button>
             <!--                    <el-scrollbar>-->
@@ -797,7 +799,8 @@ const getTypeName = (type) => {
                                                              type="info">
                                                         {{ getTypeName(nodeObj.data.question.type) }}
                                                     </el-text>
-                                                    <el-text size="small" type="info" v-if="nodeObj.data.question&&!nodeObj.data.ableToEdit">
+                                                    <el-text size="small" type="info"
+                                                             v-if="nodeObj.data.question&&!nodeObj.data.ableToEdit">
                                                         [只读]
                                                     </el-text>
                                                     <el-text class="question-tree-node-content"
@@ -820,10 +823,7 @@ const getTypeName = (type) => {
                                                             <el-button class="node-button" size="small"
                                                                        @click.stop="nodeObj.data.editing = false"
                                                                        v-if="nodeObj.data.type === 'Partition' && PermissionInfo.hasPermission('partition','edit partition name')">
-                                                                <div style="margin: 0 4px">
-                                                                    <HarmonyOSIcon_Rename/>
-                                                                </div>
-                                                                <el-text v-if="!UIMeta.mobile.value">重命名</el-text>
+                                                                <HarmonyOSIcon_Rename/>
                                                             </el-button>
                                                         </template>
                                                         <template #default>
@@ -836,22 +836,11 @@ const getTypeName = (type) => {
                                                     <el-button class="node-button" size="small"
                                                                v-if="nodeObj.data.type === 'Partition'?PermissionInfo.hasPermission('partition','delete partition'):nodeObj.data.ableToDelete"
                                                                @click.stop="onDeleteNode(nodeObj)">
-                                                        <div style="margin: 0 4px">
-                                                            <el-icon :size="16" color="var(--front-color)"
-                                                                     v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
-                                                                <RefreshLeft/>
-                                                            </el-icon>
-                                                            <HarmonyOSIcon_Remove v-else/>
-                                                        </div>
-                                                        <template v-if="!UIMeta.mobile.value">
-                                                            <div style="margin-right: 4px">
-                                                                <el-text
-                                                                        v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
-                                                                    撤销删除
-                                                                </el-text>
-                                                                <el-text v-else>删除</el-text>
-                                                            </div>
-                                                        </template>
+                                                        <el-icon :size="16" color="var(--front-color)"
+                                                                 v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
+                                                            <RefreshLeft/>
+                                                        </el-icon>
+                                                        <HarmonyOSIcon_Remove v-else/>
                                                     </el-button>
                                                 </el-button-group>
                                             </div>
@@ -895,18 +884,18 @@ const getTypeName = (type) => {
                 <div class="errorsList" v-show="showFailedQuestionIdReason" :class="{hideRight:showTree}">
                     <el-scrollbar>
                         <el-alert type="error" :closable="false">
-                            <div style="display: flex;flex-wrap: wrap;">
+                            <div style="display: flex;flex-wrap: wrap;width: 100%">
                                 <el-button style="padding: 8px;margin: 4px" text @click="backToTree">
                                     <el-icon>
                                         <ArrowLeftBold/>
                                     </el-icon>
                                 </el-button>
-                                <el-text type="danger" style="margin: 4px;margin-right: 12px">
-                                    题目上传出错
+                                <el-text type="danger" style="margin: 4px;margin-right: 12px;align-self: center;">
+                                    上传出错
                                 </el-text>
-                                <el-button link type="primary" :icon="RefreshLeft" style="margin: 4px"
+                                <el-button link type="primary" :icon="RefreshLeft" style="margin: 4px;align-self: center;"
                                            @click="restoreAllErrorUploadChanges">
-                                    全部重置更改
+                                    重置所有更改
                                 </el-button>
                             </div>
                         </el-alert>
@@ -931,10 +920,10 @@ const getTypeName = (type) => {
         </template>
         <template #right-top>
             <el-button type="primary" @click="upload" :loading="uploading"
-                       loading-icon="_Loading_" style="height: 24px"
+                       :loading-icon="_Loading_" style="height: 24px;width: 160px"
+                       :icon="HarmonyOSIcon_Upload"
                        :disabled="!QuestionCache.reactiveDirty.value">
-                <HarmonyOSIcon_Upload/>
-                <el-text>{{ showTree ? "上传题目更改" : "确认上传" }}</el-text>
+                <el-text>{{ errorsDisplay ? "确认上传" : "上传题目更改" }}</el-text>
             </el-button>
         </template>
         <template #right>

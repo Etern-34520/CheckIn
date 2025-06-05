@@ -64,7 +64,7 @@ function login() {
         <el-input v-model="password" placeholder="密码" type="password" show-password clearable class="login-input"
                   size="large"></el-input>
         <el-button :text="!primary" :type="primary?'primary':null" bg :disabled="requesting" :loading="requesting"
-                   loading-icon="_Loading_" :icon="DArrowRight" style="margin-top: 8px"
+                   :loading-icon="_Loading_" :icon="DArrowRight" style="margin-top: 8px"
                    @click="login">登录
         </el-button>
         <div style="height: 30px;display: flex;place-items: stretch;place-content: center;">

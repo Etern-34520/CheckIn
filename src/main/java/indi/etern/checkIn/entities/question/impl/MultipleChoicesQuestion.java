@@ -204,10 +204,10 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             }
             
             if (!singleCorrect && !multipleCorrect) {
-                throw new QuestionBuilderException("No correct choice found");
+                throw new QuestionBuilderException("No correct choice");
             }
             if (questionContent == null) {
-                throw new QuestionBuilderException("Question content not set");
+                throw new QuestionBuilderException("Question content is null");
             }
             if (choices.size() < 2) {
                 throw new QuestionBuilderException("Less than two choices");
