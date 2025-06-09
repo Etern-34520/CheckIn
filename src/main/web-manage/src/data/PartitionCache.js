@@ -69,26 +69,23 @@ WebSocketConnector.registerAction("deletePartitions", (message) => {
 });
 const PartitionCache = {
     refPartitions: ref({}),
-    reset() {
+/*    reset() {
         PartitionCache.refPartitions.value = {};
         onPartitionAdded.length = 0;
         onPartitionDeleted.length = 0;
         onPartitionUpdated.length = 0;
         onPartitionsAllChanged.length = 0;
-    },
+    },*/
     getRefPartitionsAsync() {
         const promise = LockUtil.buildExecutablePromise((resolve, reject) => {
-            if (this.refPartitions.value.length > 0) {
+            if (Object.keys(this.refPartitions.value).length > 0) {
                 resolve(PartitionCache.refPartitions);
             } else {
                 WebSocketConnector.send({
                     type: "getPartitions",
                 }).then((response) => {
                     for (const partition of response.data.partitions) {
-                        /*
-                                                if (PartitionCache.refPartitions.value.find((p) => p.id === partition.id) === undefined)
-                                                    PartitionCache.refPartitions.value.push(partition);
-                        */
+                        partition.questionNodes = {};
                         PartitionCache.refPartitions.value[partition.id] = reactive(partition);
                     }
                     resolve(PartitionCache.refPartitions);
@@ -194,19 +191,43 @@ const PartitionCache = {
         LockUtil.synchronizeExecute("PartitionCache", promise);
         return promise;
     },
-    registerOnPartitionAdded(param) {
-        if (param instanceof Function) {
-            onPartitionAdded.push(param);
+    registerOnPartitionAdded(action) {
+        if (action instanceof Function) {
+            let length = onPartitionAdded.push(action);
+            return () => {
+                if (length) {
+                    onPartitionAdded.splice(length - 1, 1);
+                    length = undefined;
+                } else {
+                    throw new Error("Listener has been removed");
+                }
+            }
         }
     },
-    registerOnPartitionDeleted(param) {
-        if (param instanceof Function) {
-            onPartitionDeleted.push(param);
+    registerOnPartitionDeleted(action) {
+        if (action instanceof Function) {
+            let length = onPartitionDeleted.push(action);
+            return () => {
+                if (length) {
+                    onPartitionDeleted.splice(length - 1, 1);
+                    length = undefined;
+                } else {
+                    throw new Error("Listener has been removed");
+                }
+            }
         }
     },
-    registerOnPartitionUpdated(param) {
-        if (param instanceof Function) {
-            onPartitionUpdated.push(param);
+    registerOnPartitionUpdated(action) {
+        if (action instanceof Function) {
+            let length = onPartitionUpdated.push(action);
+            return () => {
+                if (length) {
+                    onPartitionUpdated.splice(length - 1, 1);
+                    length = undefined;
+                } else {
+                    throw new Error("Listener has been removed");
+                }
+            }
         }
     },
     registerOnPartitionsAllChanged(param) {

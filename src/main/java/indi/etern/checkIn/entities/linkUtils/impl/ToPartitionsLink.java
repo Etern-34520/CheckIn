@@ -16,7 +16,7 @@ import java.util.Set;
 @Getter
 public class ToPartitionsLink extends QuestionLinkImpl<Partition> implements ToManyLink<Question, Partition> {
     
-    @ManyToMany(cascade = {CascadeType.REFRESH,CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.REFRESH,CascadeType.MERGE,CascadeType.DETACH}, fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinTable(name = "questions_link_mapping",
             foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),

@@ -21,17 +21,20 @@ public class JsonRawMessage implements IMessage<String> {
     @JsonDeserialize(using = JsonRawMessage.RawDeserializer.class)
     protected String data;
     
+    @SuppressWarnings("unused")
     public JsonRawMessage(Type type, String messageId, String rawData) {
         this.type = type;
         this.messageId = messageId;
         this.data = rawData;
     }
     
+    @SuppressWarnings("unused")
     public JsonRawMessage(Type type, String data) {
         this.type = type;
         this.data = data;
     }
     
+    @SuppressWarnings("unused")
     protected JsonRawMessage() {
     }
     
@@ -53,15 +56,9 @@ public class JsonRawMessage implements IMessage<String> {
     public static class RawDeserializer extends JsonDeserializer<String> {
         @Override
         public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-//            final TreeNode treeNode = jsonParser.readValueAsTree();
-//            return treeNode.toString();
-            
-            //based on DeepSeek
-            // 1. 创建TokenBuffer并复制当前属性的Token流
             try (TokenBuffer tokenBuffer = new TokenBuffer(jsonParser)) {
                 tokenBuffer.copyCurrentStructure(jsonParser); // 自动遍历并复制整个结构
                 
-                // 2. 将TokenBuffer写入字符串
                 StringWriter sw = new StringWriter();
                 try (JsonGenerator gen = jsonParser.getCodec().getFactory().createGenerator(sw)) {
                     tokenBuffer.serialize(gen);

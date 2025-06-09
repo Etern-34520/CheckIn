@@ -1,7 +1,6 @@
 package indi.etern.checkIn.api.webSocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import indi.etern.checkIn.CheckInApplication;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.action.interfaces.ResultJsonContext;
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @ServerEndpoint("/api/websocket/{sid}")
@@ -41,25 +39,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Connector {
     public static final CopyOnWriteArraySet<Connector> CONNECTORS = new CopyOnWriteArraySet<>();
     public static final Logger logger = LoggerFactory.getLogger(Connector.class);
-    private static final AtomicInteger onlineCount = new AtomicInteger(0);
     private static WebSocketService webSocketService;
     private static JwtTokenProvider jwtTokenProvider;
     private static ActionExecutor actionExecutor;
+    private static ObjectMapper objectMapper;
     private final int BUFFER_SIZE = 64 * 1024;
     private final int LOG_TRUNCATE_SIZE = 512;
     private Session session;
     @Getter
     private String sid = "";
     private User sessionUser;
-    private final ObjectMapper objectMapper = CheckInApplication.getObjectMapper();
-    
-    public static void addOnlineCount() {
-        onlineCount.getAndIncrement();
-    }
-    
-    public static void subOnlineCount() {
-        onlineCount.getAndDecrement();
-    }
     
     @Autowired
     public void setWebSocketService(WebSocketService webSocketService) {
@@ -72,8 +61,13 @@ public class Connector {
     }
     
     @Autowired
-    public void set(ActionExecutor actionExecutor) {
+    public void setActionExecutor(ActionExecutor actionExecutor) {
         Connector.actionExecutor = actionExecutor;
+    }
+    
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        Connector.objectMapper = objectMapper;
     }
     
     @OnOpen
@@ -83,7 +77,6 @@ public class Connector {
         session.setMaxBinaryMessageBufferSize(0);
         CONNECTORS.add(this);
         this.sid = sid;
-        addOnlineCount();
         logger.info("sid_{}:connected", sid);
     }
     
@@ -92,7 +85,6 @@ public class Connector {
     public void onClose() {
         CONNECTORS.remove(this);
         webSocketService.unsubscribeAllChannels(sid);
-        subOnlineCount();
         logger.info("sid_{}:close", sid);
     }
     
@@ -221,11 +213,7 @@ public class Connector {
         } else if (sessionUser != null) {
             JwtAuthenticationFilter.setUserToSecurityContextHolder(sessionUser);
             if (!sessionUser.isEnabled()) {
-                Map<String, String> dataMap = new HashMap<>();
-                dataMap.put("type", "error");
-                dataMap.put("data", "user is disabled");
-                dataMap.put("messageId", message.getMessageId());
-                sendMessage(objectMapper.writeValueAsString(dataMap));
+                sendMessage(Message.error(message.getMessageId(), "user is disabled"));
             }
             return sessionUser.isEnabled();
         } else {

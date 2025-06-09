@@ -17,7 +17,7 @@ public class PartRawMessageProcessor {
         if (partMap.containsKey(partId)) {
             partMap.put(partId, messagePart);
         } else {
-            throw new IllegalArgumentException("partId not found");
+            throw new IllegalArgumentException("PartId not found");
         }
     }
 

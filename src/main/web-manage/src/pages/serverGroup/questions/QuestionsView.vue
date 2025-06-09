@@ -1,6 +1,5 @@
 <!--suppress ALL -->
 <script setup>
-import {Pane, Splitpanes} from "splitpanes"
 import "splitpanes/dist/splitpanes.css"
 import router from "@/router/index.js";
 import QuestionCache from "@/data/QuestionCache.js";
@@ -16,19 +15,17 @@ import {ArrowLeftBold, RefreshLeft} from "@element-plus/icons-vue";
 import CreatePartitionButton from "@/components/question/CreatePartitionButton.vue";
 import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import SelectPartitionsActionPop from "@/components/question/SelectPartitionsActionPop.vue";
-import UIMeta from "@/utils/UI_Meta.js";
 import ResponsiveSplitpane from "@/components/common/ResponsiveDoubleSplitpane.vue";
 import {ElMessageBox} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import _Loading_ from "@/components/common/_Loading_.vue";
 
-QuestionCache.reset();
-PartitionCache.reset();
+// QuestionCache.reset();
+// PartitionCache.reset();
 
 const props = {
     label: 'name',
-    children: 'zones',
     isLeaf: 'leaf',
     data: {}
 }
@@ -60,57 +57,54 @@ watch(filterText, (val) => {
     tree.value.filter(val);
 });
 
-const localPartitionQuestionData = {};
-
-function loadPartitionChildrenNode(partitionId, isPartitionEmpty, resolve, reject) {
-    let createQuestionButtonData = {
-        id: "create-question-" + partitionId,
-        treeId: partitionId + "/createQuestion",
-        leaf: true,
-        data: {
-            type: "createQuestion",
-            partitionId: partitionId,
-            treeId: partitionId + "/create-question"
-        }
-    };
-    const localPartitionQuestionNodes = localPartitionQuestionData[partitionId];
-    let data = [];
-    data.push(createQuestionButtonData);
-    if (localPartitionQuestionNodes instanceof Array) {
-        data.push(...localPartitionQuestionNodes);
-    }
-    localPartitionQuestionData[partitionId] = false;
-    if (isPartitionEmpty) {
-        resolve(data);
-    } else {
-        QuestionCache.getContentsAndIdsAsyncByPartitionId(partitionId).then((questionInfos) => {
-            remoteLoop:for (let questionInfo of questionInfos) {
-                if (localPartitionQuestionNodes instanceof Array) {
-                    for (const localQuestionNode of localPartitionQuestionNodes) {
-                        if (localQuestionNode.data.question.id === questionInfo.question.id) {
-                            continue remoteLoop;
-                        }
+function loadPartitionChildrenNode(partitionNodeObj) {
+    return new Promise((resolve, reject) => {
+        const partitionId = partitionNodeObj.treeId;
+        let createQuestionButtonData = {
+            id: "create-question-" + partitionId,
+            treeId: partitionId + "/create-question",
+            leaf: true,
+            data: {
+                type: "createQuestion",
+                partitionId: partitionId
+            }
+        };
+        if (partitionNodeObj.data.partition.loaded) {
+            const resolveData = [createQuestionButtonData];
+            resolveData.push(...Object.values(partitionNodeObj.data.partition.questionNodes));
+            resolve(resolveData);
+        } else {
+            const previousQuestionNodes = partitionNodeObj.data.partition.questionNodes;
+            let resolveData = [createQuestionButtonData];
+            if (previousQuestionNodes) {
+                resolveData.push(...Object.values(previousQuestionNodes));
+            }
+            QuestionCache.getContentsAndIdsAsyncByPartitionId(partitionId).then((questionInfos) => {
+                for (let questionInfo of questionInfos) {
+                    const questionId = questionInfo.question.id;
+                    if (!previousQuestionNodes[questionId]) {
+                        const questionNode = QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId);
+                        resolveData.push(questionNode);
+                        partitionNodeObj.data.partition.questionNodes[questionId] = questionNode;
                     }
                 }
-                // questionInfo.value = questionInfo.content;
-                const questionNode = QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId);
-                data.push(questionNode);
-            }
-            nextTick(() => {
-                tree.value.filter(filterText.value);
+                nextTick(() => {
+                    tree.value.filter(filterText.value);
+                });
+                partitionNodeObj.data.partition.loaded = true;
+                resolve(resolveData);
+            }, (error) => {
+                reject();
             });
-            resolve(data);
-        }, (error) => {
-            reject();
-        });
-    }
+        }
+    });
 }
 
 const loadNode = (node, resolve, reject) => {
-    let nodeId = node.data.id;
+    const nodeObj = node.data;
     if (node.level === 0) {
         let createPartitionButtonData = {
-            id: "create-partition-" + nodeId,
+            treeId: "create-partition",
             leaf: true,
             data: {type: "createPartition"}
         };
@@ -126,19 +120,19 @@ const loadNode = (node, resolve, reject) => {
             resolve(data);
         });
     } else {
-        if (node.data.data.loaded) {
-            resolve(node.data.data.loadedChildren);
-        } else {
-            loadPartitionChildrenNode(nodeId, node.data.questionAmount === 0, resolve, reject);
-        }
+        loadPartitionChildrenNode(nodeObj).then(
+                (data) => {
+                    resolve(data);
+                }, (data) => {
+                    reject(data);
+                }
+        );
     }
 }
 
 function getTreeNodeDataOfPartition(partition) {
     return {
-        id: partition.id,
         treeId: partition.id,
-        zones: [],
         data: {
             editing: false,
             partition: partition,
@@ -147,70 +141,39 @@ function getTreeNodeDataOfPartition(partition) {
     };
 }
 
-PartitionCache.registerOnPartitionAdded((partition) => {
+const unregister1 = PartitionCache.registerOnPartitionAdded((partition) => {
     tree.value.append(getTreeNodeDataOfPartition(partition), tree.value.root);
 });
-PartitionCache.registerOnPartitionDeleted((partition) => {
+const unregister2 = PartitionCache.registerOnPartitionDeleted((partition) => {
     tree.value.remove(tree.value.getNode(partition.id));
     QuestionCache.removePartitionFromAllQuestions(partition);
 });
-
-QuestionCache.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) => {
+const unregister3 = QuestionCache.registerOnQuestionUpdateLocal((questionInfo, differFromOriginal) => {
     for (let partitionId of questionInfo.question.partitionIds) {
         if (tree.value.getNode(partitionId + "/" + questionInfo.question.id) === null) {
-            const questionNode = QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId);
-            if (localPartitionQuestionData[partitionId] === false) {
-                const node1 = tree.value.getNode(partitionId);
-                if (node1 !== null)
-                    tree.value.append(questionNode, node1);
-            } else {
-                if (localPartitionQuestionData[partitionId] === undefined) {
-                    localPartitionQuestionData[partitionId] = []
-                    localPartitionQuestionData[partitionId].push(questionNode);
-                } else {
-                    let exist = false;
-                    console.debug("localPartitionQuestionData: " + localPartitionQuestionData);
-                    for (const questionInfo1 of localPartitionQuestionData[partitionId]) {
-                        if (questionInfo1.data.question.id === questionNode.data.question.id) {
-                            exist = true;
-                        }
-                    }
-                    if (!exist) {
-                        localPartitionQuestionData[partitionId].push(questionNode);
-                    }
-                }
-            }
+            const partitionNode = tree.value.getNode(partitionId);
+            const questionNodeObj = QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId);
+            if (partitionNode !== null)
+                tree.value.append(questionNodeObj, partitionNode);
+            partitionNode.data.data.partition.questionNodes[questionNodeObj.data.question.id] = questionNodeObj;
         }
     }
     for (const [id, partition] of Object.entries(PartitionCache.refPartitions.value)) {
         if (questionInfo.question.partitionIds && questionInfo.question.partitionIds.includes(partition.id)) {
             continue;
         }
-        let localPartitionQuestionDatum1 = localPartitionQuestionData[partition.id];
-        if (localPartitionQuestionDatum1 === false) {
-            if (tree.value.getNode(partition.id) !== null) {
-                let questionNode = tree.value.getNode(partition.id + "/" + questionInfo.question.id);
-                if (questionNode !== null)
-                    tree.value.remove(questionNode);
-            }
-        } else if (localPartitionQuestionDatum1) {
-            let index = 0;
-            let find = false;
-            for (const questionNode of localPartitionQuestionDatum1) {
-                if (questionNode.data.question.id === questionInfo.question.id) {
-                    find = true;
-                    break;
-                }
-                index++;
-            }
-            if (find) {
-                localPartitionQuestionData[partition.id] = [];
+        const partitionNode = tree.value.getNode(partition.id);
+        if (tree.value.getNode(partition.id) !== null) {
+            let questionNode = tree.value.getNode(partition.id + "/" + questionInfo.question.id);
+            if (questionNode !== null) {
+                tree.value.remove(questionNode);
             }
         }
+        delete partitionNode.data.data.partition.questionNodes[questionInfo.question.id];
     }
 });
 
-QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
+const unregister4 = QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {//FIXME won't remove questions in closed partitions
     let questionInfo = QuestionCache.reactiveQuestionInfos.value[id];
     if (questionInfo && questionInfo.dirty || (!localDeleted && router.currentRoute.value.params.id === id)) {
         return;
@@ -221,9 +184,18 @@ QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
     for (const [partitionId, partition] of Object.entries(PartitionCache.refPartitions.value)) {
         let questionNode = tree.value.getNode(partition.id + "/" + id);
         if (questionNode !== null) {
-            tree.value.remove(questionNode);
+            nextTick(() => {
+                tree.value.remove(questionNode);
+            });
         }
     }
+});
+
+onBeforeUnmount(() => {
+    unregister1();
+    unregister2();
+    unregister3();
+    unregister4();
 });
 
 const openEdit = (questionId) => {
@@ -255,12 +227,12 @@ const onDrop = (dragNode, dropNode, place, event) => {
     console.log(dragNodeData, dropNodeData, place, event);
 
     function replacePartitionId(dropPartitionId) {
-        let treeIdBlock = dragNode.data.treeId.split("/");
+        let treeIdBlock = dragNode.treeId.split("/");
         let originalItemPartitionId = treeIdBlock[0];
         let index = 0;
         for (let partitionId of dragNodeData.question.partitionIds) {
             if (originalItemPartitionId === partitionId) {
-                dragNode.data.treeId = partitionId + "/" + dragNodeData.question.id;
+                dragNode.treeId = partitionId + "/" + dragNodeData.question.id;
                 dragNode.data.data.question.partitionIds.splice(index, 1, dropPartitionId);
                 break;
             }
@@ -276,7 +248,7 @@ const onDrop = (dragNode, dropNode, place, event) => {
     if (dataType === "Partition") {
         dropPartitionId = dropNodeData.partition.id;
     } else if (dataType === "Question" || dataType === "QuestionGroup") {
-        dropPartitionId = dropNode.data.treeId.split("/")[0];
+        dropPartitionId = dropNode.treeId.split("/")[0];
     } else if (dataType === "createQuestion") {
         dropPartitionId = dropNode.data.data.partitionId;
     } else {
@@ -310,7 +282,7 @@ const createQuestionGroup = (partitionId) => {
             localNew: true,
         };
         const questionInfo = QuestionCache.createQuestionGroup(question, undefined, authorQQ);
-        const questionNodeItemData = QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId);
+        const questionNodeItemData = QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId);
         tree.value.append(questionNodeItemData, tree.value.getNode(partitionId));
     } else {
         console.error('Permission denied: create and edit owns question groups');
@@ -340,7 +312,7 @@ const createMultipleChoiceQuestion = (partitionId) => {
             }]
         };
         const questionInfo = QuestionCache.create(question);
-        tree.value.append(QuestionCache.getQuestionNodeItemDataOf(questionInfo, partitionId), tree.value.getNode(partitionId));
+        tree.value.append(QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId), tree.value.getNode(partitionId));
     } else {
         console.error('Permission denied: create and edit owns questions');
     }
@@ -433,20 +405,18 @@ onMounted(() => {
 })
 
 function batchDo(questionInfoAction, questionNodeAction) {
-    // const checkedKeys = tree.value.getCheckedKeys();
     const checkedNodes = tree.value.getCheckedNodes();
     const checkedQuestionIds = new Set();
     const checkedQuestionNodes = new Set();
-    for (const node of checkedNodes) {
-        if (node.data.type === "Question" || node.data.type === "QuestionGroup") {
-            let split = node.treeId.split("/");
+    for (const nodeObj of checkedNodes) {
+        if (nodeObj.data.type === "Question" || nodeObj.data.type === "QuestionGroup") {
+            let split = nodeObj.treeId.split("/");
             const questionId = split[1];
-            if (questionId === "createQuestion") continue;
+            if (questionId === "create-question") continue;
             checkedQuestionIds.add(questionId);
-            checkedQuestionNodes.add(node);
-        } else if (node.data.type === "Partition") {
-            let zones = node.zones;
-            for (const questionNode of zones) {
+            checkedQuestionNodes.add(nodeObj);
+        } else if (nodeObj.data.type === "Partition" && nodeObj.data.partition.loaded) {
+            for (const questionNode of Object.values(nodeObj.data.partition.questionNodes)) {
                 if (questionNode.data.type === "Question" || questionNode.data.type === "QuestionGroup") {
                     checkedQuestionIds.add(questionNode.data.question.id);
                     checkedQuestionNodes.add(questionNode);
@@ -455,10 +425,11 @@ function batchDo(questionInfoAction, questionNodeAction) {
         }
     }
     QuestionCache.getAllAsync(Array.from(checkedQuestionIds)).then(questionInfos => {
-        if (questionInfoAction instanceof Function)
+        if (questionInfoAction instanceof Function) {
             for (const questionInfo of questionInfos) {
                 questionInfoAction(questionInfo);
             }
+        }
         if (questionNodeAction instanceof Function) {
             for (const questionNode of checkedQuestionNodes) {
                 questionNodeAction(questionNode);
@@ -483,7 +454,7 @@ function batchSetEnableRandom(enable) {
 
 const batchActionSelectPartitionMenuButtons = ref([
     {
-        name: "移动题目从所选分区到...",
+        name: "从所选分区移动到...",
         show: () => {
             return true;
         },
@@ -494,12 +465,14 @@ const batchActionSelectPartitionMenuButtons = ref([
                 const partitionId = questionNode.treeId.split("/")[0];
                 questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId && !partitionIdsSet.has(id));
                 questionNode.data.question.partitionIds.push(...partitionIds);
-                QuestionCache.update(questionNode.data);
+                nextTick(() => {
+                    QuestionCache.update(questionNode.data);
+                });
             });
         },
         menuVisible: false
     }, {
-        name: "复制题目到...",
+        name: "添加至分区...",
         show: () => {
             return true;
         },
@@ -518,7 +491,7 @@ const batchActionSelectPartitionMenuButtons = ref([
 
 const batchActionButtons = ref([
     {
-        name: "从所选分区删除题目",
+        name: "从所选分区删除",
         show: () => {
             return true;
         },
@@ -529,7 +502,9 @@ const batchActionButtons = ref([
                 } else {
                     const partitionId = questionNode.treeId.split("/")[0];
                     questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId);
-                    QuestionCache.update(questionNode.data);
+                    nextTick(() => {
+                        QuestionCache.update(questionNode.data);
+                    });
                 }
             });
         },
@@ -608,20 +583,20 @@ const rectifyCheck = (nodeObj, checkStatus) => {
         const currentPartitionId = nodeObj.treeId.split("/")[0];
         rectify1(currentPartitionId);
     } else if (dataType === "Partition") {
-        if (!QuestionCache.loadedPartitionIds.has(nodeObj.treeId)) {
-            loadPartitionChildrenNode(nodeObj.treeId, nodeObj.data.questionAmount === 0, (data) => {
-                nodeObj.data.loadedChildren = data;
-                nodeObj.data.loaded = true;
+        if (!nodeObj.data.partition.loaded) {
+            loadPartitionChildrenNode(nodeObj).then((data) => {
                 for (const questionNode of data) {
-                    if (questionNode.data.type !== "createQuestion")
+                    if (questionNode.data.type !== "createQuestion") {
                         tree.value.append(questionNode, nodeObj.treeId);
+                        tree.value.setChecked(questionNode.treeId, true);
+                    }
                 }
-                nextTick(() => {
-                    tree.value.setChecked(nodeObj.treeId, true, true);
-                });
-            }, () => {
+                tree.value.setChecked(nodeObj.treeId, true, true);
             });
         }
+    } else if (nodeObj.treeId !== "create-partition"){
+        const currentPartitionId = nodeObj.treeId.split("/")[0];
+        rectify1(currentPartitionId);
     }
 }
 
@@ -734,7 +709,7 @@ const getTypeName = (type) => {
                         </el-button-group>
                         <transition name="batch-buttons">
                             <select-partitions-action-pop
-                                    v-show="currentButton.menuVisible"
+                                    v-show="currentButton.menuVisible && !disabled"
                                     @on-confirm="currentButton.action"/>
                         </transition>
                     </div>
@@ -794,7 +769,8 @@ const getTypeName = (type) => {
                                                             warning:nodeObj.data.showWarning
                                                         }"></div>
                                                 <!--                                                :class="{'disable-tree-checkbox': !(nodeObj.data.type === 'Partition'?true:nodeObj.data.ableToEdit)}"-->
-                                                <div class="question-tree-node">
+                                                <div class="question-tree-node"
+                                                     :class="{'local-deleted': nodeObj.data.question&&nodeObj.data.question.localDeleted}">
                                                     <el-text v-if="nodeObj.data.type === 'Question'" size="small"
                                                              type="info">
                                                         {{ getTypeName(nodeObj.data.question.type) }}
@@ -805,7 +781,6 @@ const getTypeName = (type) => {
                                                     </el-text>
                                                     <el-text class="question-tree-node-content"
                                                              :class="{
-                                                        'local-deleted': nodeObj.data.question&&nodeObj.data.question.localDeleted,
                                                         'unable-to-edit': nodeObj.data.question&&!nodeObj.data.ableToEdit,
                                                              }">
                                                         {{
@@ -893,7 +868,8 @@ const getTypeName = (type) => {
                                 <el-text type="danger" style="margin: 4px;margin-right: 12px;align-self: center;">
                                     上传出错
                                 </el-text>
-                                <el-button link type="primary" :icon="RefreshLeft" style="margin: 4px;align-self: center;"
+                                <el-button link type="primary" :icon="RefreshLeft"
+                                           style="margin: 4px;align-self: center;"
                                            @click="restoreAllErrorUploadChanges">
                                     重置所有更改
                                 </el-button>
@@ -904,7 +880,7 @@ const getTypeName = (type) => {
                                 <transition-group name="slide-hide">
                                     <question-info-panel class="disable-init-animate clickable"
                                                          v-for="[questionId, reason] of Object.entries(failedQuestionIdReason)"
-                                                         :key="questionId" disable-error-and-warning
+                                                         :key="questionId" disable-error-and-warning hide-status
                                                          @click="openEdit(questionId)"
                                                          :question-info="QuestionCache.reactiveQuestionInfos.value[questionId]">
                                         <div style="margin-top: 8px;">

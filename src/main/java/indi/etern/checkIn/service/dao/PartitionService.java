@@ -38,12 +38,14 @@ public class PartitionService {
         return partitionRepository.findAll();
     }
     
+    @Cacheable(key = "#name")//TODO test
     public Optional<Partition> findByName(String name) {
         return partitionRepository.findByName(name);
     }
-    
-    @CacheEvict(key = "#partition.id")
+//    @CacheEvict(key = "#partition.id")
     public void delete(Partition partition) {
+        cache.evict(partition.getId());
+        cache.evict(partition.getName());
         partitionRepository.delete(partition);
     }
 

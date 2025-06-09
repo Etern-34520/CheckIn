@@ -1,5 +1,6 @@
 package indi.etern.checkIn.utils;
 
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.question.impl.MultipleChoicesQuestion;
@@ -8,14 +9,13 @@ import indi.etern.checkIn.entities.question.impl.Choice;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class QuestionCreateUtils {
     @FunctionalInterface
     private interface LinkHandler {
-        void handle(Map<?, ?> questionDataMap, MultipleChoicesQuestion.Builder builder);
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        void handle(Map<?, ?> questionDataMap, MultipleChoicesQuestion.Builder builder, Optional<MultipleChoicesQuestion> previousQuestion);
     }
     
     private static MultipleChoicesQuestion create(Map<?, ?> questionDataMap, LinkHandler linkHandler) {
@@ -23,10 +23,17 @@ public class QuestionCreateUtils {
         Optional<Question> questionOptional = QuestionService.singletonInstance.findById(id);
         
         MultipleChoicesQuestion.Builder builder;
+        MultipleChoicesQuestion multipleChoicesQuestion = null;
         if (questionOptional.isEmpty()) {
             builder = new MultipleChoicesQuestion.Builder();
         } else {
-            builder = MultipleChoicesQuestion.Builder.from((MultipleChoicesQuestion) questionOptional.get());
+            final Question question = questionOptional.get();
+            if (question instanceof MultipleChoicesQuestion multipleChoicesQuestion1) {
+                multipleChoicesQuestion = multipleChoicesQuestion1;
+                builder = MultipleChoicesQuestion.Builder.from(multipleChoicesQuestion1);
+            } else {
+                throw new RuntimeException("Question is not a multiple choice question");
+            }
         }
         builder.setId(id);
         
@@ -58,7 +65,7 @@ public class QuestionCreateUtils {
             }
         }
         
-        linkHandler.handle(questionDataMap, builder);
+        linkHandler.handle(questionDataMap, builder, Optional.ofNullable(multipleChoicesQuestion));
         
         Object authorQQObj = questionDataMap.get("authorQQ");
         if (authorQQObj instanceof Number authorQQNumberValue) {
@@ -82,22 +89,33 @@ public class QuestionCreateUtils {
     
     
     public static MultipleChoicesQuestion createMultipleChoicesQuestion(Map<?, ?> questionDataMap) {
-        return create(questionDataMap, (questionDataMap1, builder) -> {
+        return create(questionDataMap, (questionDataMap1, builder, previousQuestion) -> {
             Object o3 = questionDataMap1.get("partitionIds");
             if (o3 instanceof List) {
                 //noinspection unchecked
                 List<String> partitionIds = (List<String>) o3;
                 builder.usePartitionLinks(linkWrapper -> {
+                    final Set<Partition> targets = linkWrapper.getTargets();
+                    targets.clear();
                     for (String partitionId : partitionIds) {
-                        linkWrapper.getTargets().add(Partition.ofId(partitionId));
+                        targets.add(Partition.ofId(partitionId));
                     }
+                    previousQuestion.ifPresent(question -> {
+                        final ToPartitionsLink linkWrapper1 = (ToPartitionsLink) question.getLinkWrapper();
+                        final Set<Partition> partitions = new HashSet<>(linkWrapper1.getTargets());
+                        partitions.removeAll(targets);
+                        partitions.forEach(partition -> {
+                            partition.getQuestionLinks().remove(linkWrapper1);
+                            partition.getEnabledQuestionsSet().remove(question);
+                        });
+                    });
                 });
             }
         });
     }
     
     protected static MultipleChoicesQuestion createSubMultipleChoicesQuestion(Map<?, ?> questionDataMap, QuestionGroup questionGroup) {
-        return create(questionDataMap, (questionDataMap1, builder1) -> builder1.useQuestionGroupLinks(linkWrapper -> {
+        return create(questionDataMap, (questionDataMap1, builder1, previousQuestion) -> builder1.useQuestionGroupLinks(linkWrapper -> {
             linkWrapper.setTarget(questionGroup);
         }));
     }

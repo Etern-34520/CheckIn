@@ -1,8 +1,7 @@
 <script setup>
 import {DArrowRight} from "@element-plus/icons-vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
-import router from "@/router/index.js";
-import {ElMessage} from "element-plus";
+import _Loading_ from "@/components/common/_Loading_.vue";
 
 const usernameOrQQ = ref('');
 const password = ref('');

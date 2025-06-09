@@ -44,7 +44,7 @@ defineExpose({
                        :label="partition.name" :value="partition.id"></el-option>
             <template #footer v-if="showCreatePartition">
                 <transition name="creatingPartition" mode="out-in">
-                    <el-button v-if="!isCreating" text bg size="small" style="width: 100%"
+                    <el-button v-if="!isCreating" text bg style="width: 100%"
                                @click="isCreating = true">
                         创建新分区
                     </el-button>

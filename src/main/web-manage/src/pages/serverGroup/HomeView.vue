@@ -170,7 +170,7 @@ const openRecord = (id) => {
                                 </el-text>
                                 <el-button link @click="loadTodayExamRecords">重新加载</el-button>
                             </div>
-                            <el-scrollbar v-else-if="!loadingTodayExamRecords" style="margin-top: 16px;flex:1">
+                            <el-scrollbar v-else-if="!loadingTodayExamRecords" style="flex:1">
                                 <transition name="blur-scale">
                                     <div v-if="todayExamRecords && todayExamRecords[formatDate(today)]">
                                         <transition-group name="slide-hide">
@@ -203,7 +203,7 @@ const openRecord = (id) => {
                                 </el-text>
                                 <el-button link @click="loadRecentUpdatedQuestions">重新加载</el-button>
                             </div>
-                            <el-scrollbar v-else-if="recentUpdatedQuestions && !loadingRecentUpdatedQuestions"
+                            <el-scrollbar v-else-if="recentUpdatedQuestions && recentUpdatedQuestions.length && !loadingRecentUpdatedQuestions"
                                           style="position: relative">
                                 <waterfall :data="recentUpdatedQuestions" :min-row-width="400"
                                            style="max-width: calc(100% - 4px)">

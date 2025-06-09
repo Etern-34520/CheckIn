@@ -3,7 +3,6 @@ package indi.etern.checkIn.service.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.api.webSocket.Connector;
 import indi.etern.checkIn.api.webSocket.Message;
-import indi.etern.checkIn.entities.user.User;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
@@ -84,21 +83,6 @@ public class WebSocketService {
         sendMessageToAllWithoutLog(message);
     }
     
-    public boolean isOnline(String sid) {
-        boolean online = false;
-        for (Connector item : Connector.CONNECTORS) {
-            if (item.getSid().equals(sid)) {
-                online = true;
-                break;
-            }
-        }
-        return online;
-    }
-    
-    public boolean isOnline(User user) {
-        return isOnline(String.valueOf(user.getQQNumber()));
-    }
-    
     @SneakyThrows
     public void sendMessageToAll(LinkedHashMap<String, Object> map) {
         sendMessageToAll(objectMapper.writeValueAsString(map));
@@ -110,13 +94,13 @@ public class WebSocketService {
     }
     
     public void sendMessageToAllWithoutLog(String message) {
-        for (Connector item : Connector.CONNECTORS) {
-            if (item.isOpen()) {
+        for (Connector connector : Connector.CONNECTORS) {
+            if (connector.isOpen()) {
                 try {
-                    item.sendMessageWithOutLog(message);
+                    connector.sendMessageWithOutLog(message);
                 } catch (IllegalStateException ignored) {
                 } catch (Exception e) {
-                    logger.error("error occurred when send to sid_{}", item.getSid(), e);
+                    logger.error("error occurred when send to sid_{}", connector.getSid(), e);
                 }
             }
         }
@@ -137,7 +121,7 @@ public class WebSocketService {
             if (channel != null) {
                 channel.sids.remove(sid);
                 if (channel.sids.isEmpty()) {
-                    channelHashMap.remove(channelName);
+                    channel.close();
                 }
             }
         }
@@ -149,7 +133,7 @@ public class WebSocketService {
             for (Channel channel : channels) {
                 channel.sids.remove(sid);
                 if (channel.sids.isEmpty()) {
-                    channelHashMap.remove(channel.name);
+                    channel.close();
                 }
             }
         }
@@ -160,10 +144,11 @@ public class WebSocketService {
         Channel channel = channelHashMap.get(channelName);
         if (channel != null) {
             message.setChannelName(channelName);
-            sendMessages(message, channel.sids);
+            channel.sendMessage(message);
         }
     }
     
+    @SuppressWarnings("unused")
     public Channel getChannel(String channelName) {
         return channelHashMap.get(channelName);
     }

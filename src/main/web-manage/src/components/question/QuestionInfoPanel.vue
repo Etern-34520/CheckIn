@@ -13,6 +13,10 @@ const props = defineProps({
     subQuestionExpanded: {
         type: Boolean,
         default: false,
+    },
+    hideStatus: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -47,9 +51,20 @@ const getTypeName = (type) => {
     <div class="panel-1 question-info-panel">
         <div class="grid1">
             <div class="padding">
+                <div style="display: flex;flex-direction: row;flex-wrap: wrap;" v-if="!hideStatus">
+                    <div style="display: flex;flex-direction: row;margin-right: 8px">
+                        <div class="point"
+                             :style="questionInfo.question.enabled?'background: var(--el-color-primary);':'background: var(--el-color-info);'"></div>
+                        <el-text size="small" style="align-self: center" type="info">
+                            {{ questionInfo.question.enabled ? "已启用" : "未启用" }}
+                        </el-text>
+                    </div>
+                    <div style="display: flex;flex-direction: row;" v-if="questionInfo.dirty">
+                        <div class="point" style="background: var(--el-color-warning)"></div>
+                        <el-text size="small" style="align-self: center" type="info">{{ "已修改" }}</el-text>
+                    </div>
+                </div>
                 <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
-                    <div style="width: 6px;height: 6px;align-self: center;border-radius: 3px;margin: 8px;"
-                         :style="questionInfo.question.enabled?'background: var(--el-color-primary);':'background: var(--el-color-info);'"></div>
                     <div style="display: flex;flex-direction: row;flex: 1">
                         <el-text type="info" size="small" style="margin-right: 16px">类型</el-text>
                         <el-text size="small">
@@ -101,7 +116,8 @@ const getTypeName = (type) => {
                         <template #content>
                             <transition-group name="slide-hide">
                                 <QuestionInfoPanel v-for="subQuestionInfo of questionInfo.questionInfos"
-                                                   :key="subQuestionInfo.question.id" :disable-error-and-warning="disableErrorAndWarning"
+                                                   :key="subQuestionInfo.question.id"
+                                                   :disable-error-and-warning="disableErrorAndWarning"
                                                    :question-info="subQuestionInfo" :clickable="false"/>
                             </transition-group>
                         </template>
@@ -191,5 +207,13 @@ const getTypeName = (type) => {
     opacity: 0;
     scale: 0.9;
     filter: blur(8px);
+}
+
+.point {
+    width: 6px;
+    height: 6px;
+    align-self: center;
+    border-radius: 3px;
+    margin: 8px;
 }
 </style>

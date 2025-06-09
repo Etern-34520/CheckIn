@@ -860,7 +860,7 @@ const QuestionCache = {
     dirty: false,
     reactiveDirty: ref(false),
     dirtyQuestionInfos: {},
-    reset() {
+/*    reset() {
         this.reactiveQuestionInfos.value = {};
         this.originalQuestionInfos = {};
         this.dirty = false;
@@ -870,7 +870,7 @@ const QuestionCache = {
         onUpdateRemote.length = 0;
         onDelete.length = 0;
         loadRules();
-    },
+    },*/
     getAsync(id) {
         return new Promise((resolve, reject) => {
             let questionInfo = QuestionCache.reactiveQuestionInfos.value[id];
@@ -938,7 +938,6 @@ const QuestionCache = {
             }
         });
     },
-    loadedPartitionIds: reactive(new Set()),
     getContentsAndIdsAsyncByPartitionId(id) {
         return new Promise((resolve, reject) => {
             WebSocketConnector.send({
@@ -947,10 +946,9 @@ const QuestionCache = {
                     partitionId: id
                 }
             }).then((response) => {
-                QuestionCache.loadedPartitionIds.add(id);
                 let resolveData = [];
                 for (const questionSimpleInfo1 of response.data.questionList) {
-                    if (QuestionCache.reactiveQuestionInfos.value[questionSimpleInfo1.id] === undefined || QuestionCache.reactiveQuestionInfos.value[questionSimpleInfo1.id].simple) {
+                    if (QuestionCache.reactiveQuestionInfos.value[questionSimpleInfo1.id] === undefined) {
                         const questionSimpleInfo = reactive({
                             question: {
                                 id: questionSimpleInfo1.id,
@@ -986,6 +984,24 @@ const QuestionCache = {
                     }
                 }
                 resolve(resolveData);
+            }, (error) => {
+                reject(error);
+            });
+        });
+    },
+    getAllAsyncByPartitionId(id) {
+        return new Promise((resolve, reject) => {
+            WebSocketConnector.send({
+                type: "getQuestionIdsByPartitionId",
+                data: {
+                    partitionId: id
+                }
+            }).then((response) => {
+                QuestionCache.getAllAsync(response.ids).then((response1) => {
+                    resolve(response1);
+                }, (error) => {
+                    reject(error);
+                });
             }, (error) => {
                 reject(error);
             });
@@ -1255,15 +1271,38 @@ const QuestionCache = {
         QuestionCache.update(reactiveQuestionInfo);
     },
     registerOnQuestionUpdateLocal(action) {
-        onUpdateLocal.push(action);
+        let length = onUpdateLocal.push(action);
+        return () => {
+            if (length) {
+                onUpdateLocal.splice(length - 1, 1);
+                length = undefined;
+            } else {
+                throw new Error("Listener has been removed");
+            }
+        }
     },
     registerOnQuestionUpdatedRemote(action) {
-        onUpdateRemote.push(action);
-    },
+        let length = onUpdateRemote.push(action);
+        return () => {
+            if (length) {
+                onUpdateRemote.splice(length - 1, 1);
+                length = undefined;
+            } else {
+                throw new Error("Listener has been removed");
+            }
+        }    },
     registerOnQuestionDeleted(action) {
-        onDelete.push(action);
+        let length = onDelete.push(action);
+        return () => {
+            if (length) {
+                onDelete.splice(length - 1, 1);
+                length = undefined;
+            } else {
+                throw new Error("Listener has been removed");
+            }
+        }
     },
-    getQuestionNodeItemDataOf(questionOrInfo, partitionId) {
+    getQuestionNodeObjOf(questionOrInfo, partitionId) {
         let data;
         let id;
         if (questionOrInfo.id) {//if it is a question

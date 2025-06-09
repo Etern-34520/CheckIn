@@ -8,27 +8,27 @@ import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.service.dao.PartitionService;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import java.io.Serializable;
 import java.util.*;
 
-@Getter
 @Entity
 @Table(name = "partitions")
 public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
-    private static final Map<String, Partition> partitionNameMap = new HashMap<>();
-    private static final Map<String, Partition> partitionIdMap = new HashMap<>();
-    
     @Getter
     @Id
     @Column(columnDefinition = "char(36)")
     private String id;
     
+    @Setter
+    @Getter
     @Column(name = "name", unique = true, nullable = false)
     String name;
     
+    @Getter
     @JsonIgnore
     @ManyToMany(mappedBy = "targets")
     @Fetch(value = FetchMode.SUBSELECT)
@@ -41,42 +41,17 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     private Partition(String string) {
         name = string;
         questionLinks = new HashSet<>();
-//        id = Math.toIntExact(System.currentTimeMillis()/100000000);
         id = UUID.randomUUID().toString();
     }
     
     public static Partition ofName(String string) {
-        if (partitionNameMap.get(string) == null) {
-            final Optional<Partition> optionalPartition = PartitionService.singletonInstance.findByName(string);
-            if (optionalPartition.isPresent()) {
-                partitionNameMap.put(string, optionalPartition.get());
-                partitionIdMap.put(optionalPartition.get().getId(), optionalPartition.get());
-            } else {
-                Partition partition = new Partition(string);
-                partitionNameMap.put(string, partition);
-                partitionIdMap.put(partition.getId(), partition);
-            }
-        }
-        return partitionNameMap.get(string);
+        final Optional<Partition> optionalPartition = PartitionService.singletonInstance.findByName(string);
+        return optionalPartition.orElseGet(() -> new Partition(string));
     }
     
     public static Partition ofId(String partitionId) {
-        if (partitionIdMap.get(partitionId) == null) {
-            final Optional<Partition> optionalPartition = PartitionService.singletonInstance.findById(partitionId);
-            if (optionalPartition.isPresent()) {
-                partitionNameMap.put(optionalPartition.get().getName(), optionalPartition.get());
-                partitionIdMap.put(optionalPartition.get().getId(), optionalPartition.get());
-            } else {
-                return null;
-            }
-        }
-        return partitionIdMap.get(partitionId);
-    }
-    
-    public void setName(String newName) {
-        name = newName;
-        partitionNameMap.remove(name);
-        partitionNameMap.put(name, this);
+        final Optional<Partition> optionalPartition = PartitionService.singletonInstance.findById(partitionId);
+        return optionalPartition.orElse(null);
     }
     
     @Override
@@ -138,13 +113,13 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return id.hashCode();
     }
     
     @Override
     public boolean equals(Object object) {
         if (object instanceof Partition partition) {
-            return partition.name.equals(this.name);
+            return partition.id.equals(this.id);
         } else {
             return false;
         }

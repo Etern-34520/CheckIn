@@ -124,34 +124,45 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
         QuestionLinkImpl<?> linkWrapper;
         private boolean randomOrdered = false;
         
-        public static Builder from(MultipleChoicesQuestion multiPartitionableQuestion) {
-            final Builder builder = new Builder().setQuestionContent(multiPartitionableQuestion.getContent())
-                    .addChoices(multiPartitionableQuestion.getChoices())
-                    .setAuthor(multiPartitionableQuestion.getAuthor())
-                    .setEnable(multiPartitionableQuestion.isEnabled())
-                    .setRandomOrdered(multiPartitionableQuestion.isRandomOrdered())
-                    .setId(multiPartitionableQuestion.getId());
-            if (multiPartitionableQuestion.getLinkWrapper() instanceof ToPartitionsLink toPartitionsLinkWrapper) {
+        public static Builder from(MultipleChoicesQuestion question) {
+            final Builder builder = new Builder().setQuestionContent(question.getContent())
+                    .addChoices(question.getChoices())
+                    .setAuthor(question.getAuthor())
+                    .setEnable(question.isEnabled())
+                    .setRandomOrdered(question.isRandomOrdered())
+                    .setId(question.getId());
+            builder.setLink(question.getLinkWrapper());
+//            if (question.getLinkWrapper() instanceof ToPartitionsLink toPartitionsLinkWrapper) {
+/*
                 builder.usePartitionLinks(toPartitionLinkWrapper1 -> {
                     Set<Partition> targets = toPartitionLinkWrapper1.getTargets();
                     targets.clear();
                     targets.addAll(toPartitionsLinkWrapper.getTargets());
                 });
-            } else if (multiPartitionableQuestion.getLinkWrapper() instanceof ToQuestionGroupLink toQuestionGroupLinkWrapper) {
-                toQuestionGroupLinkWrapper.getTarget().getQuestionLinks().clear();
-                builder.useQuestionGroupLinks((toQuestionGroupLinkWrapper1 -> toQuestionGroupLinkWrapper1.setTarget(toQuestionGroupLinkWrapper.getTarget())));
-            }
+*/
+//            } else if (question.getLinkWrapper() instanceof ToQuestionGroupLink toQuestionGroupLinkWrapper) {
+//                toQuestionGroupLinkWrapper.getTarget().getQuestionLinks().clear();
+//                builder.useQuestionGroupLinks((toQuestionGroupLinkWrapper1 -> toQuestionGroupLinkWrapper1.setTarget(toQuestionGroupLinkWrapper.getTarget())));
+//            }
             return builder;
         }
         
+        private void setLink(QuestionLinkImpl<?> link) {
+            linkWrapper = link;
+        }
+        
         public Builder usePartitionLinks(ToPartitionsLink.Configurator configurator) {
-            linkWrapper = new ToPartitionsLink();
+            if (linkWrapper == null) {
+                linkWrapper = new ToPartitionsLink();
+            }
             configurator.configure((ToPartitionsLink) linkWrapper);
             return this;
         }
         
         public Builder useQuestionGroupLinks(ToQuestionGroupLink.Configurator configurator) {
-            linkWrapper = new ToQuestionGroupLink();
+            if (linkWrapper == null) {
+                linkWrapper = new ToQuestionGroupLink();
+            }
             configurator.configure((ToQuestionGroupLink) linkWrapper);
             return this;
         }

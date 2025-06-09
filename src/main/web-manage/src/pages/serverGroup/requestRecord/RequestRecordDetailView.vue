@@ -62,7 +62,7 @@ const routeToRelatedExamRecord = (id) => {
                             在Iplark上查询
                         </el-link>
                     </div>
-                    <el-tag style="justify-self: center">{{ data.type }}</el-tag>
+                    <el-tag style="justify-self: center;margin-right: 4px;">{{ data.type }}</el-tag>
                     <el-tag style="justify-self: center" :type="data.status === 'SUCCESS'?'success':'danger'">
                         {{ data.status }}
                     </el-tag>

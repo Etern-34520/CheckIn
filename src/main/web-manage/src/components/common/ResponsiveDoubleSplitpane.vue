@@ -93,8 +93,8 @@ watch(UIMeta.mobile, (val) => {
 
 .mobile .left-view {
     position: fixed;
-    height: 100vh;
-    width: 75vw;
+    height: calc(100vh - 36px);
+    width: 85vw;
     z-index: 2003;
     backdrop-filter: blur(32px);
     transform: translateX(calc(-100% - 500px));
@@ -111,8 +111,6 @@ watch(UIMeta.mobile, (val) => {
 
 .mobile-view-mask {
     position: absolute;
-    /*    left: 0;*/
-    /*    top: 0;*/
     width: 100vw;
     height: calc(100vh - 36px);
     z-index: 2002;
