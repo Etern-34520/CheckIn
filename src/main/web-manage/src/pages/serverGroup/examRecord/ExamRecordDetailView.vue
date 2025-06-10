@@ -171,7 +171,7 @@ onBeforeUnmount(() => {
                  :key="data.id" v-else-if="data">
                 <div style="display: flex;flex-direction: row;align-items: center;margin-left: 4px;margin-bottom: 8px;flex-wrap: wrap">
                     <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 16px;">
-                        <el-avatar style="width: 64px;height: 64px;margin-right: 16px"
+                        <el-avatar :size="64" style="margin-right: 16px"
                                    :src="getAvatarUrlOf(data.qqNumber)"/>
                         <div style="display: flex;flex-direction: column;min-width: min(70vw,120px);">
                             <el-text size="large"

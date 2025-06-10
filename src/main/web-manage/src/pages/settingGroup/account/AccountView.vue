@@ -286,7 +286,7 @@ const buttonsOption2 = ref([
                         <el-input v-model="name" :disabled="done" placeholder=""/>
                     </custom-dialog>
                     <div style="display: flex;flex-direction: row;margin-bottom: 28px">
-                        <el-avatar shape="circle" style="min-width: 84px;min-height: 84px;margin-right: 16px;"
+                        <el-avatar :size="84" shape="circle" style="margin-right: 16px;"
                                    :src="getAvatarUrlOf(user.qq)"/>
                         <div style="display:flex;flex-direction: column;justify-content: center;">
                             <el-text style="font-size: 24px;align-self: baseline;word-break: break-all">{{ user.name }}</el-text>

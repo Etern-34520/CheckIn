@@ -38,7 +38,7 @@ const routeToSignUpOrLogin = () => {
             <el-text style="font-size: 24px;align-self: baseline;margin-top: 64px">答题结果</el-text>
             <div style="display: flex;flex-direction: row;align-items: stretch;margin-top: 16px;margin-left: 16px;flex-wrap: wrap">
                 <div style="display: flex;flex-direction: row;align-items: center;">
-                    <el-avatar style="width: 64px;height: 64px;margin-right: 16px" :src="getAvatarUrlOf(result.qq)"/>
+                    <el-avatar :size="64" style="margin-right: 16px" :src="getAvatarUrlOf(result.qq)"/>
                     <el-text size="large" style="min-width: min(70vw,200px)">{{ result.qq }}</el-text>
                 </div>
             </div>

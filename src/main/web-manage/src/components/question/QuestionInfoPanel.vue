@@ -80,8 +80,8 @@ const getTypeName = (type) => {
                                     @click.stop="router.push({name:'user-detail', params: {id: questionInfo.question.authorQQ}})"
                                     text
                                     style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
-                                <el-avatar shape="circle" :src="getAvatarUrlOf(questionInfo.question.authorQQ)"
-                                           style="margin-right: 4px;width: 20px;height: 20px"></el-avatar>
+                                <el-avatar shape="circle" :size="20" :src="getAvatarUrlOf(questionInfo.question.authorQQ)"
+                                           style="margin-right: 4px;"></el-avatar>
                                 <el-text style="margin-left: 4px;">{{ questionInfo.question.authorQQ }}</el-text>
                             </el-button>
                         </div>

@@ -124,7 +124,7 @@ const back = () => {
             </el-popover>
         </div>
         <div style="display: flex;flex-direction: row;align-items: center;margin-top: 16px;margin-left: 16px;">
-            <el-avatar style="width: 64px;height: 64px;margin-right: 16px" :src="getAvatarUrlOf(qqNumber)"/>
+            <el-avatar :size="64" style="margin-right: 16px" :src="getAvatarUrlOf(qqNumber)"/>
             <el-input-number :class="{error: !validate2}" v-model="qqNumber"
                              :controls="false" style="min-width: min(70vw,200px)"/>
         </div>

@@ -20,6 +20,7 @@ import {ElMessageBox} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import _Loading_ from "@/components/common/_Loading_.vue";
+import partitionCache from "@/data/PartitionCache.js";
 
 // QuestionCache.reset();
 // PartitionCache.reset();
@@ -61,7 +62,6 @@ function loadPartitionChildrenNode(partitionNodeObj) {
     return new Promise((resolve, reject) => {
         const partitionId = partitionNodeObj.treeId;
         let createQuestionButtonData = {
-            id: "create-question-" + partitionId,
             treeId: partitionId + "/create-question",
             leaf: true,
             data: {
@@ -142,6 +142,7 @@ function getTreeNodeDataOfPartition(partition) {
 }
 
 const unregister1 = PartitionCache.registerOnPartitionAdded((partition) => {
+    partition.questionNodes = {};
     tree.value.append(getTreeNodeDataOfPartition(partition), tree.value.root);
 });
 const unregister2 = PartitionCache.registerOnPartitionDeleted((partition) => {
@@ -555,48 +556,41 @@ const switchMenuVisible = (button) => {
 }
 
 const rectifyCheck = (nodeObj, checkStatus) => {
-    function rectify1(currentPartitionId) {
-        const currentPartitionCheckedQuestionIds = new Set();
-        for (const checkedNode of checkStatus.checkedNodes) {
-            if (checkedNode.data.type === 'Question') {
-                let partitionId = checkedNode.treeId.split("/")[0];
-                if (partitionId === currentPartitionId && checkedNode.data.type === "Question") {
-                    currentPartitionCheckedQuestionIds.add(checkedNode.data.question.id);
-                }
-            }
+    function rectify1(currentPartitionNode) {
+        const childNodes = currentPartitionNode.childNodes;
+        const hasNotCheckedQuestion = childNodes.find((childNode) => childNode.data.data.type !== "createQuestion" && (!childNode.checked));
+        const hasCheckedQuestion = childNodes.find((childNode) => childNode.data.data.type !== "createQuestion" && childNode.checked);
+        const allQuestionChecked = !hasNotCheckedQuestion;
+        const allQuestionNotChecked = !hasCheckedQuestion;
+        console.log(allQuestionChecked, allQuestionNotChecked);
+        if (allQuestionChecked) {
+            tree.value.setChecked(childNodes[0].data.treeId, true, false);
+        } else if (allQuestionNotChecked) {
+            tree.value.setChecked(childNodes[0].data.treeId, false, false);
         }
-        for (const halfCheckedNode of checkStatus.halfCheckedNodes) {
-            if (halfCheckedNode.data.type === "Partition" && halfCheckedNode.id === currentPartitionId) {
-                if (currentPartitionCheckedQuestionIds.size === 0) {
-                    tree.value.setChecked(halfCheckedNode.id + "/createQuestion", false, false);
-                }
-                if (currentPartitionCheckedQuestionIds.size === tree.value.getNode(currentPartitionId).childNodes.length - 1) {
-                    tree.value.setChecked(halfCheckedNode.id + "/createQuestion", true, false);
-                }
-                break;
-            }
-        }
+        console.log(currentPartitionNode);
     }
 
     const dataType = nodeObj.data.type;
+    const currentPartitionId = nodeObj.treeId.split("/")[0];
+    const partitionNode = tree.value.getNode(currentPartitionId);
     if (dataType === "Question" || dataType === "QuestionGroup") {
-        const currentPartitionId = nodeObj.treeId.split("/")[0];
-        rectify1(currentPartitionId);
+        rectify1(partitionNode);
     } else if (dataType === "Partition") {
         if (!nodeObj.data.partition.loaded) {
             loadPartitionChildrenNode(nodeObj).then((data) => {
                 for (const questionNode of data) {
-                    if (questionNode.data.type !== "createQuestion") {
-                        tree.value.append(questionNode, nodeObj.treeId);
-                        tree.value.setChecked(questionNode.treeId, true);
-                    }
+                    tree.value.append(questionNode, nodeObj);
                 }
-                tree.value.setChecked(nodeObj.treeId, true, true);
+                nextTick(() => {
+                    tree.value.setChecked(nodeObj.treeId, true, true);
+                });
             });
+        } else if (!partitionNode.checked) {
+            rectify1(partitionNode);
         }
-    } else if (nodeObj.treeId !== "create-partition"){
-        const currentPartitionId = nodeObj.treeId.split("/")[0];
-        rectify1(currentPartitionId);
+    } else if (nodeObj.treeId !== "create-partition") {
+        rectify1(partitionNode);
     }
 }
 

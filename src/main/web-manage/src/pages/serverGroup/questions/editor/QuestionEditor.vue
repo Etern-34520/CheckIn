@@ -56,17 +56,11 @@ let update = (newVal, oldVal) => {
         loading.value = false;
         error.value = false;
         errorMessage.value = "";
-        // if (questionData.question)
-        //     lastPartitionId = questionData.question.partitionIds[0];
         if (questionData.ableToEdit) {
             view.value = "编辑";
         } else {
             view.value = "预览";
         }
-        // nextTick(() => {
-        //
-        // })
-        // questionInfo.value.verify();
         unwatch1 = watch(() => questionInfo.value.question, (newVal, oldVal) => {
             if (error.value) return;
             if (newVal && oldVal && oldVal.id === newVal.id) {
@@ -259,14 +253,14 @@ onMounted(() => {
                                     <transition name="blur-scale">
                                         <div style="display: flex;align-items: center;margin-right: 24px"
                                              v-if="questionInfo.question.lastModifiedTime">
-                                            <el-tag type="info" style="margin-right: 8px">最后编辑时间</el-tag>
+                                            <el-text type="info" style="margin-right: 8px">最后编辑时间</el-text>
                                             <el-text>
                                                 {{ questionInfo.question.lastModifiedTime }}
                                             </el-text>
                                         </div>
                                     </transition>
                                     <div style="display: flex;align-items: center;">
-                                        <el-tag type="info">评价</el-tag>
+                                        <el-text type="info">评价</el-text>
                                         <el-button-group>
                                             <el-button link @click="switchLike" style="margin: 4px 0"
                                                        :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
@@ -328,8 +322,7 @@ onMounted(() => {
                                                                       @start="onStartDrag"
                                                                       @end="onEndDrag"
                                                         >
-                                                            <transition-group
-                                                                    :name="/*dragging ? null:'drag'*/'slide-hide'">
+                                                            <transition-group name="slide-hide">
                                                                 <div class="slide-hide-base"
                                                                      style="display: grid;margin-top: 4px;grid-template-columns: 0fr 1fr;"
                                                                      v-for="(questionInfo1, $index) of questionInfo.questionInfos"
@@ -365,8 +358,7 @@ onMounted(() => {
                                                         </el-button>
                                                     </div>
                                                 </transition>
-                                                <div class="panel-1"
-                                                     style="padding: 12px 20px;margin-top: 40px;min-height: 320px">
+                                                <div style="margin-top: 40px;min-height: 320px">
                                                     <el-text>
                                                         统计信息
                                                     </el-text>

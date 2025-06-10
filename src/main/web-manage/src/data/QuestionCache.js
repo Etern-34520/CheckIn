@@ -730,8 +730,7 @@ function verifyImmediately(questionInfo) {
             questionInfo.showWarning = true;
         }
         if (question.type === "QuestionGroup") {
-            if (questionInfos.length === 0) {
-            } else {
+            if (questionInfo.questionInfos.length !== 0) {
                 let order = 0;
                 for (let questionInfo1 of questionInfo.questionInfos) {
                     order++;

@@ -165,7 +165,7 @@ const routeToExamRecords = () => {
             <div :key="transitionCaller" v-if="user">
                 <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
                     <div style="display: flex;flex-direction: row;margin-bottom: 28px;flex-wrap: wrap">
-                        <el-avatar shape="circle" style="min-width: 84px;width: 84px;min-height: 84px;height: 84px;margin-right: 16px;"
+                        <el-avatar shape="circle" :size="84" style="margin-right: 16px;"
                                    :src="getAvatarUrlOf(user.qq)"/>
                         <div style="display:flex;flex-direction: column;justify-content: center;">
                             <el-text style="font-size: 24px;align-self: baseline">{{ user.name }}</el-text>

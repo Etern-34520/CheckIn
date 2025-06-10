@@ -33,18 +33,6 @@ const filter = function (rawFile) {
         if (!questionInfo.value.question.images === undefined) {
             questionInfo.value.question.images = [];
         }
-            /*for (const image of questionInfo.value.question.images) {
-                if (image.uid === rawFile.uid) {
-                    ElNotification({
-                        title: "重复",
-                        message: "图片已存在",
-                        position: 'bottom-right',
-                        type: 'warning',
-                    })
-                    upload.value.handleRemove(rawFile);
-                    return false;
-                }
-            }*/
         upload.value.handleRemove(rawFile);
         convert(rawFile.raw).then((result) => {
             questionInfo.value.question.images.push(result);
@@ -244,7 +232,7 @@ const ableToChangeAuthor = () => {
                        clearable placeholder="作者" :disabled="!ableToChangeAuthor(questionInfo)">
                 <template #label="{ label, value }">
                     <div style="display: flex;align-items: center;justify-items: stretch">
-                        <el-avatar shape="circle" :size="24" style="margin: 4px" fit="cover"
+                        <el-avatar shape="circle" :size="24" style="margin: 4px;min-width: 24px;" fit="cover"
                                    :src="getAvatarUrlOf(value)"></el-avatar>
                         <span>{{ label }}</span>
                     </div>

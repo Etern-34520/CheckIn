@@ -1236,3 +1236,8 @@ input::-webkit-inner-spin-button {
 .el-anchor {
     --el-anchor-bg-color: rgba(0,0,0,0) !important;
 }
+
+.el-avatar {
+    min-width: var(--el-avatar-size);
+    min-height: var(--el-avatar-size);
+}

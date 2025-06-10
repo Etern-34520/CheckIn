@@ -134,7 +134,7 @@ const showDropdown = (user) => {
         <custom-dialog v-model="showEditUserGroup" title="修改用户组" :buttons-option="editGroupButtonOption"
                        @close="onClose">
             <div style="display: flex;align-items: center;margin-bottom: 16px;">
-                <el-avatar shape="circle" style="width: 36px;height: 36px;margin-right: 8px;flex: none;"
+                <el-avatar shape="circle" :size="36" style="margin-right: 8px;flex: none;"
                            :src="getAvatarUrlOf(user.qq)"/>
                 <div style="line-height: 16px;">
                     <el-text style="font-size: 16px;align-self: baseline;max-height:21px;text-wrap: wrap">{{
@@ -156,7 +156,7 @@ const showDropdown = (user) => {
         <custom-dialog v-model="showEditUserName" title="修改用户名" :buttons-option="editNameButtonOption"
                        @close="onClose">
             <div style="display: flex;align-items: center;margin-bottom: 16px;">
-                <el-avatar shape="circle" style="width: 36px;height: 36px;margin-right: 8px;flex: none;"
+                <el-avatar shape="circle" :size="36" style=";margin-right: 8px;flex: none;"
                            :src="getAvatarUrlOf(user.qq)"/>
                 <div style="line-height: 16px;">
                     <el-text style="font-size: 16px;align-self: baseline;max-height:21px;text-wrap: wrap">{{
@@ -173,7 +173,7 @@ const showDropdown = (user) => {
                     placeholder="用户名称"
             />
         </custom-dialog>
-        <el-avatar shape="circle" style="width: 36px;height: 36px;margin-right: 8px;flex: none;"
+        <el-avatar shape="circle" :size="36" style="margin-right: 8px;flex: none;"
                    :src="getAvatarUrlOf(user.qq)"/>
         <div style="line-height: 16px;">
             <el-text style="font-size: 16px;align-self: baseline;max-height:21px;text-wrap: wrap">{{
