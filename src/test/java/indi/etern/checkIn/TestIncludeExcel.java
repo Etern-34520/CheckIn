@@ -46,6 +46,7 @@ public class TestIncludeExcel {
     }
     
     void includeInternal(String partitionName) {
+        final Partition partition = Partition.ofName(partitionName);
         String fileName = ".\\question.xlsx";
         List<Question> multiPartitionableQuestionList = new ArrayList<>(250);
         // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
@@ -92,7 +93,7 @@ public class TestIncludeExcel {
                             index++;
                         }
                         multipleQuestionBuilder.usePartitionLinks((link) -> {
-                            link.getTargets().add(Partition.ofName(partitionName));
+                            link.getTargets().add(partition);
                         });
                         multipleQuestionBuilder.setEnable(true);
                         Question build = multipleQuestionBuilder.build();

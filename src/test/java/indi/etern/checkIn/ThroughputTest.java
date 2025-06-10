@@ -30,10 +30,10 @@ import java.util.concurrent.TimeUnit;
 public class ThroughputTest {
     // 每个线程处理请求的数量
 //    private static final int REQUESTS_PER_THREAD = 500000;
-    private static final int REQUESTS_PER_THREAD = 200000;
+    private static final int REQUESTS_PER_THREAD = 100000;
     // 线程的数量
 //    private static final int NUMBER_OF_THREADS = 20;
-    private static final int NUMBER_OF_THREADS = 8;
+    private static final int NUMBER_OF_THREADS = 30;
     @Autowired
     private ExamGenerator examGenerator;
     @Autowired

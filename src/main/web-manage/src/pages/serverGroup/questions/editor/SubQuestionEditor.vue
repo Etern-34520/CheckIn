@@ -113,7 +113,7 @@ const convert = (file) => {
     });
 }
 
-const currentUserQQ = Number(proxy.$cookies.get("qq"));
+const currentUserQQ = UserDataInterface.getCurrentUser().value.qq;
 // const like = ref(false);
 
 // const dislike = ref(false);

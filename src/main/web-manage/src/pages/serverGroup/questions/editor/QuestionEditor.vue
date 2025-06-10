@@ -26,6 +26,7 @@ import DisLike from "@/components/icons/DisLike.vue";
 import WebSocketConnector from "@/api/websocket.js";
 import LinkPanel from "@/components/common/LinkPanel.vue";
 import {Check, RefreshLeft} from "@element-plus/icons-vue";
+import UserDataInterface from "@/data/UserDataInterface.js";
 
 const view = ref('编辑');
 watch(() => view.value, () => {
@@ -96,7 +97,7 @@ const createQuestion = () => {
                 type: "MultipleChoicesQuestion",
                 enabled: false,
                 partitionIds: null,
-                authorQQ: Number(proxy.$cookies.get("qq")),
+                authorQQ: UserDataInterface.getCurrentUser().value.qq,
                 upVoters: new Set(),
                 downVoters: new Set(),
                 inputMeta: {},
@@ -172,7 +173,7 @@ const switchDisLike = () => {
         questionInfo.value.question.upVoters.delete(currentUserQQ);
     }
 }
-const currentUserQQ = Number(proxy.$cookies.get("qq"));
+const currentUserQQ = UserDataInterface.getCurrentUser().value.qq;
 
 const restoreCurrent = () => {
     QuestionCache.restoreChanges(questionInfo.value.question.id);

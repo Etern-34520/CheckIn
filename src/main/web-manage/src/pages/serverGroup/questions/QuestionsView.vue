@@ -176,7 +176,7 @@ const unregister3 = QuestionCache.registerOnQuestionUpdateLocal((questionInfo, d
 
 const unregister4 = QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {//FIXME won't remove questions in closed partitions
     let questionInfo = QuestionCache.reactiveQuestionInfos.value[id];
-    if (questionInfo && questionInfo.dirty || (!localDeleted && router.currentRoute.value.params.id === id)) {
+    if ((questionInfo && questionInfo.dirty) || (!localDeleted && router.currentRoute.value.params.id === id)) {
         return;
     }
     if (router.currentRoute.value.params.id === id) {
@@ -558,14 +558,19 @@ const switchMenuVisible = (button) => {
 const rectifyCheck = (nodeObj, checkStatus) => {
     function rectify1(currentPartitionNode) {
         const childNodes = currentPartitionNode.childNodes;
+        const hasQuestion = childNodes.find((childNode) => childNode.type === "Question" || childNode.type === "QuestionGroup");
         const hasNotCheckedQuestion = childNodes.find((childNode) => childNode.data.data.type !== "createQuestion" && (!childNode.checked));
         const hasCheckedQuestion = childNodes.find((childNode) => childNode.data.data.type !== "createQuestion" && childNode.checked);
         const allQuestionChecked = !hasNotCheckedQuestion;
         const allQuestionNotChecked = !hasCheckedQuestion;
         console.log(allQuestionChecked, allQuestionNotChecked);
-        if (allQuestionChecked) {
-            tree.value.setChecked(childNodes[0].data.treeId, true, false);
-        } else if (allQuestionNotChecked) {
+        if (hasQuestion) {
+            if (allQuestionChecked) {
+                tree.value.setChecked(childNodes[0].data.treeId, true, false);
+            } else if (allQuestionNotChecked) {
+                tree.value.setChecked(childNodes[0].data.treeId, false, false);
+            }
+        } else {
             tree.value.setChecked(childNodes[0].data.treeId, false, false);
         }
         console.log(currentPartitionNode);
@@ -603,7 +608,7 @@ function onDeleteNode(nodeObj) {
             QuestionCache.delete(nodeObj.data.question.id);
         }
     } else {
-        const partition = tree.value.getNode(nodeObj.id);
+        const partition = tree.value.getNode(nodeObj.treeId).data.data.partition;
         const alartNotEmpty = () => {
             ElMessageBox.confirm(
                     "删除分区时将把所属的所有题目从分区中移除，若题目无其他隶属分区，则将被删除",
@@ -621,7 +626,7 @@ function onDeleteNode(nodeObj) {
             });
         }
         const doDelete = () => {
-            PartitionCache.tryDeleteRemote(nodeObj.id);
+            PartitionCache.tryDeleteRemote(partition.id);
         }
         if (partition.questionAmount !== 0) {
             alartNotEmpty();

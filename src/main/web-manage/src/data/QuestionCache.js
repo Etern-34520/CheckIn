@@ -105,11 +105,16 @@ const getDifferenceQuestion = (question) => {
         return diff;
     }
 
-    let differenceQuestion = getDifferenceData(question, QuestionCache.originalQuestionInfos[question.id].question);
-    differenceQuestion.id = question.id;
-    differenceQuestion.type = question.type;
-    // differenceQuestion.choices = question.choices;
-    return differenceQuestion;
+    const originalQuestionInfo = QuestionCache.originalQuestionInfos[question.id];
+    if (originalQuestionInfo) {
+        let differenceQuestion = getDifferenceData(question, originalQuestionInfo.question);
+        differenceQuestion.id = question.id;
+        differenceQuestion.type = question.type;
+        // differenceQuestion.choices = question.choices;
+        return differenceQuestion;
+    } else {
+        return question;
+    }
 }
 
 WebSocketConnector.registerAction("updateQuestions", (response) => {
@@ -164,13 +169,13 @@ WebSocketConnector.registerAction("updateQuestions", (response) => {
 const deleteQuestionInternal = (questionId) => {
     let questionInfo = QuestionCache.reactiveQuestionInfos.value[questionId];
     let localDeleted = localDeletedQuestionIds.has(questionId);
+    localDeletedQuestionIds.delete(questionId);
     if (questionInfo && questionInfo.dirty !== true && router.currentRoute.value.params.id !== questionId) {
         delete QuestionCache.reactiveQuestionInfos.value[questionId];
         delete QuestionCache.originalQuestionInfos[questionId];
     } else if (localDeleted) {
         delete QuestionCache.reactiveQuestionInfos.value[questionId];
         delete QuestionCache.originalQuestionInfos[questionId];
-        localDeletedQuestionIds.delete(questionId);
     } else if (questionInfo && (questionInfo.dirty || router.currentRoute.value.params.id === questionId)) {
         questionInfo.remoteDeleted = true;
         delete QuestionCache.originalQuestionInfos[questionId];
@@ -677,19 +682,18 @@ function verifyImmediately(questionInfo) {
         questionInfo.showWarning = Object.keys(questionInfo.warnings).length > 0;
 
         if (questionInfo.remoteDeleted) {
-            questionInfo.localNew = true;
+            // questionInfo.localNew = true;
             questionInfo.warnings.remoteDeleted = {
                 content: `该${name}已远程删除，上传以保存修改`, buttons: [{
                     content: "删除", action: () => {
-                        // delete QuestionTempStorage.reactiveQuestionInfos.value[question.id];
-                        QuestionCache.delete(question.id);
+                        QuestionCache.completelyRemove(questionInfo);
                     }, type: "danger",
                 }]
             };
             questionInfo.showWarning = true;
         }
         if (question.localDeleted) {
-            if (question.localNew) {
+            if (questionInfo.localNew) {
                 questionInfo.warnings.localDeleted = {
                     content: `该新建${name}已删除`, buttons: [{
                         content: "撤销", action: () => {
@@ -707,22 +711,17 @@ function verifyImmediately(questionInfo) {
                 };
             }
         }
-        if (questionInfo.remoteUpdated) {
+        if (!questionInfo.simple && questionInfo.remoteUpdated) {
             questionInfo.warnings.remoteUpdated = {
                 content: `该${name}已远程更新`, buttons: [{
                     content: "同步到本地", action: () => {
-                        questionInfo.downloadRemoteUpdated = true;
-                        QuestionCache.getAsync(question.id).then((questionInfo1) => {
-                            questionInfo = questionInfo1;
-                            questionInfo.verify();
-                        });
+                        QuestionCache.syncQuestion(questionInfo);
                     }, type: "primary",
                 }, {
                     content: "忽略", action: () => {
-                        delete QuestionCache.originalQuestionInfos[question.id];
+                        // delete QuestionCache.originalQuestionInfos[question.id];
                         questionInfo.localNew = true;
                         delete questionInfo.remoteUpdated;
-                        // questionInfo.verify();
                         QuestionCache.update(questionInfo);
                     }, type: "default",
                 }]
@@ -730,7 +729,7 @@ function verifyImmediately(questionInfo) {
             questionInfo.showWarning = true;
         }
         if (question.type === "QuestionGroup") {
-            if (questionInfo.questionInfos.length !== 0) {
+            if (questionInfo.questionInfos && questionInfo.questionInfos.length !== 0) {
                 let order = 0;
                 for (let questionInfo1 of questionInfo.questionInfos) {
                     order++;
@@ -1046,7 +1045,7 @@ const QuestionCache = {
         ) {
             questionInfo.verify()
             let differFromOriginal;
-            if (questionInfo.remoteUpdated || questionInfo.remoteDeleted && questionInfo.question.localDeleted) {
+            if (questionInfo.remoteUpdated || (questionInfo.remoteDeleted && questionInfo.question.localDeleted)) {
                 differFromOriginal = false
             } else {
                 differFromOriginal =
@@ -1120,14 +1119,7 @@ const QuestionCache = {
                     localUploadedQuestionIds.add(questionInfo.question.id);
                     QuestionCache.update(questionInfo);
                 } else if (succeedDeletedQuestionIds.includes(questionInfo.question.id)) {
-                    // delete questionInfo.question.localDeleted;
-                    // delete questionInfo.localNew;
-                    questionInfo.remoteDeleted = true;
-                    questionInfo.question.localDeleted = true;
-                    QuestionCache.update(questionInfo);
-                    // delete questionInfo.remoteUpdated;
-                    // delete questionInfo.downloadRemoteUpdated;
-                    deleteQuestionInternal(questionInfo.question.id);
+                    QuestionCache.completelyRemove(questionInfo);
                 } else {
                     const failedQuestionIdReason = failedQuestionIdReasons[questionInfo.question.id];
                     console.warn(questionInfo.question.id + ":" + failedQuestionIdReason);
@@ -1239,6 +1231,15 @@ const QuestionCache = {
         else subQuestionInfo.getGroup = () => questionGroupInfo;
         questionGroupInfo.value.questionInfos.push(subQuestionInfo);
     },
+    completelyRemove(questionInfo) {
+        const id = questionInfo.question.id;
+        localDeletedQuestionIds.add(id);
+        delete QuestionCache.reactiveQuestionInfos.value[id];
+        questionInfo.remoteDeleted = true;
+        questionInfo.question.localDeleted = true;
+        questionInfo.localNew = false;
+        deleteQuestionInternal(id);
+    },
     delete(id) {
         let questionInfo = QuestionCache.reactiveQuestionInfos.value[id];
         if (questionInfo.simple) {
@@ -1268,6 +1269,15 @@ const QuestionCache = {
         reactiveQuestionInfo.question.upVoters = new Set();
         reactiveQuestionInfo.question.downVoters = new Set();
         QuestionCache.update(reactiveQuestionInfo);
+    },
+    syncQuestion(questionInfo) {
+        delete questionInfo.localNew;
+        questionInfo.remoteUpdated = true;
+        questionInfo.downloadRemoteUpdated = true;
+        QuestionCache.getAsync(questionInfo.question.id).then((questionInfo1) => {
+            questionInfo = questionInfo1;
+            questionInfo.verify();
+        });
     },
     registerOnQuestionUpdateLocal(action) {
         let length = onUpdateLocal.push(action);

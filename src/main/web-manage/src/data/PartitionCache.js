@@ -69,24 +69,28 @@ WebSocketConnector.registerAction("deletePartitions", (message) => {
 });
 const PartitionCache = {
     refPartitions: ref({}),
-/*    reset() {
-        PartitionCache.refPartitions.value = {};
-        onPartitionAdded.length = 0;
-        onPartitionDeleted.length = 0;
-        onPartitionUpdated.length = 0;
-        onPartitionsAllChanged.length = 0;
-    },*/
+    fullLoaded: false,
+    /*    reset() {
+            PartitionCache.refPartitions.value = {};
+            onPartitionAdded.length = 0;
+            onPartitionDeleted.length = 0;
+            onPartitionUpdated.length = 0;
+            onPartitionsAllChanged.length = 0;
+        },*/
     getRefPartitionsAsync() {
         const promise = LockUtil.buildExecutablePromise((resolve, reject) => {
-            if (Object.keys(this.refPartitions.value).length > 0) {
+            if (PartitionCache.fullLoaded) {
                 resolve(PartitionCache.refPartitions);
             } else {
                 WebSocketConnector.send({
                     type: "getPartitions",
                 }).then((response) => {
+                    PartitionCache.fullLoaded = true;
                     for (const partition of response.data.partitions) {
                         partition.questionNodes = {};
-                        PartitionCache.refPartitions.value[partition.id] = reactive(partition);
+                        if (!PartitionCache.refPartitions.value[partition.id]) {
+                            PartitionCache.refPartitions.value[partition.id] = reactive(partition);
+                        }
                     }
                     resolve(PartitionCache.refPartitions);
                 }, (error) => {
@@ -112,14 +116,16 @@ const PartitionCache = {
                 partitionId: partitionId
             }
         }).then((response) => {
-            if (response.data.infectedQuestionIds instanceof Array) {
-                const localInfectedQuestionInfos = QuestionCache.getAllLocal(response.data.infectedQuestionIds);
+            if (response.data.updatedQuestionIds.length > 0) {
+                const localInfectedQuestionInfos = QuestionCache.getAllLocal(response.data.updatedQuestionIds);
                 for (const questionInfo of localInfectedQuestionInfos) {
-                    if (questionInfo.warnings.remoteUpdated &&
-                        questionInfo.warnings.remoteUpdated.buttons[0] &&
-                        questionInfo.warnings.remoteUpdated.buttons[0].action instanceof Function) {
-                        questionInfo.warnings.remoteUpdated.buttons[0].action();
-                    }
+                    QuestionCache.syncQuestion(questionInfo);
+                }
+            }
+            if (response.data.deletedQuestionIds.length > 0) {
+                const localDeletedQuestionInfos = QuestionCache.getAllLocal(response.data.deletedQuestionIds);
+                for (const localDeletedQuestionInfo of localDeletedQuestionInfos) {
+                    QuestionCache.completelyRemove(localDeletedQuestionInfo);
                 }
             }
         });
@@ -144,6 +150,7 @@ const PartitionCache = {
                         id: id
                     }
                 }).then((response) => {
+                    response.data.partition.questionNodes = {};
                     const refPartition1 = reactive(response.data.partition);
                     PartitionCache.refPartitions.value[response.data.partition.id] = refPartition1;
                     resolve(refPartition1);
@@ -177,6 +184,7 @@ const PartitionCache = {
                     }
                 }).then((response) => {
                     for (const partition of response.data.partitions) {
+                        partition.questionNodes = {};
                         PartitionCache.refPartitions.value[partition.id] = reactive(partition);
                         names[partition.id] = partition.name;
                     }
