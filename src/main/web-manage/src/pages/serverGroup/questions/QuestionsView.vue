@@ -228,7 +228,7 @@ const onDrop = (dragNode, dropNode, place, event) => {
     console.log(dragNodeData, dropNodeData, place, event);
 
     function replacePartitionId(dropPartitionId) {
-        let treeIdBlock = dragNode.treeId.split("/");
+        let treeIdBlock = dragNode.data.treeId.split("/");
         let originalItemPartitionId = treeIdBlock[0];
         let index = 0;
         for (let partitionId of dragNodeData.question.partitionIds) {
@@ -249,7 +249,7 @@ const onDrop = (dragNode, dropNode, place, event) => {
     if (dataType === "Partition") {
         dropPartitionId = dropNodeData.partition.id;
     } else if (dataType === "Question" || dataType === "QuestionGroup") {
-        dropPartitionId = dropNode.treeId.split("/")[0];
+        dropPartitionId = dropNode.data.treeId.split("/")[0];
     } else if (dataType === "createQuestion") {
         dropPartitionId = dropNode.data.data.partitionId;
     } else {
@@ -405,7 +405,7 @@ onMounted(() => {
     }
 })
 
-function batchDo(questionInfoAction, questionNodeAction) {
+function batchDo(questionInfoAction, questionNodeObjAction) {
     const checkedNodes = tree.value.getCheckedNodes();
     const checkedQuestionIds = new Set();
     const checkedQuestionNodes = new Set();
@@ -431,9 +431,9 @@ function batchDo(questionInfoAction, questionNodeAction) {
                 questionInfoAction(questionInfo);
             }
         }
-        if (questionNodeAction instanceof Function) {
+        if (questionNodeObjAction instanceof Function) {
             for (const questionNode of checkedQuestionNodes) {
-                questionNodeAction(questionNode);
+                questionNodeObjAction(questionNode);
             }
         }
     });
@@ -462,12 +462,12 @@ const batchActionSelectPartitionMenuButtons = ref([
         action: (partitionIds) => {
             currentButton.menuVisible = false;
             const partitionIdsSet = new Set(partitionIds);
-            batchDo(undefined, (questionNode) => {
-                const partitionId = questionNode.treeId.split("/")[0];
-                questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId && !partitionIdsSet.has(id));
-                questionNode.data.question.partitionIds.push(...partitionIds);
+            batchDo(undefined, (questionNodeObj) => {
+                const partitionId = questionNodeObj.treeId.split("/")[0];
+                questionNodeObj.data.question.partitionIds = questionNodeObj.data.question.partitionIds.filter(id => id !== partitionId && !partitionIdsSet.has(id));
+                questionNodeObj.data.question.partitionIds.push(...partitionIds);
                 nextTick(() => {
-                    QuestionCache.update(questionNode.data);
+                    QuestionCache.update(questionNodeObj.data);
                 });
             });
         },
@@ -497,14 +497,14 @@ const batchActionButtons = ref([
             return true;
         },
         action: () => {
-            batchDo(undefined, (questionNode) => {
-                if (questionNode.data.question.partitionIds.length === 1) {
-                    QuestionCache.delete(questionNode.data.question.id);
+            batchDo(undefined, (questionNodeObj) => {
+                if (questionNodeObj.data.question.partitionIds.length === 1) {
+                    QuestionCache.delete(questionNodeObj.data.question.id);
                 } else {
-                    const partitionId = questionNode.treeId.split("/")[0];
-                    questionNode.data.question.partitionIds = questionNode.data.question.partitionIds.filter(id => id !== partitionId);
+                    const partitionId = questionNodeObj.treeId.split("/")[0];
+                    questionNodeObj.data.question.partitionIds = questionNodeObj.data.question.partitionIds.filter(id => id !== partitionId);
                     nextTick(() => {
-                        QuestionCache.update(questionNode.data);
+                        QuestionCache.update(questionNodeObj.data);
                     });
                 }
             });
