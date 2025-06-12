@@ -97,25 +97,31 @@
 - 后台通信采用 WebSocket ，实时数据更新
 - 响应式前端设计，支持各种尺寸的设备
 
-[//]: # (---)
+---
 
-[//]: # (<details>)
+<details>
 
-[//]: # (<summary>)
+<summary>
+截图
+</summary>
 
-[//]: # (截图)
+![1.png](/screenshots/2.0.1/screenshot(1).jpeg "1")
+![2.png](/screenshots/2.0.1/screenshot(2).jpeg "2")
+![3.png](/screenshots/2.0.1/screenshot(3).jpeg "3")
+![4.png](/screenshots/2.0.1/screenshot(4).jpeg "4")
+![5.png](/screenshots/2.0.1/screenshot(5).jpeg "5")
+![6.png](/screenshots/2.0.1/screenshot(6).jpeg "6")
+![7.png](/screenshots/2.0.1/screenshot(7).jpeg "7")
+![8.png](/screenshots/2.0.1/screenshot(8).jpeg "8")
+![9.png](/screenshots/2.0.1/screenshot(9).jpeg "9")
+![10.png](/screenshots/2.0.1/screenshot(10).jpeg "10")
+![11.png](/screenshots/2.0.1/screenshot(11).jpeg "11")
+![12.png](/screenshots/2.0.1/screenshot(12).jpeg "12")
+![13.png](/screenshots/2.0.1/screenshot(13).jpeg "13")
+![14.png](/screenshots/2.0.1/screenshot(14).jpeg "14")
+![15.png](/screenshots/2.0.1/screenshot(15).jpeg "15")
 
-[//]: # (</summary>)
-
-[//]: # ()
-[//]: # (![1.png]&#40;/screenshots/2.0.0/1.png "1"&#41;)
-
-[//]: # (![1.png]&#40;/screenshots/2.0.0/2.png "2"&#41;)
-
-[//]: # (![1.png]&#40;/screenshots/2.0.0/3.png "3"&#41;)
-
-[//]: # ()
-[//]: # (</details>)
+</details>
 
 ---
 
