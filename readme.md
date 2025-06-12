@@ -120,6 +120,16 @@
 ![13.png](/screenshots/2.0.1/screenshot(13).jpeg "13")
 ![14.png](/screenshots/2.0.1/screenshot(14).jpeg "14")
 ![15.png](/screenshots/2.0.1/screenshot(15).jpeg "15")
+![16.png](/screenshots/2.0.1/screenshot(16).jpeg "16")
+![17.png](/screenshots/2.0.1/screenshot(17).jpeg "17")
+![18.png](/screenshots/2.0.1/screenshot(18).jpeg "18")
+![19.png](/screenshots/2.0.1/screenshot(19).jpeg "19")
+![20.png](/screenshots/2.0.1/screenshot(20).jpeg "20")
+![21.png](/screenshots/2.0.1/screenshot(21).jpeg "21")
+![22.png](/screenshots/2.0.1/screenshot(22).jpeg "22")
+![23.png](/screenshots/2.0.1/screenshot(23).jpeg "23")
+![24.png](/screenshots/2.0.1/screenshot(24).jpeg "24")
+![25.png](/screenshots/2.0.1/screenshot(25).jpeg "25")
 
 </details>
 
