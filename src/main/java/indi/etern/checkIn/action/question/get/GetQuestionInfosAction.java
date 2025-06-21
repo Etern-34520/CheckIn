@@ -3,12 +3,12 @@ package indi.etern.checkIn.action.question.get;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.interfaces.*;
+import indi.etern.checkIn.dto.manage.CommonQuestionDTO;
 import jakarta.annotation.Nonnull;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Action("getQuestionInfos")
 public class GetQuestionInfosAction extends BaseAction<GetQuestionInfosAction.Input, OutputData> {
@@ -22,7 +22,7 @@ public class GetQuestionInfosAction extends BaseAction<GetQuestionInfosAction.In
     public record Input(@Nonnull List<String> questionIds) implements InputData { }
     
     public record Output(Result result,
-                         List<Map<String, Object>> questions,
+                         List<CommonQuestionDTO> questions,
                          List<String> missingIds) implements OutputData { }
     
     @Override
@@ -30,14 +30,14 @@ public class GetQuestionInfosAction extends BaseAction<GetQuestionInfosAction.In
     public void execute(ExecuteContext<Input, OutputData> context) {
         final Input input = context.getInput();
         final List<String> questionIds = input.questionIds;
-        final List<Map<String, Object>> dataList = new ArrayList<>(input.questionIds.size());
+        final List<CommonQuestionDTO> dataList = new ArrayList<>(input.questionIds.size());
         final List<String> missingIds = new ArrayList<>(0);
         for (String questionId : questionIds) {
             ResultContext<OutputData> context1 = actionExecutor.execute(GetQuestionInfoAction.class, new GetQuestionInfoAction.Input(questionId));
             final OutputData output = context1.getOutput();
-            if (output instanceof GetQuestionInfoAction.SuccessOutput(Map<String, Object> questionData)
+            if (output instanceof GetQuestionInfoAction.SuccessOutput(CommonQuestionDTO commonQuestionDTO)
                     && output.result().equals(OutputData.Result.SUCCESS)) {
-                dataList.add(questionData);
+                dataList.add(commonQuestionDTO);
             } else {
                 missingIds.add(questionId);
             }

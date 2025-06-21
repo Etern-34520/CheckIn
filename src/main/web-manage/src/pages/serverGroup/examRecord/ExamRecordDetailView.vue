@@ -13,6 +13,7 @@ import 'md-editor-v3/lib/style.css';
 import LinkPanel from "@/components/common/LinkPanel.vue";
 import {ElMessageBox} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
+import UIMeta from "@/utils/UI_Meta.js";
 
 const route = useRoute();
 const data = ref();
@@ -269,7 +270,7 @@ onBeforeUnmount(() => {
                                                        :toolbars-exclude="['save','catalog','github']"
                                                        style="height: 100vh;max-width:calc(90vw - 100px);"
                                                        :theme="UI_Meta.colorScheme.value"
-                                                       :show-toolbar-name="UI_Meta.mobile.value"
+                                                       :show-toolbar-name="UIMeta.touch.value"
                                                        :preview="true"/>
                                         </template>
                                     </collapse>

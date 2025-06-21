@@ -3,7 +3,6 @@ package indi.etern.checkIn.entities.question.impl;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
-import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
 import indi.etern.checkIn.entities.question.interfaces.answer.Answerable;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.SettingService;
@@ -11,21 +10,20 @@ import indi.etern.checkIn.throwable.entity.QuestionBuilderException;
 import indi.etern.checkIn.throwable.entity.QuestionException;
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.*;
 
 @Entity
 @Getter
-public class MultipleChoicesQuestion extends Question implements RandomOrderable, Answerable<List<String>> {
-    protected boolean randomOrdered;
-    
+public class MultipleChoicesQuestion extends Question implements Answerable<List<String>> {
     protected MultipleChoicesQuestion() {
     }
     
-    public MultipleChoicesQuestion(String questionContent, List<Choice> choices/*, Set<Partition> partitions*/, User author) {
+    public MultipleChoicesQuestion(String questionContent, List<Choice> choices, User author) {
         content = questionContent;
         this.choices = choices;
-//        this.partitions = partitions;
         this.author = author;
         boolean singleCorrect = false;
         boolean multipleCorrect = false;
@@ -92,19 +90,12 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
     }
     
     @Column(name = "sub_type")
-//    @Enumerated(EnumType.STRING)
     MultipleChoicesQuestion.Type multipleChoiceType;
     
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @OrderBy("orderIndex")
-//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-//    @Fetch(value = FetchMode.SUBSELECT)
-//    @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @Fetch(FetchMode.SUBSELECT)
     List<Choice> choices;
-    
-    private void setRandomOrdered(boolean randomOrdered) {
-        this.randomOrdered = randomOrdered;
-    }
     
     private void setId(String id) {
         this.id = id;
@@ -122,28 +113,14 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
         User author;
         boolean enable = false;
         QuestionLinkImpl<?> linkWrapper;
-        private boolean randomOrdered = false;
         
         public static Builder from(MultipleChoicesQuestion question) {
             final Builder builder = new Builder().setQuestionContent(question.getContent())
                     .addChoices(question.getChoices())
                     .setAuthor(question.getAuthor())
                     .setEnable(question.isEnabled())
-                    .setRandomOrdered(question.isRandomOrdered())
                     .setId(question.getId());
             builder.setLink(question.getLinkWrapper());
-//            if (question.getLinkWrapper() instanceof ToPartitionsLink toPartitionsLinkWrapper) {
-/*
-                builder.usePartitionLinks(toPartitionLinkWrapper1 -> {
-                    Set<Partition> targets = toPartitionLinkWrapper1.getTargets();
-                    targets.clear();
-                    targets.addAll(toPartitionsLinkWrapper.getTargets());
-                });
-*/
-//            } else if (question.getLinkWrapper() instanceof ToQuestionGroupLink toQuestionGroupLinkWrapper) {
-//                toQuestionGroupLinkWrapper.getTarget().getQuestionLinks().clear();
-//                builder.useQuestionGroupLinks((toQuestionGroupLinkWrapper1 -> toQuestionGroupLinkWrapper1.setTarget(toQuestionGroupLinkWrapper.getTarget())));
-//            }
             return builder;
         }
         
@@ -197,11 +174,6 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             return this;
         }
         
-        public Builder setRandomOrdered(boolean randomOrdered) {
-            this.randomOrdered = randomOrdered;
-            return this;
-        }
-        
         public MultipleChoicesQuestion build() {
             boolean singleCorrect = false;
             boolean multipleCorrect = false;
@@ -231,7 +203,6 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
             }
             multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, /*partitions,*/ author);
             multipleQuestion.setEnabled(enable);
-            multipleQuestion.setRandomOrdered(randomOrdered);
             if (id != null) {
                 multipleQuestion.setId(id);
             } else {
@@ -243,7 +214,7 @@ public class MultipleChoicesQuestion extends Question implements RandomOrderable
                 multipleQuestion.multipleChoiceType = Type.MULTIPLE_CORRECT;
             }
             multipleQuestion.setLinkWrapper(linkWrapper);
-            multipleQuestion.setImageBase64Strings(imageBase64Strings);
+            multipleQuestion.setImages(imageBase64Strings);
             return multipleQuestion;
         }
         

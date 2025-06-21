@@ -64,7 +64,7 @@ const getTypeName = (type) => {
                         <el-text size="small" style="align-self: center" type="info">{{ "已修改" }}</el-text>
                     </div>
                 </div>
-                <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+                <div style="min-height: 32px;display: flex;flex-direction: row;flex-wrap: wrap;">
                     <div style="display: flex;flex-direction: row;flex: 1">
                         <el-text type="info" size="small" style="margin-right: 16px">类型</el-text>
                         <el-text size="small">
@@ -78,7 +78,7 @@ const getTypeName = (type) => {
                             <el-text type="info" size="small" style="margin-right: 16px">作者</el-text>
                             <el-button
                                     @click.stop="router.push({name:'user-detail', params: {id: questionInfo.question.authorQQ}})"
-                                    text
+                                    text class="disable-init-animate"
                                     style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
                                 <el-avatar shape="circle" :size="20" :src="getAvatarUrlOf(questionInfo.question.authorQQ)"
                                            style="margin-right: 4px;"></el-avatar>

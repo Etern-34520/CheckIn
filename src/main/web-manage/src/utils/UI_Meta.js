@@ -1,4 +1,5 @@
 const mobile = ref(false);
+const touch = ref(false);
 const colorScheme = ref("light");
 const htmlHtmlElement = document.querySelector("html");
 const checkColorScheme = () => {
@@ -17,7 +18,7 @@ const checkColorScheme = () => {
         colorScheme.value = "light";
     }
 };
-const checkMobile = () => {
+const checkSize = () => {
     mobile.value = window.innerWidth <= 720;
     if (mobile.value) {
         if (!htmlHtmlElement.classList.contains("mobile")) {
@@ -27,11 +28,19 @@ const checkMobile = () => {
         htmlHtmlElement.classList.remove("mobile");
     }
 };
+const checkTouch = () => {
+    touch.value = navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    if (touch.value) {
+        htmlHtmlElement.classList.add("touch");
+    }
+}
 checkColorScheme();
-checkMobile();
-window.addEventListener("resize",checkMobile);
+checkSize();
+checkTouch();
+window.addEventListener("resize",checkSize);
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change",checkColorScheme);
 export default {
     mobile:mobile,
     colorScheme: colorScheme,
+    touch:touch,
 };

@@ -6,6 +6,7 @@ import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.service.dao.verify.ValidationResult;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +31,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     String id;
     
     @Getter
-    @Column(name = "content",columnDefinition = "text")
+    @Column(name = "content", columnDefinition = "text")
     String content;
     
     @Getter
@@ -43,15 +44,6 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @Getter
     @Column(name = "last_modified_time")
     LocalDateTime lastModifiedTime;
-    
-/*
-    @SuppressWarnings("unused")
-    //only used as orphanRemoval
-    @OneToOne(mappedBy = "question", orphanRemoval = true)
-    @JsonIgnore
-    @NotFound(action = NotFoundAction.IGNORE)
-    QuestionStatistic questionStatistic;
-*/
     
     @Getter
     @Setter
@@ -82,7 +74,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     Set<User> downVoters = new HashSet<>();
     
     @Getter
-    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnore
     QuestionLinkImpl<?> linkWrapper;
@@ -91,13 +83,22 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     /**
      * Notice: data saved as base64
      * Invalid Data Size: Mediumblob:16MB -> Base64:9MB(around)
-     * */
+     */
     @Getter
     @Setter
     @Convert(converter = MapConverter.class)
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "image_base64_strings", columnDefinition = "mediumblob")
-    Map<String, String> imageBase64Strings;
+    Map<String, String> images;
+    
+    @Getter
+    @Setter
+    @Column(name = "verification_digest", columnDefinition = "char(32)")
+    String verificationDigest;
+    
+    @Getter
+    @Setter
+    ValidationResult validationResult;
     
     protected Question() {
         lastModifiedTime = LocalDateTime.now();
@@ -106,7 +107,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     public void initId() {
         id = UUID.randomUUID().toString();
     }
-
+    
     @Override
     public boolean equals(Object object) {
         if (object instanceof Question question) {
@@ -139,6 +140,8 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     
     /**
      * for Jackson
-     * */
-    public String getType() {return getClass().getSimpleName();}
+     */
+    public String getType() {
+        return getClass().getSimpleName();
+    }
 }

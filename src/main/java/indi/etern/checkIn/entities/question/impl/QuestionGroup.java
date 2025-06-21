@@ -1,19 +1,16 @@
 package indi.etern.checkIn.entities.question.impl;
 
-import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.LinkTarget;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.linkUtils.impl.ToQuestionGroupLink;
-import indi.etern.checkIn.entities.question.interfaces.RandomOrderable;
 import indi.etern.checkIn.entities.question.interfaces.answer.Answerable;
 import indi.etern.checkIn.entities.question.interfaces.answer.SingleQuestionAnswer;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.throwable.entity.QuestionBuilderException;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -22,10 +19,7 @@ import java.util.*;
 @Getter
 @Entity
 public class QuestionGroup extends Question implements
-        LinkTarget, LinkSource<QuestionLinkImpl<?>>,
-        RandomOrderable, Answerable<List<SingleQuestionAnswer>> {
-    @Setter
-    protected boolean randomOrdered;
+        LinkTarget, LinkSource<QuestionLinkImpl<?>>, Answerable<List<SingleQuestionAnswer>> {
     
     public void addQuestion(Question question) {
         ToQuestionGroupLink questionLinkWrapper = (ToQuestionGroupLink) question.getLinkWrapper();
@@ -41,9 +35,6 @@ public class QuestionGroup extends Question implements
     @OneToMany(mappedBy = "target", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @OrderBy("orderIndex")
-//    @JoinTable(value = "question_group_list",
-//            joinColumns = @JoinColumn(value = "question_id", referencedColumnName = "id"),
-//            inverseJoinColumns = @JoinColumn(value = "group_id", referencedColumnName = "id"))
     protected Set<ToQuestionGroupLink> questionLinks;
     
     protected QuestionGroup() {
@@ -72,11 +63,13 @@ public class QuestionGroup extends Question implements
         this.id = id;
     }
     
+/*
     @Setter
     @Convert(converter = MapConverter.class)
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "image_base64_strings", columnDefinition = "mediumblob")
     Map<String, String> imageBase64Strings;
+*/
     
     @SuppressWarnings("UnusedReturnValue")
     @Getter
@@ -91,7 +84,6 @@ public class QuestionGroup extends Question implements
         
         @Getter
         final Map<String, String> imageBase64Strings = new LinkedHashMap<>();
-        private boolean randomOrdered = false;
         
         public Builder() {
         }
@@ -100,7 +92,6 @@ public class QuestionGroup extends Question implements
             final QuestionGroup.Builder builder = new Builder().setContent(previousQuestionGroup.getContent())
                     .setAuthor(previousQuestionGroup.getAuthor())
                     .setEnable(previousQuestionGroup.isEnabled())
-                    .setRandomOrdered(previousQuestionGroup.isRandomOrdered())
                     .setId(previousQuestionGroup.getId());
             builder.getPartitions().clear();
             builder.getPartitions().addAll(((ToPartitionsLink) previousQuestionGroup.getLinkWrapper()).getTargets());
@@ -152,21 +143,15 @@ public class QuestionGroup extends Question implements
                 questionGroup = new QuestionGroup(id, content/*, partitions*/, author, questions);
             }
             if (!imageBase64Strings.isEmpty()) {
-                questionGroup.setImageBase64Strings(imageBase64Strings);
+                questionGroup.setImages(imageBase64Strings);
             }
             questionGroup.setEnabled(enabled);
-            questionGroup.setRandomOrdered(enabled);
             questionGroup.setLinkWrapper(link);
             return questionGroup;
         }
         
         public Builder setEnabled(boolean enabled) {
             this.enabled = enabled;
-            return this;
-        }
-        
-        public Builder setRandomOrdered(boolean randomOrdered) {
-            this.randomOrdered = randomOrdered;
             return this;
         }
         

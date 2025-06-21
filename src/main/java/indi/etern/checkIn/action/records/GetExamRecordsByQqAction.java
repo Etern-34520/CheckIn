@@ -20,7 +20,6 @@ public class GetExamRecordsByQqAction extends BaseAction<GetExamRecordsByQqActio
         }
     }
     private final ExamDataService examDataService;
-    private long qq;
     
     public GetExamRecordsByQqAction(ExamDataService examDataService) {
         this.examDataService = examDataService;
@@ -28,7 +27,7 @@ public class GetExamRecordsByQqAction extends BaseAction<GetExamRecordsByQqActio
     
     @Override
     public void execute(ExecuteContext<Input, SuccessOutput> context) {
-        qq = context.getInput().qq;
+        long qq = context.getInput().qq;
         if (qq != context.getCurrentUser().getQQNumber()) {
             context.requirePermission("get exam data");
         }

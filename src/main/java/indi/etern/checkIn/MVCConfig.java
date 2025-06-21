@@ -14,7 +14,7 @@ public class MVCConfig implements WebMvcConfigurer {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
         
         viewResolver.setPrefix("/view/");
-        viewResolver.setSuffix(".html");
+        viewResolver.setSuffix("");
         return viewResolver;
     }
     

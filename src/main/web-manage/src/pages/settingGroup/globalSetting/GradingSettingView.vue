@@ -14,7 +14,9 @@ const editing = ref(false);
 const data = ref({});
 const extraData = ref();
 const loading = ref(true);
-const error = ref(false);
+const loadingError = ref(false);
+const errors = ref([])
+const hasError = ref(false);
 let backup = {};
 let backupJSON;
 const cancel = () => {
@@ -47,7 +49,7 @@ const finishEditing = () => {
 }
 const getData = () => {
     loading.value = true;
-    error.value = false;
+    loadingError.value = false;
     WebSocketConnector.send({
         type: "getGradingSetting",
     }).then((response) => {
@@ -62,7 +64,7 @@ const getData = () => {
             type: "error", message: "获取设置失败"
         });
         loading.value = false;
-        error.value = true;
+        loadingError.value = true;
     });
 }
 getData();
@@ -96,6 +98,14 @@ const removeLevel = (index) => {
     data.value.splits.splice(index, 1);
     data.value.splits[0] = 0;
 }
+
+const unwatch = watch(() => errors.value, () => {
+    hasError.value = errors.value.find(item => item === true);
+}, {deep: true});
+
+onUnmounted(() => {
+    unwatch();
+})
 </script>
 
 <template>
@@ -109,7 +119,7 @@ const removeLevel = (index) => {
                         <transition-group name="blur-scale">
                             <el-button class="disable-init-animate" style="margin-right: 4px;"
                                        @click="editing ? finishEditing():startEditing()"
-                                       :disabled="loading || error" key="edit">
+                                       :disabled="loading || loadingError || hasError" key="edit">
                                 {{ editing ? '完成' : '编辑' }}
                             </el-button>
                             <el-button class="disable-init-animate"
@@ -126,7 +136,7 @@ const removeLevel = (index) => {
             </div>
         </div>
         <div style="display: flex;flex-direction: column;flex:1;height:0;max-width: 1080px;width: min(95%, 1080px);align-self: center">
-            <div v-if="!loading && !error" style="display: flex;flex-wrap: wrap;margin-top: 20px;">
+            <div v-if="!loading && !loadingError" style="display: flex;flex-wrap: wrap;margin-top: 20px;">
                 <div style="display: flex;margin-right: 32px;align-items: center">
                     <el-text type="info" style="margin-right: 16px;">题数</el-text>
                     <el-text>{{ extraData.questionAmount }}</el-text>
@@ -140,7 +150,7 @@ const removeLevel = (index) => {
                     <el-text>{{ extraData.questionScore * extraData.questionAmount }}</el-text>
                 </div>
             </div>
-            <div class="score-bar" style="margin-bottom: 16px;" v-if="!loading && !error">
+            <div class="score-bar" style="margin-bottom: 16px;" v-if="!loading && !loadingError">
                 <div v-for="(level,$index) of data.levels"
                      :style="{
                 background: level.colorHex,
@@ -151,7 +161,7 @@ const removeLevel = (index) => {
             <el-scrollbar style="flex: 1" v-loading="loading">
                 <div style="display: flex;flex-direction: column;align-items: stretch">
                     <transition name="blur-scale" mode="out-in">
-                        <div v-if="!loading && !error"
+                        <div v-if="!loading && !loadingError"
                              style="display:flex;flex-direction:column;flex: 1">
                             <VueDraggable
                                     ref="draggable"
@@ -167,15 +177,16 @@ const removeLevel = (index) => {
                                              class="panel-1 disable-init-animate ">
                                             <div :style="{background: data.levels[$index].colorHex}"
                                                  style="width: 4px;align-self: stretch;border-radius: 4px 0 0 4px"></div>
-<!--                                            <div style="display: flex;flex-direction: column"></div>-->
                                             <grading-level-card :disabled="!editing" v-model="data.levels[$index]"
                                                                 v-model:split="data.splits"
+                                                                v-model:error="errors[$index]"
                                                                 :min="0"
                                                                 :max="extraData.questionScore * extraData.questionAmount"
                                                                 :predefine="predefine"
                                                                 :index="$index">
 
-                                                <div class="handle" style="width: 32px;height: 32px;display: flex;align-items: center;justify-content: center;margin-right: 16px"
+                                                <div class="handle"
+                                                     style="width: 32px;height: 32px;display: flex;align-items: center;justify-content: center;margin-right: 16px"
                                                      :style="{cursor: editing?'grab':'not-allowed'}">
                                                     <HarmonyOSIcon_Handle :size="24"/>
                                                 </div>
@@ -193,7 +204,7 @@ const removeLevel = (index) => {
                                 </transition-group>
                             </VueDraggable>
                         </div>
-                        <div v-else-if="error" style="display:flex;flex-direction: column">
+                        <div v-else-if="loadingError" style="display:flex;flex-direction: column">
                             <el-empty description="获取设置失败"></el-empty>
                             <el-button link type="primary" @click="getData" size="large">重试</el-button>
                         </div>

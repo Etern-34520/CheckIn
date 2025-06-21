@@ -86,7 +86,7 @@ const routeToSignUpOrLogin = () => {
                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
                        style="height: 100vh;max-width:calc(90vw - 100px);"
                        :theme="UIMeta.colorScheme.value"
-                       :show-toolbar-name="UIMeta.mobile.value"
+                       :show-toolbar-name="UIMeta.touch.value"
                        :preview="true"/>
         </div>
         <div class="flex-blank-1"></div>

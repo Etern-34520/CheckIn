@@ -307,7 +307,6 @@ const deleteIcon = () => {
     flex-direction: column;
     align-items: center;
     border-radius: 8px;
-    min-height: 50vh;
     padding-top: 64px;
     background: var(--html-bg);
 }

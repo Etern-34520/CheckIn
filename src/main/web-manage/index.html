@@ -6,9 +6,22 @@
     <link rel="icon" href="/src/assets/icons/icon-accent-light.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CheckIn Manage</title>
+    <meta name="description" content="CheckIn 管理" />
+    <link rel="apple-touch-icon" href="/src/assets/icons/icon-accent-light.svg" sizes="180x180" />
+<!--    <meta name="theme-color" content="#6b8399" />-->
+    <meta id="themeColorLight" name="theme-color" media="(prefers-color-scheme: light)" content="#f0f5f5" />
+    <meta id="themeColorDark" name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f14" />
 </head>
 <body style="padding:0;box-sizing: border-box;margin:0;width: 100%;height: 100%;min-width:100%;min-height: 100%;overflow: hidden">
 <div id="app" style="display:flex;flex-direction: column;width: 100%;height: 100%"></div>
 <script type="module" src="/src/main.js"></script>
 </body>
+<style>
+    @media (prefers-color-scheme: light) {
+        --html-bg: rgb(240, 245, 245);
+    }
+    @media (prefers-color-scheme: dark) {
+        --html-bg: rgb(13, 15, 20);
+    }
+</style>
 </html>

@@ -168,10 +168,10 @@ const ableToChangeAuthor = () => {
             </div>
         </template>
         <template #content>
-            <div style="display: flex;max-height: 800px;min-height: 200px !important;">
+            <div style="display: flex;min-height: 200px !important;">
                 <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
                            preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']" style="height: 75vh"
-                           :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.mobile.value"
+                           :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value"
                            :preview="!UIMeta.mobile.value"/>
             </div>
         </template>

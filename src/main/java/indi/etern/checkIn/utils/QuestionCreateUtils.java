@@ -1,25 +1,22 @@
 package indi.etern.checkIn.utils;
 
+import indi.etern.checkIn.dto.manage.*;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
-import indi.etern.checkIn.entities.question.impl.Question;
-import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.question.impl.MultipleChoicesQuestion;
 import indi.etern.checkIn.entities.question.impl.Partition;
-import indi.etern.checkIn.entities.question.impl.Choice;
+import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class QuestionCreateUtils {
-    @FunctionalInterface
-    private interface LinkHandler {
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        void handle(Map<?, ?> questionDataMap, MultipleChoicesQuestion.Builder builder, Optional<MultipleChoicesQuestion> previousQuestion);
-    }
-    
-    private static MultipleChoicesQuestion create(Map<?, ?> questionDataMap, LinkHandler linkHandler) {
-        String id = (String) questionDataMap.get("id");
+    private static <T extends CommonQuestionDTO> MultipleChoicesQuestion create(T commonQuestionDTO, LinkHandler<T> linkHandler) {
+        String id = commonQuestionDTO.getId();
         Optional<Question> questionOptional = QuestionService.singletonInstance.findById(id);
         
         MultipleChoicesQuestion.Builder builder;
@@ -37,63 +34,47 @@ public class QuestionCreateUtils {
         }
         builder.setId(id);
         
-        Object content1 = questionDataMap.get("content");
-        if (content1 instanceof String content) {
+        final String content = commonQuestionDTO.getContent();
+        if (content != null) {
             builder.setQuestionContent(content);
         }
         
-        Object randomOrdered = questionDataMap.get("randomOrdered");
-        if (randomOrdered != null) {
-            builder.setRandomOrdered((boolean) randomOrdered);
-        }
-        
-        Object enabled1 = questionDataMap.get("enabled");
-        if (enabled1 instanceof Boolean) {
-            boolean enabled = (boolean) enabled1;
+        Boolean enabled = commonQuestionDTO.getEnabled();
+        if (enabled != null) {
             builder.setEnable(enabled);
         }
         
-        Object choices1 = questionDataMap.get("choices");
-        if (choices1 instanceof List) {
-            builder.getChoices().clear();
-            //noinspection unchecked
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) choices1;
-            for (Map<String, Object> choice : choices) {
-                String choiceContent = (String) choice.get("content");
-                boolean correct = (boolean) choice.get("correct");
-                builder.addChoice(new Choice(choiceContent, correct));
+        if (commonQuestionDTO instanceof MultipleChoicesQuestionDTO multipleChoicesQuestionDTO) {
+            List<ChoiceDTO> choices = multipleChoicesQuestionDTO.getChoices();
+            if (choices != null) {
+                builder.getChoices().clear();
+                for (ChoiceDTO choiceDTO : choices) {
+                    builder.addChoice(choiceDTO.toChoice());
+                }
             }
         }
         
-        linkHandler.handle(questionDataMap, builder, Optional.ofNullable(multipleChoicesQuestion));
+        linkHandler.handle(commonQuestionDTO, builder, Optional.ofNullable(multipleChoicesQuestion));
         
-        Object authorQQObj = questionDataMap.get("authorQQ");
-        if (authorQQObj instanceof Number authorQQNumberValue) {
-            long authorQQ = authorQQNumberValue.longValue();
+        Long authorQQ = commonQuestionDTO.getAuthorQQ();
+        if (authorQQ != null) {//FIXME
             builder.setAuthor(UserService.singletonInstance.findByQQNumber(authorQQ).orElse(null));
         }
         
-        Object imageBase64Strings1 = questionDataMap.get("images");
-        if (imageBase64Strings1 instanceof List) {
+        List<ImageDTO> imageDTOs = commonQuestionDTO.getImages();
+        if (imageDTOs != null) {
             builder.getImageBase64Strings().clear();
-            //noinspection unchecked
-            List<Map<String, String>> imageBase64Strings = (List<Map<String, String>>) imageBase64Strings1;
-            for (Map<String, String> imageBase64String : imageBase64Strings) {
-                String key = imageBase64String.get("name");
-                String value = imageBase64String.get("url");
-                builder.addBase64Image(key, value);
+            for (ImageDTO imageDTO : imageDTOs) {
+                builder.addBase64Image(imageDTO.getName(), imageDTO.getUrl());
             }
         }
         return builder.build();
     }
     
-    
-    public static MultipleChoicesQuestion createMultipleChoicesQuestion(Map<?, ?> questionDataMap) {
-        return create(questionDataMap, (questionDataMap1, builder, previousQuestion) -> {
-            Object o3 = questionDataMap1.get("partitionIds");
-            if (o3 instanceof List) {
-                //noinspection unchecked
-                List<String> partitionIds = (List<String>) o3;
+    public static MultipleChoicesQuestion createMultipleChoicesQuestion(MultipleChoicesQuestionDTO questionDataMap) {
+        return create(questionDataMap, (multipleChoicesQuestionDTO, builder, previousQuestion) -> {
+            List<String> partitionIds = multipleChoicesQuestionDTO.getPartitionIds();
+            if (partitionIds != null) {
                 builder.usePartitionLinks(linkWrapper -> {
                     final Set<Partition> targets = linkWrapper.getTargets();
                     targets.clear();
@@ -114,14 +95,14 @@ public class QuestionCreateUtils {
         });
     }
     
-    protected static MultipleChoicesQuestion createSubMultipleChoicesQuestion(Map<?, ?> questionDataMap, QuestionGroup questionGroup) {
-        return create(questionDataMap, (questionDataMap1, builder1, previousQuestion) -> builder1.useQuestionGroupLinks(linkWrapper -> {
+    protected static MultipleChoicesQuestion createSubMultipleChoicesQuestion(MultipleChoicesQuestionDTO multipleChoicesQuestionDTO, QuestionGroup questionGroup) {
+        return create(multipleChoicesQuestionDTO, (questionDataMap1, builder1, previousQuestion) -> builder1.useQuestionGroupLinks(linkWrapper -> {
             linkWrapper.setTarget(questionGroup);
         }));
     }
     
-    public static QuestionGroup createQuestionGroup(Map<?, ?> questionDataMap) {
-        String id = (String) questionDataMap.get("id");
+    public static QuestionGroup createQuestionGroup(QuestionGroupDTO questionGroupDTO) {
+        String id = questionGroupDTO.getId();
         Optional<Question> questionOptional = QuestionService.singletonInstance.findById(id);
         QuestionGroup.Builder builder;
         if (questionOptional.isPresent() && questionOptional.get() instanceof QuestionGroup previousQuestionGroup) {
@@ -129,63 +110,59 @@ public class QuestionCreateUtils {
         } else {
             builder = new QuestionGroup.Builder();
         }
-        builder.setId((String) questionDataMap.get("id"));
+        builder.setId(questionGroupDTO.getId());
         
-        Object contentObj = questionDataMap.get("content");
-        if (contentObj != null) {
-            builder.setContent((String) contentObj);
+        String content = questionGroupDTO.getContent();
+        if (content != null) {
+            builder.setContent(content);
         }
         
-        Object randomOrdered = questionDataMap.get("randomOrdered");
-        if (randomOrdered != null) {
-            builder.setRandomOrdered((boolean) randomOrdered);
-        }
-        
-        Object partitionIdsObj = questionDataMap.get("partitionIds");
-        if (partitionIdsObj instanceof List) {
+        List<String> partitionIds = questionGroupDTO.getPartitionIds();
+        if (partitionIds != null) {
             builder.getPartitions().clear();
-            //noinspection unchecked
-            List<String> partitionIds = (List<String>) partitionIdsObj;
             for (String partitionId : partitionIds) {
                 builder.addPartition(Partition.ofId(partitionId));
             }
         }
         
-        Object authorQQObj = questionDataMap.get("authorQQ");
-        if (authorQQObj instanceof Number authorQQNumber) {
-            long authorQQ = authorQQNumber.longValue();
+        Long authorQQ = questionGroupDTO.getAuthorQQ();
+        if (authorQQ != null) {
             builder.setAuthor(UserService.singletonInstance.findByQQNumber(authorQQ).orElse(null));
         }
         
-        Object enabledObj = questionDataMap.get("enabled");
-        if (enabledObj instanceof Boolean enabled) {
+        Boolean enabled = questionGroupDTO.getEnabled();
+        if (enabled != null) {
             builder.setEnabled(enabled);
         }
         
-        Object questionInfosObj = questionDataMap.get("questionInfos");
-        if (questionInfosObj instanceof List<?>) {
+        List<CommonQuestionDTO> questions = questionGroupDTO.getQuestions();
+        if (questions != null) {
             builder.getQuestions().clear();
         }
-        Object imageBase64Strings1 = questionDataMap.get("images");
-        if (imageBase64Strings1 instanceof List) {
+        List<ImageDTO> imageDTOS = questionGroupDTO.getImages();
+        if (imageDTOS != null) {
             builder.getImageBase64Strings().clear();
-            //noinspection unchecked
-            List<Map<String, String>> imageBase64Strings = (List<Map<String, String>>) imageBase64Strings1;
-            for (Map<String, String> imageBase64String : imageBase64Strings) {
-                String key = imageBase64String.get("name");
-                String value = imageBase64String.get("url");
+            for (ImageDTO imageDTO : imageDTOS) {
+                String key = imageDTO.getName();
+                String value = imageDTO.getUrl();
                 builder.addBase64Image(key, value);
             }
         }
         QuestionGroup questionGroup = builder.build();
-        if (questionInfosObj instanceof List<?> questionInfos) {
-            for (Object questionInfoObj : questionInfos) {
-                if (questionInfoObj instanceof Map<?, ?> questionInfo) {
-                    MultipleChoicesQuestion multipleChoicesQuestion = createSubMultipleChoicesQuestion((Map<?, ?>) questionInfo.get("question"), questionGroup);
+        if (questions != null) {
+            for (CommonQuestionDTO questionInfoObj : questions) {
+                if (questionInfoObj instanceof MultipleChoicesQuestionDTO multipleChoicesQuestionDTO) {
+                    MultipleChoicesQuestion multipleChoicesQuestion = createSubMultipleChoicesQuestion(multipleChoicesQuestionDTO, questionGroup);
                     questionGroup.addQuestion(multipleChoicesQuestion);
                 }
             }
         }
         return questionGroup;
+    }
+    
+    @FunctionalInterface
+    private interface LinkHandler<T> {
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        void handle(T commonQuestionDTO, MultipleChoicesQuestion.Builder builder, Optional<MultipleChoicesQuestion> previousQuestion);
     }
 }

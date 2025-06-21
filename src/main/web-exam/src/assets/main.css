@@ -96,7 +96,7 @@ div.panel {
 }
 
 .el-button--primary .svg-text-fill-1 {
-    fill: var(--icon-color-reverse-1) !important;
+    fill: var(--icon-color-reverse) !important;
 }
 
 * {
@@ -262,7 +262,7 @@ div.panel {
 
 /*noinspection CssUnusedSymbol*/
 .blur-scale-enter-active, .blur-scale-leave-active {
-    transition: all 0.3s var(--ease-in-out-quint);
+    transition: all 250ms var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/

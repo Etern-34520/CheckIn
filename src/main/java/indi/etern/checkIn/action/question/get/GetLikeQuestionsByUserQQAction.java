@@ -6,21 +6,21 @@ import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.interfaces.OutputData;
+import indi.etern.checkIn.dto.manage.ManageDTOUtils;
+import indi.etern.checkIn.dto.manage.CommonQuestionDTO;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.UserService;
-import indi.etern.checkIn.utils.QuestionUpdateUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Action("getLikeQuestionsByUserQQ")
 public class GetLikeQuestionsByUserQQAction extends BaseAction<GetLikeQuestionsByUserQQAction.Input,OutputData> {
     public record Input(long qq) implements InputData {}
-    public record Output(List<Map<String,Object>> questions) implements OutputData {
+    public record Output(List<CommonQuestionDTO> questions) implements OutputData {
         @Override
         public Result result() {
             return Result.SUCCESS;
@@ -41,11 +41,11 @@ public class GetLikeQuestionsByUserQQAction extends BaseAction<GetLikeQuestionsB
         final Input input = context.getInput();
         Optional<User> optionalUser = userService.findByQQNumber(input.qq);
         if (optionalUser.isPresent()) {
-            ArrayList<Map<String,Object>> questions = new ArrayList<>();
+            ArrayList<CommonQuestionDTO> questions = new ArrayList<>();
             questionService.findAllByUpVotersContains(optionalUser.get()).forEach(question -> {
-                questions.add(QuestionUpdateUtils.getMapOfQuestion(question));
+                questions.add(ManageDTOUtils.ofQuestion(question));
             });
-            context.resolve(new GetDislikeQuestionsByUserQQAction.Output(questions));
+            context.resolve(new GetLikeQuestionsByUserQQAction.Output(questions));
         } else {
             context.resolve(MessageOutput.error("User not found"));
         }

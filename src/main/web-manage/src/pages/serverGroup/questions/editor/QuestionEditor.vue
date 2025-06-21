@@ -27,6 +27,7 @@ import WebSocketConnector from "@/api/websocket.js";
 import LinkPanel from "@/components/common/LinkPanel.vue";
 import {Check, RefreshLeft} from "@element-plus/icons-vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
+import questionCache from "@/data/QuestionCache.js";
 
 const view = ref('编辑');
 watch(() => view.value, () => {
@@ -90,7 +91,7 @@ watch(() => router.currentRoute.value.params.id, update, {immediate: true});
 
 const createQuestion = () => {
     QuestionCache.appendToGroup(
-            questionInfo,
+            questionInfo.value,
             QuestionCache.create({
                 id: randomUUIDv4(),
                 content: "",
@@ -98,8 +99,8 @@ const createQuestion = () => {
                 enabled: false,
                 partitionIds: null,
                 authorQQ: UserDataInterface.getCurrentUser().value.qq,
-                upVoters: new Set(),
-                downVoters: new Set(),
+                upVoters: [],
+                downVoters: [],
                 inputMeta: {},
                 choices: [{
                     id: randomUUIDv4(),
@@ -112,10 +113,12 @@ const createQuestion = () => {
                 }]
             }, false)
     );
+    questionCache.update(questionInfo.value);
 }
 
 const removeQuestion = (index) => {
     questionInfo.value.questionInfos.splice(index, 1);
+    questionCache.update(questionInfo.value);
 }
 
 const dragging = ref(false);
@@ -131,9 +134,11 @@ const onEndDrag = () => {
 const forceMobilePreview = ref(UIMeta.mobile.value);
 
 const switchLike = () => {
-    const like = questionInfo.value.question.upVoters.has(currentUserQQ);
+    const upVoters = questionInfo.value.question.upVoters;
+    const downVoters = questionInfo.value.question.downVoters;
+    const like = upVoters.includes(currentUserQQ);
     if (like) {
-        questionInfo.value.question.upVoters.delete(currentUserQQ);
+        upVoters.splice(upVoters.indexOf(currentUserQQ), 1);
         WebSocketConnector.send({
             type: "restoreVote",
             data: {
@@ -147,21 +152,23 @@ const switchLike = () => {
                 questionId: questionInfo.value.question.id
             }
         });
-        questionInfo.value.question.upVoters.add(currentUserQQ);
-        questionInfo.value.question.downVoters.delete(currentUserQQ);
+        upVoters.push(currentUserQQ);
+        downVoters.splice(downVoters.indexOf(currentUserQQ), 1);
     }
 }
 
 const switchDisLike = () => {
-    const disLike = questionInfo.value.question.downVoters.has(currentUserQQ);
+    const upVoters = questionInfo.value.question.upVoters;
+    const downVoters = questionInfo.value.question.downVoters;
+    const disLike = downVoters.includes(currentUserQQ);
     if (disLike) {
+        downVoters.splice(downVoters.indexOf(currentUserQQ), 1);
         WebSocketConnector.send({
             type: "restoreVote",
             data: {
                 questionId: questionInfo.value.question.id
             }
         });
-        questionInfo.value.question.downVoters.delete(currentUserQQ);
     } else {
         WebSocketConnector.send({
             type: "downVote",
@@ -169,10 +176,11 @@ const switchDisLike = () => {
                 questionId: questionInfo.value.question.id
             }
         });
-        questionInfo.value.question.downVoters.add(currentUserQQ);
-        questionInfo.value.question.upVoters.delete(currentUserQQ);
+        downVoters.push(currentUserQQ);
+        upVoters.splice(upVoters.indexOf(currentUserQQ), 1);
     }
 }
+
 const currentUserQQ = UserDataInterface.getCurrentUser().value.qq;
 
 const restoreCurrent = () => {
@@ -265,16 +273,16 @@ onMounted(() => {
                                         <el-button-group>
                                             <el-button link @click="switchLike" style="margin: 4px 0"
                                                        :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
-                                                <like :filled="questionInfo.question.upVoters.has(currentUserQQ)"/>
+                                                <like :filled="questionInfo.question.upVoters.includes(currentUserQQ)"/>
                                                 <el-text style="margin-left: 4px;">
-                                                    {{ questionInfo.question.upVoters.size }}
+                                                    {{ questionInfo.question.upVoters.length }}
                                                 </el-text>
                                             </el-button>
                                             <el-button link @click="switchDisLike" style="margin: 4px 0"
                                                        :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
-                                                <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
+                                                <DisLike :filled="questionInfo.question.downVoters.includes(currentUserQQ)"/>
                                                 <el-text style="margin-left: 4px;">{{
-                                                        questionInfo.question.downVoters.size
+                                                        questionInfo.question.downVoters.length
                                                     }}
                                                 </el-text>
                                             </el-button>

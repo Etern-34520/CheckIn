@@ -70,7 +70,7 @@ const onPreview = (file) => {
             </div>
         </el-scrollbar>
         <div class="content" style="flex:1">
-            <md-editor preview-theme="vuepress" :theme="UIMeta.colorScheme.value" :model-value="questionInfo.question.content" class="preview-only"/>
+            <md-editor preview-theme="vuepress" :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value" :model-value="questionInfo.question.content" class="preview-only"/>
             <!--            <v-md-preview :text="questionInfo.question.content"/>-->
             <multiple-choices-preview-module style="padding: 32px"
                                              v-if="questionInfo.question.type==='MultipleChoicesQuestion'"

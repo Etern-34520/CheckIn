@@ -22,7 +22,9 @@ function getCurrentIsoTime() {
 
 function encodeMessage(message) {//TODO MessagePack
     // return StringToBase64(JSON.stringify(message));
-    return JSON.stringify(message);
+    return JSON.stringify(message, (key, value) => {
+        return value === undefined ? null : value;
+    });
 }
 
 function decodeMessage(message) {//TODO MessagePack

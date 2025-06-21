@@ -79,7 +79,7 @@ function loadPartitionChildrenNode(partitionNodeObj) {
             if (previousQuestionNodes) {
                 resolveData.push(...Object.values(previousQuestionNodes));
             }
-            QuestionCache.getContentsAndIdsAsyncByPartitionId(partitionId).then((questionInfos) => {
+            QuestionCache.getQuestionSimpleDataByPartitionId(partitionId).then((questionInfos) => {
                 for (let questionInfo of questionInfos) {
                     const questionId = questionInfo.question.id;
                     if (!previousQuestionNodes[questionId]) {
@@ -278,8 +278,8 @@ const createQuestionGroup = (partitionId) => {
             enabled: false,
             partitionIds: [partitionId],
             authorQQ: authorQQ,
-            upVoters: new Set(),
-            downVoters: new Set(),
+            upVoters: [],
+            downVoters: [],
             localNew: true,
         };
         const questionInfo = QuestionCache.createQuestionGroup(question, undefined, authorQQ);
@@ -299,8 +299,8 @@ const createMultipleChoiceQuestion = (partitionId) => {
             enabled: false,
             partitionIds: [partitionId],
             authorQQ: Number(UserDataInterface.currentUser.value.qq),
-            upVoters: new Set(),
-            downVoters: new Set(),
+            upVoters: [],
+            downVoters: [],
             localNew: true,
             choices: [{
                 id: randomUUIDv4(),
@@ -335,7 +335,7 @@ const failedQuestionIdReason = ref({});
 const showFailedQuestionIdReason = ref(false);
 
 const upload = () => {
-    let hasErrorQuestions = QuestionCache.getErrorQuestions().length > 0;
+    let hasErrorQuestions = QuestionCache.getDirtyErrorQuestions().length > 0;
     const doUpload = () => {
         QuestionCache.uploadAll().then((data) => {
             uploading.value = false;
@@ -345,7 +345,8 @@ const upload = () => {
             failedQuestionIdReason.value = data.failedQuestionIdReason;
             let showFailedQuestionIdReason1 = Object.keys(failedQuestionIdReason.value).length > 0;
             showFailedQuestionIdReason.value = showFailedQuestionIdReason1;
-            showTree.value = showFailedQuestionIdReason1 ? false : showTree.value;
+            showTree.value = !showFailedQuestionIdReason1;
+            errorsDisplay.value = !showFailedQuestionIdReason1;
             if (showFailedQuestionIdReason1) {
                 responsiveSplitpane.value.showLeft();
             }
@@ -675,7 +676,7 @@ const getTypeName = (type) => {
             <el-button type="primary" style="margin-top: 8px" @click="upload" :loading="uploading"
                        :loading-icon="_Loading_" :icon="HarmonyOSIcon_Upload"
                        :disabled="!QuestionCache.reactiveDirty.value">
-                <el-text>{{ errorsDisplay ? "确认上传" : "上传题目更改" }}</el-text>
+                <el-text>{{ errorsDisplay && !showTree ? "确认上传" : "上传题目更改" }}</el-text>
             </el-button>
             <!--                    <el-scrollbar>-->
             <div class="slide-base"
@@ -762,7 +763,7 @@ const getTypeName = (type) => {
                                                  :class="{
                                                 dragHover:nodeObj.data.dragHover
                                             }">
-                                                <div class="point" :class="{
+                                                <div class="pointer" :class="{
                                                             changed:nodeObj.data.dirty,
                                                             error:nodeObj.data.showError,
                                                             warning:nodeObj.data.showWarning
@@ -771,7 +772,7 @@ const getTypeName = (type) => {
                                                 <div class="question-tree-node"
                                                      :class="{'local-deleted': nodeObj.data.question&&nodeObj.data.question.localDeleted}">
                                                     <el-text v-if="nodeObj.data.type === 'Question'" size="small"
-                                                             type="info">
+                                                             :type="nodeObj.data.question.enabled?'primary':'info'">
                                                         {{ getTypeName(nodeObj.data.question.type) }}
                                                     </el-text>
                                                     <el-text size="small" type="info"
@@ -825,72 +826,78 @@ const getTypeName = (type) => {
                         </el-scrollbar>
                     </div>
                 </div>
-                <div class="errorsList" v-show="errorsDisplay" :class="{hideRight:showTree}">
-                    <el-scrollbar>
-                        <el-alert type="warning" :closable="false">
-                            <el-button style="padding: 8px" text @click="backToTree">
-                                <el-icon>
-                                    <ArrowLeftBold/>
-                                </el-icon>
-                            </el-button>
+                <transition :name="showTree?null:'blur-scale'" mode="out-in">
+                    <div class="errorsList" v-if="errorsDisplay" :class="{hideRight:showTree}">
+                        <el-scrollbar>
+                            <el-alert type="warning" :closable="false">
+                                <div style="display: flex;flex-wrap: wrap;width: 100%">
+                                    <el-button style="padding: 8px;margin: 4px" text @click="backToTree">
+                                        <el-icon>
+                                            <ArrowLeftBold/>
+                                        </el-icon>
+                                    </el-button>
+                                    <el-text type="warning" style="margin: 4px;align-self: center;">
+                                        这些有错误的题目将不会上传
+                                    </el-text>
+                                </div>
+                            </el-alert>
                             <transition name="blur-scale">
-                                <el-text type="warning" v-if="errorsDisplay">
-                                    这些有错误的题目将不会上传
-                                </el-text>
+                                <div v-if="errorsDisplay">
+                                    <transition-group name="slide-hide">
+                                        <question-info-panel class="disable-init-animate clickable"
+                                                             v-for="questionInfo of QuestionCache.getDirtyErrorQuestions()"
+                                                             :key="questionInfo.question.id"
+                                                             @click="openEdit(questionInfo.question.id)"
+                                                             :question-info="questionInfo"/>
+                                    </transition-group>
+                                </div>
                             </transition>
-                        </el-alert>
-                        <transition name="blur-scale">
-                            <div v-if="errorsDisplay">
-                                <transition-group name="slide-hide">
-                                    <question-info-panel class="disable-init-animate clickable"
-                                                         v-for="questionInfo of QuestionCache.getErrorQuestions()"
-                                                         :key="questionInfo.question.id"
-                                                         @click="openEdit(questionInfo.question.id)"
-                                                         :question-info="questionInfo"/>
-                                </transition-group>
-                            </div>
-                        </transition>
-                        <transition name="empty">
-                            <el-empty v-show="QuestionCache.getErrorQuestions().length===0"/>
-                        </transition>
-                    </el-scrollbar>
-                </div>
-                <div class="errorsList" v-show="showFailedQuestionIdReason" :class="{hideRight:showTree}">
-                    <el-scrollbar>
-                        <el-alert type="error" :closable="false">
-                            <div style="display: flex;flex-wrap: wrap;width: 100%">
-                                <el-button style="padding: 8px;margin: 4px" text @click="backToTree">
-                                    <el-icon>
-                                        <ArrowLeftBold/>
-                                    </el-icon>
-                                </el-button>
-                                <el-text type="danger" style="margin: 4px;margin-right: 12px;align-self: center;">
-                                    上传出错
-                                </el-text>
-                                <el-button link type="primary" :icon="RefreshLeft"
-                                           style="margin: 4px;align-self: center;"
-                                           @click="restoreAllErrorUploadChanges">
-                                    重置所有更改
-                                </el-button>
-                            </div>
-                        </el-alert>
-                        <transition name="blur-scale">
-                            <div>
-                                <transition-group name="slide-hide">
-                                    <question-info-panel class="disable-init-animate clickable"
-                                                         v-for="[questionId, reason] of Object.entries(failedQuestionIdReason)"
-                                                         :key="questionId" disable-error-and-warning hide-status
-                                                         @click="openEdit(questionId)"
-                                                         :question-info="QuestionCache.reactiveQuestionInfos.value[questionId]">
-                                        <div style="margin-top: 8px;">
-                                            <el-text type="danger">{{ reason }}</el-text>
-                                        </div>
-                                    </question-info-panel>
-                                </transition-group>
-                            </div>
-                        </transition>
-                    </el-scrollbar>
-                </div>
+                            <transition name="empty">
+                                <el-empty v-show="QuestionCache.getDirtyErrorQuestions().length===0"/>
+                            </transition>
+                        </el-scrollbar>
+                    </div>
+                    <div class="errorsList" v-else-if="showFailedQuestionIdReason" :class="{hideRight:showTree}">
+                        <el-scrollbar>
+                            <el-alert type="error" :closable="false">
+                                <div style="display: flex;flex-wrap: wrap;width: 100%">
+                                    <el-button style="padding: 8px;margin: 4px" text @click="backToTree">
+                                        <el-icon>
+                                            <ArrowLeftBold/>
+                                        </el-icon>
+                                    </el-button>
+                                    <el-text type="danger" style="margin: 4px;margin-right: 12px;align-self: center;">
+                                        上传出错
+                                    </el-text>
+                                    <el-button link type="primary" :icon="RefreshLeft"
+                                               style="margin: 4px;align-self: center;"
+                                               @click="restoreAllErrorUploadChanges">
+                                        重置所有更改
+                                    </el-button>
+                                </div>
+                            </el-alert>
+                            <transition name="blur-scale">
+                                <div>
+                                    <transition-group name="slide-hide">
+                                        <question-info-panel class="disable-init-animate clickable"
+                                                             v-for="[questionId, reasons] of Object.entries(failedQuestionIdReason)"
+                                                             :key="questionId" disable-error-and-warning hide-status
+                                                             @click="openEdit(questionId)"
+                                                             :question-info="QuestionCache.reactiveQuestionInfos.value[questionId]">
+                                            <div style="margin-top: 8px;">
+                                                <transition-group name="blur-scale">
+                                                    <el-text type="danger" style="margin-right: 16px"
+                                                             v-for="reason of reasons" :key="reason">{{ reason }}
+                                                    </el-text>
+                                                </transition-group>
+                                            </div>
+                                        </question-info-panel>
+                                    </transition-group>
+                                </div>
+                            </transition>
+                        </el-scrollbar>
+                    </div>
+                </transition>
             </div>
         </template>
         <template #right-top>
@@ -898,7 +905,7 @@ const getTypeName = (type) => {
                        :loading-icon="_Loading_" style="height: 24px;width: 160px"
                        :icon="HarmonyOSIcon_Upload"
                        :disabled="!QuestionCache.reactiveDirty.value">
-                <el-text>{{ errorsDisplay ? "确认上传" : "上传题目更改" }}</el-text>
+                <el-text>{{ errorsDisplay && !showTree ? "确认上传" : "上传题目更改" }}</el-text>
             </el-button>
         </template>
         <template #right>
@@ -956,27 +963,28 @@ const getTypeName = (type) => {
     background: var(--el-color-primary-1) !important;
 }
 
-.point {
+.pointer {
     scale: 0;
     width: 4px;
     height: 4px;
     margin-right: 4px;
-    border-radius: 50%;
+    border-radius: 2px;
     align-self: center;
-    transition: 300ms var(--ease-in-quint);
+    transition: 400ms var(--ease-in-out-quint);
 }
 
-.point.changed {
+.pointer.changed {
     scale: 1;
+    height: 12px;
     background: var(--el-color-primary);
 }
 
-.point.warning {
+.pointer.warning {
     scale: 1;
     background: var(--el-color-warning);
 }
 
-.point.error {
+.pointer.error {
     scale: 1;
     background: var(--el-color-danger);
 }
@@ -1153,7 +1161,7 @@ const getTypeName = (type) => {
 }
 </style>
 <style>
-.mobile .node-buttons,
+.touch .node-buttons,
 .el-tree-node__content:not(.is-disabled):hover .node-buttons {
     opacity: 1 !important;
 }

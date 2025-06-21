@@ -1,9 +1,13 @@
 package indi.etern.checkIn.entities.setting.verification;
 
+import indi.etern.checkIn.dto.manage.CommonQuestionDTO;
+import indi.etern.checkIn.dto.manage.MultipleChoicesQuestionDTO;
+import indi.etern.checkIn.dto.manage.QuestionGroupDTO;
 import indi.etern.checkIn.entities.converter.ListJsonConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.List;
@@ -13,6 +17,7 @@ import java.util.List;
 @Builder
 @Table(name = "verification_rules")
 @Getter
+@EqualsAndHashCode(callSuper = false)
 public class VerificationRule {
     @Id
     @Column(columnDefinition = "char(36)")
@@ -31,5 +36,10 @@ public class VerificationRule {
     String tipTemplate;
     
     protected VerificationRule() {
+    }
+    
+    public boolean isApplicable(CommonQuestionDTO commonQuestionDTO) {
+        return objectName.equals("question") && commonQuestionDTO instanceof MultipleChoicesQuestionDTO ||
+                objectName.equals("questionGroup") && commonQuestionDTO instanceof QuestionGroupDTO;
     }
 }

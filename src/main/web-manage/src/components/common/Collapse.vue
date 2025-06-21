@@ -42,19 +42,15 @@ function shrink() {
 watch(() => expanded.value, (newVal, oldVal) => {
     if (newVal) {
         showContent.value = true;
-        setTimeout(() => {
-            if (expanded.value)
-                borderChanged.value = true;
-        }, 400);
     } else {
         setTimeout(() => {
             if (!expanded.value)
                 borderChanged.value = false;
-        }, 100);
+        }, 0);
         setTimeout(() => {
             if (!expanded.value)
                 showContent.value = false;
-        }, 600);
+        }, 550);
     }
 });
 </script>
@@ -91,7 +87,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
 .collapse {
     display: grid;
     grid-template-rows: 0fr 0fr;
-    transition: 400ms var(--ease-in-out-quint) 300ms;
+    transition: 400ms var(--ease-in-out-quint) 200ms;
 }
 
 .collapse.expanded {
@@ -152,7 +148,7 @@ watch(() => expanded.value, (newVal, oldVal) => {
     max-height: 100%;
     border-radius: 0 0 4px 4px;
     background: var(--panel-bg-color) var(--lighting-effect-background-3);
-    transition: max-height 250ms var(--ease-out-quint) 600ms;
+    transition: max-height 250ms var(--ease-out-quint) 250ms;
 }
 
 .collapse-content-inner {

@@ -105,7 +105,7 @@ const routeGenerateExam = () => {
                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
                        style="height: 100vh;max-width:calc(90vw - 100px);"
                        :theme="UIMeta.colorScheme.value"
-                       :show-toolbar-name="UIMeta.mobile.value"
+                       :show-toolbar-name="UIMeta.touch.value"
                        :preview="true"/>
             <div>
                 <el-button type="primary" size="large" style="margin-top: 36px;align-self: center;min-width: 180px"

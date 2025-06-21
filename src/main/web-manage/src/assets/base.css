@@ -1228,6 +1228,27 @@ input::-webkit-inner-spin-button {
     background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
+.el-popper {
+    max-width: 100vw !important;
+}
+
+.el-date-range-picker {
+    max-width: 100vw !important;
+    min-width: 0 !important;
+}
+
+.el-picker-panel__body {
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.el-date-range-picker__content {
+    flex: 1;
+    min-width: 290px;
+}
+
 .start-date .el-date-table-cell__text,
 .end-date .el-date-table-cell__text{
     color: var(--front-color-reverse) !important;

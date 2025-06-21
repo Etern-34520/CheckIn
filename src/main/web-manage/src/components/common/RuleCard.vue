@@ -471,7 +471,7 @@ const addToValues = (datum, index) => {
                 <div class="flex-blank-1"></div>
                 <transition name="blur-scale" mode="out-in">
                     <div style="display: flex;margin-bottom: 8px;flex-wrap: wrap" v-if="editing">
-                        <div style="display: flex;flex-direction: row;margin-right: 32px">
+                        <div style="display: flex;flex-direction: row;align-self: center;margin-right: 32px">
                             <el-text style="margin-right: 8px;text-wrap: nowrap;">级别</el-text>
                             <el-select v-model="model.level" :class="{error:!(model.level)}"
                                        style="min-width: 100px;width:100px"
@@ -484,10 +484,10 @@ const addToValues = (datum, index) => {
                                 </el-option>
                             </el-select>
                         </div>
-                        <div style="display: flex;flex-direction: row;">
+                        <div style="display: flex;align-self: center;flex-direction: row;">
                             <el-text style="margin-right: 8px;text-wrap: nowrap;">提示信息</el-text>
                             <el-input v-model="model.tipTemplate" class="disable-init-animate"
-                                      style="max-width: 350px;"/>
+                                      style="width: max(320px, 20vw);max-width: 60vw"/>
                         </div>
                     </div>
                 </transition>

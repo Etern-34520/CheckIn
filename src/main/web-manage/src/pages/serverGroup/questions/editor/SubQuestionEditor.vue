@@ -41,7 +41,7 @@ if (group) {
 
 watch(() => questionInfo.value.question, (newVal, oldVal) => {
     const groupInfo = questionInfo.value.getGroup();
-    // groupInfo.verify();
+    // groupInfo.verifyRaw();
     QuestionCache.update(groupInfo);
 }, {deep: true});
 
@@ -118,9 +118,11 @@ const currentUserQQ = UserDataInterface.getCurrentUser().value.qq;
 
 // const dislike = ref(false);
 const switchLike = () => {
-    const like = questionInfo.value.question.upVoters.has(currentUserQQ);
+    const downVoters = questionInfo.value.question.downVoters;
+    const upVoters = questionInfo.value.question.upVoters;
+    const like = upVoters.includes(currentUserQQ);
     if (like) {
-        questionInfo.value.question.upVoters.delete(currentUserQQ);
+        upVoters.splice(upVoters.indexOf(currentUserQQ), 1);
         WebSocketConnector.send({
             type: "restoreVote",
             data: {
@@ -134,21 +136,23 @@ const switchLike = () => {
                 questionId: questionInfo.value.question.id
             }
         });
-        questionInfo.value.question.upVoters.add(currentUserQQ);
-        questionInfo.value.question.downVoters.delete(currentUserQQ);
+        upVoters.push(currentUserQQ);
+        downVoters.splice(downVoters.indexOf(currentUserQQ), 1);
     }
 }
 
 const switchDisLike = () => {
-    const disLike = questionInfo.value.question.downVoters.has(currentUserQQ);
+    const upVoters = questionInfo.value.question.upVoters;
+    const downVoters = questionInfo.value.question.downVoters;
+    const disLike = downVoters.includes(currentUserQQ);
     if (disLike) {
+        downVoters.splice(downVoters.indexOf(currentUserQQ), 1);
         WebSocketConnector.send({
             type: "restoreVote",
             data: {
                 questionId: questionInfo.value.question.id
             }
         });
-        questionInfo.value.question.downVoters.delete(currentUserQQ);
     } else {
         WebSocketConnector.send({
             type: "downVote",
@@ -156,8 +160,8 @@ const switchDisLike = () => {
                 questionId: questionInfo.value.question.id
             }
         });
-        questionInfo.value.question.downVoters.add(currentUserQQ);
-        questionInfo.value.question.upVoters.delete(currentUserQQ);
+        downVoters.push(currentUserQQ);
+        upVoters.splice(upVoters.indexOf(currentUserQQ), 1);
     }
 }
 
@@ -252,14 +256,14 @@ const ableToChangeAuthor = () => {
                             <el-button-group>
                                 <el-button link @click="switchLike" class="disable-init-animate"
                                            :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
-                                    <like :filled="questionInfo.question.upVoters.has(currentUserQQ)"/>
-                                    <el-text style="margin-left: 4px;">{{ questionInfo.question.upVoters.size }}
+                                    <like :filled="questionInfo.question.upVoters.includes(currentUserQQ)"/>
+                                    <el-text style="margin-left: 4px;">{{ questionInfo.question.upVoters.length }}
                                     </el-text>
                                 </el-button>
                                 <el-button link @click="switchDisLike" class="disable-init-animate"
                                            :disabled="questionInfo.localNew||questionInfo.remoteDeleted">
-                                    <DisLike :filled="questionInfo.question.downVoters.has(currentUserQQ)"/>
-                                    <el-text style="margin-left: 4px;">{{ questionInfo.question.downVoters.size }}
+                                    <DisLike :filled="questionInfo.question.downVoters.includes(currentUserQQ)"/>
+                                    <el-text style="margin-left: 4px;">{{ questionInfo.question.downVoters.length }}
                                     </el-text>
                                 </el-button>
                             </el-button-group>
@@ -272,14 +276,14 @@ const ableToChangeAuthor = () => {
             <div style="margin-right: 30px;">
                 <image-viewer v-if="questionInfo.question.images" :images="questionInfo.question.images" v-model="imageDialogVisible" v-model:index="viewerIndex"/>
                 <div style="position: relative;">
-                    <div class="question-input" style="display: flex;max-height: 800px;min-height: 200px !important;"
+                    <div class="question-input" style="display: flex;min-height: 200px !important;"
                          :class="questionInfo.inputMeta['content-0']">
                         <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
+                                   :show-toolbar-name="UIMeta.touch.value"
                                    :key="UIMeta.colorScheme" preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
                                    :theme="UIMeta.colorScheme.value"/>
                     </div>
                 </div>
-<!--                </div>-->
                 <collapse :content-background="false" class="question-input" :class="questionInfo.inputMeta['images-0']">
                     <template #title>
                         <el-text style="line-height: 32px;margin-left: 8px;">图片</el-text>

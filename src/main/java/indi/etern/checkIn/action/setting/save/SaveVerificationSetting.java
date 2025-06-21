@@ -13,6 +13,7 @@ import indi.etern.checkIn.service.dao.VerificationRuleService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,7 @@ public class SaveVerificationSetting extends BaseAction<SaveVerificationSetting.
         final Input input = context.getInput();
         verificationRuleService.deleteAll();
         final List<Map<String, Object>> dataList = input.data;
+        List<VerificationRule> verificationRuleList = new ArrayList<>();
         for (Map<String, Object> data : dataList) {
             Map<String, Object> property = (Map<String, Object>) data.get("property");
             List<String> trace = (List<String>) property.get("trace");
@@ -53,8 +55,9 @@ public class SaveVerificationSetting extends BaseAction<SaveVerificationSetting.
                     .tipTemplate((String) data.get("tipTemplate"))
                     .index(dataList.indexOf(data))
                     .build();
-            verificationRuleService.save(verificationRule);
+            verificationRuleList.add(verificationRule);
         }
+        verificationRuleService.saveAll(verificationRuleList);
         final List<Object> ruleList = actionExecutor.execute(GetVerificationSettingAction.class).getOutput().data();
         webSocketService.sendMessageToAll(Message.of("updateVerificationRules", ruleList));
         context.resolve(MessageOutput.success("Verification setting saved"));
