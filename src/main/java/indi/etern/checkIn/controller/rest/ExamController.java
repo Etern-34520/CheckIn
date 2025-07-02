@@ -13,6 +13,7 @@ import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.service.dao.*;
 import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
+import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.throwable.entity.UserExistsException;
 import indi.etern.checkIn.throwable.exam.ExamException;
 import indi.etern.checkIn.throwable.exam.ExamIllegalStateException;
@@ -48,8 +49,9 @@ public class ExamController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final GradingLevelService gradingLevelService;
+    private final WebSocketService webSocketService;
     
-    public ExamController(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService, SettingService settingService, UserService userService, PasswordEncoder passwordEncoder, GradingLevelService gradingLevelService) {
+    public ExamController(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService, SettingService settingService, UserService userService, PasswordEncoder passwordEncoder, GradingLevelService gradingLevelService, WebSocketService webSocketService) {
         this.partitionService = partitionService;
         this.actionExecutor = actionExecutor;
         this.examGenerator = examGenerator;
@@ -60,6 +62,7 @@ public class ExamController {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.gradingLevelService = gradingLevelService;
+        this.webSocketService = webSocketService;
     }
     
     public record GenerateRequest(long qq, List<String> partitionIds) {
@@ -228,6 +231,7 @@ public class ExamController {
                     final boolean enabled = creatingUserStrategy == GradingLevel.CreatingUserStrategy.CREATE_AND_ENABLED;
                     userService.handleSignUp(examData, signUpRequest.name, signUpRequest.password, level.getCreatingUserRole(), enabled);
                     examData.setStatus(ExamData.Status.SIGN_UP_COMPLETED);
+                    examData.sendUpdateExamRecord();
                     examDataService.save(examData);
                     Map<String,String> message = new HashMap<>();
                     message.put("type", "success");

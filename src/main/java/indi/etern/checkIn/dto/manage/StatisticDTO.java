@@ -2,9 +2,11 @@ package indi.etern.checkIn.dto.manage;
 
 import indi.etern.checkIn.entities.question.statistic.QuestionStatistic;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class StatisticDTO {
     int drewCount;
     int submittedCount;

@@ -31,6 +31,7 @@ public class CheckInApplication {
 		objectMapper = new ObjectMapper();
 //		objectMapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
 //		objectMapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
+//		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		objectMapper.registerModule(new JavaTimeModule());
 		StreamReadConstraints.overrideDefaultStreamReadConstraints(
 				StreamReadConstraints.builder().maxStringLength(64 * 1024 * 1024).build()

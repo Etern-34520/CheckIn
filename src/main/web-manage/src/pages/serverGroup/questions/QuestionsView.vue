@@ -20,10 +20,6 @@ import {ElMessageBox} from "element-plus";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import _Loading_ from "@/components/common/_Loading_.vue";
-import partitionCache from "@/data/PartitionCache.js";
-
-// QuestionCache.reset();
-// PartitionCache.reset();
 
 const props = {
     label: 'name',

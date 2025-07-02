@@ -1,11 +1,23 @@
 package indi.etern.checkIn.controller.html;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Arrays;
+
 @Controller
 public class MainController {
+    @GetMapping("/")
+    public String index(HttpServletRequest request) {
+        if (Arrays.stream(request.getCookies()).anyMatch(cookie -> cookie.getName().equals("token"))) {
+            return "redirect:/manage/";
+        } else {
+            return "redirect:/exam/";
+        }
+    }
+    
     @GetMapping("/manage/**")
     public String manage() {
         return "manage/index.html";

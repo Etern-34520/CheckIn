@@ -372,6 +372,7 @@ onMounted(() => {
                                                         统计信息
                                                     </el-text>
                                                     <div style="margin-top: 12px">
+                                                        <!--                                                        FIXME-->
                                                         <div class="panel-1"
                                                              style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 8px;">
                                                             <el-statistic style="margin: 16px 32px;" title="抽取次数"
@@ -393,6 +394,7 @@ onMounted(() => {
                                                                                                             </el-icon>
                                                                                                         </el-button>-->
                                                         </div>
+<!--                                                        FIXME-->
                                                         <link-panel
                                                                 @click="routeToRelatedExamRecords"
                                                                 :description="'共 ' + (questionInfo.question.statistic?questionInfo.question.statistic.examDataCount:0) + ' 个'"

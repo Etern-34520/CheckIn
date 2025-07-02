@@ -171,7 +171,7 @@ const checkDisable = () => {
             </transition>
         </div>
         <el-button type="primary" size="large" :loading="buttonLoading" :loading-icon="_Loading_"
-                   style="margin-top: 24px;align-self: center;width: 300px" @click="onClick">
+                   style="margin-top: 24px;align-self: center;width: 300px" @click="onClick" :disabled="disabled">
             {{ buttonText }}
         </el-button>
     </div>
