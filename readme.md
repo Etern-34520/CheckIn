@@ -146,7 +146,9 @@
 ```shell
 java -jar checkIn-x.x.x.jar
 ```
-预期行为：将会在shell当前上下文目录下创建一个文件数据库用于临时储存，可以通过手动删除重置
+预期行为：将会在内存中创建临时数据库，关闭服务器后销毁
+
+> 若需体验常规存储模式（文件模式）请参考下文搭建教程中的更换数据库步骤
 
 可在下方 Api 及端点处找到管理入口
 > `初始用户` super admin 或 10000
@@ -158,7 +160,7 @@ java -jar checkIn-x.x.x.jar
 ### 搭建教程
 1. 连接MYSQL并创建`check_in`数据库
 2. 在jar包所在位置下创建application.properties并填入以下内容
->由于添加了 demo 支持，需要手动指定数据库提供方及url
+> 由于添加了 demo 支持，需要手动指定数据库提供方及url
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/checkIn?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
 spring.datasource.username=[your username]
