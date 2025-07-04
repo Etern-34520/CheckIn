@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>indi.etern.checkIn</groupId>
     <artifactId>checkIn</artifactId>
-    <version>2.1.0 alpha 1</version>
+    <version>2.1.0 beta 1</version>
     <name>checkIn</name>
     <description>CheckIn use Spring Boot</description>
     <properties>
