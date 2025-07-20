@@ -32,24 +32,9 @@ function decodeMessage(message) {//TODO MessagePack
     return JSON.parse(message);
 }
 
-/*
-function StringToBase64(bytes) {
-    const binString = Array.from(textEncoder.encode(bytes), (byte) =>
-        String.fromCodePoint(byte),
-    ).join("");
-    return btoa(binString);
-
-}
-*/
-
-/*
-function base64ToString(base64) {
-    return textDecoder.decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
-}
-*/
-
 let autoRetriedTimes = 0;
 let normallyClose = false;
+let lastMessageTimestamp = Date.now();
 
 const sendInternal = (objMessage) => {
     let message = encodeMessage(objMessage);
@@ -70,24 +55,7 @@ const sendInternal = (objMessage) => {
                 }
             });
         }
-        /*const oldPromise = WebSocketConnector.promises[objMessage["messageId"]];
-        const promiseData1 = {};
-        let promise1 = new Promise((resolve, reject) => {
-            promiseData1["resolve"] = () => {
-                for (const message1 of messageParts) {
-                    WebSocketConnector.ws.send(encode(message1));
-                }
-                WebSocketConnector.promises[objMessage["messageId"]] = oldPromise;
-                resolve();
-            };
-            promiseData1["reject"] = reject;
-            promiseData1["message"] = objMessage;
-        });
-        promise1["resolve"] = promiseData1["resolve"];
-        promise1["reject"] = promiseData1["reject"];
-        promise1["message"] = promiseData1["message"];
-        WebSocketConnector.promises[objMessage["messageId"]] = promise1;
-        */
+        lastMessageTimestamp = Date.now();
         console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (part message [count: ${partMessageIds.length}]):`, objMessage);
 
         WebSocketConnector.send({
@@ -166,9 +134,85 @@ const onMessageInternal = (message) => {
     }
 }
 const onMessage = (event) => {
-    const message = decodeMessage(event.data);
+    const raw = event.data;
+    const message = decodeMessage(raw);
     onMessageInternal(message);
 }
+
+let pingRetryCount = 0;
+
+const ping = () => {
+    function handleRetry() {
+        if (WebSocketConnector.ws.readyState === WebSocket.OPEN) {
+            pingRetryCount++;
+            if (pingRetryCount < 3) {
+                simplePing().then(() => {
+                    handleNext();
+                }, () => {
+                    handleRetry();
+                });
+            } else {
+                console.warn(`[ ${getCurrentIsoTime()} ][ WebSocket ] ping pong failed`);
+                WebSocketConnector.reconnect().then(() => {
+                    pingRetryCount = 0;
+                }, () => {
+                    console.error(`[ ${getCurrentIsoTime()} ][ WebSocket ] reconnect failed`);
+                });
+            }
+        }
+    }
+
+    function simplePing() {
+        return new Promise((resolve, reject) => {
+            const currentTimestamp = Date.now();
+            if (lastMessageTimestamp + 10000 < currentTimestamp) {
+                if (WebSocketConnector.ws.readyState === WebSocket.OPEN) {
+                    WebSocketConnector.send({
+                        type: "ping"
+                    }, 5000).then((response) => {
+                        resolve(response);
+                    }, (error) => {
+                        reject(error);
+                    });
+                } else {
+                    reject("websocket closed");
+                }
+            } else {
+                setTimeout(() => {
+                    simplePing().then((response) => {
+                        resolve(response);
+                    }, (error) => {
+                        reject(error);
+                    })
+                }, Math.min(currentTimestamp - lastMessageTimestamp, 0));
+            }
+        });
+    }
+
+    function handleNext() {
+        pingRetryCount = 0;
+        if (WebSocketConnector.ws.readyState === WebSocket.OPEN) {
+            setTimeout(() => {
+                ping();
+            }, 10000);
+        }
+    }
+
+    if (WebSocketConnector.ws.readyState === WebSocket.OPEN) {
+        simplePing().then(() => {
+            handleNext();
+        }, (error) => {
+            handleRetry();
+        })
+    }
+}
+
+function getPromiseState(promise) {
+    const t = {};
+    return Promise.race([promise, t])
+        .then(v => (v === t) ? "pending" : "fulfilled", () => "rejected");
+}
+
 const WebSocketConnector = {
     ws: null,
     firstConnect: true,
@@ -181,12 +225,9 @@ const WebSocketConnector = {
         qq1 = qq;
         token1 = token;
         let url = window.location.host;
-        // let url = "localhost:8080";
         return new Promise((resolve, reject) => {
-            // window.cookieStore.get("token").then((result) => {
-            //     let date = new Date(result.expires);
             const decoded = jwtDecode(token);
-            console.log(decoded);
+            // console.log(decoded);
             if (decoded.exp * 1000 < Date.now()) {
                 reject("token expired");
             } else {
@@ -197,7 +238,7 @@ const WebSocketConnector = {
                     protocol = "ws:"
                 }
                 const ws = new WebSocket(`${protocol}//${url}/checkIn/api/websocket/${qq}`);
-                ws.onclose = function () {
+                ws.onclose = function (e) {
                     if (!normallyClose && autoRetriedTimes < 3) {
                         autoRetriedTimes++;
                         setTimeout(() => {
@@ -210,7 +251,7 @@ const WebSocketConnector = {
                     } else {
                         autoRetriedTimes = 0;
                         if (!normallyClose) {
-                            console.info('WebSocket Closed');
+                            console.error(`[ ${getCurrentIsoTime()} ][ WebSocket ] Exceptionally closed:`, e);
                             if (WebSocketConnector.showGlobalNotifications
                                 && !notifications["closed"])
                                 notifications["closed"] = ElNotification({
@@ -223,13 +264,14 @@ const WebSocketConnector = {
                                 });
                             reject();
                         } else {
-                            console.info('WebSocket Closed Normally');
+                            console.info(`[ ${getCurrentIsoTime()} ][ WebSocket ] Normally closed`);
                             normallyClose = false;
                         }
                     }
                 }
                 ws.onerror = function (error) {
-                    console.error('WebSocket error', error);
+                    console.error(`[ ${getCurrentIsoTime()} ][ WebSocket ] error:`, error);
+/*
                     if (autoRetriedTimes === 3) {
                         if (WebSocketConnector.showGlobalNotifications
                             && !notifications["error"])
@@ -241,6 +283,7 @@ const WebSocketConnector = {
                             });
                         reject();
                     }
+*/
                 }
                 ws.onopen = function () {
                     this.send({
@@ -271,10 +314,11 @@ const WebSocketConnector = {
                         notifications[key].close();
                     }
                     notifications = {};
-                    console.info('WebSocket Opened');
+                    console.info(`[ ${getCurrentIsoTime()} ][ WebSocket ] Opened`);
                     window.onclose = function () {
                         WebSocketConnector.close();
                     }
+                    ping();
                     resolve();
                 }.bind(this);
                 ws.onmessage = onMessage;
@@ -284,9 +328,10 @@ const WebSocketConnector = {
         // });
     },
     reconnect() {
+        WebSocketConnector.ws.close();
         return WebSocketConnector.connect(qq1, token1);
     },
-    send: function (/** Object*/objMessage) {
+    send: function (/** Object*/objMessage, timeout = 0) {
         let ableToSend = this.ws !== null && this.ws.readyState === WebSocket.OPEN;
         if (!objMessage.messageId) {
             objMessage.messageId = randomUUIDv4();
@@ -295,11 +340,21 @@ const WebSocketConnector = {
         const promise = new Promise((resolve, reject) => {
             promiseData.resolve = resolve;
             promiseData.reject = reject;
-            promiseData.message = objMessage;
+            if (timeout > 0) {
+                setTimeout(async () => {
+                    const status = await getPromiseState(promise);
+                    if (status === "pending") {
+                        delete promise.reject;
+                        delete promise.resolve;
+                        delete WebSocketConnector.promises[objMessage.messageId];
+                        reject();
+                    }
+                }, timeout);
+            }
         });
         promise.resolve = promiseData.resolve;
         promise.reject = promiseData.reject;
-        promise.message = promiseData.message;
+        promise.message = objMessage;
         WebSocketConnector.promises[objMessage.messageId] = promise;
         if (ableToSend) {
             sendInternal(objMessage);

@@ -406,6 +406,7 @@
     backdrop-filter: blur(32px);
     background: var(--lighting-effect-background-1);
     border: var(--border-1) !important;
+    padding: 16px !important;
 }
 
 .el-notification__group {

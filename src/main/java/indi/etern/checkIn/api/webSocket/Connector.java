@@ -90,11 +90,9 @@ public class Connector {
     
     private final Map<String, PartRawMessageProcessor> partMessageMap = new HashMap<>();
     
-    private record PartMessageData(List<String> messageIds, String partId, String messagePart) {
-    }
+    private record PartMessageData(List<String> messageIds, String partId, String messagePart) {}
     
-    private record ChannelMessageData(@NonNull String channel) {
-    }
+    private record ChannelMessageData(@NonNull String channel) {}
     
     @OnMessage
     public void onMessage(String message) {
@@ -108,6 +106,7 @@ public class Connector {
             
             final String typeName = contextJsonMessage.getType().getName();
             switch (typeName) {
+                case "ping" -> this.sendMessageWithoutLog(Message.of("pong", contextId, null));
                 case "partMessage" -> {
                     PartMessageData partMessageData = objectMapper.readValue(contextJsonMessage.getData(), PartMessageData.class);
                     PartRawMessageProcessor partRawMessageProcessor;
@@ -221,17 +220,22 @@ public class Connector {
         }
     }
     
-    public void sendMessage(IMessage<?> message) throws IOException {
+    public void sendMessage(IMessage message) throws IOException {
         final String messageString = objectMapper.writeValueAsString(message);
         sendMessage(messageString);
     }
     
-    public void sendMessageWithOutLog(String messageString) throws IOException {
+    public void sendMessageWithoutLog(IMessage message) throws IOException {
+        final String messageString = objectMapper.writeValueAsString(message);
+        sendMessageWithoutLog(messageString);
+    }
+    
+    public void sendMessageWithoutLog(String messageString) throws IOException {
         this.session.getBasicRemote().sendText(messageString);
     }
     
     public void sendMessage(String messageString) throws IOException {
-        sendMessageWithOutLog(messageString);
+        sendMessageWithoutLog(messageString);
         if (logger.isDebugEnabled()) {
             if (messageString.length() > LOG_TRUNCATE_SIZE)
                 messageString = messageString.substring(0, LOG_TRUNCATE_SIZE) + "\n=========(truncated)=========";

@@ -1,5 +1,6 @@
 package indi.etern.checkIn.api.webSocket.interfaces;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -11,7 +12,8 @@ import lombok.Getter;
 
 import java.io.IOException;
 
-public interface IMessage<D> {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public interface IMessage {
     Type getType();
     
     String getMessageId();

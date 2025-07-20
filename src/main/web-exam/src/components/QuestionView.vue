@@ -22,7 +22,7 @@ const imagesScrollbar = ref();
 const scrollSyncLeft = ref(0);
 const imageViewerVisible = ref(false);
 const viewerIndex = ref(0);
-const images = computed(() => Object.values(props.question.imageBase64Strings));
+const images = computed(() => Object.values(props.question.images));
 const mobile = ref(UIMeta.mobile);
 if (props.forceMobile) mobile.value = true;
 
@@ -58,12 +58,12 @@ const model = defineModel({
     <div :class="{mobile:mobile,desktop:!mobile}" class="question-view-base"
          ref="preview">
         <images-viewer :images="images" v-model="imageViewerVisible" v-model:index="viewerIndex"
-                       v-if="question && question.imageBase64Strings"/>
+                       v-if="question && question.images"/>
         <el-scrollbar ref="imagesScrollbar" class="images-scrollbar"
-                      v-if="question && question.imageBase64Strings" @mousewheel="transformScroll"
+                      v-if="question && question.images" @mousewheel="transformScroll"
                       @scroll="onScroll">
             <div class="images">
-                <el-image class="image" v-for="(imageBase64,name,index) in question.imageBase64Strings" @click="onPreview(index)" :src="imageBase64">
+                <el-image class="image" v-for="(imageBase64,name,index) in question.images" @click="onPreview(index)" :src="imageBase64">
                     <template #error>
                         <div class="image-slot">
                             <el-icon>
@@ -103,11 +103,12 @@ const model = defineModel({
     > .images-scrollbar {
         order: 1;
         flex: 0.4;
-        padding: 32px 16px;
         margin-right: 16px;
+        margin-left: 16px;
     }
 
     > .images-scrollbar .image {
+        padding: 32px 0;
         width: 100%;
     }
 }
@@ -120,7 +121,7 @@ const model = defineModel({
         height: 200px !important;
         /*        width: 100% !important;*/
         flex: none;
-        margin: 0 32px;
+        margin: 16px 32px 0;
     }
 
     > .images-scrollbar .image {

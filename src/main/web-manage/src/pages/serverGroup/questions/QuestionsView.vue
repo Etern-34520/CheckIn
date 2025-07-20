@@ -11,7 +11,7 @@ import EditPartitionNameDialog from "@/components/question/EditPartitionNameDial
 import HarmonyOSIcon_Upload from "@/components/icons/HarmonyOSIcon_Upload.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
-import {ArrowLeftBold, RefreshLeft} from "@element-plus/icons-vue";
+import {ArrowLeftBold, Lock, RefreshLeft} from "@element-plus/icons-vue";
 import CreatePartitionButton from "@/components/question/CreatePartitionButton.vue";
 import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import SelectPartitionsActionPop from "@/components/question/SelectPartitionsActionPop.vue";
@@ -658,10 +658,17 @@ const restoreAllErrorUploadChanges = () => {
     }
 }
 
-const getTypeName = (type) => {
-    if (type === "MultipleChoicesQuestion") return "选择题";
-    else if (type === "QuestionGroup") return "题组";
-    else return "未知";
+const getTypeName = (obj) => {
+    if (obj.question) {
+        const type1 = obj.question.type;
+        if (type1 === "MultipleChoicesQuestion") return "选择题";
+        else if (type1 === "QuestionGroup") return "题组";
+        else return "未知";
+    } else if (obj.partition) {
+        return "分区";
+    } else {
+        return "未知";
+    }
 }
 </script>
 
@@ -767,15 +774,15 @@ const getTypeName = (type) => {
                                                 <!--                                                :class="{'disable-tree-checkbox': !(nodeObj.data.type === 'Partition'?true:nodeObj.data.ableToEdit)}"-->
                                                 <div class="question-tree-node"
                                                      :class="{'local-deleted': nodeObj.data.question&&nodeObj.data.question.localDeleted}">
-                                                    <el-text v-if="nodeObj.data.type === 'Question'" size="small"
-                                                             :type="nodeObj.data.question.enabled?'primary':'info'">
-                                                        {{ getTypeName(nodeObj.data.question.type) }}
-                                                    </el-text>
-                                                    <el-text size="small" type="info"
-                                                             v-if="nodeObj.data.question&&!nodeObj.data.ableToEdit">
-                                                        [只读]
+                                                    <el-icon style="margin-right: 4px" v-if="nodeObj.data.question&&!nodeObj.data.ableToEdit">
+                                                        <lock/>
+                                                    </el-icon>
+                                                    <el-text size="small" style="margin-right: 4px;"
+                                                             :type="nodeObj.data.question && nodeObj.data.question.enabled?'primary':'info'">
+                                                        {{ getTypeName(nodeObj.data) }}
                                                     </el-text>
                                                     <el-text class="question-tree-node-content"
+                                                             :tag="nodeObj.data.question&&nodeObj.data.question.localDeleted?'del':undefined"
                                                              :class="{
                                                         'unable-to-edit': nodeObj.data.question&&!nodeObj.data.ableToEdit,
                                                              }">
@@ -784,36 +791,42 @@ const getTypeName = (type) => {
                                                                     nodeObj.data.partition.name : nodeObj.data.question.content
                                                         }}
                                                     </el-text>
+                                                    <el-button-group class="node-buttons" v-if="nodeObj.data.type === 'Question'">
+                                                        <el-button class="node-button" size="small"
+                                                                   v-if="nodeObj.data.ableToDelete"
+                                                                   @click.stop="onDeleteNode(nodeObj)">
+                                                            <el-icon :size="16" color="var(--front-color)"
+                                                                     v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
+                                                                <RefreshLeft/>
+                                                            </el-icon>
+                                                            <HarmonyOSIcon_Remove v-else/>
+                                                        </el-button>
+                                                    </el-button-group>
+                                                    <el-button-group class="node-buttons" style="position: initial" v-if="nodeObj.data.type === 'Partition'">
+                                                        <el-popover trigger="click"
+                                                                    v-model:visible="nodeObj.data.editing"
+                                                                    width="400">
+                                                            <template #reference>
+                                                                <el-button class="node-button" size="small"
+                                                                           @click.stop="nodeObj.data.editing = false"
+                                                                           v-if="PermissionInfo.hasPermission('partition','edit partition name')">
+                                                                    <HarmonyOSIcon_Rename/>
+                                                                </el-button>
+                                                            </template>
+                                                            <template #default>
+                                                                <EditPartitionNameDialog
+                                                                        @on-over="nodeObj.data.editing = false"
+                                                                        :partition="nodeObj.data.partition"
+                                                                        size="default"/>
+                                                            </template>
+                                                        </el-popover>
+                                                        <el-button class="node-button" size="small"
+                                                                   v-if="PermissionInfo.hasPermission('partition','delete partition')"
+                                                                   @click.stop="onDeleteNode(nodeObj)">
+                                                            <HarmonyOSIcon_Remove/>
+                                                        </el-button>
+                                                    </el-button-group>
                                                 </div>
-                                                <el-button-group class="node-buttons">
-                                                    <el-popover trigger="click"
-                                                                v-model:visible="nodeObj.data.editing"
-                                                                width="400"
-                                                                v-if="nodeObj.data.type === 'Partition'">
-                                                        <template #reference>
-                                                            <el-button class="node-button" size="small"
-                                                                       @click.stop="nodeObj.data.editing = false"
-                                                                       v-if="nodeObj.data.type === 'Partition' && PermissionInfo.hasPermission('partition','edit partition name')">
-                                                                <HarmonyOSIcon_Rename/>
-                                                            </el-button>
-                                                        </template>
-                                                        <template #default>
-                                                            <EditPartitionNameDialog
-                                                                    @on-over="nodeObj.data.editing = false"
-                                                                    :partition="nodeObj.data.partition"
-                                                                    size="default"/>
-                                                        </template>
-                                                    </el-popover>
-                                                    <el-button class="node-button" size="small"
-                                                               v-if="nodeObj.data.type === 'Partition'?PermissionInfo.hasPermission('partition','delete partition'):nodeObj.data.ableToDelete"
-                                                               @click.stop="onDeleteNode(nodeObj)">
-                                                        <el-icon :size="16" color="var(--front-color)"
-                                                                 v-if="nodeObj.data.question?nodeObj.data.question.localDeleted:false">
-                                                            <RefreshLeft/>
-                                                        </el-icon>
-                                                        <HarmonyOSIcon_Remove v-else/>
-                                                    </el-button>
-                                                </el-button-group>
                                             </div>
                                         </template>
                                     </template>
@@ -940,7 +953,7 @@ const getTypeName = (type) => {
 .question-tree-node-content {
     width: 0;
     flex: 1;
-    margin-left: 8px;
+    margin-left: 4px;
 }
 
 .node-button {
@@ -1149,14 +1162,24 @@ const getTypeName = (type) => {
 }
 
 .local-deleted {
-    opacity: 0.4;
+    opacity: 0.6;
 }
 
 .unable-to-edit {
-    opacity: 0.6;
+    opacity: 0.8;
 }
 </style>
 <style>
+/*.node-buttons {
+    position: absolute;
+}*/
+
+/*
+.touch .node-buttons {
+    position: initial !important;
+}
+*/
+
 .touch .node-buttons,
 .el-tree-node__content:not(.is-disabled):hover .node-buttons {
     opacity: 1 !important;

@@ -36,3 +36,4 @@ build/
 ### Custom ###
 /data/
 /initialSQL/
+/src/main/web-manage/dev-dist/

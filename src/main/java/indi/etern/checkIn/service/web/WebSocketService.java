@@ -55,9 +55,9 @@ public class WebSocketService {
         for (Connector item : Connector.CONNECTORS) {
             try {
                 if (toSids.isEmpty()) {
-                    item.sendMessageWithOutLog(messageStr);
+                    item.sendMessageWithoutLog(messageStr);
                 } else if (toSids.contains(item.getSid())) {
-                    item.sendMessageWithOutLog(messageStr);
+                    item.sendMessageWithoutLog(messageStr);
                 }
             } catch (IOException ignored) {
             }
@@ -97,7 +97,7 @@ public class WebSocketService {
         for (Connector connector : Connector.CONNECTORS) {
             if (connector.isOpen()) {
                 try {
-                    connector.sendMessageWithOutLog(message);
+                    connector.sendMessageWithoutLog(message);
                 } catch (IllegalStateException ignored) {
                 } catch (Exception e) {
                     logger.error("error occurred when send to sid_{}", connector.getSid(), e);

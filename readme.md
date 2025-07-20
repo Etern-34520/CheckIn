@@ -4,8 +4,7 @@
 #### 更易用的入群测试系统
 ![Static Badge](https://img.shields.io/badge/Language-Java-red)
 ![Static Badge](https://img.shields.io/badge/JavaRequire-21-red)
-![Static Badge](https://img.shields.io/badge/Beta-2.1.0_beta_1-blue)
-![Static Badge](https://img.shields.io/badge/Stable-2.0.1-blue)
+![Static Badge](https://img.shields.io/badge/Stable-2.1.0-blue)
 ![Static Badge](https://img.shields.io/badge/Status-Developing-green)
 ---
 
@@ -93,9 +92,9 @@
 - 分区答题，自由度高
 - 多用户支持，权限控制细化，更改冲突提醒，共建题库
 - 多分数级别支持，划分层次
-- 设置完善，后台配置简易，可自定义程度高
-- 后台通信采用 WebSocket ，实时数据更新
-- 响应式前端设计，支持各种尺寸的设备
+- 设置多样，后台管理页面配置简易，可自定义程度高
+- 后台管理页面通信采用 WebSocket ，实时数据更新
+- 响应式前端设计，适配各种尺寸的设备
 
 ---
 
@@ -136,8 +135,8 @@
 ---
 
 ### 技术栈
-- SpringBoot 和 Spring系列框架 `后端`
-- VUE `前端`
+- SpringBoot 和 Spring系列框架等 `后端`
+- VUE 等 `前端`
 
 ---
 
@@ -162,7 +161,7 @@ java -jar checkIn-x.x.x.jar
 2. 在jar包所在位置下创建application.properties并填入以下内容
 > 由于添加了 demo 支持，需要手动指定数据库提供方及url
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/checkIn?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+spring.datasource.url=jdbc:mysql://localhost:3306/check_in?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
 spring.datasource.username=[your username]
 spring.datasource.password=[your password]
 ```

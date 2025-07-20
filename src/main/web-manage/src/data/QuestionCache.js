@@ -386,6 +386,7 @@ const QuestionCache = {
                                 content: questionSimpleInfo1.content,
                                 type: questionSimpleInfo1.type,
                                 authorQQ: questionSimpleInfo1.authorQQ,
+                                enabled: questionSimpleInfo1.enabled,
                             },
                             type: "Question",
                             simple: true,

@@ -279,7 +279,7 @@ const ableToChangeAuthor = () => {
                     <div class="question-input" style="display: flex;min-height: 200px !important;"
                          :class="questionInfo.inputMeta['content-0']">
                         <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
-                                   :show-toolbar-name="UIMeta.touch.value"
+                                   :show-toolbar-name="UIMeta.touch.value" :footers="['scrollSwitch']"
                                    :key="UIMeta.colorScheme" preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
                                    :theme="UIMeta.colorScheme.value"/>
                     </div>

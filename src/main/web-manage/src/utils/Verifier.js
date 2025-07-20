@@ -18,8 +18,8 @@ function loadRules() {
     WebSocketConnector.send({
         type: "getVerificationSetting"
     }).then((response) => {
-        verificationRules = [];
-        // verificationRules = response.data.data;
+        // verificationRules = [];
+        verificationRules = response.data.data;
     }, (err) => {
         ElNotification({
             title: '获取校验设置失败', message: err, position: 'bottom-right', type: 'error', duration: 0

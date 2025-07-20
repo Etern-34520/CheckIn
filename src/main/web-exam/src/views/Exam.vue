@@ -6,6 +6,7 @@ import UI_Meta from "@/UI_Meta.js";
 import LockUtil from "@/Lock.js";
 import _Loading_ from "@/components/_Loading_.vue";
 import {ElMessage, ElMessageBox} from "element-plus";
+import {ArrowDown, ArrowUp} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 
@@ -285,6 +286,7 @@ const loadContext = (questionIndex) => {
         }
     }
 }
+
 const onChange = (elementId) => {
     let questionIndex = Number(elementId.split("#question-")[1]);
     if (Number.isNaN(questionIndex)) {
@@ -349,6 +351,25 @@ const anchor = ref();
 const jumpToQuestion = (index) => {
     disableSnipTemporarily();
     anchor.value.scrollTo('#question-' + index);
+}
+
+const forward = () => {
+    const newIndex = currentIndex.value - 1;
+    if (newIndex >= 0) {
+        jumpToQuestion(newIndex);
+    } else {
+        jumpToQuestion(0);
+    }
+}
+
+const afterward = () => {
+    const newIndex = currentIndex.value + 1;
+    if (newIndex < examInfo.value.questionItemCount) {
+        jumpToQuestion(newIndex);
+    } else {
+        disableSnipTemporarily();
+        anchor.value.scrollTo('#submit');
+    }
 }
 
 const submitting = ref(false);
@@ -433,12 +454,12 @@ const confirmAllUpdate = () => {
 </script>
 
 <template>
-    <div style="display: flex;flex-direction: column;max-height: 100vh;min-height: 100vh"
+    <div style="display: flex;flex-direction: column;max-height: 100dvh;min-height: 100dvh"
          :class="{mobile:UI_Meta.mobile.value}"
          v-if="examInfo">
-        <div style="display: flex;flex-direction: row;width: 100vw;justify-content: center;height: 0;flex: 1">
+        <div style="display: flex;flex-direction: row;width: 100dvw;justify-content: center;height: 0;flex: 1">
             <div class="question-scroll" ref="scroll" :class="{'disable-snip':disableSnip}">
-                <div style="min-height: 20vh;"></div>
+                <div style="min-height: 20dvh;"></div>
                 <QuestionCard v-for="order in examInfo.questionItemCount" style="scroll-snap-align: center;"
                               v-model="answerData[String(order-1)]" :id="'question-'+String(order-1)"
                               :question="lazyLoadQuestions[order-1]" class="question-card">
@@ -490,28 +511,45 @@ const confirmAllUpdate = () => {
                                :loading-icon="_Loading_">提交
                     </el-button>
                 </div>
-                <div style="min-height: 20vh;"></div>
+                <div style="min-height: 20dvh;"></div>
             </div>
             <div class="question-anchor">
-                <el-anchor
-                        ref="anchor"
-                        style="max-height: 90vh"
-                        :container="scroll"
-                        direction="vertical"
-                        :bound="200"
-                        :offset="offset"
-                        :duration="300"
-                        @click.prevent="disableSnipTemporarily"
-                        @change="onChange"
-                        type="default">
-                    <el-anchor-link style="height: 32px;margin-bottom: 4px" v-for="order in examInfo.questionItemCount"
-                                    :href="'#question-'+String(order - 1)">
-                        <el-text :type="textTypes[order - 1]" size="large">
-                            {{ order }}
-                        </el-text>
-                    </el-anchor-link>
-                    <el-anchor-link href="#submit" title="提交"/>
-                </el-anchor>
+                <div class="question-anchor-scroll">
+                    <el-anchor
+                            ref="anchor"
+                            :container="scroll"
+                            direction="vertical"
+                            :bound="200"
+                            :offset="offset"
+                            :duration="300"
+                            @click.prevent="disableSnipTemporarily"
+                            @change="onChange"
+                            style="margin-top: 32px;margin-bottom: 32px;"
+                            type="default">
+                        <el-anchor-link style="height: 32px;margin-bottom: 4px"
+                                        v-for="order in examInfo.questionItemCount"
+                                        :href="'#question-'+String(order - 1)">
+                            <el-text :type="textTypes[order - 1]" size="large">
+                                {{ order }}
+                            </el-text>
+                        </el-anchor-link>
+                        <el-anchor-link href="#submit" title="提交"/>
+                    </el-anchor>
+                </div>
+                <div style="display: flex;flex-direction: column;margin-bottom: 16px;">
+                    <el-button link style="height: 40px;margin: 0;" @click="forward"
+                               :disabled="currentIndex <= 0">
+                        <el-icon :size="20">
+                            <ArrowUp/>
+                        </el-icon>
+                    </el-button>
+                    <el-button link style="height: 40px;margin: 0;" @click="afterward"
+                               :disabled="currentIndex >= examInfo.questionItemCount">
+                        <el-icon :size="20">
+                            <ArrowDown/>
+                        </el-icon>
+                    </el-button>
+                </div>
             </div>
         </div>
     </div>
@@ -523,8 +561,7 @@ const confirmAllUpdate = () => {
     flex-direction: column;
     overflow-y: auto;
     overflow-x: visible;
-    max-width: 90vw;
-    min-width: 90vw;
+    width: 0;
     flex: 1;
     scrollbar-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
     scrollbar-width: thin;
@@ -537,26 +574,59 @@ const confirmAllUpdate = () => {
 }
 
 .question-anchor {
+    display: flex;
+    flex-direction: column;
     align-self: center;
+    overflow: hidden;
+    max-height: 100dvh;
+    width: 54px;
+    padding: 0 !important;
+    margin-right: 8px;
+}
+
+.question-anchor-scroll {
+    height: 0;
+    flex: 1;
     overflow: auto;
-    max-height: 100vh;
-    min-width: 80px;
     scrollbar-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
-    scrollbar-width: thin;
-    scrollbar-gutter: stable both-edges;
+    padding: 0 !important;
+}
+
+.question-anchor-scroll::before {
+    display: block;
+    position: absolute;
+    content: '';
+    background: linear-gradient(180deg, var(--html-bg), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    height: 64px;
+    width: 48px;
+    top: 0;
+    z-index: 1;
+}
+
+.question-anchor-scroll::after {
+    display: block;
+    position: absolute;
+    content: '';
+    background: linear-gradient(0deg, var(--html-bg), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    height: 64px;
+    width: 48px;
+    bottom: 10dvh;
+    z-index: 1;
 }
 
 .question-card {
-    max-height: 75vh;
-    min-height: 75vh;
-    margin: 40px 5vw 40px 5vw;
+    max-height: 75dvh;
+    min-height: 75dvh;
+    margin: 40px 5dvw 40px 5dvw;
     transition: all var(--ease-in-out-quint) 400ms;
 }
 
 .mobile {
     .question-card {
-        max-height: 90vh;
-        min-height: 90vh;
+        max-height: 90dvh;
+        min-height: 90dvh;
         margin: 40px 0 40px 20px;
     }
 }

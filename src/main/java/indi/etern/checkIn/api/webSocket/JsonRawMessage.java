@@ -1,5 +1,6 @@
 package indi.etern.checkIn.api.webSocket;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -13,8 +14,9 @@ import lombok.Getter;
 import java.io.IOException;
 import java.io.StringWriter;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-public class JsonRawMessage implements IMessage<String> {
+public class JsonRawMessage implements IMessage {
     private Type type;
     private String messageId;
     @JsonRawValue

@@ -40,7 +40,7 @@ const select = (index) => {
 </script>
 
 <template>
-    <waterfall :data="question.choices" :min-row-width="400">
+    <waterfall :data="question.choices" :min-row-width="400" :even="true">
         <template #item="{item,index}">
             <div style="display: flex;flex-direction: column;padding: 6px" v-if="model.selected">
                 <el-check-tag class="choice" type="info" style="flex: 1;" :checked="model.selected[String(index)]"
@@ -53,8 +53,11 @@ const select = (index) => {
 </template>
 <style scoped>
 .choice {
-    background: rgba(0,0,0,0) !important;
-    border: none !important;
+    background-color: rgba(128,128,128,0.03);
+}
+
+.choice:hover {
+    background-color: rgba(128,128,128,0.05);
 }
 
 .choice::after {

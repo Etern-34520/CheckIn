@@ -50,7 +50,7 @@ const getIcon = () => {
                 </g>
             </svg>
         </el-button>
-        <el-scrollbar style="margin-right: 8px;">
+        <el-scrollbar style="margin-right: 8px;flex: 1;width: 0;">
             <div style="height: 30px;margin-top: 2px;display: flex;flex-direction: row;align-items: center">
                 <el-breadcrumb style="flex-shrink: 0;" :separator-icon="ArrowRight">
                     <!--suppress JSValidateTypes -->
@@ -68,7 +68,6 @@ const getIcon = () => {
                 </el-breadcrumb>
             </div>
         </el-scrollbar>
-        <div class="flex-blank-1"></div>
         <el-button @click="router.push({name:'account-base'})" text v-if="!mobile"
                    style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
             <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"

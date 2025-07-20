@@ -6,6 +6,9 @@ const props = defineProps({
     },
     data: {
         required: true
+    },
+    even: {
+        default: false
     }
 });
 
@@ -13,23 +16,17 @@ const waterfall = ref();
 const rowCount = ref(1);
 let observer;
 
-let lastWidth = 0;
-const recountRow = (width = lastWidth) => {
-    lastWidth = width;
-    rowCount.value = Math.max(1, Math.min(Math.floor(width / props.minRowWidth), props.data.length));
-}
-/*
-useResizeObserver(() => {
-    console.log("resize")
-});
-*/
 onMounted(() => {
     nextTick(() => {
         if (waterfall.value) {
             observer = new ResizeObserver((entries) => {
                 for (const entry of entries) {
                     const width = entry.contentRect.width;
-                    recountRow(width);
+                    let value1 = Math.max(1, Math.min(Math.floor(width / props.minRowWidth), props.data.length));
+                    if (props.even && value1 !== 1 && value1 % 2 !== 0) {
+                        value1 = value1 - 1;
+                    }
+                    rowCount.value = value1;
                 }
             });
             observer.observe(waterfall.value);
@@ -38,15 +35,12 @@ onMounted(() => {
 });
 onDeactivated(() => {
     observer.disconnect();
-});
-watch(() => props.data.value, () => {
-    recountRow();
-}, {deep: true});
+})
 </script>
 
 <template>
     <div ref="waterfall" class="waterfall">
-        <div v-if="data.length > 0" v-for="i in rowCount">
+        <div v-if="data.length>0" v-for="i in rowCount">
             <template v-for="(item,index) of data">
                 <template v-if="index % rowCount === i-1">
                     <slot name="item" :item="item" :index="index"/>
@@ -64,6 +58,5 @@ watch(() => props.data.value, () => {
 
 .waterfall > div {
     flex: 1;
-    width: 0;
 }
 </style>

@@ -38,7 +38,7 @@ function expand() {
 function shrink() {
     expanded.value = false;
 }
-
+defineExpose({expand, shrink});
 watch(() => expanded.value, (newVal, oldVal) => {
     if (newVal) {
         showContent.value = true;

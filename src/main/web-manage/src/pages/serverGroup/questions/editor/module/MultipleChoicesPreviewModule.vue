@@ -10,7 +10,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <waterfall :data="questionInfo.question.choices" :min-row-width="400">
+    <waterfall :data="questionInfo.question.choices" :min-row-width="400" :even="true">
         <template #item="{item,index}">
             <div style="padding: 4px;">
                 <el-button style="width: 100%;height: 100%">

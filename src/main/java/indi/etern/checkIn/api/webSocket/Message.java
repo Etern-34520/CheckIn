@@ -1,13 +1,15 @@
 package indi.etern.checkIn.api.webSocket;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import indi.etern.checkIn.api.webSocket.interfaces.IMessage;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.UUID;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-public class Message<D> implements IMessage<D> {
+public class Message<D> implements IMessage {
     private Type type;
     @Setter
     private String messageId;
