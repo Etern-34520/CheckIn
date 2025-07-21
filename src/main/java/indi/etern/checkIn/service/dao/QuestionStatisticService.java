@@ -42,9 +42,11 @@ public class QuestionStatisticService {
 //                    final int index = examData.getQuestionIds().indexOf(questionStatistic.getId());
                     final Answer<?,?> answer = examData.getAnswersMap().get(questionStatistic.getId());
                     final Answer.CheckedResultType checkedResultType = answer.check().checkedResultType();
+                    questionStatistic.increaseDrewCount();
                     switch (checkedResultType) {
                         case CORRECT -> questionStatistic.increaseCorrectCount();
                         case HALF_CORRECT -> {
+                            questionStatistic.increaseWrongCount();
                             //TODO
                         }
                         case WRONG -> questionStatistic.increaseWrongCount();

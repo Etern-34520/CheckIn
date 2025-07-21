@@ -176,7 +176,7 @@ const ableToChangeAuthor = () => {
             </div>
         </template>
     </collapse>
-    <collapse :content-background="false" :expanded="questionInfo.question.images.length > 0"
+    <collapse :content-background="false" :expanded="questionInfo.question.images && questionInfo.question.images.length > 0"
               class="question-input" :class="questionInfo.inputMeta['images-0']">
         <template #title>
             <div style="display: flex;flex-direction: row;align-items: center">

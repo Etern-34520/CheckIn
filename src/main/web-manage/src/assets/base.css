@@ -428,8 +428,9 @@
 }
 
 .el-popper {
-    z-index: 2002;
+    z-index: 2006 !important;
 }
+
 .el-popper * {
     color: var(--front-color);
 }

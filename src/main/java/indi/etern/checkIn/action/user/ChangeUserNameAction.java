@@ -29,6 +29,7 @@ public class ChangeUserNameAction extends BaseAction<ChangeUserNameAction.Input,
         final Input input = context.getInput();
         if (input.qq != context.getCurrentUser().getQQNumber()) {
             context.requirePermission("change user name");
+            context.requirePermission("operate user " + context.getCurrentUser().getRole().getType());
         }
         final Optional<User> optionalUser = userService.findByQQNumber(input.qq);
         User user = optionalUser.orElseThrow();

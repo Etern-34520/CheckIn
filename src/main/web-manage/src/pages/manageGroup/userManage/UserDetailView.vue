@@ -176,7 +176,7 @@ const routeToExamRecords = () => {
                     <div class="flex-blank-1"></div>
                     <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 8px">
                         <el-popover trigger="click" :width="400" @before-enter="newName = user.name"
-                                    v-if="currentUser.qq === user.qq || PermissionInfo.hasPermission('manage user','change user name')">
+                                    v-if="currentUser.qq === user.qq || PermissionInfo.hasPermission('manage user','change user name') && PermissionInfo.hasPermission('role','operate role ' + user.role)">
                             <template #reference>
                                 <!--suppress JSValidateTypes -->
                                 <el-button :icon="HarmonyOSIcon_Rename" style="margin-right: 0">
@@ -225,7 +225,7 @@ const routeToExamRecords = () => {
                                 </div>
                             </template>
                         </el-popover>
-                        <el-button v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('manage user','delete user')">
+                        <el-button v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('manage user','delete user') && PermissionInfo.hasPermission('role','operate role ' + user.role)">
                             <el-text type="danger" @click="deleteUser">删除</el-text>
                         </el-button>
                         <div style="margin-left: 12px" v-if="currentUser.qq!==user.qq

@@ -33,6 +33,7 @@ public class DeleteUserAction extends BaseAction<DeleteUserAction.Input, Message
         optionalUser.ifPresentOrElse((user) -> {
             if (!user.equals(context.getCurrentUser())) {
                 context.requirePermission("delete user");
+                context.requirePermission("operate role " + user.getRole().getType());
             }
             userService.delete(user);
             context.resolve(MessageOutput.success("User deleted"));

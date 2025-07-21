@@ -51,7 +51,7 @@ const getIcon = () => {
                     <img :src="getIcon()" alt="" width="56" height="56" style="margin-right: 16px;"/>
                     <div style="display: flex;flex-direction: column;">
                         <el-text size="large" style="align-self: baseline">CheckIn</el-text>
-                        <el-text type="info" style="align-self: baseline">2.1.0 stable</el-text>
+                        <el-text type="info" style="align-self: baseline">2.1.1 stable</el-text>
                         <el-link type="info" style="align-self: baseline"
                                  href="https://github.com/Etern-34520/CheckIn" target="_blank">Github
                         </el-link>

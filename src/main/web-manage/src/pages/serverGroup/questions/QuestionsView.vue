@@ -79,9 +79,9 @@ function loadPartitionChildrenNode(partitionNodeObj) {
                 for (let questionInfo of questionInfos) {
                     const questionId = questionInfo.question.id;
                     if (!previousQuestionNodes[questionId]) {
-                        const questionNode = QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId);
-                        resolveData.push(questionNode);
-                        partitionNodeObj.data.partition.questionNodes[questionId] = questionNode;
+                        const questionNodeObj = QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId);
+                        resolveData.push(questionNodeObj);
+                        partitionNodeObj.data.partition.questionNodes[questionId] = questionNodeObj;
                     }
                 }
                 nextTick(() => {
@@ -268,8 +268,9 @@ const onDragEnd = (node, dropNode, event) => {
 const createQuestionGroup = (partitionId) => {
     if (PermissionInfo.hasPermission('question group', 'create and edit owns question groups')) {
         const authorQQ = Number(UserDataInterface.currentUser.value.qq);
+        const id = randomUUIDv4();
         let question = {
-            id: randomUUIDv4(),
+            id: id,
             content: "",
             enabled: false,
             partitionIds: [partitionId],
@@ -279,8 +280,10 @@ const createQuestionGroup = (partitionId) => {
             localNew: true,
         };
         const questionInfo = QuestionCache.createQuestionGroup(question, undefined, authorQQ);
-        const questionNodeItemData = QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId);
-        tree.value.append(questionNodeItemData, tree.value.getNode(partitionId));
+        const questionNodeObj = QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId);
+        const partitionNode = tree.value.getNode(partitionId);
+        partitionNode.data.data.partition.questionNodes[id] = questionNodeObj;
+        tree.value.append(questionNodeObj, partitionNode);
     } else {
         console.error('Permission denied: create and edit owns question groups');
     }
@@ -288,8 +291,9 @@ const createQuestionGroup = (partitionId) => {
 
 const createMultipleChoiceQuestion = (partitionId) => {
     if (PermissionInfo.hasPermission('question', 'create and edit owns questions')) {
+        const id = randomUUIDv4();
         let question = {
-            id: randomUUIDv4(),
+            id: id,
             content: "",
             type: "MultipleChoicesQuestion",
             enabled: false,
@@ -309,7 +313,10 @@ const createMultipleChoiceQuestion = (partitionId) => {
             }]
         };
         const questionInfo = QuestionCache.create(question);
-        tree.value.append(QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId), tree.value.getNode(partitionId));
+        const partitionNode = tree.value.getNode(partitionId);
+        const questionNode = QuestionCache.getQuestionNodeObjOf(questionInfo, partitionId);
+        partitionNode.data.data.partition.questionNodes[id] = questionNode;
+        tree.value.append(questionNode, partitionNode);
     } else {
         console.error('Permission denied: create and edit owns questions');
     }
