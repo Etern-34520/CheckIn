@@ -72,11 +72,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return userService;
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return ENCODER;
     }

@@ -94,7 +94,7 @@ public class ExamController {
     public record GetQuestionsByIndexRequest(String examId, int[] indexes) {
     }
     
-    @RequestMapping(method = RequestMethod.POST, path = "/api/examQuestions", produces = "application/json;charset=UTF-8")
+    @RequestMapping(method = RequestMethod.POST, path = "/api/exam-questions", produces = "application/json;charset=UTF-8")
     @Transactional(propagation = Propagation.NESTED)
     public String getQuestionsByExamIdAndIndexes(@RequestBody GetQuestionsByIndexRequest request) throws JsonProcessingException, ExamException {
         Optional<ExamData> optionalExamData = examDataService.findById(request.examId);
@@ -116,7 +116,7 @@ public class ExamController {
     
     @SneakyThrows
     @Transactional
-    @RequestMapping(method = RequestMethod.POST, path = "/api/getResult")
+    @RequestMapping(method = RequestMethod.POST, path = "/api/get-result")
     public String getResult(@RequestBody GetResultRequest getResultRequest) {
         Optional<ExamData> optionalExamData = examDataService.findById(getResultRequest.examId);
         if (optionalExamData.isPresent()) {
@@ -168,7 +168,7 @@ public class ExamController {
     }
     
     @Transactional
-    @RequestMapping(method = RequestMethod.GET, path = "/api/examData")
+    @RequestMapping(method = RequestMethod.GET, path = "/api/exam-data")
     public Map<String, Object> getData() {
         Map<String, Object> result = new HashMap<>();
         var facadeSettingContext = actionExecutor.execute(GetFacadeSetting.class);

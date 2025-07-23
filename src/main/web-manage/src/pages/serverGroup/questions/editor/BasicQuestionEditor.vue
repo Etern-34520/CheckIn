@@ -170,7 +170,7 @@ const ableToChangeAuthor = () => {
         <template #content>
             <div style="display: flex;min-height: 450px !important;">
                 <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
-                           preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']" style="height: min(450px,50vh)"
+                           preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']" style="height: 50vh;min-height: 450px;"
                            :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value"
                            :preview="!UIMeta.mobile.value" :footers="['scrollSwitch']" />
             </div>

@@ -7,6 +7,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
+import { compression } from 'vite-plugin-compression2'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
@@ -38,6 +39,11 @@ export default defineConfig({
             resolvers: [ElementPlusResolver()],
         }),
         ElementPlus({}),
+        compression({
+            algorithms: ['gzip'],
+            deleteOriginalAssets: true,
+            threshold: 800
+        }),
         VitePWA({
             manifest: {
                 "name": 'CheckIn Manage',
@@ -60,7 +66,7 @@ export default defineConfig({
             workbox: {
                 runtimeCaching: [
                     {
-                        urlPattern: /(.*?)\.(js|css|ts|html)/, // js /css /ts静态资源缓存
+                        urlPattern: /(.*?)\.(js|css|ts)/, // js /css /ts静态资源缓存
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'main-cache',

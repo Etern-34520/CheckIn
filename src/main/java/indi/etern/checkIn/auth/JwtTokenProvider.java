@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
@@ -62,14 +62,14 @@ public class JwtTokenProvider {
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
         return Jwts.builder()
-                .setSubject(String.valueOf(user.getQQNumber()))
-                .setIssuedAt(currentDate)
-                .setExpiration(expireDate)
+                .subject(String.valueOf(user.getQQNumber()))
+                .issuedAt(currentDate)
+                .expiration(expireDate)
                 .signWith(key())
                 .compact();
     }
 
-    private Key key() {
+    private SecretKey key() {
         return Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(jwtSecret)
         );
@@ -77,11 +77,11 @@ public class JwtTokenProvider {
 
     // 从 Jwt token 获取用户
     public User getUser(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key())
+        Claims claims = Jwts.parser()
+                .verifyWith(key())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
         String subject = claims.getSubject();
         if (subject.equals("robot") && robotTokenService.existByToken(token)) {
             return User.ANONYMOUS;
@@ -93,8 +93,8 @@ public class JwtTokenProvider {
     // 验证 Jwt token
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key())
+            Jwts.parser()
+                    .verifyWith(key())
                     .build()
                     .parse(token);
             return true;
@@ -133,15 +133,16 @@ public class JwtTokenProvider {
     
     public String generateRobotToken(User applicant,String id) {
         Date expireDate = new Date(Long.MAX_VALUE);
-        String token = Jwts.builder()
-                .setSubject("robot")
-                .setIssuer(String.valueOf(applicant.getQQNumber()))
-                .setIssuedAt(new Date())
-                .setHeaderParam("generateTime", String.valueOf(System.currentTimeMillis()))
-                .setHeaderParam("entryId", id)
-                .setExpiration(expireDate)
+        return Jwts.builder()
+                .subject("robot")
+                .issuer(String.valueOf(applicant.getQQNumber()))
+                .issuedAt(new Date())
+                .header()
+                .add("generateTime", String.valueOf(System.currentTimeMillis()))
+                .add("entryId", id)
+                .and()
+                .expiration(expireDate)
                 .signWith(key())
                 .compact();
-        return token;
     }
 }

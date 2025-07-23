@@ -56,7 +56,7 @@ public class Login {
         return nameOrQQOrPasswordWrongStr;
     }
     
-    @PostMapping(path = "/login/api")
+    @PostMapping(path = "/api/login")
     public String login(@RequestBody Map<String,Object> body) throws JsonProcessingException {
         String usernameOrQQ = (String) body.get("usernameOrQQ");
         String password = (String) body.get("password");

@@ -14,7 +14,7 @@ const getData = () => {
     loading.value = true;
     error.value = false;
     const phrase = proxy.$cookies.get("phase");
-    proxy.$http.get("examData").then((response) => {
+    proxy.$http.get("exam-data").then((response) => {
         facadeData.value = response.facadeData;
         gradingData.value = response.gradingData;
         extraData.value = response.extraData;

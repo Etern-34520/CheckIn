@@ -79,7 +79,7 @@ const handleError = (data, actionDescription) => {
                             }
                     ).then(() => {
                         alerting = false;
-                        proxy.$http.post("getResult", {
+                        proxy.$http.post("get-result", {
                             examId: examInfo.value.examId,
                         }).then((response) => {
                             if (response.type !== "error") {
@@ -151,7 +151,7 @@ const loadQuestionsByIndexes = (indexes, force = false) => {
                 return;
             }
         }
-        proxy.$http.post("examQuestions", {
+        proxy.$http.post("exam-questions", {
             examId: examInfo.value.examId,
             indexes: indexes,
         }).then((data) => {

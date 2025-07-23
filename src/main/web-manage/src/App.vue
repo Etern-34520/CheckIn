@@ -10,6 +10,11 @@ import router from "@/router/index.js";
 const {proxy} = getCurrentInstance();
 const showReLogin = ref(false);
 const reLoginText = ref("登录失败");
+const showLoading = ref(false);
+
+setTimeout(() => {
+    showLoading.value = true;
+}, 500);
 
 watch(() => UserDataInterface.logined.value, () => {
     WebSocketConnector.showGlobalNotifications = UserDataInterface.logined.value;
@@ -56,10 +61,10 @@ onMounted(() => {
         </template>
     </el-dialog>
     <router-view v-slot="{ Component }">
-        <transition name="main-router" mode="out-in" duration="1000">
+        <transition name="main-router" mode="out-in" :duration="800">
             <component v-if="Component" :is="Component"/>
-            <div v-else class="global-loading">
-                <Loading_ style="scale: 2"></Loading_>
+            <div v-else-if="showLoading" class="global-loading">
+                <Loading_ style="width: 32px !important;"></Loading_>
             </div>
         </transition>
     </router-view>
@@ -68,7 +73,7 @@ onMounted(() => {
 <style scoped>
 /*noinspection CssUnusedSymbol*/
 .main-router-enter-active, .main-router-leave-active {
-    transition: 0.4s var(--ease-in-out-quint);
+    transition: 0.3s var(--ease-in-out-quint);
 }
 
 /*noinspection CssUnusedSymbol*/
@@ -87,6 +92,9 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100vw;
     height: 100vh;
 }

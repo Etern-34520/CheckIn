@@ -12,7 +12,6 @@ import MultipleChoicesEditorPlugin from "@/pages/serverGroup/questions/editor/mo
 import QuestionPreview from "@/components/question/QuestionPreview.vue";
 import router from "@/router/index.js";
 
-const {proxy} = getCurrentInstance();
 let questionInfo = ref({});
 
 const error = ref(false);
@@ -213,11 +212,11 @@ onMounted(() => {
                         <div class="alerts" v-if="questionInfo.question">
                             <transition-group name="alert">
                                 <div v-if="questionInfo.ableToEdit" key="page-switch">
-                                    <el-segmented v-model="view" style="height: 26px;margin-top: 2px;margin-bottom: 2px;"
+                                    <el-segmented v-model="view" style="height: 36px;margin-top: 2px;margin-bottom: 2px;"
                                                   :options="['编辑','预览']" block/>
                                 </div>
                                 <div key="preview-type-switch" v-if="view==='预览'">
-                                    <div style="display: flex">
+                                    <div style="display: flex;height: 36px">
                                         <el-text style="margin-right: 4px;margin-left: 8px;align-self: center">移动端预览</el-text>
                                         <el-switch style="align-self: center;margin-right: 8px;" v-model="forceMobilePreview"/>
                                     </div>

@@ -427,10 +427,6 @@
     word-break: break-word;
 }
 
-.el-popper {
-    z-index: 2006 !important;
-}
-
 .el-popper * {
     color: var(--front-color);
 }

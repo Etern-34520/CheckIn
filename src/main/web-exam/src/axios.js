@@ -56,14 +56,6 @@ export default {
         })
     },
     get(url, data) {
-        return new Promise((resolve, reject) => {
-            axios.get(url, data).then(
-                response => {
-                    resolve(response)
-                },
-                error => {
-                    reject(error)
-                });
-        })
+        return axios.get(url, data);
     }
 };

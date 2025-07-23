@@ -427,10 +427,6 @@
     word-break: break-word;
 }
 
-.el-popper {
-    z-index: 2006 !important;
-}
-
 .el-popper * {
     color: var(--front-color);
 }
@@ -764,7 +760,7 @@
     font-weight: normal !important;
     text-align: center;
     height: auto !important;
-    min-height: 22px !important;
+    min-height: 28px !important;
     padding: 2px 9px !important;
 }
 
