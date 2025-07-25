@@ -338,3 +338,12 @@ div.panel {
     max-width: 80vw;
     width: 80vw;
 }
+
+.pwa-title-common {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 36px;
+    -webkit-app-region: drag;
+}

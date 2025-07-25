@@ -1,5 +1,5 @@
 <script setup>
-import {ArrowRight} from "@element-plus/icons-vue";
+import {ArrowLeftBold, ArrowRight, ArrowRightBold} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import UI_Meta from "@/utils/UI_Meta.js";
@@ -28,6 +28,7 @@ function switchMenuStyle() {
 
 const colorScheme = UI_Meta.colorScheme;
 const mobile = UI_Meta.mobile;
+const inPWA = UI_Meta.inPWA;
 
 const getIcon = () => {
     if (colorScheme.value === 'light') {
@@ -36,12 +37,12 @@ const getIcon = () => {
         return iconWhite;
     }
 }
-// changeUrl.value = changeUrlFunc;
+
 </script>
 <template>
     <div id="top-bar">
         <el-button v-on:click="switchMenuStyle" class="menu-display-button" link
-                   style="width: 30px;height: 30px;margin-left: 8px;margin-right: 16px;">
+                   style="width: 30px;height: 30px;margin-left: 8px;margin-right: 4px;">
             <svg id="menuIcon" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
                 <g>
                     <rect rx="1" id="svg_1" height="2" width="16" y="19" x="7"/>
@@ -50,8 +51,23 @@ const getIcon = () => {
                 </g>
             </svg>
         </el-button>
-        <el-scrollbar style="margin-right: 8px;flex: 1;width: 0;">
-            <div style="height: 30px;margin-top: 2px;display: flex;flex-direction: row;align-items: center">
+        <template v-if="inPWA">
+            <el-button @click="router.back()"
+                       style="width: 30px;height: 30px;margin-right: 2px;margin-left: 0;" link>
+                <el-icon>
+                    <ArrowLeftBold/>
+                </el-icon>
+            </el-button>
+            <el-button @click="router.forward()"
+                       style="width: 30px;height: 30px;margin-right: 8px;margin-left: 0;" link>
+                <el-icon>
+                    <ArrowRightBold/>
+                </el-icon>
+            </el-button>
+        </template>
+        <el-scrollbar style="margin-right: 8px;margin-left: 12px">
+            <div class="init-animate"
+                 style="height: 30px;margin-top: 2px;display: flex;flex-direction: row;align-items: center">
                 <el-breadcrumb style="flex-shrink: 0;" :separator-icon="ArrowRight">
                     <!--suppress JSValidateTypes -->
                     <el-breadcrumb-item :to="{ name: 'home' }" style="line-height: 14px;">
@@ -68,13 +84,16 @@ const getIcon = () => {
                 </el-breadcrumb>
             </div>
         </el-scrollbar>
-        <el-button @click="router.push({name:'account-base'})" text v-if="!mobile"
-                   style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
-            <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
-                       style="margin-right: 4px"></el-avatar>
-            <el-text size="large">{{ user.name }}</el-text>
-            <el-text size="large" type="info" style="margin-left: 4px;">{{ user.qq }}</el-text>
-        </el-button>
+        <template v-if="!mobile">
+            <div class="flex-blank-1" style="-webkit-app-region: drag;height: 36px;min-width: 20px"></div>
+            <el-button @click="router.push({name:'account-base'})" text
+                       style="margin-right: 4px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
+                <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
+                           style="margin-right: 4px"></el-avatar>
+                <el-text size="large">{{ user.name }}</el-text>
+                <el-text size="large" type="info" style="margin-left: 4px;">{{ user.qq }}</el-text>
+            </el-button>
+        </template>
     </div>
 </template>
 
@@ -87,6 +106,8 @@ const getIcon = () => {
     flex-direction: row;
     align-items: center;
     z-index: 3;
+    margin-left: env(titlebar-area-x, 0);
+    width: env(titlebar-area-width, 100%);
 }
 
 #menuIcon rect {

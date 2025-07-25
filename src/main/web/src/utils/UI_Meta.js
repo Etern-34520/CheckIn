@@ -1,5 +1,6 @@
 const mobile = ref(false);
 const touch = ref(false);
+const inPWA = ref(false);
 const colorScheme = ref("light");
 const htmlHtmlElement = document.querySelector("html");
 const checkColorScheme = () => {
@@ -34,13 +35,22 @@ const checkTouch = () => {
         htmlHtmlElement.classList.add("touch");
     }
 }
+const checkPWA = () => {
+    inPWA.value =
+        window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+        window.matchMedia('(display-mode: standalone)').matches
+}
 checkColorScheme();
 checkSize();
 checkTouch();
-window.addEventListener("resize",checkSize);
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change",checkColorScheme);
+checkPWA();
+window.addEventListener("resize", checkSize);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", checkColorScheme);
+window.matchMedia('(display-mode: window-controls-overlay').addEventListener("change", checkPWA);
+window.matchMedia('(display-mode: standalone').addEventListener("change", checkPWA);
 export default {
-    mobile:mobile,
+    mobile: mobile,
     colorScheme: colorScheme,
-    touch:touch,
+    touch: touch,
+    inPWA: inPWA
 };

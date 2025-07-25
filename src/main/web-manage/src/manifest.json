@@ -1,9 +1,0 @@
-{
-  "name": "CheckIn Manage",
-  "icons": [
-    {
-      "src": "/src/assets/icons/icon-accent-light.svg",
-      "type": "image/svg"
-    }
-  ]
-}

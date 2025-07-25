@@ -147,7 +147,7 @@ const showDropdown = (user) => {
             </div>
             <el-select filterable v-model="newUserGroupName"
                        style="flex:1;margin-right: 4px" placeholder="用户组">
-                <template v-for="(userGroup,i) in UserDataInterface.userGroups">
+                <template v-for="(userGroup,i) in UserDataInterface.roles">
                     <el-option :disabled="!PermissionInfo.hasPermission('role','operate role ' + userGroup.type)"
                                :value="userGroup.type" :label="userGroup.type"></el-option>
                 </template>

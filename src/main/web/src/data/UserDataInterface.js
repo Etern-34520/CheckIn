@@ -1,6 +1,7 @@
 import WebSocketConnector from "@/api/websocket.js";
 import {useCookies} from "vue3-cookies";
 import router from "@/router/index.js";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const {cookies} = useCookies();
 
@@ -40,14 +41,14 @@ WebSocketConnector.registerAction("deleteUser", (message) => {
         delete UserDataInterface.userGroupMapping[message.data.role][message.data.qq];
 });
 WebSocketConnector.registerAction("addRole", (message) => {
-    UserDataInterface.userGroups[message.data.role.type] = message.data.role;
+    UserDataInterface.roles[message.data.role.type] = message.data.role;
 });
 WebSocketConnector.registerAction("deleteRole", (message) => {
-    delete UserDataInterface.userGroups[message.data.role.type];
+    delete UserDataInterface.roles[message.data.role.type];
 });
 WebSocketConnector.registerAction("addPermission", (message) => {
-    for (const userGroupType in UserDataInterface.userGroups) {
-        const userGroup = UserDataInterface.userGroups[userGroupType];
+    for (const userGroupType in UserDataInterface.roles) {
+        const userGroup = UserDataInterface.roles[userGroupType];
         if (userGroup.permissionGroups) {
             for (const permissionGroup of userGroup.permissionGroups) {
                 if (permissionGroup.name === message,data.permission.group) {
@@ -59,8 +60,8 @@ WebSocketConnector.registerAction("addPermission", (message) => {
     }
 });
 WebSocketConnector.registerAction("deletePermission", (message) => {
-    for (const userGroupType in UserDataInterface.userGroups) {
-        const userGroup = UserDataInterface.userGroups[userGroupType];
+    for (const userGroupType in UserDataInterface.roles) {
+        const userGroup = UserDataInterface.roles[userGroupType];
         if (userGroup.permissionGroups) {
             for (const permissionGroup of userGroup.permissionGroups) {
                 const permission1 = message.data.permission;
@@ -78,7 +79,7 @@ WebSocketConnector.registerAction("deletePermission", (message) => {
 });
 WebSocketConnector.registerAction("updatePermissions", (message) => {
     const currentRole = UserDataInterface.currentUser.value.role;
-    const userGroup = UserDataInterface.userGroups[currentRole];
+    const userGroup = UserDataInterface.roles[currentRole];
     if (userGroup && userGroup.permissionGroups) {
         for (const permissionGroup of userGroup.permissionGroups) {
             const updatedPermissionsOfGroup = message.data.permissions[permissionGroup.name];
@@ -99,7 +100,7 @@ WebSocketConnector.registerAction("pushRole", (message) => {
 
 const UserDataInterface = {
     users: reactive({}),
-    userGroups: reactive({}),
+    roles: reactive({}),
     userGroupMapping: reactive({}),
     currentUser: ref({qq: -1, name: "unknown", role: "unknown"}),
     logined: ref(false),
@@ -139,25 +140,27 @@ const UserDataInterface = {
     getCurrentUser: () => {
         return UserDataInterface.currentUser;
     },
-    logout: () => {
+    logout: (backToLogin = true) => {
         cookies.remove("user", "/checkIn");
         cookies.remove("token", "/checkIn");
         WebSocketConnector.close();
         UserDataInterface.logined.value = false;
-        router.push({name: 'login'});
+        if (backToLogin) {
+            router.push({name: 'login'});
+        }
     },
     getReactiveUserGroupsAsync: () => {
         return new Promise((resolve, reject) => {
-            if (Object.keys(UserDataInterface.userGroups) > 0) {
-                resolve(UserDataInterface.userGroups);
+            if (Object.keys(UserDataInterface.roles) > 0) {
+                resolve(UserDataInterface.roles);
             } else {
                 WebSocketConnector.send({
                     type: "getAllRoles",
                 }).then((response) => {
                     for (const role of response.data.roles) {
-                        UserDataInterface.userGroups[role.type] = role;
+                        UserDataInterface.roles[role.type] = role;
                     }
-                    resolve(UserDataInterface.userGroups);
+                    resolve(UserDataInterface.roles);
                 }, (error) => {
                     reject(error);
                 });
@@ -199,16 +202,16 @@ const UserDataInterface = {
             }
         });
     },
-    getPermissionGroupsOfGroupAsync: (groupType) => {
+    getPermissionGroupsOfRoleAsync: (roleType) => {
         return new Promise((resolve, reject) => {
             WebSocketConnector.send({
-                type: "getPermissionsOfRole",
+                type: "getPermissionInfoOfRole",
                 data: {
-                    roleType: groupType
+                    roleType: roleType
                 }
             }).then((response) => {
-                UserDataInterface.userGroups[groupType].permissionGroups = response.data.permissionGroups;
-                resolve(UserDataInterface.userGroups[groupType].permissionGroups);
+                UserDataInterface.roles[roleType].permissionGroups = response.data.permissionGroups;
+                resolve(UserDataInterface.roles[roleType].permissionGroups);
             }, (err) => {
                 reject(err);
             });
@@ -236,15 +239,32 @@ const UserDataInterface = {
         return new Promise((resolve, reject) => {
             try {
                 UserDataInterface.currentUser.value = user;
+                delete UserDataInterface.currentUser.value["rolePermission"];
                 watch(() => UserDataInterface.currentUser.value, () => {
-                    cookies.set("user", UserDataInterface.currentUser.value, "8h", "/checkIn");
+                    cookies.set("user", JSON.stringify(UserDataInterface.currentUser.value), "8h", "/checkIn");
                     cookies.set("token", UserDataInterface.currentUser.value.token, "8h", "/checkIn");
                 }, {deep: true, immediate: true});
                 const connect = (user) => {
                     try {
                         WebSocketConnector.connect(user.qq, user.token).then(() => {
-                            UserDataInterface.logined.value = true;
-                            resolve();
+                            if (user.rolePermission) {
+                                PermissionInfo.init(user.rolePermission);
+                                UserDataInterface.logined.value = true;
+                                resolve();
+                            } else {
+                                WebSocketConnector.send({
+                                    type: "getEnabledPermissionsOfRole",
+                                    data: {
+                                        roleType: user.role
+                                    }
+                                }).then((response) => {
+                                    PermissionInfo.init(response.data.permissionGroups);
+                                    UserDataInterface.logined.value = true;
+                                    resolve();
+                                }, (err) => {
+                                    reject(err);
+                                })
+                            }
                         }, (err) => {
                             reject(err);
                         });

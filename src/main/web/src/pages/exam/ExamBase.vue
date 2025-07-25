@@ -52,6 +52,7 @@ onBeforeMount(() => {
 
 <template>
     <div style="display: flex;flex-direction: column;width:100vw;height:100vh">
+        <div class="pwa-title-common"></div>
         <el-scrollbar v-loading="loading">
             <div class="center-base">
                 <template v-if="!loading && !error">

@@ -3,8 +3,10 @@ import LoginDialog from "@/components/common/LoginDialog.vue";
 import iconBlack from "@/assets/icons/icon-black.svg";
 import iconWhite from "@/assets/icons/icon-white.svg";
 import UI_Meta from "@/utils/UI_Meta.js";
+import UserDataInterface from "@/data/UserDataInterface.js";
 
 const colorScheme = UI_Meta.colorScheme;
+UserDataInterface.logout();
 
 const getIcon = () => {
     if (colorScheme.value === 'light') {
@@ -17,6 +19,7 @@ const getIcon = () => {
 
 <template>
     <div style="width: 100%;height:100%;display: flex;align-items: center;align-content:center;justify-content: center;overflow: hidden">
+        <div class="pwa-title-common"></div>
         <div style="z-index: 2">
             <div style="display: flex;flex-direction: row;margin-bottom: 4px;">
                 <img :src="getIcon()" class="animate-0" alt="" width="64" height="64" style="margin-bottom: 16px;opacity: 0.6"/>

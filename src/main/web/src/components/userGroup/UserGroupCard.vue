@@ -142,7 +142,7 @@ const buttonsOption = ref([{
                     <el-select filterable v-if="optionType === 'move'"
                                v-model="targetUserGroupName"
                                style="margin-top: 8px;" placeholder="用户组">
-                        <template v-for="(userGroup1,i) in UserDataInterface.userGroups">
+                        <template v-for="(userGroup1,i) in UserDataInterface.roles">
                             <el-option v-if="userGroup1.type !== userGroup.type"
                                        :disabled="!PermissionInfo.hasPermission('role','operate role ' + userGroup1.type)"
                                        :value="userGroup1.type" :label="userGroup1.type"></el-option>

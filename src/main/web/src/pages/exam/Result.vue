@@ -23,7 +23,7 @@ const backToExam = () => {
 
 const routeToSignUpOrLogin = () => {
     if (result.signUpCompletingType) {
-        window.location.href = window.location.protocol + "//" + window.location.host + "/checkIn/login/";
+        router.push({name: "login"});
     } else {
         router.push({name: "sign-up"}).then(() => {
             proxy.$cookies.set("phase", "sign-up", "7d");

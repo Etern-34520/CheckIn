@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-@Action("getPermissionsOfRole")
-public class GetPermissionsAction extends BaseAction<GetPermissionsAction.Input, GetPermissionsAction.SuccessOutput> {
+@Action("getPermissionInfoOfRole")
+public class GetPermissionInfoAction extends BaseAction<GetPermissionInfoAction.Input, GetPermissionInfoAction.SuccessOutput> {
     public record Input(String roleType) implements InputData {}
     public record SuccessOutput(List<Map<String,Object>> permissionGroups) implements OutputData {
         @Override
@@ -25,13 +25,13 @@ public class GetPermissionsAction extends BaseAction<GetPermissionsAction.Input,
     
     final RoleService roleService;
     
-    public GetPermissionsAction(RoleService roleService) {
+    public GetPermissionInfoAction(RoleService roleService) {
         this.roleService = roleService;
     }
     
     @Transactional
     @Override
-    public void execute(ExecuteContext<GetPermissionsAction.Input, SuccessOutput> context) {
+    public void execute(ExecuteContext<GetPermissionInfoAction.Input, SuccessOutput> context) {
         Role role = roleService.findByType(context.getInput().roleType).orElseThrow();
         final Set<Permission> permissions1 = role.getPermissions();
         final List<PermissionGroup> allPermissionGroups = roleService.findAllPermissionGroup();

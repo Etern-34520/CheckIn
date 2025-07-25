@@ -12,9 +12,9 @@ import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const responsiveSplitpane = ref();
 const filterText = ref("");
-const userGroups = UserDataInterface.userGroups;
+const userGroups = UserDataInterface.roles;
 const userGroupsArray = ref([]);
-watch(() => UserDataInterface.userGroups, (newValue) => {
+watch(() => UserDataInterface.roles, (newValue) => {
     userGroupsArray.value = [];
     for (const userGroupType in userGroups) {
         userGroupsArray.value.push(userGroups[userGroupType]);
@@ -144,7 +144,7 @@ const cancelCreating = () => {
                             />
                             <el-button-group>
                                 <el-button type="primary" @click="confirmCreating"
-                                           :disabled="createdGroupName===''||Boolean(UserDataInterface.userGroups[createdGroupName])">
+                                           :disabled="createdGroupName===''||Boolean(UserDataInterface.roles[createdGroupName])">
                                     确定
                                 </el-button>
                             </el-button-group>

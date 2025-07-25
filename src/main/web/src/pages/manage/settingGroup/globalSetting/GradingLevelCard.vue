@@ -41,7 +41,7 @@ const props = defineProps({
     }
 });
 
-const userGroups = UserDataInterface.userGroups;
+const userGroups = UserDataInterface.roles;
 UserDataInterface.getReactiveUserGroupsAsync();
 
 

@@ -1,5 +1,5 @@
 <script setup>
-import {ArrowLeftBold, List} from "@element-plus/icons-vue";
+import {ArrowLeftBold} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
 import UIMeta from "@/utils/UI_Meta.js";
 import {Splitpanes, Pane} from 'splitpanes'

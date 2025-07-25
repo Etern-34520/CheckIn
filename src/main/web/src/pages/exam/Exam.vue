@@ -31,7 +31,7 @@ onBeforeMount(() => {
 
 // onMounted(() => {
 watch(() => answerData.value, () => {
-    proxy.$cookies.set("submissions", answerData.value, "7d");
+    proxy.$cookies.set("submissions", JSON.stringify(answerData.value), "7d");
     checkComplete(answerData.value);
 }, {deep: true});
 // });
@@ -83,7 +83,7 @@ const handleError = (data, actionDescription) => {
                             examId: examInfo.value.examId,
                         }).then((response) => {
                             if (response.type !== "error") {
-                                proxy.$cookies.set("result", response, "7d");
+                                proxy.$cookies.set("result", JSON.stringify(response), "7d");
                                 routeToResult();
                                 console.log(response);
                             } else {
@@ -173,10 +173,10 @@ const loadQuestionsByIndexes = (indexes, force = false) => {
                             delete refreshedQuestion.value[index.toString()];
                             delete currentQuestion.refreshed;
                             delete currentQuestion.confirmRefresh;
-                            proxy.$cookies.set("timestamps", timestamps.value, "7d");
+                            proxy.$cookies.set("timestamps", JSON.stringify(timestamps.value), "7d");
                         }
                     }
-                    proxy.$cookies.set("timestamps", timestamps.value, "7d");
+                    proxy.$cookies.set("timestamps", JSON.stringify(timestamps.value), "7d");
                 }
             } else {
                 handleError(data, "获取题目时出错");
@@ -411,7 +411,7 @@ const submitExam = () => {
             answer: mappedAnswerData,
         }).then((response) => {
             if (response.type !== "error") {
-                proxy.$cookies.set("result", response, "7d");
+                proxy.$cookies.set("result", JSON.stringify(response), "7d");
                 routeToResult();
                 console.log(response);
             } else {

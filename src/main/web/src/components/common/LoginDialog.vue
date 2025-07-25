@@ -2,6 +2,7 @@
 import {DArrowRight} from "@element-plus/icons-vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import _Loading_ from "@/components/common/_Loading_.vue";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const usernameOrQQ = ref('');
 const password = ref('');
@@ -27,12 +28,7 @@ function login() {
         console.log(response);
         if (response.result === "success") {
             loginMessage.value = "";
-            UserDataInterface.loginAs({
-                name: response.name,
-                qq: response.qq,
-                role: response.role,
-                token: response.token
-            }).then(
+            UserDataInterface.loginAs(response).then(
                     () => {
                     }, () => {
                         requesting.value = false;

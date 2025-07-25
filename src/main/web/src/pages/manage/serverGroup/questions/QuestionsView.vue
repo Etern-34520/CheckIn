@@ -811,12 +811,12 @@ const getTypeName = (obj) => {
                                                     </el-button-group>
                                                     <el-button-group class="node-buttons" style="position: initial" v-if="nodeObj.data.type === 'Partition'">
                                                         <el-popover trigger="click"
+                                                                    v-if="PermissionInfo.hasPermission('partition','edit partition name')"
                                                                     v-model:visible="nodeObj.data.editing"
                                                                     width="400">
                                                             <template #reference>
                                                                 <el-button class="node-button" size="small"
-                                                                           @click.stop="nodeObj.data.editing = false"
-                                                                           v-if="PermissionInfo.hasPermission('partition','edit partition name')">
+                                                                           @click.stop="nodeObj.data.editing = false">
                                                                     <HarmonyOSIcon_Rename/>
                                                                 </el-button>
                                                             </template>

@@ -28,7 +28,7 @@ onMounted(() => {
 
 const onClick = () => {
     if (result.signUpCompletingType === "CREATE_AND_ENABLED") {
-        window.location.href = window.location.protocol + "//" + window.location.host + "/checkIn/login/"
+        router.push({name: "login"});
     } else if (!result.signUpCompletingType){
         signUp();
     } else {
@@ -94,7 +94,7 @@ const signUp = () => {
         disableAllFields.value = true;
         if (response.type === "success") {
             result.signUpCompletingType = response.completingType;
-            proxy.$cookies.set("result", result, "7d");
+            proxy.$cookies.set("result", JSON.stringify(result), "7d");
             checkSignUpCompletingType(response.completingType);
         } else {
             handleError(response)

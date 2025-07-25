@@ -1,7 +1,9 @@
 import {createRouter, createWebHistory} from "vue-router"
 import {ElMessageBox} from "element-plus";
 import QuestionCache from "@/data/QuestionCache.js";
-import PermissionInfo from "@/auth/PermissionInfo.js";
+import {useCookies} from "vue3-cookies";
+const {cookies} = useCookies();
+
 const warning1 = {
     enabled: (from, to) => {
         return (!(from.fullPath.split("/")[2] === to.fullPath.split("/")[2])) && QuestionCache.dirty
@@ -25,11 +27,22 @@ const router = createRouter({
     routes: [
         {
             path: "",
+            name: "base",
+            redirect: () => {
+                if (cookies.isKey("token")) {
+                    return {name: "home"};
+                } else {
+                    return {name: "facade"};
+                }
+            }
+        },
+        {
+            path: "/manage/",
             name: "manage-base",
             component: () => import("@/pages/manage/ManageBase.vue"),
             children: [
                 {
-                    path: "/manage/",
+                    path: "",
                     name: "manage",
                     component: () => import("@/pages/manage/Manage.vue"),
                     children: [
@@ -47,22 +60,9 @@ const router = createRouter({
                                     path: ":id/",
                                     name: "request-record-detail",
                                     component: () => import("@/pages/manage/serverGroup/requestRecord/RequestRecordDetailView.vue"),
-                                    meta: {
-                                        requiredPermission: {
-                                            group: "request record",
-                                            name: "get request records",
-                                        }
-                                    }
                                 }
-                            ],
-                            meta: {
-                                requiredPermission: {
-                                    group: "request record",
-                                    name: "get request records",
-                                }
-                            }
-                        },
-                        {
+                            ]
+                        }, {
                             path: "exam-record/",
                             name: "exam-record",
                             component: () => import("@/pages/manage/serverGroup/examRecord/ExamRecordView.vue"),
@@ -149,12 +149,6 @@ const router = createRouter({
                                     path: "generating-setting/",
                                     name: "generating-setting",
                                     component: () => import("@/pages/manage/settingGroup/globalSetting/GeneratingSettingView.vue"),
-                                    meta: {
-                                        requiredPermission: {
-                                            group: "setting",
-                                            name: "get generating setting",
-                                        }
-                                    }
                                 },
                                 {
                                     path: "grading-setting/",
@@ -223,7 +217,7 @@ const router = createRouter({
         },
         {
             path: '/exam/',
-            name: 'base',
+            name: 'exam-base',
             component: () => import("@/pages/exam/ExamBase.vue"),
             children: [
                 {
@@ -253,7 +247,6 @@ const router = createRouter({
     ]
 });
 
-/*
 router.beforeEach((to, from, next) => {
     const checkWarning = () => {
         if (from.meta.warning && from.meta.warning.enabled(from, to) && from.meta.warning.leave) {
@@ -276,24 +269,8 @@ router.beforeEach((to, from, next) => {
         }
     }
 
-    if (to.meta.requiredPermission) {
-        PermissionInfo.hasPermissionAsync(
-            to.meta.requiredPermission.group,
-            to.meta.requiredPermission.name).then((has) => {
-            if (!has) {
-                console.error("permission denied, needs {group: \""+to.meta.requiredPermission.group+"\",name: \""+to.meta.requiredPermission.name + "\"}");
-            } else {
-                checkWarning();
-            }
-        });
-    } else if (to.name !== "login"){
-        PermissionInfo.waitingForInitialize().then(() => {
-            checkWarning();
-        });
-    } else {
-        checkWarning();
-    }
+    console.log(to.matched)
+    checkWarning();
 });
-*/
 
 export default router

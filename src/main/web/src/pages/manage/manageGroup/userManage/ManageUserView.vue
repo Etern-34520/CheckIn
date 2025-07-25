@@ -11,7 +11,7 @@ import PermissionInfo from "@/auth/PermissionInfo.js";
 
 // const user = UserDataInterface.getCurrentUser();
 const users = UserDataInterface.users;
-const userGroups = UserDataInterface.userGroups;
+const userGroups = UserDataInterface.roles;
 const filterText = ref("");
 const loading = ref(true);
 const loadingGroups = ref(true);

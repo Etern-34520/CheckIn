@@ -6,6 +6,7 @@ import getAvatarUrlOf from "@/utils/Avatar.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import UI_Meta from "@/utils/UI_Meta.js";
 import PermissionInfo from "@/auth/PermissionInfo.js";
+import {Link} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 
@@ -102,31 +103,39 @@ const props = defineProps({
                 </div>
             </el-scrollbar>
             <div style="flex: 1"></div>
-            <div style="display: flex;flex-direction: row;" class="default-hidden-menu">
+            <div style="display: flex;flex-direction: column;" class="default-hidden-menu">
                 <el-button-group style="display:flex;flex-direction: row;align-items: stretch">
-                    <el-button id="menu-avatar-button" @click="routeToAccount" text
-                               style="width: 150px;height: 52px;display: flex;flex-direction: row;padding: 4px;">
-                        <div>
-                            <el-avatar shape="circle" size="default"
-                                       :src="getAvatarUrlOf(user.qq)"
-                                       style="margin-right: 4px"></el-avatar>
-                        </div>
-                        <div style="text-align: left;flex: 1;overflow: hidden;">
-                            <el-text size="large" style="display: block">{{ user.name }}</el-text>
-                            <el-text size="large" type="info" style="display: block">{{ user.qq }}</el-text>
+                    <el-button style="width: 100px;height: 32px" @click="UserDataInterface.logout();router.push({name:'facade'})" text>
+                        <div style="display: flex;flex-direction: row">
+                            <el-icon size="16" style="align-self:center;margin-right: 8px;">
+                                <Link />
+                            </el-icon>
+                            <div style="align-self:center">
+                                前往答题
+                            </div>
                         </div>
                     </el-button>
-                    <el-button style="width: 50px;height: 52px" @click="UserDataInterface.logout()" text>
-                        <div style="display: flex;flex-direction: column">
-                            <el-icon size="20" style="align-self:center">
+                    <el-button style="width: 100px;height: 32px" @click="UserDataInterface.logout()" text>
+                        <div style="display: flex;flex-direction: row">
+                            <el-icon size="16" style="align-self:center;margin-right: 8px;">
                                 <HarmonyOSIcon_Quit/>
                             </el-icon>
-                            <div>
+                            <div style="align-self:center">
                                 退出
                             </div>
                         </div>
                     </el-button>
                 </el-button-group>
+                <el-button id="menu-avatar-button" @click="routeToAccount" text
+                           style="width: 200px;display: flex;flex-direction: row;height: 40px;padding: 4px;">
+                    <el-avatar shape="circle" :size="32"
+                               :src="getAvatarUrlOf(user.qq)"
+                               style="margin-left: 2px;margin-right: 8px;"></el-avatar>
+                    <div style="text-align: left;flex: 1;overflow: hidden;">
+                        <el-text size="large" style="display: block">{{ user.name }}</el-text>
+                        <el-text size="large" type="info" style="display: block">{{ user.qq }}</el-text>
+                    </div>
+                </el-button>
             </div>
         </div>
         <div class="mobile-menu-mask" v-if="inlineBool" @click="inlineBool = false;"></div>

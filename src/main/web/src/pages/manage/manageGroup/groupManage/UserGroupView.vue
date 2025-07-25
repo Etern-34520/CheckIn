@@ -43,7 +43,7 @@ watch(() => router.currentRoute.value.params.type, () => {
             users.value = users1;
         });
         loading.value = false;
-        UserDataInterface.getPermissionGroupsOfGroupAsync(userGroup1.type).then((permissionGroups1) => {
+        UserDataInterface.getPermissionGroupsOfRoleAsync(userGroup1.type).then((permissionGroups1) => {
             permissionGroups.value = permissionGroups1;
         });
     }, () => {

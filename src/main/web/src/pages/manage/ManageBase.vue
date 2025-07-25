@@ -5,15 +5,11 @@ import LoginDialog from "@/components/common/LoginDialog.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import {ElMessage} from "element-plus";
 import router from "@/router/index.js";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const {proxy} = getCurrentInstance();
 const showReLogin = ref(false);
 const reLoginText = ref("登录失败");
-const showLoading = ref(false);
-
-setTimeout(() => {
-    showLoading.value = true;
-}, 500);
 
 watch(() => UserDataInterface.logined.value, () => {
     WebSocketConnector.showGlobalNotifications = UserDataInterface.logined.value;
@@ -22,30 +18,41 @@ watch(() => UserDataInterface.logined.value, () => {
     }
 })
 
-onMounted(() => {
-    const user = proxy.$cookies.get("user", "/checkIn");
-    if (user !== null) {
-        console.debug("Login from cookie:", user);
-        UserDataInterface.loginAs(user).then(() => {
-        }, (err) => {
-            if (err === "token expired") {
-                showReLogin.value = true;
-                reLoginText.value = "登录已过期"
-            } else {
-                reLoginText.value = "登录失败";
-                if (router.currentRoute.value.name !== "login") {
+function autoLogin() {
+    return new Promise((resolve, reject) => {
+        const user = proxy.$cookies.get("user", "/checkIn");
+        if (user !== null) {
+            console.debug("Login from cookie:", user);
+            UserDataInterface.loginAs(user).then(() => {
+                resolve();
+            }, (err) => {
+                if (err === "token expired") {
                     showReLogin.value = true;
+                    reLoginText.value = "登录已过期"
+                } else {
+                    reLoginText.value = "登录失败";
+                    if (router.currentRoute.value.name !== "login") {
+                        showReLogin.value = true;
+                    }
+                    ElMessage({
+                        type: "error",
+                        message: "登录失败",
+                    });
+                    reject();
                 }
-                ElMessage({
-                    type: "error",
-                    message: "登录失败",
-                });
-            }
-        });
-    } else {
-        Router.push({name: "login"});
+            });
+        } else {
+            Router.push({name: "login"});
+            reject();
+        }
+    })
+}
+
+// onBeforeMount(async () => {
+    if (!UserDataInterface.logined.value) {
+        autoLogin();
     }
-});
+// });
 </script>
 
 <template>
@@ -62,9 +69,6 @@ onMounted(() => {
     <router-view v-slot="{ Component }">
         <transition name="main-router" mode="out-in" :duration="800">
             <component v-if="Component" :is="Component"/>
-            <div v-else-if="showLoading" class="global-loading">
-                <Loading_ style="width: 32px !important;"></Loading_>
-            </div>
         </transition>
     </router-view>
 </template>

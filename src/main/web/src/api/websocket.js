@@ -143,7 +143,7 @@ let pingRetryCount = 0;
 
 const ping = () => {
     function handleRetry() {
-        if (WebSocketConnector.ws.readyState === WebSocket.OPEN) {
+        if (WebSocketConnector.ws && WebSocketConnector.ws.readyState === WebSocket.OPEN) {
             pingRetryCount++;
             if (pingRetryCount < 3) {
                 simplePing().then(() => {

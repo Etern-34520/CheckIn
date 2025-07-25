@@ -168,6 +168,16 @@
     overflow: auto !important;
 }
 
+.splitpanes {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.splitpanes--vertical {
+    flex-direction: row;
+}
+
 #app:has(.md-editor-resize-operate:active) * ,
 #app:has(.splitpanes__splitter:active) * {
     user-select: none !important;
@@ -271,7 +281,7 @@
     align-content: stretch;
     align-items: stretch;
     flex-direction: column;
-    transition: 20ms var(--ease-in-out-quint) !important;
+    transition: none !important;
 }
 
 /*noinspection SpellCheckingInspection*/

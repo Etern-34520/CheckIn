@@ -40,7 +40,7 @@ const startExam = () => {
         partitionIds: selectedPartitionIds.value
     }).then((data) => {
         if (data.type !== "error") {
-            proxy.$cookies.set("examInfo", data, "7d");
+            proxy.$cookies.set("examInfo", JSON.stringify(data), "7d");
             proxy.$cookies.set("phase", "examine", "7d");
             proxy.$cookies.remove("submissions");
             proxy.$cookies.remove("timestamps");

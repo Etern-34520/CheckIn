@@ -3,10 +3,17 @@ import TopBar from "@/components/common/TopBar.vue";
 import router from "@/router/index.js";
 import SideMenu from "@/components/common/SideMenu.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
+import PermissionInfo from "@/auth/PermissionInfo.js";
 
 onBeforeMount(() => {
     updateBreadcrumbArray({path: window.location.pathname});
 });
+
+const showLoading = ref(false);
+
+setTimeout(() => {
+    showLoading.value = true;
+}, 800);
 
 const menuInlineStyle = ref(false);
 
@@ -60,6 +67,10 @@ onUnmounted(() => {
 
 const user = UserDataInterface.getCurrentUser();
 
+const permissionLoaded = ref(false);
+PermissionInfo.waitingForInitialize().then(() => {
+    permissionLoaded.value = true;
+})
 </script>
 
 <template>
@@ -67,10 +78,13 @@ const user = UserDataInterface.getCurrentUser();
         <top-bar v-model:menu-inline-style="menuInlineStyle" :user="user"
                  :breadcrumb-path-array="breadcrumbPathArray"></top-bar>
         <div id="manage-base">
-            <side-menu v-model:inlineStyle="menuInlineStyle" :user="user"/>
+            <side-menu v-model:inlineStyle="menuInlineStyle" v-if="permissionLoaded" :user="user"/>
             <router-view class="manage-page-router" v-slot="{ Component }">
                 <transition name="route-page" mode="out-in">
-                    <component :is="Component"/>
+                    <component :is="Component" v-if="permissionLoaded"/>
+                    <div v-else-if="showLoading" class="global-loading">
+                        <Loading_ style="width: 32px !important;"></Loading_>
+                    </div>
                 </transition>
             </router-view>
         </div>

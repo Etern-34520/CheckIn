@@ -7,8 +7,8 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
-import { compression } from 'vite-plugin-compression2'
-import { VitePWA } from 'vite-plugin-pwa'
+// import { compression } from 'vite-plugin-compression2'
+import {VitePWA} from 'vite-plugin-pwa'
 
 export default defineConfig({
     server: {
@@ -19,15 +19,14 @@ export default defineConfig({
                 target: 'http://localhost:8080',
                 changeOrigin: true
             },
-            '/checkIn/login/api': {
-                target: 'http://localhost:8080',
-                changeOrigin: true
-                // rewrite: (path) => path.replace(/^\/checkIn\/login\/api/, '')
-            },
             "/checkIn/api/websocket/": {
                 target: "http://localhost:8080",
                 changeOrigin: true,
                 ws: true
+            },
+            "/checkIn/icons": {
+                target: "http://localhost:8080",
+                changeOrigin: true
             }
         }
     },
@@ -42,35 +41,38 @@ export default defineConfig({
         Components({
             resolvers: [ElementPlusResolver()],
         }),
-        ElementPlus({}),
+        ElementPlus({}),/*
         compression({
             algorithms: ['gzip'],
             deleteOriginalAssets: true,
             threshold: 800
-        }),
+        }),*/
         VitePWA({
             manifest: {
-                "name": 'CheckIn',
-                "description": "CheckIn",
-                // "theme_color": "rgba(0,0,0,0)",
-
+                name: 'CheckIn',
+                description: "CheckIn",
+                lang: 'zh-CN',
+                id: "CheckIn-2.1.2-beta-1",
+                display: "minimal-ui",
+                "display_override": ["window-controls-overlay"],
                 icons: [
                     {
-                        "src": "icons/icon-accent-light.svg",
-                        "sizes": "192x192",
-                        "type": "image/svg+xml"
-                    },
-                    {
-                        "src": "icons/icon-accent-light.svg",
-                        "sizes": "512x512",
-                        "type": "image/svg+xml"
+                        src: "icons/icon-accent-light_192.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                        purpose: "any"
+                    }, {
+                        src: "icons/icon-accent-light_512.png",
+                        sizes: "512x512",
+                        type: "image/png",
+                        purpose: "any"
                     }
                 ]
             },
             workbox: {
                 runtimeCaching: [
                     {
-                        urlPattern: /(.*?)\.(js|css|ts)/, // js /css /ts静态资源缓存
+                        urlPattern: /(.*?)\.(js|css|ts|html)/, // js /css /ts静态资源缓存
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'main-cache',

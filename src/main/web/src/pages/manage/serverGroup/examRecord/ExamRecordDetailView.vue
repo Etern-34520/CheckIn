@@ -346,8 +346,7 @@ onBeforeUnmount(() => {
                                                                         data.answers[questionInfo.question.id].answers[index].result.maxScore
                                                                     }}
                                                                 </el-tag>
-                                                                <div class="panel-1"
-                                                                     style="padding: 4px;display: flex;flex-direction: row;flex: 1">
+                                                                <div style="padding: 4px;display: flex;flex-direction: row;flex: 1">
                                                                     <el-tag style="margin: 2px;"
                                                                             v-for="(subAnswerDatum,index) of answerDatum"
                                                                             :type="subAnswerDatum.selected?'primary':'info'">

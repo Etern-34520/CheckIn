@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.action.interfaces.ResultJsonContext;
-import indi.etern.checkIn.action.role.SendPermissionsToUsersAction;
 import indi.etern.checkIn.api.webSocket.interfaces.IMessage;
 import indi.etern.checkIn.auth.JwtAuthenticationFilter;
 import indi.etern.checkIn.auth.JwtTokenProvider;
@@ -206,8 +205,10 @@ public class Connector {
                 return false;
             }
             
+/*
             actionExecutor.execute(SendPermissionsToUsersAction.class,
                     new SendPermissionsToUsersAction.Input(List.of(sessionUser)));
+*/
             return false;
         } else if (sessionUser != null) {
             JwtAuthenticationFilter.setUserToSecurityContextHolder(sessionUser);
