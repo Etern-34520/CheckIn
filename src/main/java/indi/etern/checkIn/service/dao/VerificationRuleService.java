@@ -1,6 +1,7 @@
 package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.dto.manage.CommonQuestionDTO;
+import indi.etern.checkIn.dto.manage.QuestionGroupDTO;
 import indi.etern.checkIn.entities.setting.verification.VerificationRule;
 import indi.etern.checkIn.repositories.VerificationRuleRepository;
 import indi.etern.checkIn.service.dao.verify.DynamicValidator;
@@ -49,7 +50,7 @@ public class VerificationRuleService {
     
     public String digest(CommonQuestionDTO commonQuestionDTO) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(commonQuestionDTO.hashCode());
+        stringBuilder.append(commonQuestionDTO.getLastModifiedTime());
         singletonInstance.findAll().forEach(rule -> {
             if (rule.isApplicable(commonQuestionDTO)) {
                 stringBuilder.append(rule.hashCode());
@@ -74,11 +75,26 @@ public class VerificationRuleService {
                 }
             }
         });
+        if (commonQuestionDTO instanceof QuestionGroupDTO questionGroupDTO) {
+            for (CommonQuestionDTO subQuestionDTO : questionGroupDTO.getQuestions()) {
+                final ValidationResult result1 = verify(subQuestionDTO, VerifyTargetType.MULTIPLE_CHOICES_QUESTION);
+                if (!result1.isShowError()) {
+                    result.setShowError(true);
+                    commonQuestionDTO.setShowError(true);
+                }
+                if (!result1.isShowWarning()) {
+                    result.setShowWarning(true);
+                    commonQuestionDTO.setShowWarning(true);
+                }
+            }
+        }
         if (!result.getErrors().isEmpty()) {
             commonQuestionDTO.getErrors().putAll(result.getErrors());
+            result.setShowError(true);
         }
         if (!result.getWarnings().isEmpty()) {
             commonQuestionDTO.getWarnings().putAll(result.getWarnings());
+            result.setShowWarning(true);
         }
         return result;
     }

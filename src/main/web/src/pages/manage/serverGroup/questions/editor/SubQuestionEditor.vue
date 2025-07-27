@@ -14,7 +14,6 @@ import UIMeta from "@/utils/UI_Meta.js";
 import {MdEditor} from "md-editor-v3";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 
-const {proxy} = getCurrentInstance();
 const imageDialogVisible = ref(false);
 const viewerIndex = ref(0);
 const upload = ref();
@@ -50,20 +49,6 @@ const filter = function (rawFile) {
         if (questionInfo.value.question.images === undefined) {
             questionInfo.value.question.images = [];
         }
-/*
-            for (const image of questionInfo.value.question.images) {
-                if (image.size === rawFile.raw.size) {
-                    ElNotification({
-                        title: "重复",
-                        message: "图片已存在",
-                        position: 'bottom-right',
-                        type: 'warning',
-                    })
-                    upload.value.handleRemove(rawFile);
-                    return false;
-                }
-            }
-*/
         upload.value.handleRemove(rawFile);
         convert(rawFile.raw).then((result) => {
             questionInfo.value.question.images.push(result);

@@ -43,7 +43,7 @@ const optionNames = {
 }
 
 const propertySelector = ref();
-const emptyVerification = (type, label, defaultTip, targetInputName) => {
+const emptyVerification = (type, label, defaultTip, targetInputName, ignoreMissingField = false) => {
     return {
         type: type,
         inputType: {
@@ -55,10 +55,11 @@ const emptyVerification = (type, label, defaultTip, targetInputName) => {
             }
         },
         targetInputName: targetInputName,
-        defaultTip: defaultTip
+        defaultTip: defaultTip,
+        ignoreMissingField: ignoreMissingField
     }
 }
-const contentVerification = (type, defaultTip, targetInputName) => {
+const contentVerification = (type, defaultTip, targetInputName, ignoreMissingField = false) => {
     return {
         type: type,
         inputType: {
@@ -81,7 +82,8 @@ const contentVerification = (type, defaultTip, targetInputName) => {
             ]
         },
         targetInputName: targetInputName,
-        defaultTip: defaultTip
+        defaultTip: defaultTip,
+        ignoreMissingField: ignoreMissingField
     };
 }
 const contentOption = {
@@ -97,7 +99,7 @@ const contentOption = {
         }
     }
 };
-const singleImageSizeVerification = (type, defaultTip, targetInputName) => {
+const singleImageSizeVerification = (type, defaultTip, targetInputName, ignoreMissingField = false) => {
     return {
         type: type,
         inputType: {
@@ -118,10 +120,11 @@ const singleImageSizeVerification = (type, defaultTip, targetInputName) => {
             ]
         },
         targetInputName: targetInputName,
-        defaultTip: defaultTip
+        defaultTip: defaultTip,
+        ignoreMissingField: ignoreMissingField
     }
 };
-const allImagesSizeVerification = (type, defaultTip, targetInputName) => {
+const allImagesSizeVerification = (type, defaultTip, targetInputName, ignoreMissingField = false) => {
     return {
         type: type,
         inputType: {
@@ -142,10 +145,11 @@ const allImagesSizeVerification = (type, defaultTip, targetInputName) => {
             ]
         },
         targetInputName: targetInputName,
-        defaultTip: defaultTip
+        defaultTip: defaultTip,
+        ignoreMissingField: ignoreMissingField
     }
 };
-const imagesQuantityVerification = (type, defaultTip, targetInputName) => {
+const imagesQuantityVerification = (type, defaultTip, targetInputName, ignoreMissingField = false) => {
     return {
         type: type,
         inputType: {
@@ -166,7 +170,8 @@ const imagesQuantityVerification = (type, defaultTip, targetInputName) => {
             ]
         },
         targetInputName: targetInputName,
-        defaultTip: defaultTip
+        defaultTip: defaultTip,
+        ignoreMissingField: ignoreMissingField
     }
 };
 const imageOption = {
@@ -175,28 +180,28 @@ const imageOption = {
         "$size": {
             name: "单张大小",
             verificationTypes: {
-                max: singleImageSizeVerification("上限", "第${order}张图片大小超过${limit}", "images"),
+                max: singleImageSizeVerification("上限", "第${order}张图片大小超过${limit}", "images", true),
                 min: singleImageSizeVerification("下限", "第${order}张图片大小低于${limit}", "images")
             }
         },
         "$*size": {
             name: "总大小",
             verificationTypes: {
-                max: allImagesSizeVerification("上限", "图片总大小超过${limit}", "images"),
+                max: allImagesSizeVerification("上限", "图片总大小超过${limit}", "images", true),
                 min: allImagesSizeVerification("下限", "图片总大小低于${limit}", "images")
             }
         },
         length: {
             name: "数量",
             verificationTypes: {
-                max: imagesQuantityVerification("上限", "图片数量超过${limit}", "images"),
+                max: imagesQuantityVerification("上限", "图片数量超过${limit}", "images", true),
                 min: imagesQuantityVerification("下限", "图片数量少于${limit}", "images"),
                 empty: emptyVerification("无图片", "无图片时", "无图片", "images")
             }
         }
     }
 };
-const choiceLengthVerification = (type, defaultTip, targetInputName) => {
+const choiceLengthVerification = (type, defaultTip, targetInputName, ignoreMissingField = false) => {
     return {
         type: type,
         inputType: {
@@ -217,10 +222,11 @@ const choiceLengthVerification = (type, defaultTip, targetInputName) => {
             ]
         },
         targetInputName: targetInputName,
-        defaultTip: defaultTip
+        defaultTip: defaultTip,
+        ignoreMissingField: ignoreMissingField
     }
 };
-const quantityVerification = (type, default1, min, max, defaultTip, targetInputName) => {
+const quantityVerification = (type, default1, min, max, defaultTip, targetInputName, ignoreMissingField = false) => {
     return {
         type: type,
         inputType: {
@@ -243,7 +249,8 @@ const quantityVerification = (type, default1, min, max, defaultTip, targetInputN
             ]
         },
         targetInputName: targetInputName,
-        defaultTip: defaultTip
+        defaultTip: defaultTip,
+        ignoreMissingField: ignoreMissingField
     }
 };
 const choiceOption = {
@@ -302,9 +309,9 @@ const partitionOption = {
         length: {
             name: "数量",
             verificationTypes: {
-                max: quantityVerification("上限", 10, 1, 30, "分区数量超过${limit}", "partitions"),
-                min: quantityVerification("下限", 10, 1, 30, "分区数量少于${limit}", "partitions"),
-                empty: emptyVerification("无分区", "没有所属分区时", "没有所属分区", "partitions")
+                max: quantityVerification("上限", 10, 1, 30, "分区数量超过${limit}", "partitions", true),
+                min: quantityVerification("下限", 10, 1, 30, "分区数量少于${limit}", "partitions", true),
+                empty: emptyVerification("无分区", "没有所属分区时", "没有所属分区", "partitions", true)
             }
         }
     }
@@ -378,7 +385,8 @@ watch(() => model.value.property.verificationTypeName, (value, oldValue, onClean
         }
         // if ((!model.value.tipTemplate) || model.value.tipTemplate.length === 0 ||
         //         (lastVerificationOption && lastVerificationOption.defaultTip && model.value.tipTemplate === lastVerificationOption.defaultTip))
-            model.value.tipTemplate = verificationOption.value.defaultTip;
+        model.value.tipTemplate = verificationOption.value.defaultTip;
+        model.value.ignoreMissingField = verificationOption.value.ignoreMissingField;
     } else {
         verificationOption.value = undefined;
     }

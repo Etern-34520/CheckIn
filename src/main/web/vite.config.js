@@ -7,8 +7,9 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
-// import { compression } from 'vite-plugin-compression2'
 import {VitePWA} from 'vite-plugin-pwa'
+
+const appVersion = process.env.npm_package_version;
 
 export default defineConfig({
     server: {
@@ -41,18 +42,13 @@ export default defineConfig({
         Components({
             resolvers: [ElementPlusResolver()],
         }),
-        ElementPlus({}),/*
-        compression({
-            algorithms: ['gzip'],
-            deleteOriginalAssets: true,
-            threshold: 800
-        }),*/
+        ElementPlus({}),
         VitePWA({
             manifest: {
                 name: 'CheckIn',
                 description: "CheckIn",
                 lang: 'zh-CN',
-                id: "CheckIn-2.1.2-beta-1",
+                id: "CheckIn-" + appVersion,
                 display: "minimal-ui",
                 "display_override": ["window-controls-overlay"],
                 icons: [
@@ -100,5 +96,7 @@ export default defineConfig({
     }, build: {
         outDir: "../resources/static/view/front-face",
         emptyOutDir: true,
+    }, define: {
+        '__APP_VERSION__': JSON.stringify(appVersion),
     }
 })

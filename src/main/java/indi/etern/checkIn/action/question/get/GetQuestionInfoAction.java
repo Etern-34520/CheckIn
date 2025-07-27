@@ -55,16 +55,16 @@ public class GetQuestionInfoAction extends BaseAction<GetQuestionInfoAction.Inpu
             final String previousDigest = question.getVerificationDigest();
             if (!currentDigest.equals(previousDigest)) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Verify question due to invalid digest, previous:\"{}\", current:\"{}\"",previousDigest,currentDigest);
+                    logger.debug("Verify question[\"{}\"] due to invalid digest, previous:\"{}\", current:\"{}\"",question.getId(),previousDigest,currentDigest);
                 }
                 final ValidationResult result = verificationRuleService.verify(commonQuestionDTO, VerificationRuleService.VerifyTargetType.ANY);
                 // 检查结果
-                if (!result.getErrors().isEmpty()) {
+                if (logger.isDebugEnabled() && !result.getErrors().isEmpty()) {
                     logger.debug("Verify result errors:");
                     result.getErrors().forEach((key, msg) -> logger.debug("{}: {}", key, msg));
                     logger.debug("========");
                 }
-                if (!result.getWarnings().isEmpty()) {
+                if (logger.isDebugEnabled() && !result.getWarnings().isEmpty()) {
                     logger.debug("Verify result warnings:");
                     result.getWarnings().forEach((key, msg) -> logger.debug("{}: {}", key, msg));
                     logger.debug("========");

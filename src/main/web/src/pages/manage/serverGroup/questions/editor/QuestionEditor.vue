@@ -11,15 +11,6 @@ import SubQuestionEditor from "@/pages/manage/serverGroup/questions/editor/SubQu
 import MultipleChoicesEditorPlugin from "@/pages/manage/serverGroup/questions/editor/module/MultipleChoicesEditorModule.vue";
 import QuestionPreview from "@/components/question/QuestionPreview.vue";
 import router from "@/router/index.js";
-
-const {proxy} = getCurrentInstance();
-let questionInfo = ref({});
-
-const error = ref(false);
-const errorMessage = ref("");
-const ready = ref(false);
-const loading = ref(false);
-let requested = false;
 import UIMeta from "@/utils/UI_Meta.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
@@ -28,6 +19,14 @@ import LinkPanel from "@/components/common/LinkPanel.vue";
 import {Check, RefreshLeft} from "@element-plus/icons-vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import questionCache from "@/data/QuestionCache.js";
+
+let questionInfo = ref({});
+
+const error = ref(false);
+const errorMessage = ref("");
+const ready = ref(false);
+const loading = ref(false);
+let requested = false;
 
 const view = ref('编辑');
 watch(() => view.value, () => {

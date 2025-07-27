@@ -6,6 +6,7 @@ import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.dto.manage.CommonQuestionDTO;
+import indi.etern.checkIn.dto.manage.IssueDTO;
 import indi.etern.checkIn.dto.manage.QuestionGroupDTO;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.question.impl.Question;
@@ -16,7 +17,9 @@ import indi.etern.checkIn.service.dao.verify.ValidationResult;
 import indi.etern.checkIn.utils.QuestionCreateUtils;
 import jakarta.annotation.Nonnull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 
 @Action(value = "createOrUpdateQuestionGroup",exposed = false)
 public class CreateOrUpdateQuestionGroup extends BaseAction<CreateOrUpdateQuestionGroup.Input, OutputData> {
@@ -49,7 +52,7 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<CreateOrUpdateQuesti
         Optional<Question> previousQuestion = questionService.findById(questionGroupDTO.getId());
         previousQuestion.ifPresent(questionGroupDTO::inheritFrom);
         final ValidationResult result = verificationRuleService.verify(questionGroupDTO, VerificationRuleService.VerifyTargetType.QUESTION_GROUP);
-        final Map<String, String> errors = result.getErrors();
+        final Map<String, IssueDTO> errors = result.getErrors();
         if (errors.isEmpty()) {
             final QuestionGroup questionGroup = QuestionCreateUtils.createQuestionGroup(questionGroupDTO);
             if (previousQuestion.isPresent() && questionGroupDTO.getAuthorQQ() != null) {
@@ -71,10 +74,10 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<CreateOrUpdateQuesti
                 final ValidationResult result1 = verificationRuleService.verify(commonQuestionDTO, VerificationRuleService.VerifyTargetType.MULTIPLE_CHOICES_QUESTION);
                 if (!result1.getErrors().isEmpty()) {
                     count++;
-                    for (Map.Entry<String, String> entry : result1.getErrors().entrySet()) {
+                    for (Map.Entry<String, IssueDTO> entry : result1.getErrors().entrySet()) {
                         String key = entry.getKey();
-                        String value = entry.getValue();
-                        errors.put(count + "-" + key, "第" + (count) + "道子题目：" +value);//TODO test
+                        String value = entry.getValue().getContent();
+                        errors.put(count + "-" + key, new IssueDTO("第" + (count) + "道子题目：" +value));
                     }
                 }
             }
@@ -86,10 +89,10 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<CreateOrUpdateQuesti
                 questionService.save(questionGroup);
                 context.resolve(new SuccessOutput(questionGroup));
             } else {
-                context.resolve(new ErrorOutput(errors.values()));
+                context.resolve(new ErrorOutput(errors.values().stream().map(IssueDTO::getContent).toList()));
             }
         } else {
-            context.resolve(new ErrorOutput(errors.values()));
+            context.resolve(new ErrorOutput(errors.values().stream().map(IssueDTO::getContent).toList()));
         }
     }
 }

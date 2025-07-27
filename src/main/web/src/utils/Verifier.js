@@ -364,7 +364,7 @@ export default (questionInfo) => {
                                         addNotification();
                                     }
                                     break;
-                                case "empty":
+                                case "empty" || "empty-":
                                     if (num === 0) {
                                         addNotification();
                                     }
@@ -387,7 +387,7 @@ export default (questionInfo) => {
                                 tipTemplate = tipTemplate.replace("${datum}", ` ${num} ${rule.values[1]} `);
                                 tipTemplate = tipTemplate.replace("${order}", ` 1 `);
                             }
-                            if (data.type === "NonNext" && (verificationTypeName === "empty" || verificationTypeName === "min")) {
+                            if (data.type === "NonNext" && !rule.ignoreMissingField && (verificationTypeName === "empty" || verificationTypeName === "min")) {
                                 questionInfo.inputMeta[rule.targetInputName + "-" + invokeCount] = rule.level;
                                 target[rule.id + "-" + invokeCount.toString()] = {
                                     content: tipTemplate
@@ -418,7 +418,7 @@ export default (questionInfo) => {
                                 streamOption = streamOption.sum();
                             }
                             streamOption.validate(validateNumberFunc, catchEmpty);
-                        } else if (streamOption.mapToNumber && verificationTypeName === "empty") {
+                        } else if (streamOption.mapToNumber && verificationTypeName === "empty" || verificationTypeName === "empty-") {
                             console.log(rule);
                             streamOption = streamOption.mapToNumber();
                             streamOption.validate(validateNumberFunc, catchEmpty);
@@ -485,6 +485,15 @@ export default (questionInfo) => {
                     order++;
                     questionInfo1.verify();
                 }
+            }
+        }
+        if (questionInfo.getGroup instanceof Function && (questionInfo.showWarning || questionInfo.showError)) {
+            const questionGroup = questionInfo.getGroup();
+            if (questionInfo.showWarning) {
+                questionGroup.showWarning = true;
+            }
+            if (questionInfo.showError) {
+                questionGroup.showError = true;
             }
         }
     } catch (e) {

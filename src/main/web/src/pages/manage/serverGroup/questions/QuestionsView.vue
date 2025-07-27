@@ -605,7 +605,6 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 
 function onDeleteNode(nodeObj) {
     if (nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup') {
-
         if (nodeObj.data.question.localDeleted) {
             QuestionCache.restoreDelete(nodeObj.data.question.id);
         } else {

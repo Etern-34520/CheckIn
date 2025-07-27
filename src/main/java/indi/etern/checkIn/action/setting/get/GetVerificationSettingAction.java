@@ -45,6 +45,7 @@ public class GetVerificationSettingAction extends BaseAction<NullInput, GetVerif
             verificationRuleMap.put("level",verificationRule.getLevel());
             verificationRuleMap.put("targetInputName",verificationRule.getTargetInputName());
             verificationRuleMap.put("tipTemplate",verificationRule.getTipTemplate());
+            verificationRuleMap.put("ignoreMissingField",verificationRule.isIgnoreMissingField());
             final List<Object> values = verificationRule.getValues();
             verificationRuleMap.put("values",values);
             arrayList.add(verificationRuleMap);

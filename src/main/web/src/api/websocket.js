@@ -75,7 +75,6 @@ const sendInternal = (objMessage) => {
         });
     } else {
         console.debug(`[ ${getCurrentIsoTime()} ][ WebSocket ] client to server (simple message):`, objMessage);
-
         WebSocketConnector.ws.send(message);
     }
 }
@@ -271,19 +270,19 @@ const WebSocketConnector = {
                 }
                 ws.onerror = function (error) {
                     console.error(`[ ${getCurrentIsoTime()} ][ WebSocket ] error:`, error);
-/*
-                    if (autoRetriedTimes === 3) {
-                        if (WebSocketConnector.showGlobalNotifications
-                            && !notifications["error"])
-                            notifications["error"] = ElNotification({
-                                title: '连接服务器失败',
-                                message: '请检查网络连接',
-                                position: 'bottom-right',
-                                type: 'error',
-                            });
-                        reject();
-                    }
-*/
+                    /*
+                                        if (autoRetriedTimes === 3) {
+                                            if (WebSocketConnector.showGlobalNotifications
+                                                && !notifications["error"])
+                                                notifications["error"] = ElNotification({
+                                                    title: '连接服务器失败',
+                                                    message: '请检查网络连接',
+                                                    position: 'bottom-right',
+                                                    type: 'error',
+                                                });
+                                            reject();
+                                        }
+                    */
                 }
                 ws.onopen = function () {
                     this.send({

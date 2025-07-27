@@ -170,10 +170,7 @@ const deleteQuestionInternal = (questionId) => {
     let questionInfo = QuestionCache.reactiveQuestionInfos.value[questionId];
     let localDeleted = localDeletedQuestionIds.has(questionId);
     localDeletedQuestionIds.delete(questionId);
-    if (questionInfo && questionInfo.dirty !== true && router.currentRoute.value.params.id !== questionId) {
-        delete QuestionCache.reactiveQuestionInfos.value[questionId];
-        delete QuestionCache.originalQuestionInfos[questionId];
-    } else if (localDeleted) {
+    if (localDeleted || questionInfo && questionInfo.dirty !== true && router.currentRoute.value.params.id !== questionId) {
         delete QuestionCache.reactiveQuestionInfos.value[questionId];
         delete QuestionCache.originalQuestionInfos[questionId];
     } else if (questionInfo && (questionInfo.dirty || router.currentRoute.value.params.id === questionId)) {
@@ -436,6 +433,7 @@ const QuestionCache = {
                     return true;
                 }
             }
+            return false;
         }
     },
     getDirtyErrorQuestions() {

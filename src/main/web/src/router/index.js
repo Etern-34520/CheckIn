@@ -2,6 +2,7 @@ import {createRouter, createWebHistory} from "vue-router"
 import {ElMessageBox} from "element-plus";
 import QuestionCache from "@/data/QuestionCache.js";
 import {useCookies} from "vue3-cookies";
+
 const {cookies} = useCookies();
 
 const warning1 = {
@@ -31,6 +32,8 @@ const router = createRouter({
             redirect: () => {
                 if (cookies.isKey("token")) {
                     return {name: "home"};
+                } else if (cookies.isKey("haveLogined")) {
+                    return {name: "login"};
                 } else {
                     return {name: "facade"};
                 }

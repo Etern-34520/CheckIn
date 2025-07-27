@@ -26,7 +26,12 @@ public class MainController {
         }
     }
     
-    @GetMapping({"/exam/**", "/manage/**", "/login/"})
+    @GetMapping("/exam/**")
+    public String exam() {
+        return "front-face/index.html";
+    }
+    
+    @GetMapping({"/manage/**", "/login/"})
     public String manage() {
         return "front-face/index.html";
     }

@@ -8,9 +8,7 @@ import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.serializer.LocalDateTimeSerializer;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -28,8 +26,12 @@ public class BasicQuestionDTO {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     protected LocalDateTime lastModifiedTime;
     protected List<String> partitionIds = null;
-    protected Map<String, String> errors = new HashMap<>();
-    protected Map<String, String> warnings = new HashMap<>();
+    @Setter
+    protected boolean showError = false;
+    @Setter
+    protected boolean showWarning = false;
+    protected Map<String, IssueDTO> errors = new HashMap<>();
+    protected Map<String, IssueDTO> warnings = new HashMap<>();
     
     public BasicQuestionDTO(Question question) {
         id = question.getId();

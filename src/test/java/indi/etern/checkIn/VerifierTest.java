@@ -36,7 +36,8 @@ public class VerifierTest {
                 "error",
                 0,
                 Arrays.asList(4.0, "MB"),
-                "图片大小不能超过${limit} (当前: ${datum})"
+                "图片大小不能超过${limit} (当前: ${datum})",
+                false
         );
         
         // 准备校验结果和上下文

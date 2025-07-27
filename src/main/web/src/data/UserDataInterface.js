@@ -243,6 +243,7 @@ const UserDataInterface = {
                 watch(() => UserDataInterface.currentUser.value, () => {
                     cookies.set("user", JSON.stringify(UserDataInterface.currentUser.value), "8h", "/checkIn");
                     cookies.set("token", UserDataInterface.currentUser.value.token, "8h", "/checkIn");
+                    cookies.set("haveLogined", "true", -1, "/checkIn");
                 }, {deep: true, immediate: true});
                 const connect = (user) => {
                     try {

@@ -47,7 +47,7 @@ public class DynamicValidator {
         
         final List<String> trace = new ArrayList<>(rule.getTrace());
         List<String> tokens = trace.stream().flatMap(s -> Arrays.stream(s.split("\\."))).skip(1).toList();
-        processTokens(tokens);
+        processTokens(tokens, rule.isIgnoreMissingField());
         executeChain(rule);
     }
     
@@ -60,7 +60,7 @@ public class DynamicValidator {
         return obj.getClass().getSimpleName();
     }
     
-    private void processTokens(List<String> tokens) {
+    private void processTokens(List<String> tokens, boolean ignoreMissingField) {
         for (int i = 0; i < tokens.size(); i++) {
             String token = tokens.get(i);
             
@@ -125,7 +125,7 @@ public class DynamicValidator {
                     }
                     
                     if (!field.isEmpty()) {
-                        field(field);
+                        field(field, ignoreMissingField);
                     }
                     
                     if (isAggregate) {
@@ -145,7 +145,7 @@ public class DynamicValidator {
             }
             // 处理普通字段访问
             else {
-                field(token);
+                field(token, ignoreMissingField);
             }
         }
     }
@@ -165,25 +165,26 @@ public class DynamicValidator {
     }
     
     // ===== 链式操作API =====
-    public DynamicValidator field(String fieldName) {
+    public DynamicValidator field(String fieldName, boolean ignoreMissingField) {
         operations.add((data, next) -> {
             Object value = getFieldValue(data, fieldName);
             
             // 空检查：字段缺失或值为null
             if (isEmptyCheck && value == null) {
-                context.markEmpty();
+                if (!ignoreMissingField) {
+                    context.markEmpty();
+                }
                 return;
             }
             
             // 空检查：空字符串
             if (isEmptyCheck && value instanceof String && ((String) value).isEmpty()) {
-                context.markEmpty();
                 return;
             }
             
             if (value != null) {
                 next.accept(value);
-            } else if (!isEmptyCheck) {
+            } else {
                 throw new VerifyException("Missing field: " + fieldName);
             }
         });

@@ -19,39 +19,34 @@ watch(() => UserDataInterface.logined.value, () => {
 })
 
 function autoLogin() {
-    return new Promise((resolve, reject) => {
-        const user = proxy.$cookies.get("user", "/checkIn");
-        if (user !== null) {
-            console.debug("Login from cookie:", user);
-            UserDataInterface.loginAs(user).then(() => {
-                resolve();
-            }, (err) => {
-                if (err === "token expired") {
+    const user = proxy.$cookies.get("user", "/checkIn");
+    if (user !== null) {
+        console.debug("Login from cookie:", user);
+        UserDataInterface.loginAs(user).then(() => {
+        }, (err) => {
+            if (err === "token expired") {
+                showReLogin.value = true;
+                reLoginText.value = "登录已过期"
+            } else {
+                reLoginText.value = "登录失败";
+                if (router.currentRoute.value.name !== "login") {
                     showReLogin.value = true;
-                    reLoginText.value = "登录已过期"
-                } else {
-                    reLoginText.value = "登录失败";
-                    if (router.currentRoute.value.name !== "login") {
-                        showReLogin.value = true;
-                    }
-                    ElMessage({
-                        type: "error",
-                        message: "登录失败",
-                    });
-                    reject();
                 }
-            });
-        } else {
-            Router.push({name: "login"});
-            reject();
-        }
-    })
+                ElMessage({
+                    type: "error",
+                    message: "登录失败",
+                });
+            }
+        });
+    } else {
+        Router.push({name: "login"});
+    }
 }
 
 // onBeforeMount(async () => {
-    if (!UserDataInterface.logined.value) {
+if (!UserDataInterface.logined.value) {
         autoLogin();
-    }
+}
 // });
 </script>
 
@@ -87,18 +82,5 @@ function autoLogin() {
 /*noinspection CssUnusedSymbol*/
 .main-router-enter-to, .main-router-leave-from {
     opacity: 1;
-}
-
-.global-loading {
-    opacity: 0.5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
 }
 </style>

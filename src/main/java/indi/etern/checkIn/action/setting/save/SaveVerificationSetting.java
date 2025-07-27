@@ -53,6 +53,7 @@ public class SaveVerificationSetting extends BaseAction<SaveVerificationSetting.
                     .targetInputName((String) data.get("targetInputName"))
                     .values((List<Object>) data.get("values"))
                     .tipTemplate((String) data.get("tipTemplate"))
+                    .ignoreMissingField((Boolean) data.get("ignoreMissingField"))
                     .index(dataList.indexOf(data))
                     .build();
             verificationRuleList.add(verificationRule);

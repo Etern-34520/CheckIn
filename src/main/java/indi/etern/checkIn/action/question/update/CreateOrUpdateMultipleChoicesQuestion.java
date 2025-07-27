@@ -5,6 +5,7 @@ import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.interfaces.OutputData;
+import indi.etern.checkIn.dto.manage.IssueDTO;
 import indi.etern.checkIn.dto.manage.MultipleChoicesQuestionDTO;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
@@ -49,7 +50,7 @@ public class CreateOrUpdateMultipleChoicesQuestion extends BaseAction<CreateOrUp
         Optional<Question> previousQuestion = questionService.findById(multipleChoicesQuestionDTO.getId());
         previousQuestion.ifPresent(multipleChoicesQuestionDTO::inheritFrom);
         final ValidationResult result = verificationRuleService.verify(multipleChoicesQuestionDTO, VerificationRuleService.VerifyTargetType.MULTIPLE_CHOICES_QUESTION);
-        final Map<String, String> errors = result.getErrors();
+        final Map<String, IssueDTO> errors = result.getErrors();
         if (errors.isEmpty()) {
             Question question = QuestionCreateUtils.createMultipleChoicesQuestion(multipleChoicesQuestionDTO);
             if (previousQuestion.isPresent() && multipleChoicesQuestionDTO.getAuthorQQ() != null) {
@@ -70,7 +71,7 @@ public class CreateOrUpdateMultipleChoicesQuestion extends BaseAction<CreateOrUp
             questionService.save(question);
             context.resolve(new SuccessOutput(question));
         } else {
-            context.resolve(new CreateOrUpdateMultipleChoicesQuestion.ErrorOutput(errors.values()));
+            context.resolve(new CreateOrUpdateMultipleChoicesQuestion.ErrorOutput(errors.values().stream().map(IssueDTO::getContent).toList()));
         }
     }
 }

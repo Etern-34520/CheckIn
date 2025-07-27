@@ -142,4 +142,16 @@ PermissionInfo.waitingForInitialize().then(() => {
     opacity: 0;
     transform: scale(0.95);
 }
+
+.global-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+}
 </style>

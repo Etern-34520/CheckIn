@@ -34,6 +34,8 @@ public class VerificationRule {
     @Column(name = "data_values")
     List<Object> values;
     String tipTemplate;
+    @Column(name = "ignore_missing_field")
+    boolean ignoreMissingField;
     
     protected VerificationRule() {
     }

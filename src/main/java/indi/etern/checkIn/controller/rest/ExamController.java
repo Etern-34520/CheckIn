@@ -47,9 +47,7 @@ public class ExamController {
     private final QuestionStatisticService questionStatisticService;
     private final SettingService settingService;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final GradingLevelService gradingLevelService;
-    private final WebSocketService webSocketService;
     
     public ExamController(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService, SettingService settingService, UserService userService, PasswordEncoder passwordEncoder, GradingLevelService gradingLevelService, WebSocketService webSocketService) {
         this.partitionService = partitionService;
@@ -60,9 +58,7 @@ public class ExamController {
         this.questionStatisticService = questionStatisticService;
         this.settingService = settingService;
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
         this.gradingLevelService = gradingLevelService;
-        this.webSocketService = webSocketService;
     }
     
     public record GenerateRequest(long qq, List<String> partitionIds) {
