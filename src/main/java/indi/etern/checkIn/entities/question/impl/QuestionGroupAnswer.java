@@ -37,8 +37,8 @@ public class QuestionGroupAnswer extends Answer<QuestionGroup, List<SingleQuesti
                     .filter(answer ->
                             answer.check().checkedResultType() == CheckedResultType.CORRECT)
                     .count();
-            double score = correctCount * singleMaxScore;
-            double maxScore = singleMaxScore * maxCount;
+            float score = correctCount * singleMaxScore;
+            float maxScore = singleMaxScore * maxCount;
             CheckedResultType checkedResultType;
             if (maxScore == score) {
                 checkedResultType = CheckedResultType.CORRECT;

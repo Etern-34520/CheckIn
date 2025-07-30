@@ -12,7 +12,7 @@ import lombok.Setter;
 
 import java.util.*;
 
-public class PartitionQuestionDrawer {
+public class PartitionQuestionSampler {
     private final Random random;
     @Getter
     private final Set<Question> partitionAllEnabledQuestions;
@@ -29,7 +29,7 @@ public class PartitionQuestionDrawer {
     SpecialPartitionLimit specialPartitionLimit;
     private final int allEnabledQuestionCount;
     
-    public PartitionQuestionDrawer(Partition partition, Random random) {
+    public PartitionQuestionSampler(Partition partition, Random random) {
         this.partition = partition;
         this.random = random;
         partitionAllEnabledQuestions = partition.getEnabledQuestionsSet();
@@ -105,6 +105,6 @@ public class PartitionQuestionDrawer {
     }
     
     public String toString() {
-        return "PartitionQuestionDrawer(" + partition.toString() + ")";
+        return "PartitionQuestionSampler(" + partition.toString() + ")";
     }
 }

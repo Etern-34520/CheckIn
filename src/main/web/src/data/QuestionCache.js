@@ -3,7 +3,7 @@ import randomUUIDv4 from "@/utils/UUID.js";
 import WebSocketConnector from "@/api/websocket.js";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
-import verify1 from "@/utils/Verifier.js";
+import verifier from "@/utils/Verifier.js";
 
 // import {ref} from "vue";
 
@@ -213,7 +213,7 @@ function verify(questionInfo) {
     debounceTimers[questionInfo.question.id] = setTimeout(() => {
         console.debug("verify started", questionInfo);
         delete debounceTimers[questionInfo.question.id];
-        verify1(questionInfo);
+        verifier.verifyQuestionInfo(questionInfo);
     }, 100);
 }
 
@@ -249,12 +249,12 @@ function initInfoWithoutCaching(questionInfo, question) {
     delete question.warnings;
     for (let key in question) {
         if (key === "messageId") continue;
-/*
-        if (key === "upVoters" || key === "downVoters") {
-            questionInfo.question[key] = new Set(question[key]);
-            continue;
-        }
-*/
+        /*
+                if (key === "upVoters" || key === "downVoters") {
+                    questionInfo.question[key] = new Set(question[key]);
+                    continue;
+                }
+        */
         if (key === "questions") {
             questionInfo.questionInfos = [];
             for (const subQuestion of question[key]) {
@@ -288,17 +288,17 @@ const QuestionCache = {
     dirty: false,
     reactiveDirty: ref(false),
     dirtyQuestionInfos: {},
-    /*    reset() {
-            this.reactiveQuestionInfos.value = {};
-            this.originalQuestionInfos = {};
-            this.dirty = false;
-            this.reactiveDirty.value = false;
-            this.dirtyQuestionInfos = {};
-            onUpdateLocal.length = 0;
-            onUpdateRemote.length = 0;
-            onDelete.length = 0;
-            loadRules();
-        },*/
+    reset() {
+        this.reactiveQuestionInfos.value = {};
+        this.originalQuestionInfos = {};
+        this.dirty = false;
+        this.reactiveDirty.value = false;
+        this.dirtyQuestionInfos = {};
+        onUpdateLocal.length = 0;
+        onUpdateRemote.length = 0;
+        onDelete.length = 0;
+        verifier.loadRules();
+    },
     getAsync(id) {
         return new Promise((resolve, reject) => {
             let questionInfo = QuestionCache.reactiveQuestionInfos.value[id];
@@ -540,7 +540,7 @@ const QuestionCache = {
                     QuestionCache.completelyRemove(questionInfo);
                 } else {
                     const failedReasons = failedQuestionIdReasons[questionInfo.question.id];
-                    console.warn(questionInfo.question.id , failedReasons);
+                    console.warn(questionInfo.question.id, failedReasons);
                 }
             }
             /*

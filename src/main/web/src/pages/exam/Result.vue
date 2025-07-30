@@ -39,7 +39,17 @@ const routeToSignUpOrLogin = () => {
             <div style="display: flex;flex-direction: row;align-items: stretch;margin-top: 16px;margin-left: 16px;flex-wrap: wrap">
                 <div style="display: flex;flex-direction: row;align-items: center;">
                     <el-avatar :size="64" style="margin-right: 16px" :src="getAvatarUrlOf(result.qq)"/>
-                    <el-text size="large" style="min-width: min(70vw,200px)">{{ result.qq }}</el-text>
+                    <div style="display: flex;flex-direction: row;align-items: center;flex-wrap: wrap">
+                        <el-text size="large" style="margin-right: 48px">{{ result.qq }}</el-text>
+                        <div style="display: flex;flex-direction: row;align-items: center;">
+                            <el-text type="primary" style="margin-right: 16px">
+                                总分
+                            </el-text>
+                            <el-text style="font-size: 24px;margin-right: 16px">
+                                {{ result.score }}
+                            </el-text>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div style="display: flex;flex-direction: row;align-items: stretch;margin: 16px;flex-wrap: wrap">
@@ -48,13 +58,6 @@ const routeToSignUpOrLogin = () => {
                          :style="{background: result.colorHex}"></div>
                     <el-text style="align-self: center" size="large">{{ result.level }}</el-text>
                 </div>
-                <el-statistic style="margin-right: 80px;margin-bottom: 12px;" :value="result.score">
-                    <template #title>
-                        <el-text type="primary" size="small">
-                            总分
-                        </el-text>
-                    </template>
-                </el-statistic>
                 <div style="display: flex;flex-direction: row;margin-bottom: 12px;">
                     <el-statistic style="margin-right: 32px;" :value="result.correctCount">
                         <template #title>
@@ -94,7 +97,7 @@ const routeToSignUpOrLogin = () => {
             <el-button @click="backToExam()" style="min-width: 180px">重新答题</el-button>
             <el-button v-if="result.showCreatingAccountGuide" style="min-width: 180px"
                        :type="result.signUpCompletingType?undefined:'primary'" @click="routeToSignUpOrLogin()">
-                {{ result.signUpCompletingType?"前往登录页":"注册" }}
+                {{ result.signUpCompletingType ? "前往登录页" : "注册" }}
             </el-button>
         </div>
     </div>

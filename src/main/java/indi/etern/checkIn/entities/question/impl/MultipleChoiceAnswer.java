@@ -26,20 +26,31 @@ public class MultipleChoiceAnswer extends Answer<MultipleChoicesQuestion, List<S
     @Override
     protected void initFromSource(MultipleChoicesQuestion multipleChoicesQuestion, List<String> source) {
         this.source = multipleChoicesQuestion;
-        selectedChoices = multipleChoicesQuestion.choices.stream().filter(choice -> source.contains(choice.getId())).collect(Collectors.toSet());
+        if (source.isEmpty()) {
+            selectedChoices = Set.of();
+        } else {
+            selectedChoices = multipleChoicesQuestion.choices.stream().filter(choice -> source.contains(choice.getId())).collect(Collectors.toSet());
+        }
     }
+    
+    record RateData(float rate, Answer.CheckedResultType checkedResultType) {}
     
     @Override
     public CheckedResult check() {
-        SettingItem scoreSettingItem = SettingService.singletonInstance.getItem("generating","questionScore");
-        float maxScore = scoreSettingItem.getValue(Number.class).floatValue();
         if (result == null) {
-            final boolean correct = source.checkAnswer(this);
-            if (correct) {
-                result = new CheckedResult(maxScore, maxScore, CheckedResultType.CORRECT);
-            } else {
-                result = new CheckedResult(0, maxScore, CheckedResultType.WRONG);//TODO half correct supports
+            final SettingItem item = SettingService.singletonInstance.getItem("grading", "multipleChoicesQuestionsCheckingStrategy");
+            final SettingItem item1 = SettingService.singletonInstance.getItem("grading", "enableLosePoints");
+            boolean enableLosePoints = item1.getValue(Boolean.class);
+            SettingItem scoreSettingItem = SettingService.singletonInstance.getItem("generating","questionScore");
+            float maxScore = scoreSettingItem.getValue(Number.class).floatValue();
+            
+            final MultipleChoicesQuestion.AnswerCheckingStrategy answerCheckingStrategy = MultipleChoicesQuestion.AnswerCheckingStrategy.valueOf(item.getValue(String.class).toUpperCase());
+            final RateData rateData = answerCheckingStrategy.checkAnswer(source, this);
+            float rate = rateData.rate;
+            if (!enableLosePoints && rate < 0) {
+                rate = 0f;
             }
+            result = new CheckedResult(maxScore * rate, maxScore, rateData.checkedResultType);
         }
         return result;
     }

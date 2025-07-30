@@ -65,7 +65,7 @@ const getIcon = () => {
                 </el-icon>
             </el-button>
         </template>
-        <el-scrollbar style="margin-right: 8px;margin-left: 12px">
+        <el-scrollbar style="margin-right: 8px;margin-left: 12px;width: 0;flex: 1">
             <div class="init-animate"
                  style="height: 30px;margin-top: 2px;display: flex;flex-direction: row;align-items: center">
                 <el-breadcrumb style="flex-shrink: 0;" :separator-icon="ArrowRight">
@@ -82,10 +82,10 @@ const getIcon = () => {
                         </el-breadcrumb-item>
                     </TransitionGroup>
                 </el-breadcrumb>
+                <div class="flex-blank-1" style="-webkit-app-region: drag;height: 36px;min-width: 20px"></div>
             </div>
         </el-scrollbar>
         <template v-if="!mobile">
-            <div class="flex-blank-1" style="-webkit-app-region: drag;height: 36px;min-width: 20px"></div>
             <el-button @click="router.push({name:'account-base'})" text
                        style="margin-right: 4px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
                 <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"

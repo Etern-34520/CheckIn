@@ -40,7 +40,7 @@ watch(() => model.value.maxLimitEnabled,() => {
                                style="margin-right: 8px;"></el-switch>
                     <el-input-number :disabled="disabled || !model.minLimitEnabled" v-model="model.minLimit" :min="0"
                                      :max="model.maxLimitEnabled?model.maxLimit:partition.enabledQuestionCount"
-                                     class="no-init-animate"></el-input-number>
+                                     class="disable-init-animate"></el-input-number>
                 </div>
                 <div style="display: flex">
                     <el-text style="margin-right: 8px;">上限</el-text>
@@ -49,7 +49,7 @@ watch(() => model.value.maxLimitEnabled,() => {
                     <el-input-number :disabled="disabled || !model.maxLimitEnabled" v-model="model.maxLimit"
                                      :min="model.minLimitEnabled?model.minLimit:undefined"
                                      :max="partition.enabledQuestionCount"
-                                     class="no-init-animate"></el-input-number>
+                                     class="disable-init-animate"></el-input-number>
                 </div>
             </div>
         </template>

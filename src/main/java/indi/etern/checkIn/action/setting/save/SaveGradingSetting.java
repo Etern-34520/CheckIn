@@ -22,7 +22,7 @@ public class SaveGradingSetting extends BaseAction<SaveGradingSetting.Input, Mes
     private final RoleService roleService;
     
     public record Input(Map<String, Object> data) implements InputData {}
-    public static final String[] KEYS = {"splits", "questionScore"};
+    public static final String[] KEYS = {"splits", "questionScore", "multipleChoicesQuestionsCheckingStrategy", "enableLosePoints"};
     final GradingLevelService gradingLevelService;
     
     public SaveGradingSetting(GradingLevelService gradingLevelService, RoleService roleService) {

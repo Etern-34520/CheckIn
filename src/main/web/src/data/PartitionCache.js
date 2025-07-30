@@ -70,13 +70,13 @@ WebSocketConnector.registerAction("deletePartitions", (message) => {
 const PartitionCache = {
     refPartitions: ref({}),
     fullLoaded: false,
-    /*    reset() {
-            PartitionCache.refPartitions.value = {};
-            onPartitionAdded.length = 0;
-            onPartitionDeleted.length = 0;
-            onPartitionUpdated.length = 0;
-            onPartitionsAllChanged.length = 0;
-        },*/
+    reset() {
+        PartitionCache.refPartitions.value = {};
+        onPartitionAdded.length = 0;
+        onPartitionDeleted.length = 0;
+        onPartitionUpdated.length = 0;
+        onPartitionsAllChanged.length = 0;
+    },
     getRefPartitionsAsync() {
         const promise = LockUtil.buildExecutablePromise((resolve, reject) => {
             if (PartitionCache.fullLoaded) {

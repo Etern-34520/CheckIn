@@ -366,49 +366,67 @@ onMounted(() => {
                                                         </el-button>
                                                     </div>
                                                 </transition>
-                                                <div style="margin-top: 40px;min-height: 320px">
-                                                    <el-text>
-                                                        统计信息
-                                                    </el-text>
-                                                    <div style="margin-top: 12px">
-                                                        <!--                                                        FIXME-->
-                                                        <div class="panel-1"
-                                                             style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 8px;">
-                                                            <el-statistic style="margin: 16px 32px;" title="抽取次数"
-                                                                          :value="questionInfo.question.statistic?questionInfo.question.statistic.drewCount:0"></el-statistic>
-                                                            <el-statistic style="margin: 16px 32px;" title="提交次数"
-                                                                          :value="questionInfo.question.statistic?questionInfo.question.statistic.submittedCount:0"></el-statistic>
-                                                            <el-statistic style="margin: 16px 32px;" title="答对次数"
-                                                                          :value="questionInfo.question.statistic?questionInfo.question.statistic.correctCount:0"></el-statistic>
-                                                            <el-statistic style="margin: 16px 48px 16px 32px;"
-                                                                          title="答错次数"
-                                                                          :value="questionInfo.question.statistic?questionInfo.question.statistic.wrongCount:0"></el-statistic>
-                                                            <div class="flex-blank-1"></div>
-                                                            <!--                                            <el-button link size="large" style="margin: 8px 16px;min-height: 48px">
-                                                                                                            <el-text size="large" style="margin-right: 8px;">
-                                                                                                                查看作答详情
-                                                                                                            </el-text>
-                                                                                                            <el-icon size="large">
-                                                                                                                <ArrowRightBold/>
-                                                                                                            </el-icon>
-                                                                                                        </el-button>-->
+                                                <transition name="blur-scale">
+                                                    <div style="margin-top: 40px;min-height: 320px;padding: 4px 8px 8px 8px;" v-if="questionInfo.question">
+                                                        <el-text>
+                                                            统计信息
+                                                        </el-text>
+                                                        <div style="margin-top: 12px">
+                                                            <div class="panel-1"
+                                                                 style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 8px;">
+                                                                <el-statistic style="margin: 16px 32px;" title="抽取次数"
+                                                                              :value="questionInfo.question.statistic?questionInfo.question.statistic.drewCount:0"></el-statistic>
+                                                                <el-statistic style="margin: 16px 32px;" title="提交次数"
+                                                                              :value="questionInfo.question.statistic?questionInfo.question.statistic.submittedCount:0"></el-statistic>
+                                                                <el-statistic style="margin: 16px 32px;" title="答对次数"
+                                                                              :value="questionInfo.question.statistic?questionInfo.question.statistic.correctCount:0"></el-statistic>
+                                                                <el-statistic style="margin: 16px 48px 16px 32px;"
+                                                                              title="答错次数"
+                                                                              :value="questionInfo.question.statistic?questionInfo.question.statistic.wrongCount:0"></el-statistic>
+                                                                <div class="flex-blank-1"></div>
+                                                            </div>
+                                                            <link-panel
+                                                                    @click="routeToRelatedExamRecords"
+                                                                    :description="'共 ' + (questionInfo.question.statistic?questionInfo.question.statistic.examDataCount:0) + ' 个'"
+                                                                    name="使用了该题的测试" :icon="Check"></link-panel>
                                                         </div>
-<!--                                                        FIXME-->
-                                                        <link-panel
-                                                                @click="routeToRelatedExamRecords"
-                                                                :description="'共 ' + (questionInfo.question.statistic?questionInfo.question.statistic.examDataCount:0) + ' 个'"
-                                                                name="使用了该题的测试" :icon="Check"></link-panel>
                                                     </div>
-                                                </div>
+                                                </transition>
                                             </div>
                                         </transition>
                                     </div>
                                     <div v-else>
                                         <transition name="switch-preview" mode="out-in">
-                                            <question-preview v-if="questionInfo.question"
-                                                              :key="questionInfo.question.id"
-                                                              :questionInfo="questionInfo"
-                                                              :force-mobile="forceMobilePreview"/>
+                                            <div v-if="questionInfo.question" :key="questionInfo.question.id">
+                                                <question-preview :questionInfo="questionInfo"
+                                                                  :force-mobile="forceMobilePreview"/>
+                                                <transition name="blur-scale">
+                                                    <div style="margin-top: 40px;min-height: 320px;padding: 4px 8px 8px 8px;" v-if="questionInfo.question">
+                                                        <el-text>
+                                                            统计信息
+                                                        </el-text>
+                                                        <div style="margin-top: 12px">
+                                                            <div class="panel-1"
+                                                                 style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 8px;">
+                                                                <el-statistic style="margin: 16px 32px;" title="抽取次数"
+                                                                              :value="questionInfo.question.statistic?questionInfo.question.statistic.drewCount:0"></el-statistic>
+                                                                <el-statistic style="margin: 16px 32px;" title="提交次数"
+                                                                              :value="questionInfo.question.statistic?questionInfo.question.statistic.submittedCount:0"></el-statistic>
+                                                                <el-statistic style="margin: 16px 32px;" title="答对次数"
+                                                                              :value="questionInfo.question.statistic?questionInfo.question.statistic.correctCount:0"></el-statistic>
+                                                                <el-statistic style="margin: 16px 48px 16px 32px;"
+                                                                              title="答错次数"
+                                                                              :value="questionInfo.question.statistic?questionInfo.question.statistic.wrongCount:0"></el-statistic>
+                                                                <div class="flex-blank-1"></div>
+                                                            </div>
+                                                            <link-panel
+                                                                    @click="routeToRelatedExamRecords"
+                                                                    :description="'共 ' + (questionInfo.question.statistic?questionInfo.question.statistic.examDataCount:0) + ' 个'"
+                                                                    name="使用了该题的测试" :icon="Check"></link-panel>
+                                                        </div>
+                                                    </div>
+                                                </transition>
+                                            </div>
                                             <el-empty v-else/>
                                         </transition>
                                     </div>

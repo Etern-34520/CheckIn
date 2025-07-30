@@ -203,6 +203,26 @@ onUnmounted(() => {
                                     </div>
                                 </transition-group>
                             </VueDraggable>
+                            <div style="margin-top: 32px">
+                                <el-text size="large">
+                                    题目判分标准
+                                </el-text>
+                                <div style="display: flex;flex-direction: column;margin-top: 16px;margin-bottom: 20dvh;margin-left: 8px">
+                                    <el-text style="align-self: start">
+                                        选择题（单选/多选）
+                                    </el-text>
+                                    <el-radio-group :disabled="!editing" v-model="data.multipleChoicesQuestionsCheckingStrategy">
+                                        <el-radio label="全部正确才可得分" value="all_correct"/>
+                                        <el-radio label="错误时不得分，部分正确时按正确选项占比" value="correct_rated"/>
+                                        <el-radio label="按正确选项和错误选项占比" value="correct_rated_and_wrong_rated"/>
+                                        <el-radio label="按正确选项占比和错误双倍占比" value="correct_rated_and_wrong_double_rated"/>
+                                    </el-radio-group>
+                                    <div>
+                                        <el-text type="info" style="margin-right: 12px">启用倒扣分制</el-text>
+                                        <el-switch :disabled="!editing" v-model="data.enableLosePoints"/>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div v-else-if="loadingError" style="display:flex;flex-direction: column">
                             <el-empty description="获取设置失败"></el-empty>

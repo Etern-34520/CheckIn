@@ -169,7 +169,7 @@ VALUES ('admin', '02c72178-bac2-424c-aa38-1c60a2aa1d6e'),
 INSERT INTO server_setting_items (setting_key, setting_value, clazz)
 VALUES ('generating.completingPartitions', '[]', 'java.util.ArrayList'),
        ('generating.completingStrategy', '"required"', 'java.lang.String'),
-       ('generating.drawingStrategy', '"weighted"', 'java.lang.String'),
+       ('generating.samplingStrategy', '"weighted"', 'java.lang.String'),
        ('generating.partitionRange', '[0,1]', 'java.util.ArrayList'),
        ('generating.questionAmount', '0', 'java.lang.Integer'),
        ('generating.questionScore', '5', 'java.lang.Integer'),

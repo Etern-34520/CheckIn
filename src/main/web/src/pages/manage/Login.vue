@@ -6,7 +6,6 @@ import UI_Meta from "@/utils/UI_Meta.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
 
 const colorScheme = UI_Meta.colorScheme;
-UserDataInterface.logout();
 
 const getIcon = () => {
     if (colorScheme.value === 'light') {

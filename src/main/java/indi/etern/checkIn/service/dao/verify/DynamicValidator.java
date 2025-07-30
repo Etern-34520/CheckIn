@@ -184,6 +184,8 @@ public class DynamicValidator {
             
             if (value != null) {
                 next.accept(value);
+            } else if (ignoreMissingField) {
+                logger.debug("Ignoring missing value for field {}", fieldName);
             } else {
                 throw new VerifyException("Missing field: " + fieldName);
             }
