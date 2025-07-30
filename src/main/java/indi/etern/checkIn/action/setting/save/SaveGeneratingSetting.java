@@ -29,7 +29,7 @@ public class SaveGeneratingSetting extends BaseAction<SaveGeneratingSetting.Inpu
             "requiredPartitions",
             "showRequiredPartitions",
             "completingPartitions",
-            "drawingStrategy",
+            "samplingStrategy",
             "completingStrategy"
     };
     

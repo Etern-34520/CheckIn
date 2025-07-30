@@ -12,7 +12,6 @@ import indi.etern.checkIn.dto.manage.ManageDTOUtils;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.PartitionService;
-import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.VerificationRuleService;
 import indi.etern.checkIn.service.dao.verify.ValidationResult;
 import jakarta.annotation.Nonnull;
@@ -31,14 +30,12 @@ public class GetQuestionsSimpleDataAction extends BaseAction<GetQuestionsSimpleD
     private final VerificationRuleService verificationRuleService;
     private final TransactionTemplate transactionTemplate;
     private final Logger logger = LoggerFactory.getLogger(GetQuestionsSimpleDataAction.class);
-    private final QuestionService questionService;
     
-    public GetQuestionsSimpleDataAction(PartitionService partitionService, VerificationRuleService verificationRuleService, TransactionTemplate transactionTemplate, QuestionService questionService) {
+    public GetQuestionsSimpleDataAction(PartitionService partitionService, VerificationRuleService verificationRuleService, TransactionTemplate transactionTemplate) {
         super();
         this.partitionService = partitionService;
         this.verificationRuleService = verificationRuleService;
         this.transactionTemplate = transactionTemplate;
-        this.questionService = questionService;
     }
     
     @Override
@@ -55,9 +52,9 @@ public class GetQuestionsSimpleDataAction extends BaseAction<GetQuestionsSimpleD
                     final CommonQuestionDTO questionInfoForVerify = ManageDTOUtils.ofQuestion(question);
                     
                     ValidationResult result;
-                    final String previousDigest = question.getVerificationDigest();
                     final String currentDigest = verificationRuleService.digest(questionInfoForVerify);
-                    if (!previousDigest.equals(currentDigest)) {
+                    final String previousDigest = question.getVerificationDigest();
+                    if (!currentDigest.equals(previousDigest)) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Verify question[\"{}\"] due to invalid digest, previous:\"{}\", current:\"{}\"",question.getId(),previousDigest,currentDigest);
                         }

@@ -48,12 +48,13 @@ public class CreateOrUpdateMultipleChoicesQuestion extends BaseAction<CreateOrUp
         final Input input = context.getInput();
         final var multipleChoicesQuestionDTO = input.multipleChoicesQuestionDTO;
         Optional<Question> previousQuestion = questionService.findById(multipleChoicesQuestionDTO.getId());
+        final boolean authorChanged = previousQuestion.isPresent() && multipleChoicesQuestionDTO.getAuthorQQ() != null;
         previousQuestion.ifPresent(multipleChoicesQuestionDTO::inheritFrom);
         final ValidationResult result = verificationRuleService.verify(multipleChoicesQuestionDTO, VerificationRuleService.VerifyTargetType.MULTIPLE_CHOICES_QUESTION);
         final Map<String, IssueDTO> errors = result.getErrors();
         if (errors.isEmpty()) {
             Question question = QuestionCreateUtils.createMultipleChoicesQuestion(multipleChoicesQuestionDTO);
-            if (previousQuestion.isPresent() && multipleChoicesQuestionDTO.getAuthorQQ() != null) {
+            if (authorChanged) {
                 context.requirePermission("change question author");
             }
             if (previousQuestion.isEmpty() ||

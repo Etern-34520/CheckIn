@@ -70,6 +70,10 @@ const user = UserDataInterface.getCurrentUser();
 const permissionLoaded = ref(false);
 PermissionInfo.waitingForInitialize().then(() => {
     permissionLoaded.value = true;
+});
+
+onBeforeUnmount(() => {
+    UserDataInterface.logout();
 })
 </script>
 

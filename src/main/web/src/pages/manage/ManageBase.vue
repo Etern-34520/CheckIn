@@ -10,13 +10,14 @@ import PermissionInfo from "@/auth/PermissionInfo.js";
 const {proxy} = getCurrentInstance();
 const showReLogin = ref(false);
 const reLoginText = ref("登录失败");
+// const showComponents = ref(true);
 
 watch(() => UserDataInterface.logined.value, () => {
     WebSocketConnector.showGlobalNotifications = UserDataInterface.logined.value;
     if (UserDataInterface.logined.value) {
         showReLogin.value = false;
     }
-})
+});
 
 function autoLogin() {
     const user = proxy.$cookies.get("user", "/checkIn");
@@ -39,15 +40,14 @@ function autoLogin() {
             }
         });
     } else {
+        // showComponents.value = false;
         Router.push({name: "login"});
     }
 }
 
-// onBeforeMount(async () => {
 if (!UserDataInterface.logined.value) {
-        autoLogin();
+    autoLogin();
 }
-// });
 </script>
 
 <template>

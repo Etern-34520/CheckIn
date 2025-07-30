@@ -33,8 +33,6 @@ public abstract class CommonQuestionDTO extends BasicQuestionDTO {
     protected List<ImageDTO> images;
     protected List<Long> upVoters;
     protected List<Long> downVoters;
-//    @JsonDeserialize(using = AuthorQQDeserializer.class)
-    protected Long authorQQ;
     protected StatisticDTO statistic = null;
     
     public CommonQuestionDTO(Question question) {
@@ -68,6 +66,7 @@ public abstract class CommonQuestionDTO extends BasicQuestionDTO {
         this.authorQQ = Objects.requireNonNullElse(authorQQ, 0L);
     }
     
+    @Override
     public void inheritFrom(Question question) {
         super.inheritFrom(question);
         final Map<String, String> images1 = question.getImages();
@@ -85,13 +84,6 @@ public abstract class CommonQuestionDTO extends BasicQuestionDTO {
         
         upVoters = question.getUpVoters().stream().map(User::getQQNumber).toList();
         downVoters = question.getDownVoters().stream().map(User::getQQNumber).toList();
-        
-        final User author = question.getAuthor();
-        if (authorQQ == null && author != null) {
-            authorQQ = author.getQQNumber();
-        } else if (authorQQ != null && authorQQ == 0L) {
-            authorQQ = null;
-        }
         
         if (statistic == null) {
             QuestionStatisticService.singletonInstance.findById(question.getId()).ifPresent(questionStatistic -> {

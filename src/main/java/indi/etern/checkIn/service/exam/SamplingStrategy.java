@@ -15,15 +15,15 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-public enum DrawingStrategy {
+public enum SamplingStrategy {
     WEIGHTED {
         @Override
-        public void drawQuestions(Set<Question> questions , Map<Partition, PartitionQuestionDrawer> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
-            WeightRandom<PartitionQuestionDrawer> partitionQuestionDrawerWeightRandom = new WeightRandom<>(random);
-            final List<WeightRandom.Part<PartitionQuestionDrawer>> weightedParts =
-                    map.values().stream().map(partitionQuestionDrawer ->
-                                    new WeightRandom.Part<>(partitionQuestionDrawer)
-                                            .useWeightCalc(partitionQuestionDrawer::getAvailableCount)
+        public void drawQuestions(Set<Question> questions , Map<Partition, PartitionQuestionSampler> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
+            WeightRandom<PartitionQuestionSampler> partitionQuestionDrawerWeightRandom = new WeightRandom<>(random);
+            final List<WeightRandom.Part<PartitionQuestionSampler>> weightedParts =
+                    map.values().stream().map(partitionQuestionSampler ->
+                                    new WeightRandom.Part<>(partitionQuestionSampler)
+                                            .useWeightCalc(partitionQuestionSampler::getAvailableCount)
                     ).toList();
             partitionQuestionDrawerWeightRandom.addItems(weightedParts);
             while (true) {
@@ -34,30 +34,30 @@ public enum DrawingStrategy {
                 } else if (count > targetQuestionAmount) {
                     throw new IndexOutOfBoundsException(count + " > " + targetQuestionAmount);
                 }
-                WeightRandom.Part<PartitionQuestionDrawer> partitionQuestionDrawerPart;
+                WeightRandom.Part<PartitionQuestionSampler> partitionQuestionDrawerPart;
                 try {
                     partitionQuestionDrawerPart = partitionQuestionDrawerWeightRandom.weightedRandomPart();
                 } catch (IllegalStateException|ArrayIndexOutOfBoundsException e) {
                     throw new NotEnoughQuestionsForExamException(e);
                 }
                 
-                PartitionQuestionDrawer partitionQuestionDrawer = partitionQuestionDrawerPart.getT();
+                PartitionQuestionSampler partitionQuestionSampler = partitionQuestionDrawerPart.getT();
                 try {
                     final int rest = targetQuestionAmount - count;
-                    final Question question = partitionQuestionDrawer.drawOneCountLessThanOrEqual(rest);
+                    final Question question = partitionQuestionSampler.drawOneCountLessThanOrEqual(rest);
                     questions.add(question);
                     logger.debug("WEIGHTED:{} added, previous has {}, rest {}", question, count, rest);
                 } catch (PartitionMaxLimitReachedException|PartitionEmptiedException e) {
-                    logger.warn("WEIGHTED:{} removed due to strategy or empty", partitionQuestionDrawer.getPartition());
+                    logger.warn("WEIGHTED:{} removed due to strategy or empty", partitionQuestionSampler.getPartition());
                     partitionQuestionDrawerWeightRandom.removeItem(partitionQuestionDrawerPart);
-                    map.values().forEach(partitionQuestionDrawer1 -> partitionQuestionDrawer1.invalidAll(partitionQuestionDrawer.getPartitionAllEnabledQuestions()));
+                    map.values().forEach(partitionQuestionSampler1 -> partitionQuestionSampler1.invalidAll(partitionQuestionSampler.getPartitionAllEnabledQuestions()));
                 }
             }
         }
     },
     RANDOM {
         @Override
-        public void drawQuestions(Set<Question> questions, Map<Partition, PartitionQuestionDrawer> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
+        public void drawQuestions(Set<Question> questions, Map<Partition, PartitionQuestionSampler> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
             while (true) {
                 final int count = QuestionRealCountCounter.count(questions);
                 if (count == targetQuestionAmount) {
@@ -70,21 +70,21 @@ public enum DrawingStrategy {
                 if (randomBound == 0) {
                     throw new NotEnoughQuestionsForExamException();
                 }
-                PartitionQuestionDrawer partitionQuestionDrawer = map.values().stream().toList().get(random.nextInt(randomBound));
+                PartitionQuestionSampler partitionQuestionSampler = map.values().stream().toList().get(random.nextInt(randomBound));
                 try {
                     final int rest = targetQuestionAmount - count;
-                    final Question question = partitionQuestionDrawer.drawOneCountLessThanOrEqual(rest);
+                    final Question question = partitionQuestionSampler.drawOneCountLessThanOrEqual(rest);
                     questions.add(question);
                     logger.debug("RANDOM: {} added, previous has {}, rest {}", question, count, rest);
                 } catch (PartitionMaxLimitReachedException | PartitionEmptiedException e) {
-                    map.remove(partitionQuestionDrawer.getPartition());
-                    map.values().forEach(partitionQuestionDrawer1 -> partitionQuestionDrawer1.invalidAll(partitionQuestionDrawer.getPartitionAllEnabledQuestions()));
-                    logger.warn("RANDOM: {} removed due to strategy or empty", partitionQuestionDrawer.getPartition());
+                    map.remove(partitionQuestionSampler.getPartition());
+                    map.values().forEach(partitionQuestionSampler1 -> partitionQuestionSampler1.invalidAll(partitionQuestionSampler.getPartitionAllEnabledQuestions()));
+                    logger.warn("RANDOM: {} removed due to strategy or empty", partitionQuestionSampler.getPartition());
                 }
             }
         }
     };
     final Logger logger = LoggerFactory.getLogger(getClass());
     
-    public abstract void drawQuestions(Set<Question> questions, Map<Partition, PartitionQuestionDrawer> map, Random random, int questionAmount) throws NotEnoughQuestionsForExamException;
+    public abstract void drawQuestions(Set<Question> questions, Map<Partition, PartitionQuestionSampler> map, Random random, int questionAmount) throws NotEnoughQuestionsForExamException;
 }

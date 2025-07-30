@@ -117,10 +117,23 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
         answersMap = new HashMap<>();
         handleAnswerItemMap(orderedQuestions, answerMap, null);
         final ExamResult examResult = ExamResult.from(this);
-        examResult.setCorrectCount((int) answersMap.values().stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.CORRECT).count());
-        examResult.setHalfCorrectCount((int) answersMap.values().stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.HALF_CORRECT).count());
-        examResult.setWrongCount((int) answersMap.values().stream().filter(answer1 -> answer1.check().checkedResultType() == Answer.CheckedResultType.WRONG).count());
-        examResult.setScore((float) answersMap.values().stream().mapToDouble(answer -> answer.check().score()).sum());
+        int correctCount = 0;
+        int halfCorrectCount = 0;
+        int wrongCount = 0;
+        float score = 0;
+        for (Answer<?, ?> answer1 : answersMap.values()) {
+            final Answer.CheckedResult checkedResult = answer1.check();
+            switch (checkedResult.checkedResultType()) {
+                case CORRECT -> correctCount++;
+                case HALF_CORRECT -> halfCorrectCount++;
+                case WRONG -> wrongCount++;
+            }
+            score += checkedResult.score();
+        }
+        examResult.setCorrectCount(correctCount);
+        examResult.setHalfCorrectCount(halfCorrectCount);
+        examResult.setWrongCount(wrongCount);
+        examResult.setScore((float) Math.round(score * 10) / 10);
         return examResult;
     }
     
@@ -131,7 +144,13 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
             Question question = orderedQuestions.get(index);
             
             Object value = entry.getValue();
-            if (value instanceof List<?> choiceIndexes && question instanceof MultipleChoicesQuestion multipleChoicesQuestion) {
+            if (question instanceof MultipleChoicesQuestion multipleChoicesQuestion) {
+                List<?> choiceIndexes;
+                if (value instanceof List<?> choiceIndexes1) {
+                    choiceIndexes = choiceIndexes1;
+                } else {
+                    choiceIndexes = List.of();
+                }
                 //noinspection unchecked
                 var choiceAnswer = multipleChoicesQuestion.newAnswerFrom((List<String>) choiceIndexes);
                 if (questionGroup == null) {

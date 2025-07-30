@@ -10,16 +10,7 @@ const warning1 = {
         return (!(from.fullPath.split("/")[2] === to.fullPath.split("/")[2])) && QuestionCache.dirty
     },
     title: "确定离开？",
-    leave: "未保存的内容将暂缓于内存，刷新页面后将丢失",
-    confirm: "确定离开",
-    cancel: "返回保存",
-};
-const warning2 = {
-    enabled: (from, to) => {
-        return true;
-    },
-    title: "确定离开？",
-    leave: "离开后将丢失未保存的内容",
+    leave: "未保存的内容将暂缓于内存，刷新页面或登出后将丢失",
     confirm: "确定离开",
     cancel: "返回保存",
 };

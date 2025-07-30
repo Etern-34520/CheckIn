@@ -7,6 +7,7 @@ import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.serializer.LocalDateTimeSerializer;
 import lombok.*;
 
@@ -32,6 +33,7 @@ public class BasicQuestionDTO {
     protected boolean showWarning = false;
     protected Map<String, IssueDTO> errors = new HashMap<>();
     protected Map<String, IssueDTO> warnings = new HashMap<>();
+    protected Long authorQQ;
     
     public BasicQuestionDTO(Question question) {
         id = question.getId();
@@ -43,6 +45,7 @@ public class BasicQuestionDTO {
         if (linkWrapper instanceof ToPartitionsLink toPartitionsLink) {
             partitionIds = toPartitionsLink.getTargets().stream().map(Partition::getId).toList();
         }
+        authorQQ = question.getAuthor().getQQNumber();
     }
     
     public void inheritFrom(Question question) {
@@ -57,6 +60,12 @@ public class BasicQuestionDTO {
             if (linkWrapper instanceof ToPartitionsLink toPartitionsLink) {
                 partitionIds = toPartitionsLink.getTargets().stream().map(Partition::getId).toList();
             }
+        }
+        final User author = question.getAuthor();
+        if (authorQQ == null && author != null) {
+            authorQQ = author.getQQNumber();
+        } else if (authorQQ != null && authorQQ == 0L) {
+            authorQQ = null;
         }
     }
 }

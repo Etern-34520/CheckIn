@@ -144,12 +144,6 @@ const invalidExam = () => {
     });
 }
 
-/*
-const banQQ = () => {
-    //TODO
-}
-*/
-
 const slideWay = ref(router.currentRoute.value.name === "related-requests");
 const remove = router.afterEach((to, from, failure) => {
     setTimeout(() => {
@@ -379,9 +373,6 @@ onBeforeUnmount(() => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <!--                                        <div class="panel-1" style="padding: 16px">
-                                                                                    TODO action track
-                                                                                </div>-->
                                     </div>
                                 </div>
                             </el-scrollbar>

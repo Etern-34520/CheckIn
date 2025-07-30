@@ -93,7 +93,7 @@ watch(UIMeta.mobile, (val) => {
 
 .mobile .left-view {
     position: fixed;
-    height: calc(100vh - 36px);
+    height: calc(100vh - 52px);
     width: 85vw;
     z-index: 2003;
     backdrop-filter: blur(32px);

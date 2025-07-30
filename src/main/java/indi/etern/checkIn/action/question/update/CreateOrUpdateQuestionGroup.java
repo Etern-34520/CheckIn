@@ -50,12 +50,13 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<CreateOrUpdateQuesti
         final Input input = context.getInput();
         final var questionGroupDTO = input.questionGroupDTO;
         Optional<Question> previousQuestion = questionService.findById(questionGroupDTO.getId());
+        final boolean authorChanged = previousQuestion.isPresent() && questionGroupDTO.getAuthorQQ() != null;
         previousQuestion.ifPresent(questionGroupDTO::inheritFrom);
         final ValidationResult result = verificationRuleService.verify(questionGroupDTO, VerificationRuleService.VerifyTargetType.QUESTION_GROUP);
         final Map<String, IssueDTO> errors = result.getErrors();
         if (errors.isEmpty()) {
             final QuestionGroup questionGroup = QuestionCreateUtils.createQuestionGroup(questionGroupDTO);
-            if (previousQuestion.isPresent() && questionGroupDTO.getAuthorQQ() != null) {
+            if (authorChanged) {
                 context.requirePermission("change question group author");
             }
             if (previousQuestion.isEmpty() ||

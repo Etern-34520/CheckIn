@@ -91,20 +91,24 @@ getData();
 
 const updateLimits = (partitionIds) => {
     const removedIds = [];
-    for (const partitionIdString in data.value.specialPartitionLimits) {
-        removedIds.push(partitionIdString);
+    for (const partitionId1 in data.value.specialPartitionLimits) {
+        if (!partitionIds.includes(partitionId1)) {
+            removedIds.push(partitionId1);
+        }
     }
     for (const removedId of removedIds) {
         delete data.value.specialPartitionLimits[removedId];
     }
     for (const partitionId of partitionIds) {
-        data.value.specialPartitionLimits[partitionId] = {
-            partitionId: partitionId,
-            minLimitEnabled: false,
-            minLimit: 0,
-            maxLimitEnabled: false,
-            maxLimit: 100,
-        };
+        if(!data.value.specialPartitionLimits[partitionId]) {
+            data.value.specialPartitionLimits[partitionId] = {
+                partitionId: partitionId,
+                minLimitEnabled: false,
+                minLimit: 0,
+                maxLimitEnabled: false,
+                maxLimit: 100,
+            };
+        }
     }
 }
 </script>
@@ -193,7 +197,7 @@ const updateLimits = (partitionIds) => {
                                        :label="partition.name" :value="partition.id"></el-option>
                         </el-select>
                         <el-text size="large" class="field-label">抽取策略</el-text>
-                        <el-radio-group v-model="data.drawingStrategy" size="large" style="padding: 4px 20px"
+                        <el-radio-group v-model="data.samplingStrategy" size="large" style="padding: 4px 20px"
                                         :disabled="!editing">
                             <el-radio value="weighted">以各分区题目数量为权重按比抽取</el-radio>
                             <el-radio value="random">随机从所选及必选分区抽取</el-radio>
@@ -215,7 +219,7 @@ const updateLimits = (partitionIds) => {
                                 </el-select>
                                 <waterfall :data="data.specialLimitsEnabledPartitions" :min-row-width="600">
                                     <template #item="{item,index}">
-                                        <div class="panel-1 no-init-animate"
+                                        <div class="panel-1 disable-init-animate"
                                              style="padding: 8px 24px;margin: 2px;display: flex;align-items: center"
                                              :key="index">
                                             <special-partition-rule :disabled="!editing" style="margin:2px;flex: 1"

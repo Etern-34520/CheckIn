@@ -2,6 +2,8 @@ import WebSocketConnector from "@/api/websocket.js";
 import {useCookies} from "vue3-cookies";
 import router from "@/router/index.js";
 import PermissionInfo from "@/auth/PermissionInfo.js";
+import QuestionCache from "@/data/QuestionCache.js";
+import PartitionCache from "@/data/PartitionCache.js";
 
 const {cookies} = useCookies();
 
@@ -145,6 +147,8 @@ const UserDataInterface = {
         cookies.remove("token", "/checkIn");
         WebSocketConnector.close();
         UserDataInterface.logined.value = false;
+        QuestionCache.reset();
+        PartitionCache.reset();
         if (backToLogin) {
             router.push({name: 'login'});
         }
@@ -238,6 +242,9 @@ const UserDataInterface = {
     loginAs: (user) => {
         return new Promise((resolve, reject) => {
             try {
+                if (UserDataInterface.logined.value) {
+                    UserDataInterface.logout(false);
+                }
                 UserDataInterface.currentUser.value = user;
                 delete UserDataInterface.currentUser.value["rolePermission"];
                 watch(() => UserDataInterface.currentUser.value, () => {
