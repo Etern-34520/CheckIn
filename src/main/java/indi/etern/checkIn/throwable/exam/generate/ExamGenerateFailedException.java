@@ -9,6 +9,5 @@ public abstract class ExamGenerateFailedException extends ExamRuntimeException {
     public ExamGenerateFailedException() {
         super();
     }
-    public abstract String getEnDescription();
-    public abstract String getCnDescription();
+    public abstract String getDescription();
 }

@@ -18,7 +18,7 @@ import java.util.Set;
 public enum SamplingStrategy {
     WEIGHTED {
         @Override
-        public void drawQuestions(Set<Question> questions , Map<Partition, PartitionQuestionSampler> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
+        public void sampleQuestions(Set<Question> questions , Map<Partition, PartitionQuestionSampler> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
             WeightRandom<PartitionQuestionSampler> partitionQuestionDrawerWeightRandom = new WeightRandom<>(random);
             final List<WeightRandom.Part<PartitionQuestionSampler>> weightedParts =
                     map.values().stream().map(partitionQuestionSampler ->
@@ -57,7 +57,7 @@ public enum SamplingStrategy {
     },
     RANDOM {
         @Override
-        public void drawQuestions(Set<Question> questions, Map<Partition, PartitionQuestionSampler> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
+        public void sampleQuestions(Set<Question> questions, Map<Partition, PartitionQuestionSampler> map, Random random, int targetQuestionAmount) throws NotEnoughQuestionsForExamException {
             while (true) {
                 final int count = QuestionRealCountCounter.count(questions);
                 if (count == targetQuestionAmount) {
@@ -86,5 +86,5 @@ public enum SamplingStrategy {
     };
     final Logger logger = LoggerFactory.getLogger(getClass());
     
-    public abstract void drawQuestions(Set<Question> questions, Map<Partition, PartitionQuestionSampler> map, Random random, int questionAmount) throws NotEnoughQuestionsForExamException;
+    public abstract void sampleQuestions(Set<Question> questions, Map<Partition, PartitionQuestionSampler> map, Random random, int questionAmount) throws NotEnoughQuestionsForExamException;
 }

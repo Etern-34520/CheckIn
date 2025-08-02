@@ -144,7 +144,7 @@ const updateLimits = (partitionIds) => {
                             <div style="display: flex;flex-direction: column;margin-right: 32px">
                                 <el-text size="large" class="field-label">题量</el-text>
                                 <div style="display: flex;padding: 8px 0">
-                                    <el-input-number v-model="data.questionAmount" :disabled="!editing"></el-input-number>
+                                    <el-input-number v-model="data.questionAmount" :min="1" :disabled="!editing"></el-input-number>
                                 </div>
                             </div>
                             <div style="display: flex;flex-direction: column;">

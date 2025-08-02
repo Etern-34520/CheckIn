@@ -40,7 +40,7 @@ public class ExamGenerator {
         this.specialPartitionLimitService = specialPartitionLimitService;
     }
     
-    private void drawQuestions(Set<Question> drewQuestions, List<Partition> partitions, int questionAmount, Random random, SamplingStrategy samplingStrategy, CompletingStrategy completingStrategy) throws NotEnoughQuestionsForExamException, MinQuestionLimitOutOfBoundsException {
+    private void sampleQuestions(Set<Question> drewQuestions, List<Partition> partitions, int questionAmount, Random random, SamplingStrategy samplingStrategy, CompletingStrategy completingStrategy) throws NotEnoughQuestionsForExamException, MinQuestionLimitOutOfBoundsException {
         if (logger.isDebugEnabled()) {
             List<Question> allEnabledQuestions = new ArrayList<>();
             partitions.forEach(partition -> {
@@ -63,7 +63,7 @@ public class ExamGenerator {
                 }
             });
             logger.debug("all enabled questions[{}]: {}", allEnabledQuestionsCount, allEnabledQuestions.stream().map(Question::getId).toList());
-            logger.debug("draw questions({}) for partitions({})", questionAmount, partitions);
+            logger.debug("sample questions({}) for partitions({})", questionAmount, partitions);
         }
         
         try {
@@ -73,45 +73,52 @@ public class ExamGenerator {
             logger.debug("completing partitions: {}", completingPartitions);
 
 //            int completingCount = questionAmount - QuestionRealCountCounter.count(drewQuestions);
-            logger.debug("draw questions({}) for completing partitions({})", questionAmount, completingPartitions);
+            logger.debug("sample questions({}) for completing partitions({})", questionAmount, completingPartitions);
             getQuestions(completingPartitions, random, samplingStrategy, questionAmount, drewQuestions);
         }
     }
     
-    private void getQuestions(List<Partition> partitions, Random random, SamplingStrategy samplingStrategy, int questionAmount, Set<Question> drewQuestions) throws NotEnoughQuestionsForExamException, MinQuestionLimitOutOfBoundsException {
+    private void getQuestions(List<Partition> partitions, Random random, SamplingStrategy samplingStrategy, int questionAmount, Set<Question> sampledQuestions) throws NotEnoughQuestionsForExamException, MinQuestionLimitOutOfBoundsException {
         Map<Partition, SpecialPartitionLimit> specialPartitionLimitMap = specialPartitionLimitService.getLimits(partitions);
-        Map<Partition, PartitionQuestionSampler> drawersMap = new HashMap<>();
+        Map<Partition, PartitionQuestionSampler> samplersMap = new HashMap<>();
         partitions.forEach((partition) -> {
-            final PartitionQuestionSampler drawer = new PartitionQuestionSampler(partition, random);
-            drawer.setSpecialPartitionLimit(specialPartitionLimitMap.get(partition));
-            drawersMap.put(partition, drawer);
+            final PartitionQuestionSampler sampler = new PartitionQuestionSampler(partition, random);
+            sampler.setSpecialPartitionLimit(specialPartitionLimitMap.get(partition));
+            samplersMap.put(partition, sampler);
         });
-        drawersMap.values().forEach(drawer -> {
-            drawer.invalidAll(drewQuestions);
-            drewQuestions.addAll(drawer.initLeastQuestions());
+        samplersMap.values().forEach(sampler -> {
+            sampler.invalidAll(sampledQuestions);
+            sampledQuestions.addAll(sampler.initLeastQuestions());
         });
         
         if (questionAmount < 0) {
             throw new MinQuestionLimitOutOfBoundsException();
         } else if (questionAmount == 0) {
-            logger.debug("no need to draw more questions");
+            logger.debug("no need to sample more questions");
         } else {
-            samplingStrategy.drawQuestions(drewQuestions, drawersMap, random, questionAmount);
+            samplingStrategy.sampleQuestions(sampledQuestions, samplersMap, random, questionAmount);
         }
     }
     
     public ExamData generateExam(long qq, List<Partition> selectedPartitions) {
         try {
-            final SamplingStrategy samplingStrategy = getDrawingStrategy();
+            final SamplingStrategy samplingStrategy = getSamplingStrategy();
             final CompletingStrategy completingStrategy = getCompletingStrategy();
             
             SettingItem settingItem2 = settingService.getItem("generating", "questionAmount");
             int questionAmount = settingItem2.getValue(Integer.class);
             logger.debug("question amount: {}", questionAmount);
             
-            SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
-            //noinspection unchecked
-            List<String> requiredPartitionIds = (List<String>) settingItem3.getValue(List.class);
+            List<String> requiredPartitionIds;
+            
+            try {
+                SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
+                //noinspection unchecked
+                requiredPartitionIds = (List<String>) settingItem3.getValue(List.class);
+            } catch (Exception ignored) {
+                requiredPartitionIds = Collections.emptyList();
+            }
+            
             List<String> selectedPartitionIds = selectedPartitions.stream().map(Partition::getId).toList();
             List<Partition> partitions = new ArrayList<>(requiredPartitionIds.size() + selectedPartitionIds.size());
             partitions.addAll(selectedPartitions);
@@ -125,7 +132,7 @@ public class ExamGenerator {
             SettingItem expireTimeSetting = settingService.getItem("exam", "expiredPeriod");
             Period expiredPeriod = expireTimeSetting.getValue(Period.class);
             LinkedHashSet<Question> questions = new LinkedHashSet<>();
-            drawQuestions(questions, partitions, questionAmount, new Random(), samplingStrategy, completingStrategy);
+            sampleQuestions(questions, partitions, questionAmount, new Random(), samplingStrategy, completingStrategy);
             
             return ExamData.builder()
                     .id(UUID.randomUUID().toString())
@@ -152,7 +159,7 @@ public class ExamGenerator {
         return completingStrategy;
     }
     
-    private SamplingStrategy getDrawingStrategy() {
+    private SamplingStrategy getSamplingStrategy() {
         SettingItem settingItem = settingService.getItem("generating", "samplingStrategy");
         String drawingStrategyName = settingItem.getValue(String.class);
         SamplingStrategy samplingStrategy = SamplingStrategy.valueOf(drawingStrategyName.toUpperCase());
@@ -169,7 +176,7 @@ public class ExamGenerator {
                 Optional<Question> optionalQuestion = questionService.findById(id);
                 optionalQuestion.ifPresent(question -> existedQuestions[originalIds.indexOf(id)] = question);
             });
-            final SamplingStrategy samplingStrategy = getDrawingStrategy();
+            final SamplingStrategy samplingStrategy = getSamplingStrategy();
             final CompletingStrategy completingStrategy = getCompletingStrategy();
             List<Partition> selectedPartitions = partitionService.findAllByIds(examData.getSelectedPartitionIds());
             final Set<Question> questions = new LinkedHashSet<>(
@@ -179,7 +186,7 @@ public class ExamGenerator {
                             .map(Optional::get)
                             .toList()
             );
-            drawQuestions(questions, selectedPartitions, examData.getQuestionAmount(), new Random(), samplingStrategy, completingStrategy);
+            sampleQuestions(questions, selectedPartitions, examData.getQuestionAmount(), new Random(), samplingStrategy, completingStrategy);
             for (Question question : existedQuestions) {
                 if (question != null) {
                     questions.remove(question);

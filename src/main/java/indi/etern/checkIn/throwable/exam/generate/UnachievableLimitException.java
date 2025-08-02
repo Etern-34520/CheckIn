@@ -10,12 +10,7 @@ public class UnachievableLimitException extends ExamGenerateFailedException {
     }
     
     @Override
-    public String getEnDescription() {
-        return "Cannot generate exam in current generating options";
-    }
-    
-    @Override
-    public String getCnDescription() {
+    public String getDescription() {
         return "无法在当前选项下生成试题";
     }
 }

@@ -3,6 +3,7 @@ package indi.etern.checkIn.service.exam.specialPartitionLimit;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.service.dao.SettingService;
+import io.jsonwebtoken.lang.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -47,8 +48,10 @@ public class SpecialPartitionLimitService {
             Map<String,Map<String,Object>> map = settingItem4.getValue(Map.class);
             specialPartitionLimits = SpecialPartitionLimitService.from(map.values());
         } catch (NoSuchElementException e) {
+            specialPartitionLimits = SpecialPartitionLimitService.from(Collections.of());
             logger.debug("No specialPartitionLimits found");
         } catch (Exception e) {
+            specialPartitionLimits = SpecialPartitionLimitService.from(Collections.of());
             logger.debug("On flush", e);
         }
     }

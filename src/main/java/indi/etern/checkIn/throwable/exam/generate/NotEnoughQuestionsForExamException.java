@@ -10,12 +10,7 @@ public class NotEnoughQuestionsForExamException extends ExamGenerateFailedExcept
     }
     
     @Override
-    public String getEnDescription() {
-        return "Not enough questions for exam";
-    }
-    
-    @Override
-    public String getCnDescription() {
+    public String getDescription() {
         return "可用题目不足";
     }
 }

@@ -9,6 +9,7 @@ import indi.etern.checkIn.action.setting.get.GetFacadeSetting;
 import indi.etern.checkIn.action.setting.get.GetGradingSetting;
 import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.question.impl.Partition;
+import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.service.dao.*;
 import indi.etern.checkIn.service.exam.ExamGenerator;
@@ -19,6 +20,7 @@ import indi.etern.checkIn.throwable.exam.ExamException;
 import indi.etern.checkIn.throwable.exam.ExamIllegalStateException;
 import indi.etern.checkIn.throwable.exam.ExamSubmittedException;
 import indi.etern.checkIn.throwable.exam.generate.ExamGenerateFailedException;
+import indi.etern.checkIn.throwable.exam.generate.PartitionsOutOfRangeException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
@@ -66,24 +68,41 @@ public class ExamController {
     
     @PostMapping(path = "/api/generate")
     @Transactional(noRollbackFor = Throwable.class)
-    public Map<String, ?> generateExam(@RequestBody GenerateRequest generateRequest) {
+    public String generateExam(@RequestBody GenerateRequest generateRequest) throws JsonProcessingException {
         try {
-            final ExamData examData = examGenerator.generateExam(generateRequest.qq, partitionService.findAllByIds(generateRequest.partitionIds));
-            examDataService.invalidAllByQQ(generateRequest.qq);
-            examDataService.save(examData);
-            questionStatisticService.appendStatistic(examData);
-            Map<String, Object> result = new HashMap<>();
-            result.put("examId", examData.getId());
-            result.put("questionItemCount", examData.getQuestionIds().size());
-            examData.sendUpdateExamRecord();
-            return result;
+            List<Integer> range = null;
+            try {
+                SettingItem item = settingService.getItem("generating","partitionRange");
+                final ArrayList<?> value = item.getValue(ArrayList.class);
+                if (value.size() == 2) {
+                    //noinspection unchecked
+                    range = (List<Integer>) value;
+                } else {
+                    logger.warn("Setting \"generating.partitionRange\" not match to 2 elements");
+                }
+            } catch (Exception ignored) {
+                logger.warn("Setting \"generating.partitionRange\" missing");
+            }
+            final int size = generateRequest.partitionIds.size();
+            if (range == null || (size >= range.getFirst() && size <= range.getLast())) {
+                final ExamData examData = examGenerator.generateExam(generateRequest.qq, partitionService.findAllByIds(generateRequest.partitionIds));
+                examDataService.invalidAllByQQ(generateRequest.qq);
+                examDataService.save(examData);
+                questionStatisticService.appendStatistic(examData);
+                Map<String, Object> result = new HashMap<>();
+                result.put("examId", examData.getId());
+                result.put("questionItemCount", examData.getQuestionIds().size());
+                examData.sendUpdateExamRecord();
+                return objectMapper.writeValueAsString(result);
+            } else {
+                throw new PartitionsOutOfRangeException();
+            }
         } catch (ExamGenerateFailedException e) {
             Map<String, String> errorDataMap = new HashMap<>();
             errorDataMap.put("type", "error");
-            errorDataMap.put("enDescription", e.getEnDescription());
-            errorDataMap.put("cnDescription", e.getCnDescription());
+            errorDataMap.put("description", e.getDescription());
             errorDataMap.put("exceptionType", e.getClass().getSimpleName());
-            return errorDataMap;
+            return objectMapper.writeValueAsString(errorDataMap);
         }
     }
     

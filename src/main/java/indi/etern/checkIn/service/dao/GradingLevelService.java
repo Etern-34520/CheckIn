@@ -16,6 +16,7 @@ import java.util.List;
 public class GradingLevelService {
     private final GradingLevelRepository gradingLevelRepository;
     public static GradingLevelService singletonInstance;
+    
     protected GradingLevelService(GradingLevelRepository gradingLevelRepository) {
         singletonInstance = this;
         this.gradingLevelRepository = gradingLevelRepository;

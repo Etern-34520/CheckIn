@@ -652,9 +652,12 @@ const QuestionCache = {
         const id = questionInfo.question.id;
         localDeletedQuestionIds.add(id);
         delete QuestionCache.reactiveQuestionInfos.value[id];
+        delete QuestionCache.dirtyQuestionInfos[id];
         questionInfo.remoteDeleted = true;
         questionInfo.question.localDeleted = true;
         questionInfo.localNew = false;
+        QuestionCache.dirty = Object.keys(QuestionCache.dirtyQuestionInfos).length > 0;
+        QuestionCache.reactiveDirty.value = QuestionCache.dirty;
         deleteQuestionInternal(id);
     },
     delete(id) {

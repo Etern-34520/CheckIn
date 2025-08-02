@@ -929,7 +929,7 @@ const getTypeName = (obj) => {
                     <div v-if="!Component"
                          style="width: 100%;height: 100%;display: flex;flex-direction: column;align-items: center;justify-content: center">
                         <el-text type="info" size="large">
-                            选择题目以编辑
+                            选择题目以编辑或预览
                         </el-text>
                     </div>
                     <component v-else :is="Component"/>

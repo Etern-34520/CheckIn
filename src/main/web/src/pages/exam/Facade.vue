@@ -109,7 +109,8 @@ const routeGenerateExam = () => {
                        :preview="true"/>
             <div>
                 <el-button type="primary" size="large" style="margin-top: 36px;align-self: center;min-width: 180px"
-                           @click="routeGenerateExam">生成题目
+                           :disabled="!extraData.serviceAvailable" @click="routeGenerateExam">
+                    {{extraData.serviceAvailable?"生成题目":"服务暂不可用"}}
                 </el-button>
             </div>
         </div>

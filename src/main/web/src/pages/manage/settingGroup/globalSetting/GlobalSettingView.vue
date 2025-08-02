@@ -10,6 +10,7 @@ import Waterfall from "@/components/common/Waterfall.vue";
 import router from "@/router/index.js";
 import HarmonyOSIcon_InfoCircle from "@/components/icons/HarmonyOSIcon_InfoCircle.vue";
 import PermissionInfo from "@/auth/PermissionInfo.js";
+import ServerStatusInfo from "@/components/common/ServerStatusInfo.vue";
 
 defineExpose({
     name: "Base"
@@ -24,6 +25,8 @@ watch(() => PermissionInfo.permissions.value, () => {
 
 const groups = [
     {
+        name: "服务状态"//占位
+    }, {
         name: "题库设置",
         items: [
             //TODO
@@ -55,7 +58,7 @@ const groups = [
                 }
             },
             {
-                name: "评级设置", description: "分数线 分级 消息", icon: Check, action: () => {
+                name: "评级设置", description: "分数线 分级 消息 判分标准", icon: Check, action: () => {
                     router.push({name: "grading-setting"});
                 }
             }
@@ -89,7 +92,11 @@ const groups = [
     <el-scrollbar>
         <waterfall :data="groups" :min-row-width="700">
             <template #item="{item:group,index}">
-                <div style="display: flex;flex-direction: column;margin-bottom: 16px;margin-left: 8px;margin-right: 8px">
+                <div v-if="index === 0" style="display: flex;flex-direction: column;margin-bottom: 16px;margin-left: 8px;margin-right: 8px">
+                    <el-text style="font-size: 20px;align-self: baseline;margin-bottom: 8px">服务状态</el-text>
+                    <server-status-info :display-statuses="['UNAVAILABLE', 'MAY_FAIL', 'FULLY_AVAILABLE']"/>
+                </div>
+                <div v-else style="display: flex;flex-direction: column;margin-bottom: 16px;margin-left: 8px;margin-right: 8px">
                     <el-text style="font-size: 20px;align-self: baseline;margin-bottom: 8px">{{ group.name }}</el-text>
                     <template v-for="item of group.items">
                         <link-panel @click="item.action()" :key="item.name"

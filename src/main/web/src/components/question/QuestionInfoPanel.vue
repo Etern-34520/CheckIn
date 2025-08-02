@@ -78,7 +78,7 @@ const getTypeName = (type) => {
                             <el-text type="info" size="small" style="margin-right: 16px">作者</el-text>
                             <el-button
                                     @click.stop="router.push({name:'user-detail', params: {id: questionInfo.question.authorQQ}})"
-                                    text class="disable-init-animate"
+                                    link class="disable-init-animate"
                                     style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
                                 <el-avatar shape="circle" :size="20" :src="getAvatarUrlOf(questionInfo.question.authorQQ)"
                                            style="margin-right: 4px;"></el-avatar>

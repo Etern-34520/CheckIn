@@ -181,10 +181,13 @@ const ableToChangeAuthor = () => {
         <template #title>
             <div style="display: flex;flex-direction: row;align-items: center">
                 <el-text style="line-height: 32px;margin-left: 16px;margin-right: 8px">图片</el-text>
-                <el-tag type="info">{{
+                <div class="flex-blank-1"></div>
+                <el-text type="info" style="margin-right: 16px">
+                    数量
+                    {{
                         questionInfo.question.images ? questionInfo.question.images.length : 0
                     }}
-                </el-tag>
+                </el-text>
             </div>
         </template>
         <template #content>

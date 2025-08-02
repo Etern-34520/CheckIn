@@ -115,5 +115,9 @@ public class QuestionService {
         return questionRepository.findAllByLastModifiedTimeBeforeAndLinkWrapper_LinkType(
                 LocalDateTime.now(), QuestionLinkImpl.LinkType.PARTITION_LINK, Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
     }
+    
+    public int countEnabled() {
+        return Math.toIntExact(questionRepository.countByEnabledIsTrue());
+    }
 }
 

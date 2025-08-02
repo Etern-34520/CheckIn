@@ -4,6 +4,7 @@ import MultipleChoicesViewModule from "@/components/exam/MultipleChoicesViewModu
 import QuestionGroupSubQuestionViewModule from "@/components/exam/QuestionGroupSubQuestionViewModule.vue";
 import ImagesViewer from "@/components/viewer/ImagesViewer.vue";
 import UIMeta from "@/utils/UI_Meta.js";
+import {Picture} from "@element-plus/icons-vue";
 
 const props = defineProps({
     question: {

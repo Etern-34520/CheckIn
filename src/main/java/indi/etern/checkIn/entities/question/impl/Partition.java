@@ -30,10 +30,9 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     
     @Getter
     @JsonIgnore
-    @ManyToMany(mappedBy = "targets")
+    @ManyToMany(mappedBy = "targets", fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)
     Set<ToPartitionsLink> questionLinks;
-    
     
     protected Partition() {
     }

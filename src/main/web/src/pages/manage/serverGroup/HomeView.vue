@@ -9,6 +9,7 @@ import UI_Meta from "@/utils/UI_Meta.js";
 import Waterfall from "@/components/common/Waterfall.vue";
 import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import QuestionCache from "@/data/QuestionCache.js";
+import ServerStatusInfo from "@/components/common/ServerStatusInfo.vue";
 
 const user = UserDataInterface.getCurrentUser();
 const animate = ref(false);
@@ -160,6 +161,7 @@ const openRecord = (id) => {
                             </el-text>
                         </div>
                     </div>
+                    <server-status-info/>
                     <div style="padding: 8px 16px 0;flex:1" class="panel">
                         <el-text size="large" style="align-self: baseline;margin-top: 4px">今日答题记录</el-text>
                         <div v-loading="loadingTodayExamRecords"

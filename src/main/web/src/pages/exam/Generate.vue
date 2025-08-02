@@ -48,7 +48,7 @@ const startExam = () => {
         } else {
             loadingExam.value = false;
             ElMessageBox.alert(
-                    data.cnDescription?data.cnDescription:data.enDescription?data.enDescription:data.exceptionType,
+                    data.description?data.description:data.exceptionType,
                     "生成题目时出错", {
                         type: "error",
                         draggable: true,
@@ -131,7 +131,8 @@ const back = () => {
         <div class="flex-blank-1"></div>
         <el-button type="primary" size="large" :loading="loadingExam" :loading-icon="_Loading_"
                    style="margin-top: 36px;align-self: center;min-width: 180px"
-                   @click="startExam" :disabled="!(validate1 && validate2)">开始答题
+                   :disabled="!extraData.serviceAvailable || !(validate1 && validate2)" @click="startExam">
+            {{extraData.serviceAvailable?"开始答题":"服务暂不可用"}}
         </el-button>
     </div>
 </template>

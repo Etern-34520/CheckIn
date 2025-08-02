@@ -7,7 +7,8 @@ import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import Collapse from "@/components/common/Collapse.vue";
-import MultipleChoicesEditorPlugin from "@/pages/manage/serverGroup/questions/editor/module/MultipleChoicesEditorModule.vue";
+import MultipleChoicesEditorPlugin
+    from "@/pages/manage/serverGroup/questions/editor/module/MultipleChoicesEditorModule.vue";
 import QuestionCache from "@/data/QuestionCache.js";
 import ImageViewer from "@/components/viewer/ImagesViewer.vue";
 import UIMeta from "@/utils/UI_Meta.js";
@@ -205,10 +206,11 @@ const ableToChangeAuthor = () => {
                     </transition-group>
                 </div>
                 <div style="display: flex;flex-direction: row">
-                    <div class="panel-1 question-input disable-init-animate" :class="questionInfo.inputMeta['content-0']"
+                    <div class="panel-1 question-input disable-init-animate"
+                         :class="questionInfo.inputMeta['content-0']"
                          style="flex: 4;max-height: 80px;padding:8px 16px;margin: 0">
                         <el-scrollbar>
-                            <el-text type="info">字数 {{questionInfo.question.content.length}}</el-text>
+                            <el-text type="info">字数 {{ questionInfo.question.content.length }}</el-text>
                             <br/>
                             <el-text>
                                 {{ questionInfo.question.content }}
@@ -217,7 +219,8 @@ const ableToChangeAuthor = () => {
                     </div>
                     <div style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column;justify-content: stretch">
                         <el-select v-model="questionInfo.question.authorQQ" filterable clearable placeholder="作者"
-                                   :class="questionInfo.inputMeta['author-0']" :disabled="!ableToChangeAuthor(questionInfo)">
+                                   :class="questionInfo.inputMeta['author-0']"
+                                   :disabled="!ableToChangeAuthor(questionInfo)">
                             <template #label="{ label, value }">
                                 <div style="display: flex;align-items: center;justify-items: stretch">
                                     <el-avatar shape="circle" :size="24" style="margin: 4px" fit="cover"
@@ -259,19 +262,31 @@ const ableToChangeAuthor = () => {
         </template>
         <template #content>
             <div style="margin-right: 30px;">
-                <image-viewer v-if="questionInfo.question.images" :images="questionInfo.question.images" v-model="imageDialogVisible" v-model:index="viewerIndex"/>
+                <image-viewer v-if="questionInfo.question.images" :images="questionInfo.question.images"
+                              v-model="imageDialogVisible" v-model:index="viewerIndex"/>
                 <div style="position: relative;">
                     <div class="question-input" style="display: flex;min-height: 200px !important;"
                          :class="questionInfo.inputMeta['content-0']">
                         <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
                                    :show-toolbar-name="UIMeta.touch.value" :footers="['scrollSwitch']"
-                                   :key="UIMeta.colorScheme" preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
+                                   :key="UIMeta.colorScheme" preview-theme="vuepress"
+                                   :toolbars-exclude="['save','catalog','github']"
                                    :theme="UIMeta.colorScheme.value"/>
                     </div>
                 </div>
-                <collapse :content-background="false" class="question-input" :class="questionInfo.inputMeta['images-0']">
+                <collapse :content-background="false" class="question-input"
+                          :class="questionInfo.inputMeta['images-0']">
                     <template #title>
-                        <el-text style="line-height: 32px;margin-left: 8px;">图片</el-text>
+                        <div style="display: flex;flex-direction: row;align-items: center">
+                            <el-text style="line-height: 32px;margin-left: 16px;margin-right: 8px">图片</el-text>
+                            <div class="flex-blank-1"></div>
+                            <el-text type="info" style="margin-right: 16px">
+                                数量
+                                {{
+                                    questionInfo.question.images ? questionInfo.question.images.length : 0
+                                }}
+                            </el-text>
+                        </div>
                     </template>
                     <template #content>
                         <div class="question-image-upload panel-1" style="padding: 16px">

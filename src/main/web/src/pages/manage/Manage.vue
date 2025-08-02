@@ -61,9 +61,6 @@ let updateBreadcrumbArray = (to) => {
     }
 };
 const stop = router.afterEach(updateBreadcrumbArray);
-onUnmounted(() => {
-    stop();
-});
 
 const user = UserDataInterface.getCurrentUser();
 
@@ -73,6 +70,7 @@ PermissionInfo.waitingForInitialize().then(() => {
 });
 
 onBeforeUnmount(() => {
+    stop();
     UserDataInterface.logout();
 })
 </script>
