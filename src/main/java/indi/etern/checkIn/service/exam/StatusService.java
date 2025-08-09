@@ -8,6 +8,8 @@ import indi.etern.checkIn.service.dao.GradingLevelService;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.SettingService;
+import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLimit;
+import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLimitService;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -23,19 +25,21 @@ public class StatusService {
     private final QuestionService questionService;
     private final PartitionService partitionService;
     private final SettingService settingService;
+    private final SpecialPartitionLimitService specialPartitionLimitService;
     private ServerStatuses serverStatuses;
+    
+    public StatusService(GradingLevelService gradingLevelService, QuestionService questionService, PartitionService partitionService, SettingService settingService, SpecialPartitionLimitService specialPartitionLimitService) {
+        this.gradingLevelService = gradingLevelService;
+        this.questionService = questionService;
+        this.partitionService = partitionService;
+        this.settingService = settingService;
+        this.specialPartitionLimitService = specialPartitionLimitService;
+    }
     
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
         flush();
-    }
-    
-    public StatusService(GradingLevelService gradingLevelService, QuestionService questionService, PartitionService partitionService, SettingService settingService) {
-        this.gradingLevelService = gradingLevelService;
-        this.questionService = questionService;
-        this.partitionService = partitionService;
-        this.settingService = settingService;
     }
     
     public StatusInfo checkSubmitAvailability() {
@@ -59,8 +63,9 @@ public class StatusService {
         String reason = null;
         try {
             SettingItem settingItem2 = settingService.getItem("generating", "questionAmount");
-            int questionAmount = Math.min(settingItem2.getValue(Integer.class), 1);
+            int questionAmount = Math.max(settingItem2.getValue(Integer.class), 1);
             
+            List<Partition> requiredPartitions = null;
             if (questionService.countEnabled() < questionAmount) {
                 generateAvailability = Status.UNAVAILABLE;
                 type = "questionsNotEnough";
@@ -71,11 +76,27 @@ public class StatusService {
                     SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
                     //noinspection unchecked
                     List<String> requiredPartitionIds = (List<String>) settingItem3.getValue(List.class);
-                    final List<Partition> partitions = partitionService.findAllByIds(requiredPartitionIds);
-                    final int requiredPartitionsQuestionsCount = Math.toIntExact(
-                            partitions.stream()
-                                    .map(Partition::getQuestionLinks).flatMap(Collection::stream)
-                                    .map(ToPartitionsLink::getSource).filter(Question::isEnabled).distinct().count());
+                    requiredPartitions = partitionService.findAllByIds(requiredPartitionIds);
+                    final Map<Partition, SpecialPartitionLimit> limits = specialPartitionLimitService.getAll();
+                    int requiredPartitionsQuestionsCount = 0;
+                    Set<Question> uniqueValues = new HashSet<>();
+                    for (Partition partition : requiredPartitions) {
+                        Set<ToPartitionsLink> questionLinks = partition.getQuestionLinks();
+                        int partitionQuestionsCount = 0;
+                        for (ToPartitionsLink toPartitionsLink : questionLinks) {
+                            Question source = toPartitionsLink.getSource();
+                            if (source.isEnabled() &&
+                                    uniqueValues.add(source)) {
+                                final SpecialPartitionLimit limit = limits.get(partition);
+                                if (limit == null || limit.checkMax(partitionQuestionsCount + 1)) {
+                                    partitionQuestionsCount++;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        requiredPartitionsQuestionsCount += partitionQuestionsCount;
+                    }
                     fullyAvailableQuestionsCount += requiredPartitionsQuestionsCount;
                 } catch (NoSuchElementException ignored) {
                 }
@@ -96,28 +117,34 @@ public class StatusService {
                 }
                 
                 final List<Partition> partitions = partitionService.findAll();
+                if (requiredPartitions != null) {
+                    partitions.removeAll(requiredPartitions);
+                }
                 partitions.sort(Comparator.comparing(Partition::getEnabledQuestionCount));
                 int countMin = 0;
                 int countMax = 0;
-                Set<Question> uniqueValues = new HashSet<>();
-                int limit1 = min;
-                int limit2 = max;
-                for (Partition partition : partitions) {
-                    Set<ToPartitionsLink> questionLinks = partition.getQuestionLinks();
-                    for (ToPartitionsLink toPartitionsLink : questionLinks) {
-                        Question source = toPartitionsLink.getSource();
-                        if (source.isEnabled()) {
-                            if (uniqueValues.add(source)) {
-                                if (limit1 > 0) {
-                                    countMin++;
-                                }
-                                if (limit2 > 0) {
-                                    countMax++;
-                                }
-                            }
+                Set<Question> uniqueValues1 = new HashSet<>();
+                Set<Question> uniqueValues2 = new HashSet<>();
+                int minLimit = min;
+                int maxLimit = max;
+                for (int i = 0; i < partitions.size(); i++) {
+                    Partition least = partitions.get(i);
+                    Partition most = partitions.get(partitions.size() - 1 - i);
+                    Set<ToPartitionsLink> mostLinks = most.getQuestionLinks();
+                    Set<ToPartitionsLink> leastLinks = least.getQuestionLinks();
+                    for (ToPartitionsLink mostLink : mostLinks) {
+                        Question source = mostLink.getSource();
+                        if (source.isEnabled() && uniqueValues1.add(source) && maxLimit > 0) {
+                            countMax++;
                         }
                     }
-                    if (limit1-- <= 0 && limit2-- <= 0) break;
+                    for (ToPartitionsLink leastLink : leastLinks) {
+                        Question source = leastLink.getSource();
+                        if (source.isEnabled() && uniqueValues2.add(source) && minLimit > 0) {
+                            countMin++;
+                        }
+                    }
+                    if (minLimit-- <= 0 && maxLimit-- <= 0) break;
                 }
                 if (fullyAvailableQuestionsCount + countMin >= questionAmount) {
                     generateAvailability = Status.FULLY_AVAILABLE;
@@ -141,7 +168,7 @@ public class StatusService {
         return new StatusInfo(generateAvailability, type, reason);
     }
     
-//    @AfterReturning("relationChanged()")
+    //    @AfterReturning("relationChanged()")
     @Transactional(readOnly = true)
     public synchronized void flush() {
         serverStatuses = new ServerStatuses(checkGenerateAvailability(), checkSubmitAvailability());
@@ -150,17 +177,6 @@ public class StatusService {
     public ServerStatuses getStatus() {
         return serverStatuses;
     }
-    
-/*
-    @Pointcut("execution(* indi.etern.checkIn.service.dao.GradingLevelService.delete*(..)) || " +
-            "execution(* indi.etern.checkIn.service.dao.GradingLevelService.save*(..)) || " +
-            "execution(* indi.etern.checkIn.service.dao.QuestionService.save*(..)) || " +
-            "execution(* indi.etern.checkIn.service.dao.QuestionService.delete(..)) || " +
-            "execution(* indi.etern.checkIn.service.dao.PartitionService.save(..)) || " +
-            "execution(* indi.etern.checkIn.service.dao.PartitionService.delete(..)) || " +
-            "execution(* indi.etern.checkIn.service.dao.SettingService.set*(..))")
-    public void relationChanged() {}
-*/
     
     public enum Status {
         FULLY_AVAILABLE,

@@ -57,8 +57,11 @@ const getAlertStatusDescription = (status) => {
 </script>
 
 <template>
-    <div v-if="serverStatuses" class="server-statuses">
-        <el-alert :closable="false" style="border-radius: 4px;flex: 1;min-width: min(280px, 80dvw)"
+    <div v-if="serverStatuses &&
+     displayStatuses.includes(serverStatuses.submitAvailability.status) &&
+      displayStatuses.includes(serverStatuses.generateAvailability.status)"
+         class="server-statuses">
+        <el-alert :closable="false" style="border-radius: 4px;flex: 1;min-width: min(140px, 80dvw)"
                   v-if="displayStatuses.includes(serverStatuses.generateAvailability.status)"
                   :type="getAlertType(serverStatuses.generateAvailability.status)">
             <div style="display: flex;flex-direction: row;flex-wrap: wrap">
@@ -70,7 +73,7 @@ const getAlertStatusDescription = (status) => {
                 </el-text>
             </div>
         </el-alert>
-        <el-alert :closable="false" style="border-radius: 4px;flex: 1;min-width: min(280px, 80dvw)"
+        <el-alert :closable="false" style="border-radius: 4px;flex: 1;min-width: min(140px, 80dvw)"
                   v-if="displayStatuses.includes(serverStatuses.submitAvailability.status)"
                   :type="getAlertType(serverStatuses.submitAvailability.status)">
             <div style="display: flex;flex-direction: row;flex-wrap: wrap">

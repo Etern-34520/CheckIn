@@ -12,12 +12,11 @@ import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const responsiveSplitpane = ref();
 const filterText = ref("");
-const userGroups = UserDataInterface.roles;
 const userGroupsArray = ref([]);
 watch(() => UserDataInterface.roles, (newValue) => {
     userGroupsArray.value = [];
-    for (const userGroupType in userGroups) {
-        userGroupsArray.value.push(userGroups[userGroupType]);
+    for (const userGroupType in UserDataInterface.roles) {
+        userGroupsArray.value.push(UserDataInterface.roles[userGroupType]);
     }
 }, {immediate: true, deep: true});
 const loading = ref(true);
@@ -130,8 +129,7 @@ const cancelCreating = () => {
                             v-if="PermissionInfo.hasPermission('role','create role')">
                     <template #reference>
                         <!--suppress JSValidateTypes -->
-                        <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px;margin-bottom: 8px"
-                                   class="disable-init-animate">
+                        <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px;margin-bottom: 8px">
                             新建用户组
                         </el-button>
                     </template>
@@ -163,18 +161,19 @@ const cancelCreating = () => {
                         :animation="150"
                         ghostClass="ghost"
                         handle=".handle">
-                    <transition-group name="filter">
+                    <transition-group name="slide-hide">
                         <template v-for="userGroup of userGroupsArray" :key="userGroup.type">
-                            <div style="display: flex;flex-direction: row;align-items: center"
-                                 v-if="doFilter(userGroup)">
-                                <transition name="handle" mode="out-in">
-                                    <div class="handle" style="cursor: grab">
-                                        <HarmonyOSIcon_Handle v-if="changingLevel" style="margin-right: 8px"
-                                                              :size="18"/>
-                                    </div>
-                                </transition>
-                                <user-group-card class="clickable disable-init-animate" :user-group="userGroup"
-                                                 @click="openView(userGroup)" style="flex: 1"/>
+                            <div class="slide-hide-base" v-if="doFilter(userGroup)">
+                                <div style="display: flex;flex-direction: row;align-items: center">
+                                    <transition name="handle" mode="out-in">
+                                        <div class="handle" style="cursor: grab">
+                                            <HarmonyOSIcon_Handle v-if="changingLevel" style="margin-right: 8px"
+                                                                  :size="18"/>
+                                        </div>
+                                    </transition>
+                                    <user-group-card class="clickable disable-init-animate" :user-group="userGroup"
+                                                     @click="openView(userGroup)" style="flex: 1"/>
+                                </div>
                             </div>
                         </template>
                     </transition-group>
@@ -192,31 +191,6 @@ const cancelCreating = () => {
 </template>
 
 <style scoped>
-/*noinspection CssUnusedSymbol*/
-.filter-enter-active {
-    overflow: hidden;
-    transition: transform 0.3s var(--ease-out-quint) 0.2s,
-    max-height 0.2s var(--ease-in-out-quint);
-}
-
-/*noinspection CssUnusedSymbol*/
-.filter-leave-active {
-    overflow: hidden;
-    transition: transform 0.3s var(--ease-in-quint),
-    max-height 0.2s var(--ease-in-out-quint) 0.3s;
-}
-
-/*noinspection CssUnusedSymbol*/
-.filter-enter-from, .filter-leave-to {
-    max-height: 0;
-    transform: translateX(-100%);
-}
-
-/*noinspection CssUnusedSymbol*/
-.filter-leave-from, .filter-enter-to {
-    max-height: 40px;
-    transform: translateX(0);
-}
 
 /*noinspection CssUnusedSymbol*/
 .handle-enter-active,

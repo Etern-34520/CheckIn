@@ -5,12 +5,11 @@ import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.LinkedHashMap;
 
 @Action("deleteRole")
 public class DeleteRoleAction extends BaseAction<DeleteRoleAction.Input, MessageOutput> {
@@ -35,13 +34,7 @@ public class DeleteRoleAction extends BaseAction<DeleteRoleAction.Input, Message
         } else {
             roleService.delete(role);
             
-            LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-            map.put("type","deleteRole");
-            LinkedHashMap<String,Object> role1 = new LinkedHashMap<>();
-            role1.put("type",role.getType());
-            role1.put("level",role.getLevel());
-            map.put("role",role1);
-            webSocketService.sendMessageToAll(map);
+            webSocketService.sendMessageToAll(Message.of("deleteRole", role));
             
             context.resolve(MessageOutput.success("Role deleted"));
         }

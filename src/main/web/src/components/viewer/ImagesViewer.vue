@@ -44,7 +44,7 @@ onBeforeUnmount(() => {
         <div class="images-viewer" v-if="model" @click="model=false">
             <el-empty v-if="!images[index]"/>
             <div v-else style="display: flex;flex: 1;align-items: center">
-                <el-button link style="width: 120px;height: 40vh" :disabled="index===0" @click.stop="index = index-1">
+                <el-button link style="width: 120px;height: 40dvh" :disabled="index===0" @click.stop="index = index-1">
                     <el-icon size="40">
                         <ArrowLeft/>
                     </el-icon>
@@ -53,14 +53,14 @@ onBeforeUnmount(() => {
                     <div class="slide-switch-base" :class="slideWay?'left-to-right':''">
                         <transition :name="slideWay?'slide-left-to-right':'slide-right-to-left'">
                             <el-image :src="images[nextIndex].url" :key="nextIndex" @click.stop
-                                      style="height: calc(100vh - 60px);" fit="contain"/>
+                                      style="height: calc(100dvh - 60px);" fit="contain"/>
                         </transition>
                     </div>
                     <div class="index-label panel">
                         <el-text>{{ index + 1 }} / {{ images.length }}</el-text>
                     </div>
                 </div>
-                <el-button link style="width: 120px;height: 40vh" :disabled="index===images.length-1" @click.stop="index = index+1">
+                <el-button link style="width: 120px;height: 40dvh" :disabled="index===images.length-1" @click.stop="index = index+1">
                     <el-icon size="40">
                         <ArrowRight/>
                     </el-icon>

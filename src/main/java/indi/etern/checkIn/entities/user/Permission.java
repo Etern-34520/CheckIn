@@ -1,7 +1,7 @@
 package indi.etern.checkIn.entities.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import indi.etern.checkIn.auth.Authority;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "PERMISSIONS")
+@JsonIgnoreProperties("authority")
 public class Permission implements GrantedAuthority {
     @Setter
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})

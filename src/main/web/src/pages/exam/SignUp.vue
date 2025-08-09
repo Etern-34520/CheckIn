@@ -146,7 +146,7 @@ const checkDisable = () => {
         </el-button>
         <div style="display: flex;flex-direction: row;align-items: center;margin-top: 16px;margin-left: 16px;">
             <el-avatar :size="64" style="margin-right: 16px" :src="getAvatarUrlOf(result.qq)"/>
-            <el-text style="min-width: min(70vw,200px)">{{ result.qq }}</el-text>
+            <el-text style="min-width: min(70dvw,200px)">{{ result.qq }}</el-text>
         </div>
         <div style="display: flex;flex-direction: column;width: 300px;margin-top: 32px;">
             <el-text style="align-self: baseline">用户名</el-text>

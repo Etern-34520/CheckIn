@@ -170,7 +170,7 @@ const unregister3 = QuestionCache.registerOnQuestionUpdateLocal((questionInfo, d
     }
 });
 
-const unregister4 = QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {//FIXME won't remove questions in closed partitions
+const unregister4 = QuestionCache.registerOnQuestionDeleted((id, localDeleted) => {
     let questionInfo = QuestionCache.reactiveQuestionInfos.value[id];
     if ((questionInfo && questionInfo.dirty) || (!localDeleted && router.currentRoute.value.params.id === id)) {
         return;
@@ -185,6 +185,7 @@ const unregister4 = QuestionCache.registerOnQuestionDeleted((id, localDeleted) =
                 tree.value.remove(questionNode);
             });
         }
+        delete partition.questionNodes[id];
     }
 });
 

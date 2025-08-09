@@ -495,7 +495,7 @@ const addToValues = (datum, index) => {
                         <div style="display: flex;align-self: center;flex-direction: row;">
                             <el-text style="margin-right: 8px;text-wrap: nowrap;">提示信息</el-text>
                             <el-input v-model="model.tipTemplate" class="disable-init-animate"
-                                      style="width: max(320px, 20vw);max-width: 60vw"/>
+                                      style="width: max(320px, 20dvw);max-width: 60dvw"/>
                         </div>
                     </div>
                 </transition>

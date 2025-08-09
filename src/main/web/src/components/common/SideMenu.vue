@@ -83,7 +83,7 @@ const props = defineProps({
 
 <template>
     <div id="menu-container" :class="{'menu-container-inline': inlineBool && (!UI_Meta.mobile.value)}">
-        <div style="position: absolute;width: 100vw;height: calc(100vh - 32px);"
+        <div style="position: absolute;width: 100dvw;height: calc(100dvh - 32px);"
              @click="inlineBool = false" v-if="inlineBool && (UI_Meta.mobile.value)"></div>
         <div id="menu" class="container"
              :class="{'menu-inline': inlineBool,'menu-expand': expandBool || inlineBool}"
@@ -189,8 +189,8 @@ const props = defineProps({
         position: absolute;
         top: 38px;
         left: 0;
-        width: 100vw;
-        height: calc(100vh - 38px);
+        width: 100dvw;
+        height: calc(100dvh - 38px);
         z-index: 2004;
     }
 }

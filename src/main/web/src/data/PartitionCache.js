@@ -72,6 +72,7 @@ const PartitionCache = {
     fullLoaded: false,
     reset() {
         PartitionCache.refPartitions.value = {};
+        PartitionCache.fullLoaded = false;
         onPartitionAdded.length = 0;
         onPartitionDeleted.length = 0;
         onPartitionUpdated.length = 0;

@@ -180,17 +180,19 @@ const hideCreatingDialog = () => {
                           style="margin-bottom: 8px;flex: 1"/>
                 <!--suppress JSValidateTypes -->
                 <el-button :icon="HarmonyOSIcon_Plus" style="margin-left: 8px" @click="showCreateUser = true"
-                           v-if="PermissionInfo.hasPermission('manage user', 'create user')"
-                           class="disable-init-animate">
+                           v-if="PermissionInfo.hasPermission('manage user', 'create user')">
                     新建用户
                 </el-button>
             </div>
             <el-scrollbar>
                 <div class="init-animate">
-                    <transition-group name="filter">
+                    <transition-group name="slide-hide">
                         <template v-for="(user,i) in users" :key="user.qq">
-                            <user-card class="clickable disable-init-animate" :user="user" @click="openView(user)"
-                                       v-if="doFilter(user)"/>
+                            <div class="slide-hide-base" v-if="doFilter(user)">
+                                <div>
+                                    <user-card class="clickable disable-init-animate" :user="user" @click="openView(user)"/>
+                                </div>
+                            </div>
                         </template>
                     </transition-group>
                 </div>
@@ -213,32 +215,6 @@ const hideCreatingDialog = () => {
 </template>
 
 <style scoped>
-/*noinspection CssUnusedSymbol*/
-.filter-enter-active {
-    overflow: hidden;
-    transition: transform 0.3s var(--ease-out-quint) 0.2s,
-    max-height 0.2s var(--ease-in-out-quint);
-}
-
-/*noinspection CssUnusedSymbol*/
-.filter-leave-active {
-    overflow: hidden;
-    transition: transform 0.3s var(--ease-in-quint),
-    max-height 0.2s var(--ease-in-out-quint) 0.3s;
-}
-
-/*noinspection CssUnusedSymbol*/
-.filter-enter-from, .filter-leave-to {
-    max-height: 0;
-    transform: translateX(-100%);
-}
-
-/*noinspection CssUnusedSymbol*/
-.filter-leave-from, .filter-enter-to {
-    max-height: 37px;
-    transform: translateX(0);
-}
-
 /*noinspection CssUnusedSymbol*/
 .hide-cancel-enter-active,
 .hide-cancel-leave-active {

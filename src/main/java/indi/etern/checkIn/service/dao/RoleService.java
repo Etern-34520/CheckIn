@@ -1,5 +1,6 @@
 package indi.etern.checkIn.service.dao;
 
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.PermissionGroup;
 import indi.etern.checkIn.entities.user.Role;
@@ -10,7 +11,6 @@ import indi.etern.checkIn.service.web.WebSocketService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,21 +37,13 @@ public class RoleService {
         final String name = "operate role " + role.getType();
         if (!permissionRepository.existsByName(name)) {
             final Permission permission = new Permission(name);
-            permission.setDescription("修改用户所属组组到 " + role.getType());
+            permission.setDescription("操作用户组 " + role.getType());
             PermissionGroup rolePermissionGroup = permissionGroupRepository.findById("role").orElseThrow();
             permission.setGroup(rolePermissionGroup);
-            permissionRepository.save(permission);
+//            permissionRepository.save(permission);
             roleRepository.save(role);
             
-            LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-            map.put("type", "addPermission");
-            LinkedHashMap<String,Object> permissionJson = new LinkedHashMap<>();
-            permissionJson.put("name", permission.getName());
-            permissionJson.put("description", permission.getDescription());
-            permissionJson.put("group", "role");
-            map.put("permission", permissionJson);
-            
-            webSocketService.sendMessageToAll(map);
+            webSocketService.sendMessageToAll(Message.of("addPermission", permission));
             return permission;
         } else {
             roleRepository.save(role);
@@ -107,14 +99,8 @@ public class RoleService {
             permissionRepository.delete(permission);
         }
         
-        LinkedHashMap<String,Object> map = new LinkedHashMap<>();
-        map.put("type", "deletePermission");
-        LinkedHashMap<String,Object> permissionJson = new LinkedHashMap<>();
-        permissionJson.put("name", permissionName);
-        permissionJson.put("group", "role");
-        map.put("permission", permissionJson);
-        
-        webSocketService.sendMessageToAll(map);
+        record PermissionInfo(String name, String group) {}
+        webSocketService.sendMessageToAll(Message.of("deletePermission", new PermissionInfo(permissionName, "role")));
         
         roleRepository.delete(role);
     }

@@ -126,7 +126,7 @@ const back = () => {
         <div style="display: flex;flex-direction: row;align-items: center;margin-top: 16px;margin-left: 16px;">
             <el-avatar :size="64" style="margin-right: 16px" :src="getAvatarUrlOf(qqNumber)"/>
             <el-input-number :class="{error: !validate2}" v-model="qqNumber"
-                             :controls="false" style="min-width: min(70vw,200px)"/>
+                             :controls="false" style="min-width: min(70dvw,200px)"/>
         </div>
         <div class="flex-blank-1"></div>
         <el-button type="primary" size="large" :loading="loadingExam" :loading-icon="_Loading_"

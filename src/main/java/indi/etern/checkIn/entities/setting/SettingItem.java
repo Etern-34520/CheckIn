@@ -6,6 +6,7 @@ import indi.etern.checkIn.entities.converter.ClassConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
 @Entity
 @Table(name = "SERVER_SETTING_ITEMS")
@@ -25,6 +26,9 @@ public class SettingItem {
     @Setter
     private Object value;
     
+    @Transient
+    private boolean loaded = false;
+    
     @Column(name = "CLAZZ")
     @Convert(converter = ClassConverter.class)
     @Getter
@@ -35,16 +39,30 @@ public class SettingItem {
         stringValue = "";
     }
     
+    @SneakyThrows
     @SuppressWarnings("unchecked")
     public <T> T getValue(Class<T> clazz) {
+        if (!loaded) {
+            loaded = true;
+            postLoad();
+        }
         return (T) value;
+    }
+    
+    @SneakyThrows
+    public Object getValue() {
+        if (!loaded) {
+            loaded = true;
+            postLoad();
+        }
+        return value;
     }
     
     public boolean isPresent() {
         return !key.isEmpty();
     }
     
-    @PostLoad
+//    @PostLoad
     private void postLoad() throws JsonProcessingException {
         if (clazz != null) {
             value = stringValue == null ? null : CheckInApplication.getObjectMapper().readValue(stringValue, clazz);
@@ -59,6 +77,7 @@ public class SettingItem {
             this.value = value;
             stringValue = value == null ? null : CheckInApplication.getObjectMapper().writeValueAsString(value);
             this.clazz = clazz;
+            loaded = true;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -74,6 +93,7 @@ public class SettingItem {
             } else {
                 this.clazz = null;
             }
+            loaded = true;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -172,7 +172,7 @@ const deleteToken = (index) => {
             <div style="display: flex;flex-direction: column;align-items: center">
                 <transition name="blur-scale" mode="out-in">
                     <div v-if="!loading && !error"
-                         style="max-width: 1280px;width: min(70vw,1280px);display: flex;flex-direction: column;align-items: stretch">
+                         style="max-width: 1280px;width: min(70dvw,1280px);display: flex;flex-direction: column;align-items: stretch">
                         <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 8px">
                             <el-text size="large" style="align-self: center;margin-right: 16px">IP 兼容</el-text>
                             <el-radio-group v-model="data.ipSource" :disabled="!editing">

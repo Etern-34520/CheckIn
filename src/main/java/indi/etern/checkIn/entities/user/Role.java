@@ -1,5 +1,6 @@
 package indi.etern.checkIn.entities.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -24,6 +25,7 @@ public class Role {
     @Id
     private String type;
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<User> users = new HashSet<>();
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "ROLE_PERMISSION_MAPPING",
@@ -31,6 +33,7 @@ public class Role {
             inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
             joinColumns = @JoinColumn(name = "ROLE_TYPE", referencedColumnName = "TYPE", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)),
             inverseJoinColumns = @JoinColumn(name = "PERMISSION_ID", referencedColumnName = "ID", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)))
+    @JsonIgnore
     private Set<Permission> permissions = new HashSet<>();
     @Setter
     private int level;

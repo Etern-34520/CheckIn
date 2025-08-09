@@ -40,7 +40,7 @@ public class CheckInApplication {
 	}
 	
 	@Bean
-	public Cache<String, Object> caffeineCache() {
+	public Cache<?, Object> caffeineCache() {
 		return Caffeine.newBuilder()
 				.expireAfterWrite(30, TimeUnit.SECONDS)
 				.initialCapacity(128)

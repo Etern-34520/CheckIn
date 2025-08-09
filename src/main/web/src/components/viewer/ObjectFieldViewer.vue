@@ -8,7 +8,7 @@ const props = defineProps({
     },
     nameStyle: {
         type: String,
-        default: 'width: max(10vw,120px);'
+        default: 'width: max(10dvw,120px);'
     }
 });
 

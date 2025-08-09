@@ -43,18 +43,18 @@ WebSocketConnector.registerAction("deleteUser", (message) => {
         delete UserDataInterface.userGroupMapping[message.data.role][message.data.qq];
 });
 WebSocketConnector.registerAction("addRole", (message) => {
-    UserDataInterface.roles[message.data.role.type] = message.data.role;
+    UserDataInterface.roles[message.data.type] = message.data;
 });
 WebSocketConnector.registerAction("deleteRole", (message) => {
-    delete UserDataInterface.roles[message.data.role.type];
+    delete UserDataInterface.roles[message.data.type];
 });
 WebSocketConnector.registerAction("addPermission", (message) => {
     for (const userGroupType in UserDataInterface.roles) {
         const userGroup = UserDataInterface.roles[userGroupType];
         if (userGroup.permissionGroups) {
             for (const permissionGroup of userGroup.permissionGroups) {
-                if (permissionGroup.name === message,data.permission.group) {
-                    permissionGroup.permissions.push(message.data.permission);
+                if (permissionGroup.name === message.data.group) {
+                    permissionGroup.permissions.push(message.data);
                     break;
                 }
             }
@@ -66,7 +66,7 @@ WebSocketConnector.registerAction("deletePermission", (message) => {
         const userGroup = UserDataInterface.roles[userGroupType];
         if (userGroup.permissionGroups) {
             for (const permissionGroup of userGroup.permissionGroups) {
-                const permission1 = message.data.permission;
+                const permission1 = message.data;
                 if (permissionGroup.name === permission1.group) {
                     for (const permission of permissionGroup.permissions) {
                         if (permission.name === permission1.name) {

@@ -132,20 +132,22 @@ const onPermissionCardClick = (permission) => {
                                                 <div class="smooth-height-base"
                                                      v-for="permission of permissionGroup.permissions"
                                                      :key="permission.name">
-                                                    <div class="panel-1 permission-card disable-init-animate"
-                                                         @click="onPermissionCardClick(permission)">
-                                                        <div class="permission-card-top">
-                                                            <el-text size="large">
-                                                                {{ permission.name }}
+                                                    <div>
+                                                        <div class="panel-1 permission-card disable-init-animate"
+                                                             @click="onPermissionCardClick(permission)">
+                                                            <div class="permission-card-top">
+                                                                <el-text size="large">
+                                                                    {{ permission.name }}
+                                                                </el-text>
+                                                                <div class="flex-blank-1"></div>
+                                                                <el-switch :disabled="!editing" style="max-height: 20px;"
+                                                                           @click.stop
+                                                                           v-model="permission.enabled"/>
+                                                            </div>
+                                                            <el-text type="info">
+                                                                {{ permission.description }}
                                                             </el-text>
-                                                            <div class="flex-blank-1"></div>
-                                                            <el-switch :disabled="!editing" style="max-height: 20px;"
-                                                                       @click.stop
-                                                                       v-model="permission.enabled"/>
                                                         </div>
-                                                        <el-text type="info">
-                                                            {{ permission.description }}
-                                                        </el-text>
                                                     </div>
                                                 </div>
                                             </transition-group>

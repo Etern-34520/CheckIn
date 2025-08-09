@@ -326,17 +326,17 @@ div.panel {
     align-items: center;
     border-radius: 8px;
     background: var(--html-bg);
-    min-width: 100vw;
-    /*height: 100vh;*/
-    min-height: 100vh;
+    min-width: 100dvw;
+    /*height: 100dvh;*/
+    min-height: 100dvh;
 }
 
 .auto-padding-center {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    max-width: 80vw;
-    width: 80vw;
+    max-width: 80dvw;
+    width: 80dvw;
 }
 
 .pwa-title-common {

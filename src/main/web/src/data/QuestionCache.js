@@ -291,9 +291,9 @@ const QuestionCache = {
     reset() {
         this.reactiveQuestionInfos.value = {};
         this.originalQuestionInfos = {};
+        this.dirtyQuestionInfos = {};
         this.dirty = false;
         this.reactiveDirty.value = false;
-        this.dirtyQuestionInfos = {};
         onUpdateLocal.length = 0;
         onUpdateRemote.length = 0;
         onDelete.length = 0;

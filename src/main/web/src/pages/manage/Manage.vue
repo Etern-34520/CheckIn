@@ -31,7 +31,7 @@ const breadcrumbMap = {
     "user-exam-records": "用户答题记录",
     "my-data": "我的",
     "verification-setting": "上传校验设置",
-    "facade-setting": "首页设置",
+    "facade-setting": "前台自定义",
     "generating-setting": "生成设置",
     "grading-setting": "评级设置",
     "advance-setting": "高级设置",
@@ -153,7 +153,7 @@ onBeforeUnmount(() => {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
 }
 </style>

@@ -59,7 +59,7 @@ const version = __APP_VERSION__.replaceAll("-", " ");
                         </el-link>
                     </div>
                 </div>
-                <collapse>
+                <collapse expanded>
                     <template #title>
                         <div style="display: flex;flex-direction: row;align-items: center;height: 100%;margin-left: 8px">
                             <el-text>使用到的开源项目</el-text>

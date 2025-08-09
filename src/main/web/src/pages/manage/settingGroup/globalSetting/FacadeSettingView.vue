@@ -105,14 +105,14 @@ const uploadImage = (event) => {
 }
 
 const deleteIcon = () => {
-    delete data.value.icon;
+    data.value.icon = null;
 }
 </script>
 
 <template>
     <div style="display: flex;flex-direction: column;">
         <div style="display: flex;flex-direction: row;flex-wrap: wrap">
-            <el-text style="align-self:baseline;font-size: 24px;margin-right: 32px;">首页设置</el-text>
+            <el-text style="align-self:baseline;font-size: 24px;margin-right: 32px;">前台自定义</el-text>
             <template
                     v-if="PermissionInfo.hasPermission('setting','save facade setting')">
                 <transition-group name="blur-scale">
@@ -140,7 +140,7 @@ const deleteIcon = () => {
                     <transition name="blur-scale" mode="out-in">
                         <div v-if="mode==='预览'"
                              style="display: inherit;flex-direction: inherit;flex: inherit;align-items:center;width: 100%">
-                            <div style="display: flex;flex-direction: row;flex-wrap: wrap;max-width: 80vw;width: 80vw;">
+                            <div style="display: flex;flex-direction: row;flex-wrap: wrap;max-width: 80dvw;width: 80dvw;">
                                 <div v-if="data.icon" class="icon-image" style="position: relative">
                                     <el-image
                                             style="width: 100%;height: 100%;filter: saturate(2) blur(64px);transform: scale(3) translate3d(20%,5%,0);position: absolute"
@@ -148,12 +148,11 @@ const deleteIcon = () => {
                                     <el-image :src="data.icon" fit="contain"
                                               style="width: 100%;height: 100%;"></el-image>
                                 </div>
-                                <div style="margin: 32px 16px;z-index: 1">
+                                <div style="margin: 32px 16px;z-index: 1;display: flex;flex-direction: column;justify-content: center;">
                                     <el-text class="title" :type="data.title?undefined:'info'">{{
                                             data.title ? data.title : "[无标题]"
                                         }}
                                     </el-text>
-                                    <br/>
                                     <el-text class="subtitle" :type="data.subTitle?undefined:'info'">
                                         {{ data.subTitle ? data.subTitle : "[无副标题]" }}
                                     </el-text>
@@ -228,14 +227,14 @@ const deleteIcon = () => {
                                 <md-editor no-upload-img placeholder="描述" v-model="data.description"
                                            class="preview-only"
                                            preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                                           style="height: 100vh;"
+                                           style="height: 100dvh;"
                                            :theme="UIMeta.colorScheme.value"
                                            :show-toolbar-name="UIMeta.mobile.value"
                                            :preview="true"/>
                             </div>
                         </div>
                         <div v-else
-                             style="display: inherit;flex-direction: inherit;flex: inherit;justify-content: stretch;align-items:stretch;max-width: 80vw;width: 80vw;">
+                             style="display: inherit;flex-direction: inherit;flex: inherit;justify-content: stretch;align-items:stretch;max-width: 80dvw;width: 80dvw;">
                             <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
                                 <input style="display: none;" id="icon-upload" type="file"
                                        accept="image/png, image/jpeg, .svg" @change="uploadImage" ref="iconUpload"/>
@@ -243,9 +242,9 @@ const deleteIcon = () => {
                                     <label
                                             for="icon-upload"
                                             class="disable-init-animate el-button icon-upload-label">
-                                        <el-image style="width: 20vh;min-width:160px;min-height:160px;aspect-ratio: 1;display: flex;flex-direction: column;
+                                        <el-image style="width: 20dvh;min-width:160px;min-height:160px;aspect-ratio: 1;display: flex;flex-direction: column;
                                                             align-items: center;justify-content: center"
-                                                  :src="data.icon" fit="contain">
+                                                  :src="data.icon ? data.icon : undefined" fit="contain">
                                             <template #error>
                                                 <el-icon size="30">
                                                     <Picture/>
@@ -275,16 +274,16 @@ const deleteIcon = () => {
                                 </div>
                                 <div style="display: flex;flex-direction: column;margin-right: 48px;margin-bottom: 48px">
                                     <el-input class="disable-init-animate" placeholder="标题"
-                                              style="font-size: 40px;--el-input-height: 60px;margin-top:20px;width:30vw;min-width: 300px;"
+                                              style="font-size: 40px;--el-input-height: 60px;margin-top:20px;width:30dvw;min-width: 300px;"
                                               v-model="data.title"></el-input>
                                     <el-input class="disable-init-animate" placeholder="副标题"
-                                              style="font-size: 24px;opacity:0.7;--el-input-height: 40px;margin-top:20px;width:30vw;min-width: 240px;"
+                                              style="font-size: 24px;opacity:0.7;--el-input-height: 40px;margin-top:20px;width:30dvw;min-width: 240px;"
                                               v-model="data.subTitle"></el-input>
                                 </div>
                             </div>
                             <md-editor no-upload-img placeholder="描述" v-model="data.description"
                                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                                       style="height: 100vh;margin-top: 100px;margin-bottom: 120px"
+                                       style="height: 100dvh;margin-top: 100px;margin-bottom: 120px"
                                        :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.mobile.value"
                                        :preview="!UIMeta.mobile.value"/>
                         </div>
@@ -312,12 +311,12 @@ const deleteIcon = () => {
 }
 
 .icon-upload-label {
-    width: 20vh;
+    width: 20dvh;
     min-width: 160px;
     min-height: 160px;
     aspect-ratio: 1;
     padding: 0 !important;
-    height: 20vh;
+    height: 20dvh;
     overflow: hidden;
 }
 
@@ -330,11 +329,11 @@ const deleteIcon = () => {
 }
 
 .icon-image {
-    width: 20vh;
+    width: 20dvh;
     min-width: 160px;
     min-height: 160px;
     aspect-ratio: 1;
-    height: 20vh;
+    height: 20dvh;
     margin-right: 40px;
     display: flex;
     flex-direction: column;
@@ -342,20 +341,31 @@ const deleteIcon = () => {
     justify-content: center;
 }
 
+
 .title {
     font-size: 44px;
+    height: auto;
     font-weight: bolder;
-    height: 60px;
     margin-top: 20px;
     min-width: 300px;
+    animation: ani-0 600ms 400ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
+    text-wrap: wrap;
+    word-break: break-all;
+    align-self: baseline;
 }
 
 .subtitle {
     font-size: 24px;
-    height: 40px;
+    height: auto;
     margin-top: 20px;
     min-width: 240px;
     margin-bottom: 40px;
+    animation: ani-0 600ms 800ms var(--ease-out-quint);
+    animation-fill-mode: backwards;
+    text-wrap: wrap;
+    word-break: break-all;
+    align-self: baseline;
 }
 
 .exam-info {

@@ -43,7 +43,7 @@ const routeToRelatedExamRecord = (id) => {
             <transition name="blur-scale" mode="out-in">
                 <div class="general-info"
                      :key="data.id">
-                    <div style="min-width: min(70vw,120px);display: flex;flex-direction: row;align-items: center;margin-right: 16px"
+                    <div style="min-width: min(70dvw,120px);display: flex;flex-direction: row;align-items: center;margin-right: 16px"
                          v-if="data.qqNumber">
                         <el-avatar size="small" style="align-self: center;margin-right: 8px;"
                                    :src="getAvatarUrlOf(data.qqNumber)"/>
@@ -53,7 +53,7 @@ const routeToRelatedExamRecord = (id) => {
                         </el-text>
                     </div>
                     <div v-if="data.ipString"
-                         style="min-width: min(70vw,120px);display: flex;flex-direction: row;align-items: center;margin-right: 16px">
+                         style="min-width: min(70dvw,120px);display: flex;flex-direction: row;align-items: center;margin-right: 16px">
                         <el-text style="align-self: center;">
                             {{ data.ipString }}
                         </el-text>
@@ -115,7 +115,7 @@ const routeToRelatedExamRecord = (id) => {
                             <el-empty
                                     v-if="!Boolean(data.requestAttributes) || Object.keys(data.requestAttributes).length === 0"></el-empty>
                             <object-field-viewer v-else :data="data.requestAttributes"
-                                                 name-style="width: max(30vw,240px);"/>
+                                                 name-style="width: max(30dvw,240px);"/>
                         </template>
                     </collapse>
                     <collapse style="padding: 16px;margin-bottom: 12px" :content-background="false"

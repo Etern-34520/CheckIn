@@ -126,6 +126,8 @@
 .el-input {
     background: var(--el-bg-color);
     border: var(--border-1) !important;
+    min-height: 32px;
+    --el-input-inner-height: calc(var(--el-input-height, 32px) - 4px) !important;
 }
 
 .el-date-editor--daterange:not(.disable-init-animate),
@@ -178,12 +180,12 @@
     flex-direction: row;
 }
 
-#app:has(.md-editor-resize-operate:active) * ,
+#app:has(.md-editor-resize-operate:active) *,
 #app:has(.splitpanes__splitter:active) * {
     user-select: none !important;
 }
 
-#app:has(.md-editor-resize-operate:active) * ,
+#app:has(.md-editor-resize-operate:active) *,
 #app:has(.splitpanes--vertical > .splitpanes__splitter:active) * {
     cursor: col-resize !important;
 }
@@ -410,7 +412,7 @@
 }
 
 .el-notification {
-    --el-notification-width: min(400px,calc(100vw - 32px)) !important;
+    --el-notification-width: min(400px, calc(100dvw - 32px)) !important;
     transition: 400ms 200ms var(--ease-out-quint) !important;
     background-color: var(--panel-bg-color) !important;
     backdrop-filter: blur(32px);
@@ -569,6 +571,7 @@
 
 .el-input__inner {
     background-clip: text !important;
+    height: initial !important;
 }
 
 /*.el-input__wrapper.is-focus, .el-select__wrapper.is-focused {
@@ -699,11 +702,9 @@
 .el-date-editor--daterange.is-active::after,
 .el-input:has(.is-focus)::after, .el-textarea:has(textarea:focus)::after, .el-select:has(.is-focused)::after,
 .el-input-number.error > .el-input::after, .el-input-number.warning > .el-input::after,
-
 .question-input.warning::after,
 .el-date-editor--daterange.warning::after,
 .el-input.warning::after, .el-textarea.warning::after, .el-select.warning::after, .el-checkbox.warning::after,
-
 .question-input.error::after,
 .el-date-editor--daterange.error::after,
 .el-input.error::after, .el-textarea.error::after, .el-select.error::after, .el-checkbox.error::after {
@@ -802,8 +803,8 @@
 }
 
 .el-check-tag.is-checked::after {
-    width: max(calc(100% - 8px),60%) !important;
-    left: min(4px,20%) !important;
+    width: max(calc(100% - 8px), 60%) !important;
+    left: min(4px, 20%) !important;
     opacity: 1 !important;
     margin-top: 4px !important;
 }
@@ -844,6 +845,10 @@
 .el-scrollbar__bar {
     transition: 300ms var(--ease-in-out-quint);
     opacity: 1;
+}
+
+.el-scrollbar.hide-bars .el-scrollbar__bar{
+    display: none !important;
 }
 
 .el-scrollbar__bar.is-vertical {
@@ -954,13 +959,8 @@
 
 .el-switch__core {
     --el-switch-off-color: var(--panel-bg-color);
-    /*--el-switch-on-color: var(--el-color-primary-1);*/
     border: var(--border-2) !important;
 }
-
-/*.el-switch__core:not(.is-disabled):hover {
-    --el-switch-on-color: var(--el-color-primary);
-}*/
 
 #app .el-switch__core .el-switch__action {
     left: 4px;
@@ -971,14 +971,15 @@
 }
 
 #app .el-switch.is-checked .el-switch__action {
-    /*--el-switch-on-color: rgb(30, 30, 30);*/
     --el-switch-on-color: var(--front-color-reverse);
     background-color: var(--el-switch-on-color) !important;
     left: calc(100% - 16px);
 }
 
-.el-switch {
+.el-switch:not(.disable-init-animate) {
     transition: 200ms var(--ease-in-out-quint);
+    animation: var(--init-animation);
+    animation-fill-mode: backwards;
 }
 
 .el-tree-node {
@@ -1032,7 +1033,7 @@
 }
 
 .el-overlay {
-    --el-overlay-color-lighter: rgba(0,0,0,0.2) !important;
+    --el-overlay-color-lighter: rgba(0, 0, 0, 0.2) !important;
 }
 
 .dialog-fade-enter-active .el-overlay-dialog,
@@ -1226,10 +1227,71 @@ input::-webkit-inner-spin-button {
 .el-color-dropdown__btns {
     display: flex;
     align-items: center;
+    margin-top: 8px !important;
+    backdrop-filter: blur(32px);
+    background: var(--lighting-effect-background-2) var(--panel-bg-color);
+    border: var(--border-1) !important;
+    border-radius: 4px !important;
+    padding: 4px !important;
+
+    .el-color-dropdown__value > .el-input {
+        animation: none !important;
+
+        .el-input__wrapper {
+            height: 28px;
+            font-size: 14px !important;
+            text-align: center;
+        }
+    }
+
+    .el-button {
+        height: 32px !important;
+        border: var(--border-1) !important;
+        background: var(--lighting-effect-background-2) var(--panel-bg-color) !important;
+        animation: none !important;
+    }
+
+    .el-color-dropdown__link-btn {
+        margin-left: auto;
+        margin-right: 4px;
+    }
+
+    .el-color-dropdown__btn {
+        margin-left: 0 !important;
+    }
+
+    .el-color-predefine__color-selector.selected {
+        box-shadow: 0 0 0 2px var(--el-color-primary);
+    }
 }
 
-.el-color-dropdown__btn {
-    margin-left: auto !important;
+.el-color-picker__panel {
+    background: rgba(0, 0, 0, 0) !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.el-color-hue-slider {
+    width: 16px !important;
+    border-radius: 4px !important;
+    margin-left: 4px !important;
+}
+
+.el-color-svpanel {
+    border-radius: 4px !important;
+    overflow: hidden !important;
+}
+
+.el-color-predefine {
+    padding: 12px !important;
+    padding-bottom: 4px !important;
+    width: auto !important;
+    backdrop-filter: blur(32px);
+    background: var(--lighting-effect-background-2) var(--panel-bg-color);
+    border: var(--border-1) !important;
+    border-radius: 4px !important;
 }
 
 .el-color-picker__mask {
@@ -1237,16 +1299,16 @@ input::-webkit-inner-spin-button {
 }
 
 .el-popper {
-    max-width: 100vw !important;
+    max-width: 100dvw !important;
 }
 
 .el-date-range-picker {
-    max-width: 100vw !important;
+    max-width: 100dvw !important;
     min-width: 0 !important;
 }
 
 .el-picker-panel__body {
-    max-width: 100vw !important;
+    max-width: 100dvw !important;
     min-width: 0 !important;
     display: flex;
     flex-wrap: wrap;
@@ -1258,12 +1320,12 @@ input::-webkit-inner-spin-button {
 }
 
 .start-date .el-date-table-cell__text,
-.end-date .el-date-table-cell__text{
+.end-date .el-date-table-cell__text {
     color: var(--front-color-reverse) !important;
 }
 
 .el-anchor {
-    --el-anchor-bg-color: rgba(0,0,0,0) !important;
+    --el-anchor-bg-color: rgba(0, 0, 0, 0) !important;
 }
 
 .el-avatar {

@@ -35,9 +35,8 @@ const routeGenerateExam = () => {
                 <el-image class="icon-main" :src="facadeData.icon" fit="contain"
                           style="width: 100%;height: 100%;"></el-image>
             </div>
-            <div style="margin: 32px 16px;z-index: 1">
+            <div style="margin: 32px 16px;z-index: 1;display: flex;flex-direction: column;justify-content: center;">
                 <el-text class="title">{{ facadeData.title }}</el-text>
-                <br/>
                 <el-text class="subtitle">
                     {{ facadeData.subTitle }}
                 </el-text>
@@ -103,7 +102,7 @@ const routeGenerateExam = () => {
             <md-editor no-upload-img placeholder="描述" v-model="facadeData.description"
                        class="preview-only"
                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                       style="height: 100vh;max-width:calc(90vw - 100px);"
+                       style="height: 100dvh;max-width:calc(90dvw - 100px);"
                        :theme="UIMeta.colorScheme.value"
                        :show-toolbar-name="UIMeta.touch.value"
                        :preview="true"/>
@@ -124,15 +123,15 @@ const routeGenerateExam = () => {
     flex: 1;
     align-items: center;
     width: 100%;
-    margin-top: 10vh;
+    margin-top: 10dvh;
 }
 
 .icon-image {
-    width: 20vh;
+    width: 20dvh;
     min-width: 160px;
     min-height: 160px;
     aspect-ratio: 1;
-    height: 20vh;
+    height: 20dvh;
     margin-right: 40px;
     display: flex;
     flex-direction: column;
@@ -183,22 +182,28 @@ const routeGenerateExam = () => {
 
 .title {
     font-size: 44px;
+    height: auto;
     font-weight: bolder;
-    height: 60px;
     margin-top: 20px;
     min-width: 300px;
     animation: ani-0 600ms 400ms var(--ease-out-quint);
     animation-fill-mode: backwards;
+    text-wrap: wrap;
+    word-break: break-all;
+    align-self: baseline;
 }
 
 .subtitle {
     font-size: 24px;
-    height: 40px;
+    height: auto;
     margin-top: 20px;
     min-width: 240px;
     margin-bottom: 40px;
     animation: ani-0 600ms 800ms var(--ease-out-quint);
     animation-fill-mode: backwards;
+    text-wrap: wrap;
+    word-break: break-all;
+    align-self: baseline;
 }
 
 .icon-blur {

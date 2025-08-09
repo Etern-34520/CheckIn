@@ -22,7 +22,11 @@ public class SaveSettingCommon {
                 .filter(entry -> enabledKeys.contains(entry.getKey()))
                 .map(entry -> {
                     final Object value = entry.getValue();
-                    return new SettingItem(rootName + "." + entry.getKey(), value, value.getClass());
+                    if (value != null) {
+                        return new SettingItem(rootName + "." + entry.getKey(), value, value.getClass());
+                    } else {
+                        return new SettingItem(rootName + "." + entry.getKey(), null, null);
+                    }
                 })
                 .toList();
         SettingService.singletonInstance.setAll(settingItems);

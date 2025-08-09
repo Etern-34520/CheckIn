@@ -126,7 +126,7 @@ const buttonsOption = ref([{
 
 <template>
     <div class="panel-1"
-         style="display: flex;flex-direction: row;padding: 8px 12px;align-items: center;margin-bottom: 2px;height: 20px">
+         style="display: flex;flex-direction: row;padding: 8px 12px;align-items: center;margin-bottom: 2px;">
         <custom-dialog title="用户组中仍有用户" v-model="showDeleteRoleUserActions"
                        :buttons-option="buttonsOption" @closed="onClose"
                        ref="deleteRoleUserDialog">
@@ -151,7 +151,7 @@ const buttonsOption = ref([{
                 </transition>
             </div>
         </custom-dialog>
-        <el-text style="font-size: 16px;align-self: baseline;max-height:21px;overflow: hidden;">{{
+        <el-text style="font-size: 16px;align-self: baseline;overflow: hidden;text-wrap: wrap;word-break: break-all;">{{
                 userGroup.type
             }}
         </el-text>

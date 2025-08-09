@@ -5,13 +5,12 @@ import indi.etern.checkIn.repositories.SettingRepository;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @CacheConfig(cacheNames = "setting")
@@ -26,9 +25,10 @@ public class SettingService {
         cache = cacheManager.getCache("setting");
     }
     
-    @Cacheable(key = "#root + '.' + #name")
     public SettingItem getItem(String root, String name) {
-        return settingRepository.findById(root + "." + name).orElseThrow();
+        final String key = root + "." + name;
+        final SettingItem cachedItem = cache.get(key, SettingItem.class);
+        return Objects.requireNonNullElseGet(cachedItem, () -> settingRepository.findById(key).orElseThrow());
     }
     
     public List<SettingItem> findAllByKeys(Collection<String> keys) {
@@ -50,8 +50,8 @@ public class SettingService {
         return settingItems;
     }
     
-    @CachePut(key = "#settingItem.key")
     public void setSetting(SettingItem settingItem) {
+        cache.put(settingItem.getKey(), settingItem);
         settingRepository.save(settingItem);
     }
     
@@ -60,5 +60,9 @@ public class SettingService {
             cache.put(settingItem.getKey(), settingItem);
         }
         settingRepository.saveAll(settingItems);
+    }
+    
+    public void flush() {
+        settingRepository.flush();
     }
 }

@@ -6,6 +6,7 @@ import indi.etern.checkIn.action.MessageOutput;
 import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.user.Permission;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
@@ -13,10 +14,9 @@ import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
-
 @Action("createRole")
 public class CreateRoleAction extends BaseAction<CreateRoleAction.Input, MessageOutput> {
+    
     public record Input(String roleType) implements InputData { }
     
     private final WebSocketService webSocketService;
@@ -42,15 +42,10 @@ public class CreateRoleAction extends BaseAction<CreateRoleAction.Input, Message
             
             Permission createdPermission = roleService.save(role);
             
-            LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-            map.put("type", "addRole");
-            LinkedHashMap<String, Object> role = new LinkedHashMap<>();
-            role.put("type", this.role.getType());
-            role.put("level", this.role.getLevel());
-            map.put("role", role);
-            webSocketService.sendMessageToAll(map);
+            webSocketService.sendMessageToAll(Message.of("addRole", role));
             
             if (createdPermission != null) {
+//                roleService.savePermission(createdPermission);
                 final User currentUser = context.getCurrentUser();
                 Role currentUserRole = currentUser.getRole();
                 currentUserRole = roleService.findByType(currentUserRole.getType()).orElseThrow();//flush Role.users

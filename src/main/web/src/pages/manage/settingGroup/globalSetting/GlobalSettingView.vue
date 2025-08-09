@@ -44,7 +44,7 @@ const groups = [
         name: "答题设置",
         items: [
             {
-                name: "首页自定义", description: "图标 标题 副标题 描述", icon: Postcard, action: () => {
+                name: "前台自定义", description: "图标 标题 副标题 描述", icon: Postcard, action: () => {
                     router.push({name: "facade-setting"});
                 }
             },

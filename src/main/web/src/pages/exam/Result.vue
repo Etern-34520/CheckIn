@@ -87,7 +87,7 @@ const routeToSignUpOrLogin = () => {
             <md-editor no-upload-img placeholder="结果" v-model="result.message"
                        class="preview-only"
                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                       style="height: 100vh;max-width:calc(90vw - 100px);"
+                       style="height: 100dvh;max-width:calc(90dvw - 100px);"
                        :theme="UIMeta.colorScheme.value"
                        :show-toolbar-name="UIMeta.touch.value"
                        :preview="true"/>

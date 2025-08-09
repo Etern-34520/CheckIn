@@ -65,7 +65,7 @@ const getIcon = () => {
                 </el-icon>
             </el-button>
         </template>
-        <el-scrollbar style="margin-right: 8px;margin-left: 12px;width: 0;flex: 1">
+        <el-scrollbar style="margin-right: 8px;margin-left: 12px;width: 0;flex: 1" class="hide-bars">
             <div class="init-animate"
                  style="height: 30px;margin-top: 2px;display: flex;flex-direction: row;align-items: center">
                 <el-breadcrumb style="flex-shrink: 0;" :separator-icon="ArrowRight">
@@ -87,11 +87,10 @@ const getIcon = () => {
         </el-scrollbar>
         <template v-if="!mobile">
             <el-button @click="router.push({name:'account-base'})" text
-                       style="margin-right: 4px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
-                <el-avatar shape="circle" size="small" :src="getAvatarUrlOf(user.qq)"
-                           style="margin-right: 4px"></el-avatar>
-                <el-text size="large">{{ user.name }}</el-text>
-                <el-text size="large" type="info" style="margin-left: 4px;">{{ user.qq }}</el-text>
+                       style="margin-right: 4px;padding: 0 8px;transition: 200ms var(--ease-in-out-quint)">
+                    <el-avatar shape="circle" :size="20" :src="getAvatarUrlOf(user.qq)"
+                               style="margin-right: 6px"></el-avatar>
+                    <el-text size="large" truncated style="height: 20px;max-width: 40dvh">{{ user.name }}</el-text>
             </el-button>
         </template>
     </div>

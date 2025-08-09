@@ -168,7 +168,7 @@ onBeforeUnmount(() => {
                     <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 16px;">
                         <el-avatar :size="64" style="margin-right: 16px"
                                    :src="getAvatarUrlOf(data.qqNumber)"/>
-                        <div style="display: flex;flex-direction: column;min-width: min(70vw,120px);">
+                        <div style="display: flex;flex-direction: column;min-width: min(70dvw,120px);">
                             <el-text size="large"
                                      style="align-self: baseline;margin-bottom: 6px;">
                                 {{ data.qqNumber }}
@@ -262,7 +262,7 @@ onBeforeUnmount(() => {
                                                        class="preview-only"
                                                        preview-theme="vuepress"
                                                        :toolbars-exclude="['save','catalog','github']"
-                                                       style="height: 100vh;max-width:calc(90vw - 100px);"
+                                                       style="height: 100dvh;max-width:calc(90dvw - 100px);"
                                                        :theme="UI_Meta.colorScheme.value"
                                                        :show-toolbar-name="UIMeta.touch.value"
                                                        :preview="true"/>
