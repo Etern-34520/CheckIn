@@ -274,6 +274,11 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
                 String finalString = string;
                 usePartitionLinks(partitionLink -> partitionLink.getTargets().add(Partition.ofName(finalString)));
             }
+
+            //TODO test
+            if (linkWrapper instanceof ToPartitionsLink toPartitionsLink) {
+                toPartitionsLink.getTargets().forEach(partition -> partition.getQuestionLinks().add(toPartitionsLink));
+            }
             multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, /*partitions,*/ author);
             multipleQuestion.setEnabled(enable);
             if (id != null) {

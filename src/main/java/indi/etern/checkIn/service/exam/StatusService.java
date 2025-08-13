@@ -72,6 +72,7 @@ public class StatusService {
                 reason = "可用题目不足";
             } else {
                 int fullyAvailableQuestionsCount = 0;
+                int leastRequiredPartitionsQuestionsCount = 0;
                 try {
                     SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
                     //noinspection unchecked
@@ -83,11 +84,12 @@ public class StatusService {
                     for (Partition partition : requiredPartitions) {
                         Set<ToPartitionsLink> questionLinks = partition.getQuestionLinks();
                         int partitionQuestionsCount = 0;
+                        final SpecialPartitionLimit limit = limits.get(partition);
+                        leastRequiredPartitionsQuestionsCount += limit != null ? limit.getMinLimit() : 0;
                         for (ToPartitionsLink toPartitionsLink : questionLinks) {
                             Question source = toPartitionsLink.getSource();
                             if (source.isEnabled() &&
                                     uniqueValues.add(source)) {
-                                final SpecialPartitionLimit limit = limits.get(partition);
                                 if (limit == null || limit.checkMax(partitionQuestionsCount + 1)) {
                                     partitionQuestionsCount++;
                                 } else {
@@ -146,7 +148,11 @@ public class StatusService {
                     }
                     if (minLimit-- <= 0 && maxLimit-- <= 0) break;
                 }
-                if (fullyAvailableQuestionsCount + countMin >= questionAmount) {
+                if (leastRequiredPartitionsQuestionsCount > questionAmount) {
+                    generateAvailability = Status.UNAVAILABLE;
+                    type = "unachievableMinLimits";
+                    reason = "最低题目数量限制超过设定数量";
+                } else if (fullyAvailableQuestionsCount + countMin >= questionAmount) {
                     generateAvailability = Status.FULLY_AVAILABLE;
                     type = "available";
                 } else if (fullyAvailableQuestionsCount + countMax < questionAmount) {
@@ -155,8 +161,8 @@ public class StatusService {
                     reason = "可用题目不足";
                 } else {
                     generateAvailability = Status.MAY_FAIL;
-                    type = "questionsMayNotBeEnough";
-                    reason = "可用题目在选择某些分区进行生成时可能不足";
+                    type = "specificOptionsMayFail";
+                    reason = "在选择某些分区进行生成时可能失败";
                 }
             }
             

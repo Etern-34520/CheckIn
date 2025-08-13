@@ -137,6 +137,8 @@ public class QuestionGroup extends Question implements
                 targets.clear();
                 targets.addAll(partitions);
             }
+            //TODO test
+            partitions.forEach(partition -> partition.getQuestionLinks().add(link));
             if (questions.isEmpty()) {
                 questionGroup = new QuestionGroup(id, content/*, partitions*/, author);
             } else {

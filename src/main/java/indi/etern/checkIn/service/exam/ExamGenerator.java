@@ -14,6 +14,7 @@ import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLim
 import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLimitService;
 import indi.etern.checkIn.throwable.exam.generate.MinQuestionLimitOutOfBoundsException;
 import indi.etern.checkIn.throwable.exam.generate.NotEnoughQuestionsForExamException;
+import indi.etern.checkIn.throwable.exam.generate.UnachievableLimitException;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +97,11 @@ public class ExamGenerator {
         } else if (questionAmount == 0) {
             logger.debug("no need to sample more questions");
         } else {
-            samplingStrategy.sampleQuestions(sampledQuestions, samplersMap, random, questionAmount);
+            try {
+                samplingStrategy.sampleQuestions(sampledQuestions, samplersMap, random, questionAmount);
+            } catch (IndexOutOfBoundsException e) {
+                throw new UnachievableLimitException(e);
+            }
         }
     }
     

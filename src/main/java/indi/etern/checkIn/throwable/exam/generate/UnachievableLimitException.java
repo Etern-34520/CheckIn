@@ -11,6 +11,6 @@ public class UnachievableLimitException extends ExamGenerateFailedException {
     
     @Override
     public String getDescription() {
-        return "无法在当前选项下生成试题";
+        return "无法在当前配置下生成试题";
     }
 }
