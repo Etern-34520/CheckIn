@@ -11,7 +11,12 @@ function isQuestionsEqual(q1, q2) {
     if (q1.id === q2.id) {
         const bothHaveNoImages = (q1.images === undefined || q1.images.length === 0) && (q2.images === undefined || q2.images.length === 0);
         const bothHaveNoPartitions = (q1.partitionIds === undefined || q1.partitionIds === null) && (q2.partitionIds === undefined || q2.partitionIds === null);
-        const basic = q1.localDeleted === q2.localDeleted && q1.enabled === q2.enabled && q1.randomOrdered === q2.randomOrdered && q1.content === q2.content && q1.authorQQ === q2.authorQQ && ((q1.choices === undefined && q2.choices === undefined) || q1.choices.length === q2.choices.length) && (bothHaveNoImages || q1.images !== undefined && q2.images !== undefined && q1.images.length === q2.images.length) && (bothHaveNoPartitions || q1.partitionIds && q2.partitionIds && q1.partitionIds.length === q2.partitionIds.length);
+        const basic =
+            q1.localDeleted === q2.localDeleted && q1.enabled === q2.enabled && q1.randomOrdered === q2.randomOrdered &&
+            q1.content === q2.content && q1.authorQQ === q2.authorQQ && (q1.explanation === q2.explanation || (!q1.explanation && !q2.explanation)) &&
+            ((q1.choices === undefined && q2.choices === undefined) || q1.choices.length === q2.choices.length) &&
+            (bothHaveNoImages || q1.images !== undefined && q2.images !== undefined && q1.images.length === q2.images.length) &&
+            (bothHaveNoPartitions || q1.partitionIds && q2.partitionIds && q1.partitionIds.length === q2.partitionIds.length);
         if (basic) {
             let choiceNotEqual = false;
             let index = 0;

@@ -25,12 +25,12 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
     @OrderBy("orderIndex")
     @Fetch(FetchMode.SUBSELECT)
     List<Choice> choices;
+
+    protected MultipleChoicesQuestion() {}
     
-    protected MultipleChoicesQuestion() {
-    }
-    
-    public MultipleChoicesQuestion(String questionContent, List<Choice> choices, User author) {
+    public MultipleChoicesQuestion(String questionContent, List<Choice> choices, User author, String explanation) {
         content = questionContent;
+        this.explanation = explanation;
         this.choices = choices;
         this.author = author;
         boolean singleCorrect = false;
@@ -186,13 +186,15 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
         User author;
         boolean enable = false;
         QuestionLinkImpl<?> linkWrapper;
-        
+        private String explanation;
+
         public static Builder from(MultipleChoicesQuestion question) {
             final Builder builder = new Builder().setQuestionContent(question.getContent())
                     .addChoices(question.getChoices())
                     .setAuthor(question.getAuthor())
                     .setEnable(question.isEnabled())
-                    .setId(question.getId());
+                    .setId(question.getId())
+                    .setExplanation(question.getExplanation());
             builder.setLink(question.getLinkWrapper());
             return builder;
         }
@@ -275,11 +277,10 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
                 usePartitionLinks(partitionLink -> partitionLink.getTargets().add(Partition.ofName(finalString)));
             }
 
-            //TODO test
             if (linkWrapper instanceof ToPartitionsLink toPartitionsLink) {
                 toPartitionsLink.getTargets().forEach(partition -> partition.getQuestionLinks().add(toPartitionsLink));
             }
-            multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, /*partitions,*/ author);
+            multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, author, explanation);
             multipleQuestion.setEnabled(enable);
             if (id != null) {
                 multipleQuestion.setId(id);
@@ -298,6 +299,11 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
         
         public Builder setId(String id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder setExplanation(String explanation) {
+            this.explanation = explanation;
             return this;
         }
     }

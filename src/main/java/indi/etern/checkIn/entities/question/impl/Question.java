@@ -99,6 +99,12 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @Getter
     @Setter
     ValidationResult validationResult;
+
+    @Getter
+    @Setter
+    @JsonIgnore
+    @Column(name = "explanation", columnDefinition = "text")
+    String explanation;
     
     protected Question() {
         lastModifiedTime = LocalDateTime.now();

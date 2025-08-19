@@ -40,9 +40,9 @@ public class QuestionGroup extends Question implements
     protected QuestionGroup() {
     }
     
-    public QuestionGroup(String id, String questionContent/*, Set<Partition> partitions*/, User author, Set<Question> questionSet) {
+    public QuestionGroup(String id, String questionContent, User author, Set<Question> questionSet, String explanation) {
         this.content = questionContent;
-//        this.partitions = partitions;
+        this.explanation = explanation;
         this.author = author;
         this.questionLinks = new HashSet<>();
         int index = 0;
@@ -55,9 +55,9 @@ public class QuestionGroup extends Question implements
         this.id = id;
     }
     
-    public QuestionGroup(String id, String questionContent/*, Set<Partition> partitions*/, User author) {
+    public QuestionGroup(String id, String questionContent, User author, String explanation) {
         this.content = questionContent;
-//        this.partitions = partitions;
+        this.explanation = explanation;
         this.author = author;
         this.questionLinks = new HashSet<>();
         this.id = id;
@@ -84,15 +84,17 @@ public class QuestionGroup extends Question implements
         
         @Getter
         final Map<String, String> imageBase64Strings = new LinkedHashMap<>();
-        
+        private String explanation;
+
         public Builder() {
         }
         
         public static Builder from(QuestionGroup previousQuestionGroup) {
-            final QuestionGroup.Builder builder = new Builder().setContent(previousQuestionGroup.getContent())
+            final Builder builder = new Builder().setContent(previousQuestionGroup.getContent())
                     .setAuthor(previousQuestionGroup.getAuthor())
                     .setEnable(previousQuestionGroup.isEnabled())
-                    .setId(previousQuestionGroup.getId());
+                    .setId(previousQuestionGroup.getId())
+                    .setExplanation(previousQuestionGroup.getExplanation());
             builder.getPartitions().clear();
             builder.getPartitions().addAll(((ToPartitionsLink) previousQuestionGroup.getLinkWrapper()).getTargets());
             builder.getQuestions().clear();
@@ -140,9 +142,9 @@ public class QuestionGroup extends Question implements
             //TODO test
             partitions.forEach(partition -> partition.getQuestionLinks().add(link));
             if (questions.isEmpty()) {
-                questionGroup = new QuestionGroup(id, content/*, partitions*/, author);
+                questionGroup = new QuestionGroup(id, content, author, explanation);
             } else {
-                questionGroup = new QuestionGroup(id, content/*, partitions*/, author, questions);
+                questionGroup = new QuestionGroup(id, content, author, questions, explanation);
             }
             if (!imageBase64Strings.isEmpty()) {
                 questionGroup.setImages(imageBase64Strings);
@@ -157,8 +159,13 @@ public class QuestionGroup extends Question implements
             return this;
         }
         
-        public QuestionGroup.Builder addBase64Image(String name, String base64String) {
+        public Builder addBase64Image(String name, String base64String) {
             imageBase64Strings.put(name, base64String);
+            return this;
+        }
+
+        public Builder setExplanation(String explanation) {
+            this.explanation = explanation;
             return this;
         }
     }

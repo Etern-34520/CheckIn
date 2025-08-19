@@ -21,6 +21,7 @@ import java.util.Map;
 public class BasicQuestionDTO {
     protected String id;
     protected String content;
+    protected String explanation;
     protected Boolean enabled;
     protected String type;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -38,6 +39,7 @@ public class BasicQuestionDTO {
     public BasicQuestionDTO(Question question) {
         id = question.getId();
         content = question.getContent();
+        explanation = question.getExplanation();
         enabled = question.isEnabled();
         type = question.getType();
         lastModifiedTime = question.getLastModifiedTime();
@@ -54,6 +56,9 @@ public class BasicQuestionDTO {
         }
         if (content == null) {
             content = question.getContent();
+        }
+        if (explanation == null) {
+            explanation = question.getExplanation();
         }
         if (partitionIds == null) {
             final QuestionLinkImpl<?> linkWrapper = question.getLinkWrapper();

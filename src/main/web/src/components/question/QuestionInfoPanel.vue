@@ -3,6 +3,7 @@ import PartitionCache from "../../data/PartitionCache.js";
 import Collapse from "@/components/common/Collapse.vue";
 import router from "@/router/index.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
+import UserDataInterface from "@/data/UserDataInterface.js";
 
 const props = defineProps({
     questionInfo: Object,
@@ -51,96 +52,109 @@ const getTypeName = (type) => {
     <div class="panel-1 question-info-panel">
         <div class="grid1">
             <div class="padding">
-                <div style="display: flex;flex-direction: row;flex-wrap: wrap;" v-if="!hideStatus">
-                    <div style="display: flex;flex-direction: row;margin-right: 8px">
-                        <div class="point"
-                             :style="questionInfo.question.enabled?'background: var(--el-color-primary);':'background: var(--el-color-info);'"></div>
-                        <el-text size="small" style="align-self: center" type="info">
-                            {{ questionInfo.question.enabled ? "已启用" : "未启用" }}
-                        </el-text>
-                    </div>
-                    <div style="display: flex;flex-direction: row;" v-if="questionInfo.dirty">
-                        <div class="point" style="background: var(--el-color-warning)"></div>
-                        <el-text size="small" style="align-self: center" type="info">{{ "已修改" }}</el-text>
-                    </div>
-                </div>
-                <div style="min-height: 32px;display: flex;flex-direction: row;flex-wrap: wrap;">
-                    <div style="display: flex;flex-direction: row;flex: 1">
-                        <el-text type="info" size="small" style="margin-right: 16px">类型</el-text>
-                        <el-text size="small">
-                            {{
-                                getTypeName(questionInfo.question.type ? questionInfo.question.type : questionInfo.type)
-                            }}
-                        </el-text>
-                    </div>
-                    <transition name="blur-scale">
-                        <div style="display: flex;flex-direction: row;flex: 1" v-if="questionInfo.question.authorQQ">
-                            <el-text type="info" size="small" style="margin-right: 16px">作者</el-text>
-                            <el-button
-                                    @click.stop="router.push({name:'user-detail', params: {id: questionInfo.question.authorQQ}})"
-                                    link class="disable-init-animate"
-                                    style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
-                                <el-avatar shape="circle" :size="20" :src="getAvatarUrlOf(questionInfo.question.authorQQ)"
-                                           style="margin-right: 4px;"></el-avatar>
-                                <el-text style="margin-left: 4px;">{{ questionInfo.question.authorQQ }}</el-text>
-                            </el-button>
+                <el-watermark :font="{color: 'rgba(128,128,128,0.01)', fontSize: 16}" :content="['',UserDataInterface.currentUser.value.qq]"
+                              :rotate="-45"
+                              :zIndex="2000" :gap="[50,50]">
+                    <div>
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;" v-if="!hideStatus">
+                            <div style="display: flex;flex-direction: row;margin-right: 8px">
+                                <div class="point"
+                                     :style="questionInfo.question.enabled?'background: var(--el-color-primary);':'background: var(--el-color-info);'"></div>
+                                <el-text size="small" style="align-self: center" type="info">
+                                    {{ questionInfo.question.enabled ? "已启用" : "未启用" }}
+                                </el-text>
+                            </div>
+                            <div style="display: flex;flex-direction: row;" v-if="questionInfo.dirty">
+                                <div class="point" style="background: var(--el-color-warning)"></div>
+                                <el-text size="small" style="align-self: center" type="info">{{ "已修改" }}</el-text>
+                            </div>
                         </div>
-                    </transition>
-                </div>
-                <div class="question-content flex-blank-1 disable-init-animate">
-                    <el-text type="info" size="small" style="margin-right: 16px">内容</el-text>
-                    <el-scrollbar :max-height="120" style="padding: 0;flex: 1;margin-bottom: 8px">
-                        <el-text>
+                        <div style="min-height: 32px;display: flex;flex-direction: row;flex-wrap: wrap;">
+                            <div style="display: flex;flex-direction: row;flex: 1">
+                                <el-text type="info" size="small" style="margin-right: 16px">类型</el-text>
+                                <el-text size="small">
+                                    {{
+                                        getTypeName(questionInfo.question.type ? questionInfo.question.type : questionInfo.type)
+                                    }}
+                                </el-text>
+                            </div>
+                            <transition name="blur-scale">
+                                <div style="display: flex;flex-direction: row;flex: 1"
+                                     v-if="questionInfo.question.authorQQ">
+                                    <el-text type="info" size="small" style="margin-right: 16px">作者</el-text>
+                                    <el-button
+                                        @click.stop="router.push({name:'user-detail', params: {id: questionInfo.question.authorQQ}})"
+                                        link class="disable-init-animate"
+                                        style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
+                                        <el-avatar shape="circle" :size="20"
+                                                   :src="getAvatarUrlOf(questionInfo.question.authorQQ)"
+                                                   style="margin-right: 4px;"></el-avatar>
+                                        <el-text style="margin-left: 4px;">{{
+                                                questionInfo.question.authorQQ
+                                            }}
+                                        </el-text>
+                                    </el-button>
+                                </div>
+                            </transition>
+                        </div>
+                        <div class="question-content flex-blank-1 disable-init-animate">
+                            <el-text type="info" size="small" style="margin-right: 16px">内容</el-text>
+                            <el-scrollbar :max-height="120" style="padding: 0;flex: 1;margin-bottom: 8px">
+                                <el-text>
                             <pre style="word-wrap: break-word;white-space: pre-wrap;">{{
                                     questionInfo.question.content
                                 }}</pre>
-                        </el-text>
-                    </el-scrollbar>
-                </div>
-                <div style="display: flex;flex-direction: row;margin-bottom: 4px"
-                     v-if="questionInfo.question.choices!==undefined&&questionInfo.question.choices!==null">
-                    <el-text type="info" size="small" style="margin-right: 16px;word-break: keep-all">选项</el-text>
-                    <div>
-                        <el-tag v-for="choice of questionInfo.question.choices"
-                                style="margin-bottom: 4px;margin-right: 4px"
-                                :type="choice.correct?'success':'danger'">
-                            {{ choice.content }}
-                        </el-tag>
-                    </div>
-                </div>
-                <div v-if="questionInfo.question.type==='QuestionGroup'" style="margin-bottom: 4px">
-                    <collapse @click.stop :expanded="subQuestionExpanded" :content-background="false">
-                        <template #title>
-                            <el-text style="line-height: 32px;margin-left: 8px;">子题目</el-text>
-                        </template>
-                        <template #content>
-                            <transition-group name="slide-hide">
-                                <QuestionInfoPanel v-for="subQuestionInfo of questionInfo.questionInfos"
-                                                   :key="subQuestionInfo.question.id"
-                                                   :disable-error-and-warning="disableErrorAndWarning"
-                                                   :question-info="subQuestionInfo" :clickable="false"/>
+                                </el-text>
+                            </el-scrollbar>
+                        </div>
+                        <div style="display: flex;flex-direction: row;margin-bottom: 4px"
+                             v-if="questionInfo.question.choices!==undefined&&questionInfo.question.choices!==null">
+                            <el-text type="info" size="small" style="margin-right: 16px;word-break: keep-all">选项
+                            </el-text>
+                            <div>
+                                <el-tag v-for="choice of questionInfo.question.choices"
+                                        style="margin-bottom: 4px;margin-right: 4px"
+                                        :type="choice.correct?'success':'danger'">
+                                    {{ choice.content }}
+                                </el-tag>
+                            </div>
+                        </div>
+                        <div v-if="questionInfo.question.type==='QuestionGroup'" style="margin-bottom: 4px">
+                            <collapse @click.stop :expanded="subQuestionExpanded" :content-background="false">
+                                <template #title>
+                                    <el-text style="line-height: 32px;margin-left: 8px;">子题目</el-text>
+                                </template>
+                                <template #content>
+                                    <transition-group name="slide-hide">
+                                        <QuestionInfoPanel v-for="subQuestionInfo of questionInfo.questionInfos"
+                                                           :key="subQuestionInfo.question.id"
+                                                           :disable-error-and-warning="disableErrorAndWarning"
+                                                           :question-info="subQuestionInfo" :clickable="false"/>
+                                    </transition-group>
+                                </template>
+                            </collapse>
+                        </div>
+                        <div
+                            v-if="questionInfo.question.partitionIds!==undefined&&questionInfo.question.partitionIds!==null">
+                            <el-text type="info" size="small" style="margin-right: 16px">分区</el-text>
+                            <el-tag
+                                v-for="(partitionName,partitionId,index) in partitionNames"
+                                type="info">
+                                {{ partitionName }}
+                            </el-tag>
+                        </div>
+                        <div class="errorsDescription" v-if="!disableErrorAndWarning">
+                            <transition-group name="errorDescriptions">
+                                <el-text v-for="error of questionInfo.errors"
+                                         :key="error.content?error.content:''"
+                                         type="danger">
+                                    {{ error.content }}
+                                </el-text>
                             </transition-group>
-                        </template>
-                    </collapse>
-                </div>
-                <div v-if="questionInfo.question.partitionIds!==undefined&&questionInfo.question.partitionIds!==null">
-                    <el-text type="info" size="small" style="margin-right: 16px">分区</el-text>
-                    <el-tag
-                            v-for="(partitionName,partitionId,index) in partitionNames"
-                            type="info">
-                        {{ partitionName }}
-                    </el-tag>
-                </div>
-                <div class="errorsDescription" v-if="!disableErrorAndWarning">
-                    <transition-group name="errorDescriptions">
-                        <el-text v-for="error of questionInfo.errors"
-                                 :key="error.content?error.content:''"
-                                 type="danger">
-                            {{ error.content }}
-                        </el-text>
-                    </transition-group>
-                </div>
-                <slot/>
+                        </div>
+                        <slot/>
+                    </div>
+                </el-watermark>
             </div>
         </div>
     </div>

@@ -38,6 +38,11 @@ public class QuestionCreateUtils {
         if (content != null) {
             builder.setQuestionContent(content);
         }
+
+        String explanation = commonQuestionDTO.getExplanation();
+        if (explanation != null) {
+            builder.setExplanation(explanation);
+        }
         
         Boolean enabled = commonQuestionDTO.getEnabled();
         if (enabled != null) {
@@ -57,7 +62,7 @@ public class QuestionCreateUtils {
         linkHandler.handle(commonQuestionDTO, builder, Optional.ofNullable(multipleChoicesQuestion));
         
         Long authorQQ = commonQuestionDTO.getAuthorQQ();
-        if (authorQQ != null) {//FIXME
+        if (authorQQ != null) {
             builder.setAuthor(UserService.singletonInstance.findByQQNumber(authorQQ).orElse(null));
         }
         
@@ -71,8 +76,8 @@ public class QuestionCreateUtils {
         return builder.build();
     }
     
-    public static MultipleChoicesQuestion createMultipleChoicesQuestion(MultipleChoicesQuestionDTO questionDataMap) {
-        return create(questionDataMap, (multipleChoicesQuestionDTO, builder, previousQuestion) -> {
+    public static MultipleChoicesQuestion createMultipleChoicesQuestion(MultipleChoicesQuestionDTO questionDTO) {
+        return create(questionDTO, (multipleChoicesQuestionDTO, builder, previousQuestion) -> {
             List<String> partitionIds = multipleChoicesQuestionDTO.getPartitionIds();
             if (partitionIds != null) {
                 builder.usePartitionLinks(linkWrapper -> {
@@ -115,6 +120,11 @@ public class QuestionCreateUtils {
         String content = questionGroupDTO.getContent();
         if (content != null) {
             builder.setContent(content);
+        }
+
+        String explanation = questionGroupDTO.getExplanation();
+        if (explanation != null) {
+            builder.setExplanation(explanation);
         }
         
         List<String> partitionIds = questionGroupDTO.getPartitionIds();

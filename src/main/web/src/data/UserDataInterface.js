@@ -245,6 +245,7 @@ const UserDataInterface = {
                 if (UserDataInterface.logined.value) {
                     UserDataInterface.logout(false);
                 }
+                delete user.result;
                 UserDataInterface.currentUser.value = user;
                 delete UserDataInterface.currentUser.value["rolePermission"];
                 watch(() => UserDataInterface.currentUser.value, () => {
