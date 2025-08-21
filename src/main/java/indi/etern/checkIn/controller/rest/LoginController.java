@@ -9,7 +9,13 @@ import indi.etern.checkIn.action.role.permission.GetEnabledPermissionsOfRoleActi
 import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.UserService;
+import indi.etern.checkIn.service.web.TurnstileService;
+import indi.etern.checkIn.throwable.TurnstileException;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,19 +36,21 @@ public class LoginController {
     private final String nameOrQQOrPasswordWrongStr = "{\"result\":\"fail\",\"message\":\"用户名 QQ 或 密码 错误\"}";
     private final String userDisabledStr = "{\"result\":\"fail\",\"message\":\"用户已禁用\"}";
     private final ActionExecutor actionExecutor;
-    
-    public LoginController(JwtTokenProvider jwtTokenProvider, UserService userService, ObjectMapper objectMapper, PasswordEncoder passwordEncoder, ActionExecutor actionExecutor) {
+    private final TurnstileService turnstileService;
+
+    public LoginController(JwtTokenProvider jwtTokenProvider, UserService userService, ObjectMapper objectMapper, PasswordEncoder passwordEncoder, ActionExecutor actionExecutor, TurnstileService turnstileService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
         this.objectMapper = objectMapper;
         this.passwordEncoder = passwordEncoder;
         this.actionExecutor = actionExecutor;
+        this.turnstileService = turnstileService;
     }
-    
+
     public static boolean isNumber(String str) {
         return str != null && NUMBER_PATTERN.matcher(str).matches();
     }
-    
+
     private String getResponseOf(User user) throws JsonProcessingException {
         if (!user.isEnabled()) {
             return userDisabledStr;
@@ -64,7 +72,7 @@ public class LoginController {
         }
         return objectMapper.writeValueAsString(dataMap);
     }
-    
+
     private String checkWithUserName(String name, String password) throws JsonProcessingException {
         final List<User> users = userService.findAllByName(name);
         for (User user : users) {
@@ -74,11 +82,56 @@ public class LoginController {
         }
         return nameOrQQOrPasswordWrongStr;
     }
-    
+
+    @GetMapping(path = "/api/checkTurnstile")
+    public String checkTurnstile() throws JsonProcessingException {
+        boolean enableTurnstileOnLogin = turnstileService.isTurnstileEnabledOnLogin();
+        boolean enableTurnstileOnExam = turnstileService.isTurnstileEnabledOnExam();
+        Map<String, Object> response = new HashMap<>();
+        if (enableTurnstileOnExam || enableTurnstileOnLogin) {
+            String siteKey = turnstileService.getSiteKey();
+            if (siteKey == null || siteKey.isEmpty()) {
+                response.put("enableTurnstileOnLogin", false);
+                response.put("enableTurnstileOnExam", false);
+                response.put("message", "Turnstile 未配置");
+            } else {
+                response.put("enableTurnstileOnLogin", enableTurnstileOnLogin);
+                response.put("enableTurnstileOnExam", enableTurnstileOnExam);
+                response.put("siteKey", siteKey);
+            }
+        } else {
+            response.put("enableTurnstileOnLogin", false);
+            response.put("enableTurnstileOnExam", false);
+            response.put("message", "Turnstile 未启用");
+        }
+        return objectMapper.writeValueAsString(response);
+    }
+
     @PostMapping(path = "/api/login")
-    public String login(@RequestBody Map<String, Object> body) throws JsonProcessingException {
+    public String login(@RequestBody Map<String, Object> body, HttpServletRequest httpServletRequest) throws JsonProcessingException, BadRequestException {
         String usernameOrQQ = (String) body.get("usernameOrQQ");
         String password = (String) body.get("password");
+
+        boolean enableTurnstile = turnstileService.isTurnstileEnabledOnLogin();
+
+        if (enableTurnstile && turnstileService.isServiceEnable()) {
+            String turnstileToken = (String) body.get("turnstileToken");
+            try {
+                turnstileService.check(turnstileToken, httpServletRequest);
+            } catch (TurnstileException e) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("result", "fail");
+                errorResponse.put("message", e.getMessage());
+                return objectMapper.writeValueAsString(errorResponse);
+            } catch (BadRequestException e) {
+                return "{\"result\":\"fail\",\"message\":\"未成功验证\"}";
+            }
+        }
+        return dispatch(usernameOrQQ, password);
+    }
+
+    @SneakyThrows
+    private String dispatch(String usernameOrQQ, String password) {
         if (usernameOrQQ == null || password == null) {
             return nameOrQQOrPasswordWrongStr;
         }
@@ -99,7 +152,7 @@ public class LoginController {
             return checkWithUserName(usernameOrQQ, password);
         }
     }
-    
+
     private boolean checkPassword(User user, String password) {
         return user.getPassword() == null || passwordEncoder.matches(password, user.getPassword());
     }

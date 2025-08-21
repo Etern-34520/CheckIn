@@ -1,8 +1,7 @@
 <script setup>
-import {DArrowRight} from "@element-plus/icons-vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import _Loading_ from "@/components/common/_Loading_.vue";
-import PermissionInfo from "@/auth/PermissionInfo.js";
+import VueTurnstile from 'vue-turnstile';
 
 const usernameOrQQ = ref('');
 const password = ref('');
@@ -10,7 +9,23 @@ const {proxy} = getCurrentInstance();
 
 const loginMessage = ref('');
 const key = ref(true);
-const requesting = ref(false);//FIXME
+const requesting = ref(false);
+
+const turnstile = ref(null);
+function reset() {
+    turnstile.value.reset();
+}
+const siteKey = ref(proxy.$cookies.get("siteKey"));
+const verifyLogin = ref(proxy.$cookies.get("verifyLogin"));
+proxy.$http.get("checkTurnstile").then((resp) => {
+    proxy.$cookies.set("verifyLogin", resp.enableTurnstileOnLogin, "7d", "/checkIn");
+    proxy.$cookies.set("verifyExam", resp.enableTurnstileOnExam, "7d", "/checkIn");
+    proxy.$cookies.set("siteKey", resp.siteKey, "7d", "/checkIn");
+    verifyLogin.value = resp.enableTurnstileOnLogin;
+    siteKey.value = resp.siteKey;
+});
+
+const token = ref("");
 
 const props = defineProps({
     primary: {
@@ -23,7 +38,8 @@ function login() {
     requesting.value = true;
     proxy.$http.post("login", {
         usernameOrQQ: usernameOrQQ.value,
-        password: password.value
+        password: password.value,
+        turnstileToken: token.value,
     }).then(response => {
         console.log(response);
         if (response.result === "success") {
@@ -33,14 +49,17 @@ function login() {
                     }, () => {
                         requesting.value = false;
                         loginMessage.value = "服务器连接失败";
+                        reset();
                     }
             )
         } else if (response.result === "fail") {
             requesting.value = false;
             loginMessage.value = response.message;
+            reset();
         } else {
             requesting.value = false;
             loginMessage.value = "请求时遇到错误"
+            reset();
         }
         key.value = !key.value;
     }, (error) => {
@@ -48,8 +67,17 @@ function login() {
         requesting.value = false;
         loginMessage.value = "请求时遇到错误";
         key.value = !key.value;
+        reset();
     });
 }
+
+onErrorCaptured((e) => {
+    if (e.name === "TurnstileError") {
+        // Turnstile 被禁用后的内部报错，可忽略
+        console.trace("turnstile disabled",e);
+        return false;
+    }
+})
 </script>
 
 <template>
@@ -58,14 +86,18 @@ function login() {
                   type="text" size="large"></el-input>
         <el-input v-model="password" placeholder="密码" type="password" show-password clearable class="login-input"
                   size="large"></el-input>
-        <el-button :text="!primary" :type="primary?'primary':null" bg :disabled="requesting" :loading="requesting"
-                   :loading-icon="_Loading_" :icon="DArrowRight" style="margin-top: 8px"
-                   @click="login">登录
+        <el-button :text="!primary" :type="primary?'primary':null" bg :disabled="Boolean(requesting || (token.length === 0 && verifyLogin))"
+                   :loading="Boolean(requesting || (token.length === 0 && verifyLogin))"
+                   :loading-icon="_Loading_" style="margin-top: 8px" @click="login">
+            {{ token.length === 0 && verifyLogin ? "等待 Cloudflare 验证" : "登录"}}
         </el-button>
         <div style="height: 30px;display: flex;place-items: stretch;place-content: center;">
             <Transition name="message" mode="out-in">
                 <el-text :key="key">{{ loginMessage }}</el-text>
             </Transition>
+        </div>
+        <div style="height: 65px;width:300px;display: flex;">
+            <vue-turnstile ref="turnstile" v-if="verifyLogin" appearance="interaction-only" @error="reset" :site-key="siteKey" v-model="token" size="normal"/>
         </div>
     </div>
 </template>

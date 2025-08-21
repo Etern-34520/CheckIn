@@ -1,9 +1,6 @@
 import axios from "axios";
 import {ElMessage} from "element-plus";
 
-// axios.defaults.baseURL = 'http://localhost:5173/'
-// axios.defaults.baseURL = 'http://localhost:8080/'
-// axios.defaults.baseURL = window.location.host;
 axios.defaults.baseURL = window.location.protocol + "//" + window.location.host + "/checkIn/api/";
 
 //post请求头
@@ -62,7 +59,7 @@ export default {
                     }
                 },
                 error => {
-                    reject(err)
+                    reject(error)
                 });
         })
     },
@@ -70,7 +67,7 @@ export default {
         return new Promise((resolve, reject) => {
             axios.get(url, data).then(
                 response => {
-                    if (response.data) {
+                    if (response && response.data) {
                         try {
                             resolve(response.data)
                         } catch (e) {
@@ -81,7 +78,7 @@ export default {
                     }
                 },
                 error => {
-                    reject(err)
+                    reject(error)
                 });
         })
     }

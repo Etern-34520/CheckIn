@@ -13,6 +13,7 @@ import ServerStatusInfo from "@/components/common/ServerStatusInfo.vue";
 
 const user = UserDataInterface.getCurrentUser();
 const animate = ref(false);
+
 if (router.options.history.state.back === "/login/") {
     animate.value = true;
 }
@@ -78,7 +79,9 @@ const loadUsersBestExam = () => {
     }, (message) => {
         message.disableNotification();
         loadingUsersBestExam.value = false;
-        loadingUsersBestExamError.value = true;
+        if (message.data.message !== "ExamController record not found") {
+            loadingUsersBestExamError.value = true;
+        }
     })
 }
 loadUsersBestExam();
@@ -122,8 +125,11 @@ onBeforeUnmount(() => {
 
 const mobile = UI_Meta.mobile;
 
-const openRecord = (id) => {
-    router.push({name: 'exam-record-detail', params: {id: id}});
+const openRecord = (exam) => {
+    if (exam && exam.id) {
+        const id = exam.id;
+        router.push({name: 'exam-record-detail', params: {id: id}});
+    }
 }
 </script>
 
@@ -140,29 +146,40 @@ const openRecord = (id) => {
         <el-scrollbar style="flex: 1" :view-style="mobile?'height: 200%':'height: 100%'">
             <splitpanes :horizontal="mobile">
                 <pane min-size="20" size="30">
-                    <div class="panel clickable" @click="openRecord(usersBestExam.id)"
-                         style="padding: 0;flex: 0;min-height: 60px;display: flex;flex-direction: column;margin-bottom: 6px !important;"
-                         v-if="!loadingUsersBestExam && usersBestExam">
-                        <div v-if="loadingUsersBestExamError"
-                             style="flex: 1;display: flex;justify-content: center;align-items: center;">
-                            <el-text style="align-self: center;margin-right: 12px" type="info">加载个人答题记录时出错
-                            </el-text>
-                            <el-button link @click="loadUsersBestExam">重新加载</el-button>
-                        </div>
-                        <div style="padding: 16px;display: flex;flex-direction: row;align-items: stretch;flex: 1"
-                             v-else-if="!loadingUsersBestExam">
-                            <div style="margin: -4px 4px;width: 6px;border-radius: 3px"
-                                 :style="{background: usersBestExam.result.colorHex}"></div>
-                            <el-text size="large" style="margin-right: 8px;margin-left: 16px">
-                                我的分数
-                            </el-text>
-                            <el-text size="large" type="primary">
-                                {{ usersBestExam.result.score }}
-                            </el-text>
-                        </div>
-                    </div>
-                    <server-status-info/>
+                    <server-status-info loading-text="获取服务状态"/>
                     <div style="padding: 8px 16px 0;flex:1" class="panel">
+                        <transition name="smooth-height" mode="out-in">
+                            <div class="smooth-height-base" style="padding: 0;" v-if="!loadingUsersBestExam">
+                                <div>
+                                    <div style="padding: 0;min-height: 40px;display: flex;justify-content: center;align-items: start;flex-direction: column;margin-bottom: 6px !important;">
+                                        <div v-if="loadingUsersBestExamError">
+                                            <div
+                                                style="flex: 1;display: flex;justify-content: center;align-items: center;">
+                                                <el-text style="align-self: center;margin-right: 12px" type="info">
+                                                    加载个人答题记录时出错
+                                                </el-text>
+                                                <el-button link @click="loadUsersBestExam">重新加载</el-button>
+                                            </div>
+                                        </div>
+                                        <div v-else style="place-self: stretch;flex: 1;display: flex;">
+                                            <el-button link @click="openRecord(usersBestExam)"
+                                                 style="padding: 0 !important;place-self: stretch;">
+                                                <div style="display: flex;flex-direction: row;align-items: stretch;flex: 1">
+                                                    <div style="margin: -4px 4px;width: 4px;border-radius: 2px"
+                                                         :style="{background: usersBestExam.result.colorHex}"></div>
+                                                    <el-text size="large" style="margin-right: 8px;margin-left: 16px">
+                                                        我的分数
+                                                    </el-text>
+                                                    <el-text size="large" type="primary">
+                                                        {{ usersBestExam.result.score }}
+                                                    </el-text>
+                                                </div>
+                                            </el-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
                         <el-text size="large" style="align-self: baseline;margin-top: 4px">今日答题记录</el-text>
                         <div v-loading="loadingTodayExamRecords"
                              style="display:flex;flex-direction:column;flex:1;height: 0;margin-top: 16px;">
@@ -205,15 +222,16 @@ const openRecord = (id) => {
                                 </el-text>
                                 <el-button link @click="loadRecentUpdatedQuestions">重新加载</el-button>
                             </div>
-                            <el-scrollbar v-else-if="recentUpdatedQuestions && recentUpdatedQuestions.length && !loadingRecentUpdatedQuestions"
-                                          style="position: relative">
-                                <waterfall :data="recentUpdatedQuestions" :min-row-width="400"
+                            <el-scrollbar
+                                v-else-if="recentUpdatedQuestions && Object.keys(recentUpdatedQuestions).length && !loadingRecentUpdatedQuestions"
+                                style="position: relative">
+                                <waterfall :data="Object.entries(recentUpdatedQuestions)" :min-row-width="400"
                                            style="max-width: calc(100% - 4px)">
                                     <template #item="{item,index}">
-                                        <question-info-panel :question-info="item" class="clickable"
+                                        <question-info-panel :question-info="item[1]" class="clickable"
                                                              disable-error-and-warning
                                                              style="margin: 4px"
-                                                             @click="router.push({name:'question-detail',params: {id:item.question.id}})"/>
+                                                             @click="router.push({name:'question-detail',params: {id:item[0]}})"/>
                                     </template>
                                 </waterfall>
                             </el-scrollbar>

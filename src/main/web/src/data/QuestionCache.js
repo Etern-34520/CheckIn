@@ -160,7 +160,7 @@ WebSocketConnector.registerAction("updateQuestions", (response) => {
         }
         if (newQuestionIds.length > 0) {
             QuestionCache.getAllAsync(newQuestionIds).then((questionInfos) => {
-                for (const questionInfo of questionInfos) {
+                for (const [id,questionInfo] of Object.keys(questionInfos)) {
                     QuestionCache.update(questionInfo);
                 }
             }, (error) => {
@@ -340,16 +340,16 @@ const QuestionCache = {
             }
         });
     },
-    getAllAsync(questionIds) {
+    getAllAsync(questionIds, ignoreError = false) {
         let requestQuestionIds = [];
-        let loadedQuestionInfos = [];
+        let loadedQuestionInfos = {};
         return new Promise((resolve, reject) => {
             for (let id of questionIds) {
                 let questionInfo = QuestionCache.reactiveQuestionInfos.value[id];
                 if (questionInfo === undefined || questionInfo.simple || (questionInfo.remoteUpdated && questionInfo.downloadRemoteUpdated)) {
                     requestQuestionIds.push(id);
                 } else {
-                    loadedQuestionInfos.push(questionInfo);
+                    loadedQuestionInfos[id] = questionInfo;
                 }
             }
             if (requestQuestionIds.length === 0) {
@@ -361,12 +361,17 @@ const QuestionCache = {
                         questionIds: requestQuestionIds
                     }
                 }).then((response) => {
-                    for (let question of response.data.questions) {
+                    for (let [id,question] of Object.entries(response.data.questions)) {
                         let questionInfo = QuestionCache.reactiveQuestionInfos.value[question.id];
                         questionInfo = initQuestionInfo(questionInfo, question);
-                        loadedQuestionInfos.push(questionInfo);
+                        loadedQuestionInfos[id] = questionInfo;
                     }
                     resolve(loadedQuestionInfos);
+                }, (error) => {
+                    if (ignoreError) {
+                        error.disableNotification();
+                    }
+                    reject(error);
                 });
             }
         });

@@ -5,7 +5,8 @@ const props = defineProps({
         default: 300
     },
     data: {
-        required: true
+        required: true,
+        type: Array
     },
     even: {
         default: false

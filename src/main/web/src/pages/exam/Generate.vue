@@ -5,6 +5,7 @@ import router from "@/router/index.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {ArrowLeftBold} from "@element-plus/icons-vue";
 import _Loading_ from "@/components/common/_Loading_.vue";
+import VueTurnstile from "vue-turnstile";
 
 const {proxy} = getCurrentInstance();
 const props = defineProps({
@@ -30,6 +31,12 @@ const selectPartition = (partitionId) => {
     }
 }
 
+proxy.$http.get("checkTurnstile").then((resp) => {
+    proxy.$cookies.set("verifyLogin", resp.enableTurnstileOnLogin, "7d");
+    proxy.$cookies.set("verifyExam", resp.enableTurnstileOnExam, "7d");
+    proxy.$cookies.set("siteKey", resp.siteKey, "7d");
+});
+
 const qqNumber = ref();
 
 const loadingExam = ref(false);
@@ -37,7 +44,8 @@ const startExam = () => {
     loadingExam.value = true;
     proxy.$http.post("generate", {
         qq: qqNumber.value,
-        partitionIds: selectedPartitionIds.value
+        partitionIds: selectedPartitionIds.value,
+        turnstileToken: token.value
     }).then((data) => {
         if (data.type !== "error") {
             proxy.$cookies.set("examInfo", JSON.stringify(data), "7d");
@@ -46,6 +54,7 @@ const startExam = () => {
             proxy.$cookies.remove("timestamps");
             router.push({name: "examine"});
         } else {
+            reset();
             loadingExam.value = false;
             ElMessageBox.alert(
                     data.description?data.description:data.exceptionType,
@@ -61,7 +70,7 @@ const startExam = () => {
         loadingExam.value = false;
         ElMessage({
             type: "error",
-            message: "生成题目时出错" + err.message
+            message: "生成题目时出错" + ((err && err.message) ? err.message : "")
         })
     })
 }
@@ -73,6 +82,28 @@ const back = () => {
     proxy.$cookies.remove("phase");
     router.push({name: "facade"});
 }
+
+const token = ref("");
+const turnstile = ref(null);
+function reset() {
+    turnstile.value.reset();
+}
+const siteKey = ref(proxy.$cookies.get("siteKey"));
+const verifyExam = ref(proxy.$cookies.get("verifyExam"));
+proxy.$http.get("checkTurnstile").then((resp) => {
+    proxy.$cookies.set("verifyLogin", resp.enableTurnstileOnLogin, "7d", "/checkIn");
+    proxy.$cookies.set("verifyExam", resp.enableTurnstileOnExam, "7d", "/checkIn");
+    proxy.$cookies.set("siteKey", resp.siteKey, "7d", "/checkIn");
+    verifyExam.value = resp.enableTurnstileOnExam;
+    siteKey.value = resp.siteKey;
+});
+onErrorCaptured((e) => {
+    if (e.name === "TurnstileError") {
+        // Turnstile 被禁用后的内部报错，可忽略
+        console.trace("turnstile disabled",e);
+        return false;
+    }
+})
 </script>
 
 <template>
@@ -82,7 +113,7 @@ const back = () => {
             <el-icon><ArrowLeftBold/></el-icon>返回
         </el-button>
         <template v-if="((requiredPartitionIds && requiredPartitionIds.length > 0)
-          || (selectablePartitionIds && selectablePartitionIds.length > 0))">
+                        || (selectablePartitionIds && selectablePartitionIds.length > 0))">
             <el-text style="font-size: 24px;align-self: baseline;margin-top: 24px">选择分区</el-text>
             <div class="panel" style="padding: 16px 24px;margin-top: 36px" v-if="requiredPartitionIds && requiredPartitionIds.length > 0">
                 <el-text size="large" style="align-self: baseline">必选分区</el-text>
@@ -129,10 +160,13 @@ const back = () => {
                              :controls="false" style="min-width: min(70dvw,200px)"/>
         </div>
         <div class="flex-blank-1"></div>
-        <el-button type="primary" size="large" :loading="loadingExam" :loading-icon="_Loading_"
+        <div style="height: 65px;width:300px;display: flex;">
+            <vue-turnstile ref="turnstile" v-if="verifyExam" appearance="interaction-only" @error="reset" :site-key="siteKey" v-model="token" size="normal"/>
+        </div>
+        <el-button type="primary" size="large" :loading="Boolean(loadingExam || (token.length === 0 && verifyExam))" :loading-icon="_Loading_"
                    style="margin-top: 36px;align-self: center;min-width: 180px"
-                   :disabled="!extraData.serviceAvailable || !(validate1 && validate2)" @click="startExam">
-            {{extraData.serviceAvailable?"开始答题":"服务暂不可用"}}
+                   :disabled="!extraData.serviceAvailable || !(validate1 && validate2) || (token.length === 0 && verifyExam)" @click="startExam">
+            {{extraData.serviceAvailable ? token.length === 0 && verifyExam ? "等待 Cloudflare 验证" : "生成题目" : "服务暂不可用"}}
         </el-button>
     </div>
 </template>

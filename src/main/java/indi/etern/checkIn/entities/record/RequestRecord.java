@@ -107,19 +107,8 @@ public class RequestRecord implements BaseEntity<String> {
         requestRecord.id = UUID.randomUUID().toString();
         requestRecord.sessionId = httpServletRequest.getSession().getId();
         requestRecord.time = LocalDateTime.now();
-        IpSourceProcessor ipSourceProcessor;
-        
-        try {
-            final SettingItem item = SettingService.singletonInstance.getItem("advance", "ipSource");
-            String ipSourceType = item.getValue(String.class);
-            ipSourceProcessor = IpSourceProcessor.valueOf(ipSourceType.toUpperCase());
-        } catch (Exception ignored) {
-            logger.warn("Setting: advance.ipSource not found");
-            ipSourceProcessor = IpSourceProcessor.REQUEST;
-        }
-        
-        String ipString = ipSourceProcessor.process(httpServletRequest);
-        
+        String ipString = getIpOf(httpServletRequest);
+
         boolean useRequestIpIfSourceIsNull = true;
         
         try {
@@ -163,7 +152,22 @@ public class RequestRecord implements BaseEntity<String> {
         requestRecord.requestAttributes = attributesMap;
         return requestRecord;
     }
-    
+
+    public static String getIpOf(HttpServletRequest httpServletRequest) {
+        IpSourceProcessor ipSourceProcessor;
+
+        try {
+            final SettingItem item = SettingService.singletonInstance.getItem("advance", "ipSource");
+            String ipSourceType = item.getValue(String.class);
+            ipSourceProcessor = IpSourceProcessor.valueOf(ipSourceType.toUpperCase());
+        } catch (Exception ignored) {
+            logger.warn("Setting: advance.ipSource not found");
+            ipSourceProcessor = IpSourceProcessor.REQUEST;
+        }
+
+        return ipSourceProcessor.process(httpServletRequest);
+    }
+
     public static RequestRecord from(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Throwable throwable) {
         RequestRecord requestRecord = from(httpServletRequest, httpServletResponse);
         requestRecord.status = Status.ERROR;

@@ -173,7 +173,7 @@ const deleteToken = (index) => {
                 <transition name="blur-scale" mode="out-in">
                     <div v-if="!loading && !error"
                          style="max-width: 1280px;width: min(70dvw,1280px);display: flex;flex-direction: column;align-items: stretch">
-                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 8px">
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 12px">
                             <el-text size="large" style="align-self: center;margin-right: 16px">IP 兼容</el-text>
                             <el-radio-group v-model="data.ipSource" :disabled="!editing">
                                 <el-radio value="request">使用传入 IP (默认)</el-radio>
@@ -184,12 +184,43 @@ const deleteToken = (index) => {
                                 <el-radio value="true_client_ip">从请求头 "true-client-ip" 解析 IP (Cloudflare Enterprise)</el-radio>
                             </el-radio-group>
                         </div>
-                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 8px">
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 12px">
                             <el-text size="large" style="align-self: center;margin-right: 16px">无法从请求头中获取 IP 时回退至请求</el-text>
                             <el-switch v-model="data.useRequestIpIfSourceIsNull" :disabled="!editing"></el-switch>
                         </div>
-                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 8px">
-                            <el-text size="large" style="align-self: center;margin-right: 16px">robot tokens</el-text>
+                        <div style="display: flex;flex-direction: column;flex-wrap: wrap;align-items: start;margin-bottom: 4px">
+                            <el-text size="large" style="align-self: start;">启用 Cloudflare Turnstile</el-text>
+                            <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;">
+                                <div style="margin-right: 36px;margin-left: 12px">
+                                    <el-text style="margin-right: 16px">登录</el-text>
+                                    <el-switch v-model="data.enableTurnstileOnLogin" :disabled="!editing"></el-switch>
+                                </div>
+                                <div>
+                                    <el-text style="margin-right: 16px">答题</el-text>
+                                    <el-switch v-model="data.enableTurnstileOnExam" :disabled="!editing"></el-switch>
+                                </div>
+                            </div>
+                        </div>
+                        <transition name="smooth-height" mode="out-in">
+                            <div class="smooth-height-base" v-if="data.enableTurnstileOnLogin || data.enableTurnstileOnExam">
+                                <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: start;margin-left: 12px">
+                                    <div style="width: 360px;margin-right: 8px">
+                                        <el-text>Site Key</el-text>
+                                        <el-input style="margin-top: 4px;" type="text" v-model="data.turnstileSiteKey"
+                                                  placeholder="留空则启用无效"
+                                                  :disabled="!editing || (!data.enableTurnstileOnLogin && !data.enableTurnstileOnExam)"></el-input>
+                                    </div>
+                                    <div style="width: 360px">
+                                        <el-text>Secret Key</el-text>
+                                        <el-input style="margin-top: 4px;" type="text"
+                                                  v-model="data.turnstileSecret" placeholder="留空则启用无效"
+                                                  :disabled="!editing || (!data.enableTurnstileOnLogin && !data.enableTurnstileOnExam)"></el-input>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 8px;margin-top: 24px">
+                            <el-text size="large" style="align-self: center;margin-right: 16px">Robot tokens</el-text>
                             <transition name="blur-scale">
                                 <el-button class="disable-init-animate" link @click="createNewToken" v-if="editing">
                                     <HarmonyOSIcon_Plus style="margin-right: 4px;"/>

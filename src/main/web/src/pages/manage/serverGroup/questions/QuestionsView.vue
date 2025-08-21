@@ -432,7 +432,7 @@ function batchDo(questionInfoAction, questionNodeObjAction) {
     }
     QuestionCache.getAllAsync(Array.from(checkedQuestionIds)).then(questionInfos => {
         if (questionInfoAction instanceof Function) {
-            for (const questionInfo of questionInfos) {
+            for (const questionInfo of Object.values(questionInfos)) {
                 questionInfoAction(questionInfo);
             }
         }

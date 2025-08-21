@@ -190,14 +190,14 @@ const ping = () => {
 
     function handleNext() {
         pingRetryCount = 0;
-        if (WebSocketConnector.ws.readyState === WebSocket.OPEN) {
+        if (WebSocketConnector.ws && WebSocketConnector.ws.readyState === WebSocket.OPEN) {
             setTimeout(() => {
                 ping();
             }, 10000);
         }
     }
 
-    if (WebSocketConnector.ws.readyState === WebSocket.OPEN) {
+    if (WebSocketConnector.wa && WebSocketConnector.ws.readyState === WebSocket.OPEN) {
         simplePing().then(() => {
             handleNext();
         }, (error) => {

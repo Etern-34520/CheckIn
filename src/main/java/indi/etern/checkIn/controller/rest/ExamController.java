@@ -1,5 +1,6 @@
 package indi.etern.checkIn.controller.rest;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.ActionExecutor;
@@ -14,7 +15,7 @@ import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.service.dao.*;
 import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
-import indi.etern.checkIn.service.web.WebSocketService;
+import indi.etern.checkIn.service.web.TurnstileService;
 import indi.etern.checkIn.throwable.entity.UserExistsException;
 import indi.etern.checkIn.throwable.exam.ExamException;
 import indi.etern.checkIn.throwable.exam.ExamIllegalStateException;
@@ -22,10 +23,10 @@ import indi.etern.checkIn.throwable.exam.ExamSubmittedException;
 import indi.etern.checkIn.throwable.exam.generate.ExamGenerateFailedException;
 import indi.etern.checkIn.throwable.exam.generate.PartitionsOutOfRangeException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -50,8 +51,12 @@ public class ExamController {
     private final SettingService settingService;
     private final UserService userService;
     private final GradingLevelService gradingLevelService;
-    
-    public ExamController(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator, ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService, SettingService settingService, UserService userService, PasswordEncoder passwordEncoder, GradingLevelService gradingLevelService, WebSocketService webSocketService) {
+    private final TurnstileService turnstileService;
+
+    public ExamController(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator,
+                          ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService,
+                          SettingService settingService, UserService userService, GradingLevelService gradingLevelService,
+                          TurnstileService turnstileService) {
         this.partitionService = partitionService;
         this.actionExecutor = actionExecutor;
         this.examGenerator = examGenerator;
@@ -61,14 +66,27 @@ public class ExamController {
         this.settingService = settingService;
         this.userService = userService;
         this.gradingLevelService = gradingLevelService;
+        this.turnstileService = turnstileService;
     }
-    
-    public record GenerateRequest(long qq, List<String> partitionIds) {
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record GenerateRequest(long qq, List<String> partitionIds, String turnstileToken) {
     }
     
     @PostMapping(path = "/api/generate")
     @Transactional(noRollbackFor = Throwable.class)
-    public String generateExam(@RequestBody GenerateRequest generateRequest) throws JsonProcessingException {
+    public String generateExam(@RequestBody GenerateRequest generateRequest, HttpServletRequest httpServletRequest) throws JsonProcessingException {
+        if (turnstileService.isTurnstileEnabledOnExam() && turnstileService.isServiceEnable()) {
+            try {
+                turnstileService.check(generateRequest.turnstileToken, httpServletRequest);
+            } catch (Exception e) {
+                Map<String, String> errorDataMap = new HashMap<>();
+                errorDataMap.put("type", "error");
+                errorDataMap.put("description", e.getMessage());
+                errorDataMap.put("exceptionType", e.getClass().getSimpleName());
+                return objectMapper.writeValueAsString(errorDataMap);
+            }
+        }
         try {
             List<Integer> range = null;
             try {

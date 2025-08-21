@@ -29,7 +29,8 @@ export default defineConfig({
                 target: "http://localhost:8080",
                 changeOrigin: true
             }
-        }
+        },
+        allowedHosts: ["test-checkin.com"]
     },
     base: '/checkIn/',
     plugins: [
