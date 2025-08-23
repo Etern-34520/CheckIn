@@ -139,7 +139,7 @@ const updateLimits = (partitionIds) => {
             <div style="display: flex;flex-direction: column;align-items: center">
                 <transition name="blur-scale" mode="out-in">
                     <div v-if="!loading && !error"
-                         style="max-width: 1280px;width: min(70dvw,1280px);display: flex;flex-direction: column">
+                         style="max-width: 1280px;width: min(85%,1280px);display: flex;flex-direction: column">
                         <div style="display: flex;flex-direction: row;flex-wrap: wrap">
                             <div style="display: flex;flex-direction: column;margin-right: 32px">
                                 <el-text size="large" class="field-label">题量</el-text>
@@ -242,7 +242,7 @@ const updateLimits = (partitionIds) => {
                                         placeholder="补全分区"
                                         multiple
                                         filterable
-                                        style="margin: 8px 0 8px 8px;min-width: min(400px,10dvw)"
+                                        style="margin: 8px 0 8px 8px;min-width: min(400px,10%)"
                                         :class="{error:(editing && data.completingStrategy==='selected') && (!data.completingPartitions || data.completingPartitions.length===0)}"
                                         :disabled="!(editing && data.completingStrategy==='selected')">
                                     <el-option v-for="(partition,id) in refPartitions" :key="partition.id"

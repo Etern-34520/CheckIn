@@ -97,7 +97,7 @@ const getAlertStatusDescription = (status) => {
                 </div>
             </div>
             <div class="smooth-height-base" v-else key="main" style="flex: 1">
-                <div style="display: flex;flex-direction: row;flex-wrap: wrap;flex: 1;gap: 2px;">
+                <div class="alerts" style="display: flex;flex-direction: row;flex-wrap: wrap;flex: 1;gap: 2px;">
                     <transition-group name="smooth-height">
                         <div class="smooth-height-base" key="generateAvailability" style="flex: 1;"
                              v-if="serverStatuses.generateAvailability && displayStatuses.includes(serverStatuses.generateAvailability.status)">
@@ -155,7 +155,7 @@ const getAlertStatusDescription = (status) => {
     transition: margin-bottom 200ms var(--ease-in-out-quint);
 }
 
-.server-statuses:has(*) {
+.server-statuses:has(.alerts > *) {
     margin-bottom: 8px !important;
 }
 </style>

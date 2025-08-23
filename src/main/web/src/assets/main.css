@@ -190,15 +190,13 @@ div.panel {
 }
 
 .smooth-height-enter-active {
-    transition: grid-template-rows 300ms var(--ease-in-out-quint),
-    transform 200ms var(--ease-in-out-quint) 300ms,
-    opacity 200ms var(--ease-in-out-quint) 300ms,
-    filter 200ms var(--ease-in-out-quint) 300ms;
+    transition: grid-template-rows 300ms var(--ease-in-out-quint) 300ms,
+    opacity 200ms var(--ease-in-out-quint) 600ms,
+    filter 200ms var(--ease-in-out-quint) 600ms;
 }
 
 .smooth-height-leave-active {
     transition: grid-template-rows 300ms var(--ease-in-out-quint) 300ms,
-    transform 200ms var(--ease-in-out-quint),
     opacity 200ms var(--ease-in-out-quint),
     filter 200ms var(--ease-in-out-quint);
 }
@@ -206,7 +204,6 @@ div.panel {
 .smooth-height-enter-from,
 .smooth-height-leave-to {
     grid-template-rows: 0fr !important;
-    transform: translateY(-20%);
     opacity: 0;
     filter: blur(32px);
 }
@@ -214,7 +211,6 @@ div.panel {
 .smooth-height-enter-to,
 .smooth-height-leave-from {
     grid-template-rows: 1fr !important;
-    transform: translateY(0);
     scale: 1;
     opacity: 1;
     filter: none;
@@ -250,14 +246,20 @@ div.panel {
 
 .slide-left-to-right-enter-from {
     margin-left: -100%;
+    opacity: 0;
 }
 
 .slide-left-to-right-leave-to {
-    opacity: 0.99999999999; /*to delay display switch*/
+    opacity: 0;
+}
+
+.slide-right-to-right-enter-from {
+    opacity: 0;
 }
 
 .slide-right-to-left-leave-to {
     margin-left: -100%;
+    opacity: 0;
 }
 
 /*noinspection CssUnusedSymbol*/

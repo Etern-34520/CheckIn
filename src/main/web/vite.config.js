@@ -50,6 +50,7 @@ export default defineConfig({
                 description: "CheckIn",
                 lang: 'zh-CN',
                 id: "CheckIn-" + appVersion,
+                registerType: "autoUpdate",
                 display: "minimal-ui",
                 "display_override": ["window-controls-overlay"],
                 icons: [

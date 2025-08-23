@@ -151,8 +151,8 @@ const openRecord = (exam) => {
                         <transition name="smooth-height" mode="out-in">
                             <div class="smooth-height-base" style="padding: 0;" v-if="!loadingUsersBestExam">
                                 <div>
-                                    <div style="padding: 0;min-height: 40px;display: flex;justify-content: center;align-items: start;flex-direction: column;margin-bottom: 6px !important;">
-                                        <div v-if="loadingUsersBestExamError">
+                                    <div style="padding: 0;min-height: 0;display: flex;justify-content: center;align-items: start;flex-direction: column;">
+                                        <div style="min-height: 40px;" v-if="loadingUsersBestExamError">
                                             <div
                                                 style="flex: 1;display: flex;justify-content: center;align-items: center;">
                                                 <el-text style="align-self: center;margin-right: 12px" type="info">
@@ -161,9 +161,9 @@ const openRecord = (exam) => {
                                                 <el-button link @click="loadUsersBestExam">重新加载</el-button>
                                             </div>
                                         </div>
-                                        <div v-else style="place-self: stretch;flex: 1;display: flex;">
+                                        <div v-else-if="usersBestExam" style="place-self: stretch;flex: 1;display: flex;">
                                             <el-button link @click="openRecord(usersBestExam)"
-                                                 style="padding: 0 !important;place-self: stretch;">
+                                                 style="padding: 0 !important;place-self: stretch;min-height: 40px;">
                                                 <div style="display: flex;flex-direction: row;align-items: stretch;flex: 1">
                                                     <div style="margin: -4px 4px;width: 4px;border-radius: 2px"
                                                          :style="{background: usersBestExam.result.colorHex}"></div>
@@ -230,7 +230,7 @@ const openRecord = (exam) => {
                                     <template #item="{item,index}">
                                         <question-info-panel :question-info="item[1]" class="clickable"
                                                              disable-error-and-warning
-                                                             style="margin: 4px"
+                                                             style="margin: 0 4px 8px 4px;"
                                                              @click="router.push({name:'question-detail',params: {id:item[0]}})"/>
                                     </template>
                                 </waterfall>

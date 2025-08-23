@@ -38,12 +38,14 @@ const mobile = UI_Meta.mobile;
 </template>
 
 <style scoped>
-.global-setting-base {
-    transition: padding 0.3s var(--ease-in-out-quint);
+.global-setting-base > .slide-switch-base {
     padding: 24px 32px 0;
+    transition: padding 0.3s var(--ease-in-out-quint);
+    --slide-padding: 32px;
 }
 
-.global-setting-base.mobile {
+.global-setting-base.mobile > .slide-switch-base {
     padding: 12px 12px 0;
+    --slide-padding: 12px;
 }
 </style>

@@ -5,6 +5,7 @@ import QuestionInfoPanel from "@/components/question/QuestionInfoPanel.vue";
 import ExamRecordItem from "@/pages/manage/serverGroup/examRecord/ExamRecordItem.vue";
 import WebSocketConnector from "@/api/websocket.js";
 import QuestionCache from "@/data/QuestionCache.js";
+import UserDataInterface from "@/data/UserDataInterface.js";
 
 const back = () => {
     router.push({name: "question-detail"});
@@ -105,66 +106,77 @@ const getTagType = (checkedResultType) => {
                         </div>
                         <div style="display:flex;flex-direction: column" v-else-if="!loading">
                             <transition name="blur-scale" mode="out-in">
-                                <div style="display:flex;flex-direction: column" v-if="data.examDataAnswerList && data.examDataAnswerList.length > 0">
+                                <div style="display:flex;flex-direction: column"
+                                     v-if="data.examDataAnswerList && data.examDataAnswerList.length > 0">
                                     <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 16px"
                                          v-for="item of data.examDataAnswerList">
                                         <exam-record-item style="flex: 1;margin: 4px;min-width: 240px"
                                                           class="clickable" :record="item.examData"
                                                           @click="router.push({name:'exam-record-detail',params: {id:item.examData.id}})"/>
                                         <div class="panel-1" style="flex: 1;margin: 4px;padding: 4px">
-                                            <div style="padding: 4px">
-                                                <div style="display: flex;flex-direction: column;align-items:baseline;"
-                                                     v-if="currentQuestionInfo.question.type === 'QuestionGroup'">
-                                                    <div v-for="(answerDatum,index) of getDisplayAnswerData(currentQuestionInfo,item.answer)">
-                                                        <div style="display: flex;flex-direction: row;margin-bottom: 8px;margin-right: 32px;">
-                                                            <el-tag type="info" size="large"
-                                                                    style="align-self: center;border-radius: 4px 0 0 4px;">
-                                                                {{ index }}
-                                                            </el-tag>
-                                                            <el-tag style="margin-right: 12px;align-self: center;border-radius: 0 4px 4px 0;"
+                                            <el-watermark :font="{color: 'rgba(128,128,128,0.01)', fontSize: 16}"
+                                                          :content="['',UserDataInterface.currentUser.value.qq]"
+                                                          :rotate="-45"
+                                                          :zIndex="2000" :gap="[50,50]">
+                                                <div style="padding: 4px">
+                                                    <div
+                                                        style="display: flex;flex-direction: column;align-items:baseline;"
+                                                        v-if="currentQuestionInfo.question.type === 'QuestionGroup'">
+                                                        <div
+                                                            v-for="(answerDatum,index) of getDisplayAnswerData(currentQuestionInfo,item.answer)">
+                                                            <div
+                                                                style="display: flex;flex-direction: row;margin-bottom: 8px;margin-right: 32px;">
+                                                                <el-tag type="info" size="large"
+                                                                        style="align-self: center;border-radius: 4px 0 0 4px;">
+                                                                    {{ index }}
+                                                                </el-tag>
+                                                                <el-tag
+                                                                    style="margin-right: 12px;align-self: center;border-radius: 0 4px 4px 0;"
                                                                     size="large"
                                                                     :type="getTagType(item.answer.answers[index].result.checkedResultType)">
-                                                                {{
-                                                                    item.answer.answers[index].result.score
-                                                                }}
-                                                                /
-                                                                {{
-                                                                    item.answer.answers[index].result.maxScore
-                                                                }}
-                                                            </el-tag>
-                                                            <div class="panel-1"
-                                                                 style="padding: 4px;display: flex;flex-direction: row;flex: 1">
-                                                                <el-tag style="margin: 2px;"
-                                                                        v-for="(subAnswerDatum,index) of answerDatum"
-                                                                        :type="subAnswerDatum.selected?'primary':'info'">
-                                                                    {{ subAnswerDatum.content }}
+                                                                    {{
+                                                                        item.answer.answers[index].result.score
+                                                                    }}
+                                                                    /
+                                                                    {{
+                                                                        item.answer.answers[index].result.maxScore
+                                                                    }}
                                                                 </el-tag>
+                                                                <div class="panel-1"
+                                                                     style="padding: 4px;display: flex;flex-direction: row;flex: 1">
+                                                                    <el-tag style="margin: 2px;"
+                                                                            v-for="(subAnswerDatum,index) of answerDatum"
+                                                                            :type="subAnswerDatum.selected?'primary':'info'">
+                                                                        {{ subAnswerDatum.content }}
+                                                                    </el-tag>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div style="display: flex;flex-wrap: wrap;align-items:baseline;"
-                                                     v-else>
-                                                    <el-tag v-for="(answerDatum,index) of getDisplayAnswerData(currentQuestionInfo,item.answer)"
+                                                    <div style="display: flex;flex-wrap: wrap;align-items:baseline;"
+                                                         v-else>
+                                                        <el-tag
+                                                            v-for="(answerDatum,index) of getDisplayAnswerData(currentQuestionInfo,item.answer)"
                                                             style="margin: 2px"
                                                             :type="answerDatum.selected?'primary':'info'">
-                                                        {{ answerDatum.content }}
-                                                    </el-tag>
+                                                            {{ answerDatum.content }}
+                                                        </el-tag>
+                                                    </div>
+                                                    <div style="margin-top: 8px;display: flex;flex-direction: row"
+                                                         v-if="item.answer && item.answer.result">
+                                                        <el-tag type="info" size="large"
+                                                                style="border-radius: 4px 0 0 4px;">
+                                                            总分
+                                                        </el-tag>
+                                                        <el-tag size="large" style="border-radius: 0 4px 4px 0;"
+                                                                :type="getTagType(item.answer.result.checkedResultType)">
+                                                            {{ item.answer.result.score }}
+                                                            /
+                                                            {{ item.answer.result.maxScore }}
+                                                        </el-tag>
+                                                    </div>
                                                 </div>
-                                                <div style="margin-top: 8px;display: flex;flex-direction: row"
-                                                     v-if="item.answer && item.answer.result">
-                                                    <el-tag type="info" size="large"
-                                                            style="border-radius: 4px 0 0 4px;">
-                                                        总分
-                                                    </el-tag>
-                                                    <el-tag size="large" style="border-radius: 0 4px 4px 0;"
-                                                            :type="getTagType(item.answer.result.checkedResultType)">
-                                                        {{ item.answer.result.score }}
-                                                        /
-                                                        {{ item.answer.result.maxScore }}
-                                                    </el-tag>
-                                                </div>
-                                            </div>
+                                            </el-watermark>
                                         </div>
                                     </div>
                                 </div>

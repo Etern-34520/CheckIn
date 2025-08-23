@@ -302,6 +302,16 @@
     opacity: 0.75;
 }
 
+.md-editor-btn {
+    background: var(--button-bg-color) var(--lighting-effect-background-2);
+    --md-bk-color: rgba(0,0,0,0);
+    transition: 0.2s var(--ease-in-out-quint);
+}
+
+.md-editor-btn:hover {
+    background-color: var(--panel-bg-color-overlay) !important;
+}
+
 .el-button:not(.is-text):not(.is-link) {
     --button-bg-color: var(--panel-bg-color);
     background: var(--button-bg-color) var(--lighting-effect-background-2);
@@ -623,12 +633,14 @@
 }
 
 #app .el-date-editor--daterange,
+.md-editor-input,
 .el-textarea, .el-input, .el-select {
     box-sizing: border-box;
     border-radius: 4px !important;
     background: var(--panel-bg-color);
     transition: var(--ease-in-out-quint) 0.2s;
     border: var(--border-1) !important;
+    --md-bk-color: rgba(0, 0, 0, 0);
 }
 
 .el-select__selection {
@@ -700,6 +712,7 @@
 }
 
 .el-date-editor--daterange.is-active::after,
+.md-editor-input:focus::after,
 .el-input:has(.is-focus)::after, .el-textarea:has(textarea:focus)::after, .el-select:has(.is-focused)::after,
 .el-input-number.error > .el-input::after, .el-input-number.warning > .el-input::after,
 .question-input.warning::after,
@@ -847,7 +860,7 @@
     opacity: 1;
 }
 
-.el-scrollbar.hide-bars .el-scrollbar__bar{
+.el-scrollbar.hide-bars .el-scrollbar__bar {
     display: none !important;
 }
 
@@ -1104,6 +1117,7 @@
     background: var(--panel-bg-color-overlay) !important;
 }
 
+.md-editor-modal,
 .el-message-box,
 .el-dialog {
     border-radius: 8px !important;

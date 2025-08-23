@@ -172,7 +172,7 @@ const deleteToken = (index) => {
             <div style="display: flex;flex-direction: column;align-items: center">
                 <transition name="blur-scale" mode="out-in">
                     <div v-if="!loading && !error"
-                         style="max-width: 1280px;width: min(70dvw,1280px);display: flex;flex-direction: column;align-items: stretch">
+                         style="max-width: 1280px;width: min(85%,1280px);display: flex;flex-direction: column;align-items: stretch">
                         <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 12px">
                             <el-text size="large" style="align-self: center;margin-right: 16px">IP 兼容</el-text>
                             <el-radio-group v-model="data.ipSource" :disabled="!editing">
@@ -186,34 +186,35 @@ const deleteToken = (index) => {
                         </div>
                         <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 12px">
                             <el-text size="large" style="align-self: center;margin-right: 16px">无法从请求头中获取 IP 时回退至请求</el-text>
-                            <el-switch v-model="data.useRequestIpIfSourceIsNull" :disabled="!editing"></el-switch>
+                            <el-switch class="disable-init-animate" v-model="data.useRequestIpIfSourceIsNull" :disabled="!editing"></el-switch>
                         </div>
                         <div style="display: flex;flex-direction: column;flex-wrap: wrap;align-items: start;margin-bottom: 4px">
                             <el-text size="large" style="align-self: start;">启用 Cloudflare Turnstile</el-text>
                             <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;">
                                 <div style="margin-right: 36px;margin-left: 12px">
                                     <el-text style="margin-right: 16px">登录</el-text>
-                                    <el-switch v-model="data.enableTurnstileOnLogin" :disabled="!editing"></el-switch>
+                                    <el-switch class="disable-init-animate" v-model="data.enableTurnstileOnLogin" :disabled="!editing"></el-switch>
                                 </div>
                                 <div>
                                     <el-text style="margin-right: 16px">答题</el-text>
-                                    <el-switch v-model="data.enableTurnstileOnExam" :disabled="!editing"></el-switch>
+                                    <el-switch class="disable-init-animate" v-model="data.enableTurnstileOnExam" :disabled="!editing"></el-switch>
                                 </div>
                             </div>
                         </div>
                         <transition name="smooth-height" mode="out-in">
                             <div class="smooth-height-base" v-if="data.enableTurnstileOnLogin || data.enableTurnstileOnExam">
                                 <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: start;margin-left: 12px">
-                                    <div style="width: 360px;margin-right: 8px">
-                                        <el-text>Site Key</el-text>
-                                        <el-input style="margin-top: 4px;" type="text" v-model="data.turnstileSiteKey"
-                                                  placeholder="留空则启用无效"
+                                    <div style="width: 360px;margin-right: 8px;display: flex;flex-direction: column;align-items: start;justify-content: start">
+                                        <el-text style="align-self: start">Site Key</el-text>
+                                        <el-input style="margin-top: 4px;max-width: calc(85% - 12px);" type="text" v-model="data.turnstileSiteKey"
+                                                  placeholder="留空则启用无效" class="disable-init-animate"
                                                   :disabled="!editing || (!data.enableTurnstileOnLogin && !data.enableTurnstileOnExam)"></el-input>
                                     </div>
-                                    <div style="width: 360px">
-                                        <el-text>Secret Key</el-text>
-                                        <el-input style="margin-top: 4px;" type="text"
+                                    <div style="width: 360px;margin-right: 8px;display: flex;flex-direction: column;align-items: start;justify-content: start">
+                                        <el-text style="align-self: start">Secret Key</el-text>
+                                        <el-input style="margin-top: 4px;max-width: calc(85% - 12px)" type="text"
                                                   v-model="data.turnstileSecret" placeholder="留空则启用无效"
+                                                  class="disable-init-animate"
                                                   :disabled="!editing || (!data.enableTurnstileOnLogin && !data.enableTurnstileOnExam)"></el-input>
                                     </div>
                                 </div>
@@ -299,28 +300,6 @@ const deleteToken = (index) => {
                             </div>
                             <el-text style="align-self: baseline" type="info" v-else>无数据</el-text>
                         </transition>
-                        <!--                        <el-text size="large" class="field-label">自动创建用户</el-text>
-                                                <el-radio-group v-model="data.autoCreateUserMode" size="large" style="padding: 4px 20px"
-                                                                :disabled="!editing">
-                                                    <el-radio value="disabled">禁用</el-radio>
-                                                    <el-radio value="afterExam">答题后创建</el-radio>
-                                                    <el-radio value="afterQualify">验证后创建</el-radio>
-                                                </el-radio-group>
-                                                <transition name="blur-scale">
-                                                    <div v-if="data.autoCreateUserMode !== 'disabled'"
-                                                         style="margin-left: 8px;display: flex;flex-direction: column;align-items: stretch;margin-top: 8px">
-                                                        <el-select v-model="data.autoCreatedUserLevel"
-                                                                   placeholder="选择答题结果级别"
-                                                                   multiple
-                                                                   filterable>
-                                                            <el-option :value="'test'" :label="'test'"/>
-                                                        </el-select>
-                                                        <div style="display: flex;flex-direction: row;margin-top: 8px">
-                                                            <el-text>创建后启用用户</el-text>
-                                                            <el-switch v-model="data.autoCreatedUserEnabled"/>
-                                                        </div>
-                                                    </div>
-                                                </transition>-->
                     </div>
                     <div v-else-if="error" style="display:flex;flex-direction: column">
                         <el-empty description="获取设置失败"></el-empty>

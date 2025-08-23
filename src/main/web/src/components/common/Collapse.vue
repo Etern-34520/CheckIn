@@ -3,6 +3,7 @@ import {ArrowDownBold} from "@element-plus/icons-vue";
 
 const showContent = ref(false);
 const expanded = ref(false);
+const disableAnimate = ref(false);
 const borderChanged = ref(false);
 const props = defineProps({
     expanded: {
@@ -24,7 +25,11 @@ const props = defineProps({
 });
 onMounted(() => {
     if (props.expanded) {
+        disableAnimate.value = true;
         expanded.value = props.expanded;
+        nextTick(() => {
+            disableAnimate.value = false;
+        })
     }
 });
 const switchExpand = () => {
@@ -56,10 +61,11 @@ watch(() => expanded.value, (newVal, oldVal) => {
 </script>
 
 <template>
-    <div v-bind="$attrs" class="collapse" :class="{expanded:expanded}">
+    <div v-bind="$attrs" class="collapse" :class="{expanded:expanded, 'disable-animate': disableAnimate}">
         <div class="collapse-title" :class="{
             'border-changed':borderChanged,
             'title-background':titleBackground,
+            'disable-animate': disableAnimate,
             clickable:clickable
         }" @click="clickable?switchExpand():null">
             <div class="collapse-title-inner">
@@ -75,8 +81,8 @@ watch(() => expanded.value, (newVal, oldVal) => {
                 </transition>
             </el-button>
         </div>
-        <div class="collapse-content" :class="{'content-background':contentBackground}">
-            <div class="collapse-content-inner" v-show="showContent">
+        <div class="collapse-content" :class="{'content-background':contentBackground,'disable-animate': disableAnimate}">
+            <div class="collapse-content-inner" :class="{'disable-animate': disableAnimate}" v-show="showContent">
                 <slot name="content"/>
             </div>
         </div>
@@ -84,6 +90,10 @@ watch(() => expanded.value, (newVal, oldVal) => {
 </template>
 
 <style scoped>
+.disable-animate {
+    transition: none !important;
+}
+
 .collapse {
     display: grid;
     grid-template-rows: 0fr 0fr;

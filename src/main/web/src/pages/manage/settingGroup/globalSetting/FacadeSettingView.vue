@@ -140,7 +140,7 @@ const deleteIcon = () => {
                     <transition name="blur-scale" mode="out-in">
                         <div v-if="mode==='预览'"
                              style="display: inherit;flex-direction: inherit;flex: inherit;align-items:center;width: 100%">
-                            <div style="display: flex;flex-direction: row;flex-wrap: wrap;max-width: 80dvw;width: 80dvw;">
+                            <div style="display: flex;flex-direction: row;flex-wrap: wrap;max-width: 85%;width: 85%;">
                                 <div v-if="data.icon" class="icon-image" style="position: relative">
                                     <el-image
                                             style="width: 100%;height: 100%;filter: saturate(2) blur(64px);transform: scale(3) translate3d(20%,5%,0);position: absolute"
@@ -234,7 +234,7 @@ const deleteIcon = () => {
                             </div>
                         </div>
                         <div v-else
-                             style="display: inherit;flex-direction: inherit;flex: inherit;justify-content: stretch;align-items:stretch;max-width: 80dvw;width: 80dvw;">
+                             style="display: inherit;flex-direction: inherit;flex: inherit;justify-content: stretch;align-items:stretch;max-width: 85%;width: 85%;">
                             <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
                                 <input style="display: none;" id="icon-upload" type="file"
                                        accept="image/png, image/jpeg, .svg" @change="uploadImage" ref="iconUpload"/>
@@ -274,10 +274,10 @@ const deleteIcon = () => {
                                 </div>
                                 <div style="display: flex;flex-direction: column;margin-right: 48px;margin-bottom: 48px">
                                     <el-input class="disable-init-animate" placeholder="标题"
-                                              style="font-size: 40px;--el-input-height: 60px;margin-top:20px;width:30dvw;min-width: 300px;"
+                                              style="font-size: 40px;--el-input-height: 60px;margin-top:20px;width:30%;min-width: 300px;"
                                               v-model="data.title"></el-input>
                                     <el-input class="disable-init-animate" placeholder="副标题"
-                                              style="font-size: 24px;opacity:0.7;--el-input-height: 40px;margin-top:20px;width:30dvw;min-width: 240px;"
+                                              style="font-size: 24px;opacity:0.7;--el-input-height: 40px;margin-top:20px;width:30%;min-width: 240px;"
                                               v-model="data.subTitle"></el-input>
                                 </div>
                             </div>
