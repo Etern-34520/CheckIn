@@ -5,6 +5,7 @@ import indi.etern.checkIn.entities.setting.verification.VerificationRule;
 import indi.etern.checkIn.service.dao.verify.DynamicValidator;
 import indi.etern.checkIn.service.dao.verify.ValidationContext;
 import indi.etern.checkIn.service.dao.verify.ValidationResult;
+import indi.etern.checkIn.utils.UUIDv7;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +29,7 @@ public class VerifierTest {
         
         // 创建校验规则
         VerificationRule rule = new VerificationRule(
-                UUID.randomUUID().toString(),
+                UUIDv7.randomUUID().toString(),
                 "Question",
                 Arrays.asList("question","images", "$*", "size"),
                 "max",

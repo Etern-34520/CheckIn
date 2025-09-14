@@ -1,7 +1,7 @@
 <script setup>
 // import {nextTick, onBeforeMount, ref, watch} from "vue";
 import QuestionCache from "@/data/QuestionCache.js";
-import randomUUIDv4 from "@/utils/UUID.js";
+import { uuidv7 } from "uuidv7";
 import {VueDraggable} from "vue-draggable-plus";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
@@ -95,7 +95,7 @@ const createQuestion = () => {
     QuestionCache.appendToGroup(
         questionInfo.value,
         QuestionCache.create({
-            id: randomUUIDv4(),
+            id: uuidv7(),
             content: "",
             type: "MultipleChoicesQuestion",
             enabled: false,
@@ -105,11 +105,11 @@ const createQuestion = () => {
             downVoters: [],
             inputMeta: {},
             choices: [{
-                id: randomUUIDv4(),
+                id: uuidv7(),
                 correct: true,
                 content: ""
             }, {
-                id: randomUUIDv4(),
+                id: uuidv7(),
                 correct: false,
                 content: ""
             }]

@@ -4,7 +4,7 @@ import "splitpanes/dist/splitpanes.css"
 import router from "@/router/index.js";
 import QuestionCache from "@/data/QuestionCache.js";
 import PartitionCache from "@/data/PartitionCache.js";
-import randomUUIDv4 from "@/utils/UUID.js";
+import { uuidv7 } from "uuidv7";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import HarmonyOSIcon_CheckBox from "@/components/icons/HarmonyOSIcon_CheckBox.vue";
 import EditPartitionNameDialog from "@/components/question/EditPartitionNameDialog.vue";
@@ -41,8 +41,8 @@ const filterNode = (value, node) => {
 const filterQuestionInfo = (questionInfo) => {
     for (const v of filterText.value.split(",")) {
         if (v !== "" &&
-                (questionInfo.type === 'Partition') || (questionInfo.type === 'Question' && (
-                        (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase()))))
+            (questionInfo.type === 'Partition') || (questionInfo.type === 'Question' && (
+                (questionInfo.question.content && questionInfo.question.content.toUpperCase().includes(v.toUpperCase()))))
         ) {
             return true;
         }
@@ -117,11 +117,11 @@ const loadNode = (node, resolve, reject) => {
         });
     } else {
         loadPartitionChildrenNode(nodeObj).then(
-                (data) => {
-                    resolve(data);
-                }, (data) => {
-                    reject(data);
-                }
+            (data) => {
+                resolve(data);
+            }, (data) => {
+                reject(data);
+            }
         );
     }
 }
@@ -216,7 +216,7 @@ const allowDrag = (node) => {
 const allowDrop = (draggingNode, dropNode, type) => {
     let nodeDataType = dropNode.data.data.type;
     return ((nodeDataType === "Partition" || nodeDataType === "QuestionGroup") && type === "inner") ||
-            (nodeDataType !== "Partition" && nodeDataType !== "createPartition" && type === "next");
+        (nodeDataType !== "Partition" && nodeDataType !== "createPartition" && type === "next");
 }
 
 const onDrop = (dragNode, dropNode, place, event) => {
@@ -269,7 +269,7 @@ const onDragEnd = (node, dropNode, event) => {
 const createQuestionGroup = (partitionId) => {
     if (PermissionInfo.hasPermission('question group', 'create and edit owns question groups')) {
         const authorQQ = Number(UserDataInterface.currentUser.value.qq);
-        const id = randomUUIDv4();
+        const id = uuidv7();
         let question = {
             id: id,
             content: "",
@@ -292,7 +292,7 @@ const createQuestionGroup = (partitionId) => {
 
 const createMultipleChoiceQuestion = (partitionId) => {
     if (PermissionInfo.hasPermission('question', 'create and edit owns questions')) {
-        const id = randomUUIDv4();
+        const id = uuidv7();
         let question = {
             id: id,
             content: "",
@@ -304,11 +304,11 @@ const createMultipleChoiceQuestion = (partitionId) => {
             downVoters: [],
             localNew: true,
             choices: [{
-                id: randomUUIDv4(),
+                id: uuidv7(),
                 correct: true,
                 content: ""
             }, {
-                id: randomUUIDv4(),
+                id: uuidv7(),
                 correct: false,
                 content: ""
             }]
@@ -615,15 +615,15 @@ function onDeleteNode(nodeObj) {
         const partition = tree.value.getNode(nodeObj.treeId).data.data.partition;
         const alartNotEmpty = () => {
             ElMessageBox.confirm(
-                    "删除分区时将把所属的所有题目从分区中移除，若题目无其他隶属分区，则将被删除",
-                    "该分区非空",
-                    {
-                        showClose: false,
-                        draggable: true,
-                        confirmButtonText: "确定",
-                        cancelButtonText: "取消",
-                        type: "warning"
-                    }
+                "删除分区时将把所属的所有题目从分区中移除，若题目无其他隶属分区，则将被删除",
+                "该分区非空",
+                {
+                    showClose: false,
+                    draggable: true,
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    type: "warning"
+                }
             ).then(() => {
                 doDelete();
             }).catch(() => {
@@ -719,8 +719,8 @@ const getTypeName = (obj) => {
                         </el-button-group>
                         <transition name="batch-buttons">
                             <select-partitions-action-pop
-                                    v-show="currentButton.menuVisible && !disabled"
-                                    @on-confirm="currentButton.action"/>
+                                v-show="currentButton.menuVisible && !disabled"
+                                @on-confirm="currentButton.action"/>
                         </transition>
                     </div>
                     <div style="flex:1;overflow:overlay;">
@@ -751,13 +751,13 @@ const getTypeName = (obj) => {
                                                     <div class="no-pop-padding create-selection">
                                                         <el-button-group>
                                                             <el-button
-                                                                    :disabled="!PermissionInfo.hasPermission('question group','create and edit owns question groups')"
-                                                                    @click="createQuestionGroup(nodeObj.data.partitionId)">
+                                                                :disabled="!PermissionInfo.hasPermission('question group','create and edit owns question groups')"
+                                                                @click="createQuestionGroup(nodeObj.data.partitionId)">
                                                                 题组
                                                             </el-button>
                                                             <el-button
-                                                                    :disabled="!PermissionInfo.hasPermission('question','create and edit owns questions')"
-                                                                    @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
+                                                                :disabled="!PermissionInfo.hasPermission('question','create and edit owns questions')"
+                                                                @click="createMultipleChoiceQuestion(nodeObj.data.partitionId)">
                                                                 选择题
                                                             </el-button>
                                                             <!--<el-button disabled>排序题</el-button>-->
@@ -781,7 +781,8 @@ const getTypeName = (obj) => {
                                                 <!--                                                :class="{'disable-tree-checkbox': !(nodeObj.data.type === 'Partition'?true:nodeObj.data.ableToEdit)}"-->
                                                 <div class="question-tree-node"
                                                      :class="{'local-deleted': nodeObj.data.question&&nodeObj.data.question.localDeleted}">
-                                                    <el-icon style="margin-right: 4px" v-if="nodeObj.data.question&&!nodeObj.data.ableToEdit">
+                                                    <el-icon style="margin-right: 4px"
+                                                             v-if="nodeObj.data.question&&!nodeObj.data.ableToEdit">
                                                         <lock/>
                                                     </el-icon>
                                                     <el-text size="small" style="margin-right: 4px;"
@@ -795,10 +796,11 @@ const getTypeName = (obj) => {
                                                              }">
                                                         {{
                                                             nodeObj.data.type === 'Partition' ?
-                                                                    nodeObj.data.partition.name : nodeObj.data.question.content
+                                                                nodeObj.data.partition.name : nodeObj.data.question.content
                                                         }}
                                                     </el-text>
-                                                    <el-button-group class="node-buttons" v-if="nodeObj.data.type === 'Question'">
+                                                    <el-button-group class="node-buttons"
+                                                                     v-if="nodeObj.data.type === 'Question'">
                                                         <el-button class="node-button" size="small"
                                                                    v-if="nodeObj.data.ableToDelete"
                                                                    @click.stop="onDeleteNode(nodeObj)">
@@ -809,7 +811,8 @@ const getTypeName = (obj) => {
                                                             <HarmonyOSIcon_Remove v-else/>
                                                         </el-button>
                                                     </el-button-group>
-                                                    <el-button-group class="node-buttons" style="position: initial" v-if="nodeObj.data.type === 'Partition'">
+                                                    <el-button-group class="node-buttons" style="position: initial"
+                                                                     v-if="nodeObj.data.type === 'Partition'">
                                                         <el-popover trigger="click"
                                                                     v-if="PermissionInfo.hasPermission('partition','edit partition name')"
                                                                     v-model:visible="nodeObj.data.editing"
@@ -822,9 +825,9 @@ const getTypeName = (obj) => {
                                                             </template>
                                                             <template #default>
                                                                 <EditPartitionNameDialog
-                                                                        @on-over="nodeObj.data.editing = false"
-                                                                        :partition="nodeObj.data.partition"
-                                                                        size="default"/>
+                                                                    @on-over="nodeObj.data.editing = false"
+                                                                    :partition="nodeObj.data.partition"
+                                                                    size="default"/>
                                                             </template>
                                                         </el-popover>
                                                         <el-button class="node-button" size="small"

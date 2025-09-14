@@ -1,5 +1,5 @@
 import router from "@/router/index.js";
-import randomUUIDv4 from "@/utils/UUID.js";
+import { uuidv7 } from "uuidv7";
 import WebSocketConnector from "@/api/websocket.js";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import UserDataInterface from "@/data/UserDataInterface.js";
@@ -612,7 +612,7 @@ const QuestionCache = {
             questionInfos = [];
             for (let i = 0; i < 2; i++) {
                 questionInfos.push(QuestionCache.create({
-                    id: randomUUIDv4(),
+                    id: uuidv7(),
                     content: "",
                     type: "MultipleChoicesQuestion",
                     enabled: false,
@@ -621,9 +621,9 @@ const QuestionCache = {
                     upVoters: [],
                     downVoters: [],
                     choices: [{
-                        id: randomUUIDv4(), correct: true, content: ""
+                        id: uuidv7(), correct: true, content: ""
                     }, {
-                        id: randomUUIDv4(), correct: false, content: ""
+                        id: uuidv7(), correct: false, content: ""
                     }]
                 }, false));
             }

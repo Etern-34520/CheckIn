@@ -84,6 +84,9 @@ export default defineConfig({
                         },
                     },
                 ],
+                navigateFallbackDenylist: [
+                    /^\/checkIn\/api\/*/
+                ]
             },
             includeAssets: ['src/assets/icons/*.svg'],
             devOptions: {

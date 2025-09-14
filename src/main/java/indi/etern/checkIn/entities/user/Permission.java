@@ -2,12 +2,11 @@ package indi.etern.checkIn.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import indi.etern.checkIn.utils.UUIDv7;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
-
-import java.util.UUID;
 
 @Getter
 @Entity
@@ -31,7 +30,7 @@ public class Permission implements GrantedAuthority {
     private String name;
     
     public Permission(String name) {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUIDv7.randomUUID().toString();
         this.name = name;
     }
     

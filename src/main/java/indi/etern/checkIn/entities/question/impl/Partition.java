@@ -6,6 +6,7 @@ import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.linkUtils.LinkTarget;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.service.dao.PartitionService;
+import indi.etern.checkIn.utils.UUIDv7;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,9 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Entity
 @Table(name = "partitions")
@@ -40,7 +43,7 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     private Partition(String string) {
         name = string;
         questionLinks = new HashSet<>();
-        id = UUID.randomUUID().toString();
+        id = UUIDv7.randomUUID().toString();
     }
     
     public static Partition ofName(String string) {

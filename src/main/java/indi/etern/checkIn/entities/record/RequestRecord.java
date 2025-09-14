@@ -6,6 +6,7 @@ import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.service.dao.SettingService;
+import indi.etern.checkIn.utils.UUIDv7;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -104,7 +105,7 @@ public class RequestRecord implements BaseEntity<String> {
     
     public static RequestRecord from(HttpServletRequest httpServletRequest, @Nullable HttpServletResponse httpServletResponse) {
         RequestRecord requestRecord = new RequestRecord();
-        requestRecord.id = UUID.randomUUID().toString();
+        requestRecord.id = UUIDv7.randomUUID().toString();
         requestRecord.sessionId = httpServletRequest.getSession().getId();
         requestRecord.time = LocalDateTime.now();
         String ipString = getIpOf(httpServletRequest);

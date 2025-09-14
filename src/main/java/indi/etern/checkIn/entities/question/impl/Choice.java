@@ -1,13 +1,13 @@
 package indi.etern.checkIn.entities.question.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import indi.etern.checkIn.utils.UUIDv7;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @Getter
 @Embeddable
@@ -26,11 +26,11 @@ public class Choice implements Serializable {
     private int orderIndex;
     
     protected Choice() {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUIDv7.randomUUID().toString();
     }
     
     public Choice(String content, boolean isCorrect) {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUIDv7.randomUUID().toString();
         this.content = content;
         this.isCorrect = isCorrect;
     }

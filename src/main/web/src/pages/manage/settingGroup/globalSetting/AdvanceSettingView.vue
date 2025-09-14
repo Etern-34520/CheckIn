@@ -5,7 +5,7 @@ import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import CustomDialog from "@/components/common/CustomDialog.vue";
 import UserDataInterface from "@/data/UserDataInterface.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
-import randomUUIDv4 from "../../../../utils/UUID.js";
+import { uuidv7 } from "uuidv7";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import router from "@/router/index.js";
 
@@ -92,7 +92,7 @@ const createTokenButtonOption = ref([{
             data.value.robotTokenItems = [];
         }
         const token = {
-            id: randomUUIDv4(),
+            id: uuidv7(),
             token: null,
             description: newTokenDescription.value,
             generateTime: null,
@@ -161,7 +161,7 @@ const deleteToken = (index) => {
                             </el-button>
                             <el-button class="disable-init-animate" style="margin-right: 24px;"
                                        @click="cancel" v-if="editing" key="cancel">
-                                {{ editing ? '取消' : '编辑' }}
+                                取消
                             </el-button>
                         </transition-group>
                     </el-button-group>

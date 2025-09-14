@@ -128,7 +128,7 @@ const updateLimits = (partitionIds) => {
                             </el-button>
                             <el-button class="disable-init-animate" style="margin-right: 24px;"
                                        @click="cancel" v-if="editing" key="cancel">
-                                {{ editing ? '取消' : '编辑' }}
+                                '取消'
                             </el-button>
                         </transition-group>
                     </el-button-group>

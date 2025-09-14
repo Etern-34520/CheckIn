@@ -11,6 +11,7 @@ import router from "@/router/index.js";
 import HarmonyOSIcon_InfoCircle from "@/components/icons/HarmonyOSIcon_InfoCircle.vue";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import ServerStatusInfo from "@/components/common/ServerStatusInfo.vue";
+import HarmonyOSIcon_PersonShield from "@/components/icons/HarmonyOSIcon_PersonShield.vue";
 
 defineExpose({
     name: "Base"
@@ -67,11 +68,11 @@ const groups = [
         name: "其它",
         items: [
             {
-                name: "关于",
-                description: "使用到的开源项目 Github",
-                icon: HarmonyOSIcon_InfoCircle,
+                name: "OAuth2",
+                description: "第三方登录 验证范围",
+                icon: HarmonyOSIcon_PersonShield,
                 action: () => {
-                    router.push({name: "about"});
+                    router.push({name: "oauth2-setting"});
                 }
             },
             {
@@ -81,6 +82,14 @@ const groups = [
                 icon: MoreFilled,
                 action: () => {
                     router.push({name: "advance-setting"});
+                }
+            },
+            {
+                name: "关于",
+                description: "使用到的开源项目 Github",
+                icon: HarmonyOSIcon_InfoCircle,
+                action: () => {
+                    router.push({name: "about"});
                 }
             }
         ]

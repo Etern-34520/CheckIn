@@ -9,6 +9,7 @@ import indi.etern.checkIn.entities.question.interfaces.answer.Answerable;
 import indi.etern.checkIn.entities.question.interfaces.answer.SingleQuestionAnswer;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.throwable.entity.QuestionBuilderException;
+import indi.etern.checkIn.utils.UUIDv7;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.Fetch;
@@ -128,7 +129,7 @@ public class QuestionGroup extends Question implements
         }
         
         public QuestionGroup build() {
-            if (id == null) id = UUID.randomUUID().toString();
+            if (id == null) id = UUIDv7.randomUUID().toString();
             QuestionGroup questionGroup;
             ToPartitionsLink link;
             if (partitions.isEmpty()) {

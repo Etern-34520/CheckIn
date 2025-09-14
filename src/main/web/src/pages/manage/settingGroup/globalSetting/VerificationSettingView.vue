@@ -3,7 +3,7 @@ import RuleCard from "@/components/common/RuleCard.vue";
 import {VueDraggable} from "vue-draggable-plus";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
-import randomUUIDv4 from "@/utils/UUID.js";
+import { uuidv7 } from "uuidv7";
 import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import WebSocketConnector from "@/api/websocket.js";
@@ -18,7 +18,7 @@ const error = ref(false);
 let backup = [];
 let backupJSON;
 const addRule = () => {
-    data.value.push({id: randomUUIDv4()});
+    data.value.push({id: uuidv7()});
 };
 const cancel = () => {
     data.value = backup;

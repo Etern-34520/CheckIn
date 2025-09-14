@@ -1,7 +1,7 @@
 <script setup>
 import UserDataInterface from "@/data/UserDataInterface.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
-import {Finished, MessageBox} from "@element-plus/icons-vue";
+import {Finished, Link, MessageBox} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
 import Like from "@/components/icons/Like.vue";
 import DisLike from "@/components/icons/DisLike.vue";
@@ -9,12 +9,9 @@ import HarmonyOSIcon_Quit from "@/components/icons/HarmonyOSIcon_Quit.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import HarmonyOSIcon_Rename from "@/components/icons/HarmonyOSIcon_Rename.vue";
 import WebSocketConnector from "@/api/websocket.js";
-import {ElMessage, ElMessageBox} from "element-plus";
+import {ElMessageBox} from "element-plus";
 import LinkPanel from "@/components/common/LinkPanel.vue";
 import CustomDialog from "@/components/common/CustomDialog.vue";
-import Waterfall from "@/components/common/Waterfall.vue";
-
-// const user = UserDataInterface.getCurrentUser();
 
 defineExpose({
     name: "Base"
@@ -59,8 +56,16 @@ const groups = [
         ]
     },
     {
-        name: "操作",
+        name: "账户",
         items: [
+            {
+                name: "第三方关联登录",
+                description: "",
+                icon: Link,
+                action: () => {
+                    router.push({name: "oauth2-binding"})
+                }
+            },
             {
                 name: "修改用户名",
                 description: "",

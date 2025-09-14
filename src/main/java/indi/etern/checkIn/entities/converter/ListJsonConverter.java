@@ -26,6 +26,7 @@ public class ListJsonConverter implements AttributeConverter<List<?>,String> {
     @SneakyThrows
     @Override
     public List<?> convertToEntityAttribute(String dbData) {
+        if (dbData == null) return null;
         return objectMapper.readValue(dbData,List.class);
     }
 }

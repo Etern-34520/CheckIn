@@ -2,10 +2,9 @@ package indi.etern.checkIn.api.webSocket;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import indi.etern.checkIn.api.webSocket.interfaces.IMessage;
+import indi.etern.checkIn.utils.UUIDv7;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
@@ -48,6 +47,6 @@ public class Message<D> implements IMessage {
     }
     
     public static <O> Message<O> of(String typeName, O data) {
-        return new Message<>(Type.of(typeName), UUID.randomUUID().toString(),data);
+        return new Message<>(Type.of(typeName), UUIDv7.randomUUID().toString(),data);
     }
 }

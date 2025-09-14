@@ -15,6 +15,7 @@ import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLim
 import indi.etern.checkIn.throwable.exam.generate.MinQuestionLimitOutOfBoundsException;
 import indi.etern.checkIn.throwable.exam.generate.NotEnoughQuestionsForExamException;
 import indi.etern.checkIn.throwable.exam.generate.UnachievableLimitException;
+import indi.etern.checkIn.utils.UUIDv7;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,7 +141,7 @@ public class ExamGenerator {
             sampleQuestions(questions, partitions, questionAmount, new Random(), samplingStrategy, completingStrategy);
             
             return ExamData.builder()
-                    .id(UUID.randomUUID().toString())
+                    .id(UUIDv7.randomUUID().toString())
                     .qqNumber(qq)
                     .status(ExamData.Status.ONGOING)
                     .questionIds(questions.stream().map(Question::getId).toList())

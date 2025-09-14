@@ -27,9 +27,15 @@ public class MainController {
         boolean enabledOnLogin = turnstileService.isTurnstileEnabledOnLogin();
         boolean enabledOnExam = turnstileService.isTurnstileEnabledOnExam();
         if (enabledOnLogin || enabledOnExam) {
-            response.addCookie(new Cookie("siteKey", turnstileService.getSiteKey()));
-            response.addCookie(new Cookie("verifyLogin", String.valueOf(enabledOnLogin)));
-            response.addCookie(new Cookie("verifyExam", String.valueOf(enabledOnExam)));
+            Cookie siteKey = new Cookie("siteKey", turnstileService.getSiteKey());
+            siteKey.setPath("/checkIn");
+            response.addCookie(siteKey);
+            Cookie verifyLogin = new Cookie("verifyLogin", String.valueOf(enabledOnLogin));
+            verifyLogin.setPath("/checkIn");
+            response.addCookie(verifyLogin);
+            Cookie verifyExam = new Cookie("verifyExam", String.valueOf(enabledOnExam));
+            verifyExam.setPath("/checkIn");
+            response.addCookie(verifyExam);
         }
         if (byServiceWorker) {
             return "front-face/index.html";
@@ -45,18 +51,26 @@ public class MainController {
     public String exam(HttpServletResponse response) {
         boolean enabledOnExam = turnstileService.isTurnstileEnabledOnExam();
         if (enabledOnExam) {
-            response.addCookie(new Cookie("siteKey", turnstileService.getSiteKey()));
-            response.addCookie(new Cookie("verifyExam", String.valueOf(enabledOnExam)));
+            Cookie siteKey = new Cookie("siteKey", turnstileService.getSiteKey());
+            siteKey.setPath("/checkIn");
+            response.addCookie(siteKey);
+            Cookie verifyExam = new Cookie("verifyExam", String.valueOf(enabledOnExam));
+            verifyExam.setPath("/checkIn");
+            response.addCookie(verifyExam);
         }
         return "front-face/index.html";
     }
 
-    @GetMapping({"/manage/**", "/login/"})
+    @GetMapping({"/manage/**", "/login/", "/oauth2/error"})
     public String manage(HttpServletResponse response) {
         boolean enabledOnLogin = turnstileService.isTurnstileEnabledOnLogin();
         if (enabledOnLogin) {
-            response.addCookie(new Cookie("siteKey", turnstileService.getSiteKey()));
-            response.addCookie(new Cookie("verifyLogin", String.valueOf(enabledOnLogin)));
+            Cookie siteKey = new Cookie("siteKey", turnstileService.getSiteKey());
+            siteKey.setPath("/checkIn");
+            response.addCookie(siteKey);
+            Cookie verifyLogin = new Cookie("verifyLogin", String.valueOf(enabledOnLogin));
+            verifyLogin.setPath("/checkIn");
+            response.addCookie(verifyLogin);
         }
         return "front-face/index.html";
     }
@@ -82,7 +96,15 @@ public class MainController {
     }
 
     @GetMapping("/icons/{fileName}")
-    public String icons(@PathVariable String fileName) {
-        return "icons/" + fileName;
+    public String icons(@PathVariable String fileName) {return "icons/" + fileName;}
+
+    @GetMapping("/oauth2/success/**")
+    public String oauth2CallbackSuccess() {
+        return "front-face/index.html";
+    }
+
+    @GetMapping("/oauth2/fail/**")
+    public String oauth2CallbackFail() {
+        return "front-face/index.html";
     }
 }

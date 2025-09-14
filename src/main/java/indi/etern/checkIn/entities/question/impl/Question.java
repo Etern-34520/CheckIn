@@ -7,6 +7,7 @@ import indi.etern.checkIn.entities.linkUtils.LinkSource;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.verify.ValidationResult;
+import indi.etern.checkIn.utils.UUIDv7;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +19,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "questions")
@@ -111,7 +111,7 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     }
     
     public void initId() {
-        id = UUID.randomUUID().toString();
+        id = UUIDv7.randomUUID().toString();
     }
     
     @Override

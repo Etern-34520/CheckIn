@@ -926,21 +926,26 @@
     order: -1;
     margin-left: 3px;
     margin-right: -21px;
+    margin-top: 1px;
     aspect-ratio: 1;
     border-radius: 50%;
     border: 1.5px solid;
-    border-color: var(--front-color) #0000;
+    border-color: var(--front-color) #0000 !important;
     animation: l1 0.8s var(--ease-in-bounce) infinite;
+}
+
+.el-tree-node__expand-icon {
+    transition: all 200ms var(--ease-in-out-bounce) !important;
+}
+
+.el-tree-node__content:has(.el-tree-node__loading-icon) .el-tree-node__expand-icon {
+    opacity: 0;
 }
 
 @keyframes l1 {
     to {
         transform: rotate(.5turn)
     }
-}
-
-.el-tree-node__expand-icon {
-    transition-timing-function: var(--ease-in-bounce) !important;
 }
 
 .el-tree-node__content:has(.disable-tree-checkbox) .el-checkbox {

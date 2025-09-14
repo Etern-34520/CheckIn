@@ -1,7 +1,7 @@
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {ElNotification} from "element-plus";
 import {h} from "vue";
-import randomUUIDv4 from "@/utils/UUID.js";
+import { uuidv7 } from "uuidv7";
 import Reconnect from "@/components/common/Reconnect.vue";
 import {jwtDecode} from "jwt-decode";
 // import {encode,decode} from "@ygoe/msgpack"
@@ -42,9 +42,9 @@ const sendInternal = (objMessage) => {
         const messageParts = [];
         const partCount = Math.ceil(message.length / limits);
         const partMessageIds = [];
-        const partId = randomUUIDv4();
+        const partId = uuidv7();
         for (let i = 0; i < partCount; i++) {
-            const messageId = randomUUIDv4();
+            const messageId = uuidv7();
             partMessageIds.push(messageId);
             messageParts.push({
                 messageId: messageId,
@@ -333,7 +333,7 @@ const WebSocketConnector = {
     send: function (/** Object*/objMessage, timeout = 0) {
         let ableToSend = this.ws !== null && this.ws.readyState === WebSocket.OPEN;
         if (!objMessage.messageId) {
-            objMessage.messageId = randomUUIDv4();
+            objMessage.messageId = uuidv7();
         }
         const promiseData = {};
         const promise = new Promise((resolve, reject) => {

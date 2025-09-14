@@ -1,42 +1,68 @@
 package indi.etern.checkIn.service.dao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.api.webSocket.Message;
+import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.exam.ExamData;
+import indi.etern.checkIn.entities.setting.oauth2.OAuth2ProviderInfo;
+import indi.etern.checkIn.entities.user.OAuth2Binding;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.entities.user.User;
+import indi.etern.checkIn.repositories.OAuth2BindingRepository;
 import indi.etern.checkIn.repositories.RoleRepository;
 import indi.etern.checkIn.repositories.UserRepository;
+import indi.etern.checkIn.service.web.OAuth2Service;
 import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.throwable.entity.UserExistsException;
 import indi.etern.checkIn.throwable.exam.ExamException;
 import indi.etern.checkIn.throwable.exam.ExamIllegalStateException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService extends DefaultOAuth2UserService implements UserDetailsService {
     public static UserService singletonInstance;
-    @Resource
-    private UserRepository userRepository;
+    private final OAuth2Service oauth2Service;
     private final RoleService roleService;
     private final RoleRepository roleRepository;
     private final WebSocketService webSocketService;
-    
-    protected UserService(RoleService roleService, RoleRepository roleRepository, WebSocketService webSocketService) {
+    @Resource
+    private UserRepository userRepository;
+    @Resource
+    private OAuth2BindingRepository oAuth2BindingRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    protected UserService(RoleService roleService, RoleRepository roleRepository, WebSocketService webSocketService, OAuth2Service oauth2Service) {
         singletonInstance = this;
         this.roleService = roleService;
         this.roleRepository = roleRepository;
         this.webSocketService = webSocketService;
+        this.oauth2Service = oauth2Service;
     }
-    
+
     public boolean check(long qq, String password) {
         if (qq <= 0 || password == null || password.isEmpty()) {
             return false;
@@ -44,23 +70,23 @@ public class UserService implements UserDetailsService {
         final Optional<User> optionalUser = findByQQNumber(qq);
         return optionalUser.isPresent() && optionalUser.get().getPassword().equals(password);
     }
-    
+
     public void save(User user) {
         roleService.save(user.getRole());
     }
-    
+
     public List<User> findAllByName(String name) {
         return userRepository.findAllByName(name);
     }
-    
+
     public Optional<User> findByQQNumber(long qqNumber) {
         return userRepository.findById(qqNumber);
     }
-    
+
     public List<User> findAll() {
         return userRepository.findAll();
     }
-    
+
     @Override
     public UserDetails loadUserByUsername(String qq) throws UsernameNotFoundException {
         try {
@@ -68,12 +94,12 @@ public class UserService implements UserDetailsService {
             if (userOptional.isPresent())
                 return userOptional.get();
             else
-                throw new UsernameNotFoundException("User not found:"+qq);
+                throw new UsernameNotFoundException("User not found:" + qq);
         } catch (Exception e) {
-            throw new UsernameNotFoundException("User not found:"+qq);
+            throw new UsernameNotFoundException("User not found:" + qq);
         }
     }
-    
+
     public boolean existsByQQNumber(long qqNumber) {
         return userRepository.existsById(qqNumber);
     }
@@ -81,23 +107,23 @@ public class UserService implements UserDetailsService {
     public void saveAndFlush(User user) {
         userRepository.saveAndFlush(user);
     }
-    
+
     public Set<User> findAllByRoleType(String roleType) {
         return roleRepository.findById(roleType).orElseThrow().getUsers();
     }
-    
+
     public List<User> findAllByQQNumber(List<Long> qqNumbers) {
         return userRepository.findAllById(qqNumbers);
     }
-    
+
     public void deleteAllByQQ(List<Long> qqNumbers) {
         userRepository.deleteAllById(qqNumbers);
     }
-    
+
     public void delete(User user) {
         userRepository.delete(user);
     }
-    
+
     public void handleSignUp(ExamData examData, String name, String rawPassword, Role role, boolean enabled) throws ExamException {
         if (examData.getStatus() == ExamData.Status.ONGOING) {
             throw new ExamIllegalStateException();
@@ -115,5 +141,90 @@ public class UserService implements UserDetailsService {
         } else {
             throw new ExamInvalidException();
         }
+    }
+
+    @SneakyThrows
+    @Override
+    @Transactional
+    public User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+        Object subObject = oAuth2User.getAttributes().get(getSubKey(userRequest));
+        String providerId = userRequest.getClientRegistration().getRegistrationId();
+        User user = null;
+        if (subObject != null) {
+            Optional<User> optionalUser = findByOAuth2ProviderAndUserId(providerId, subObject.toString());
+            if (optionalUser.isPresent()) {
+                user = optionalUser.get();
+            }
+        } else {
+            throw new OAuth2AuthenticationException("Subject not found in OAuth2 attributes");
+        }
+
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes servletRequestAttributes) {
+            HttpServletResponse response = servletRequestAttributes.getResponse();
+            HttpServletRequest request = servletRequestAttributes.getRequest();
+            if (response != null) {
+                Cookie[] cookies = request.getCookies();
+                boolean inOAuthBinding = false;
+                String previousToken = null;
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        if (cookie.getName().equals("token")) {
+                            previousToken = cookie.getValue();
+                        } else if (cookie.getName().equals("inOAuth2Binding")) {
+                            inOAuthBinding = Boolean.parseBoolean(cookie.getValue());
+                        }
+                    }
+                }
+                if (inOAuthBinding) {
+                    if (user != null) {
+                        throw new OAuth2AuthenticationException("该第三方账号已绑定其他账号");
+                    } else {
+                        user = JwtTokenProvider.singletonInstance.getUser(previousToken);
+                        OAuth2Binding oAuth2Binding = OAuth2Binding.of(providerId, subObject.toString());
+                        oAuth2Binding.setUser(user);
+                        oAuth2BindingRepository.save(oAuth2Binding);
+                        user.getOauth2Bindings().add(oAuth2Binding);
+                        save(user);
+                        return user;
+                    }
+                } else if (user != null){
+                    addCookies(user, response);
+                } else {
+                    throw new OAuth2AuthenticationException("找不到对应用户");
+                }
+            }
+        }
+
+        return user;
+    }
+
+    private void addCookies(User user, HttpServletResponse response) throws JsonProcessingException {
+        String token = JwtTokenProvider.singletonInstance.generateToken(user);
+        Map<String, Object> userDataMap = new HashMap<>();
+        userDataMap.put("name", user.getName());
+        userDataMap.put("qq", user.getQQNumber());
+        userDataMap.put("role", user.getRole().getType());
+        userDataMap.put("token", token);
+        String userData = URLEncoder.encode(objectMapper.writeValueAsString(userDataMap), StandardCharsets.UTF_8)
+                .replace("+", "%20");
+        Cookie userCookie = new Cookie("user", userData);
+        Cookie tokenCookie = new Cookie("token", token);
+        userCookie.setPath("/checkIn");
+        tokenCookie.setPath("/checkIn");
+        response.addCookie(userCookie);
+        response.addCookie(tokenCookie);
+    }
+
+    public Optional<User> findByOAuth2ProviderAndUserId(String providerId, String userId) {
+        Optional<OAuth2Binding> optionalBinding = oAuth2BindingRepository.findByProviderIdAndUserId(providerId, userId);
+        return optionalBinding.map(OAuth2Binding::getUser);
+    }
+
+    private String getSubKey(OAuth2UserRequest userRequest) {//TODO
+        String provider = userRequest.getClientRegistration().getRegistrationId();
+        OAuth2ProviderInfo oAuth2ProviderInfo = oauth2Service.getProviderInfo(provider);
+        return oAuth2ProviderInfo.getUserIdAttributeName();
     }
 }

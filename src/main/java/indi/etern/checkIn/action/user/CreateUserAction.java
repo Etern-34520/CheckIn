@@ -12,33 +12,24 @@ import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.RoleService;
 import indi.etern.checkIn.service.dao.UserService;
 import indi.etern.checkIn.service.web.WebSocketService;
+import indi.etern.checkIn.utils.UUIDv7;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Optional;
-import java.util.UUID;
 
 @Action("createUser")
 public class CreateUserAction extends BaseAction<CreateUserAction.Input, OutputData> {
     private final UserService userService;
     private final WebSocketService webSocketService;
     private final RoleService roleService;
-    
+
     public CreateUserAction(UserService userService, WebSocketService webSocketService, RoleService roleService) {
         this.userService = userService;
         this.webSocketService = webSocketService;
         this.roleService = roleService;
     }
-    
-    public record Input(long qq, String name, String roleType) implements InputData { }
-    
-    public record SuccessOutput(String initPassword) implements OutputData {
-        @Override
-        public Result result() {
-            return Result.SUCCESS;
-        }
-    }
-    
+
     @Transactional
     @Override
     public void execute(ExecuteContext<Input, OutputData> context) {
@@ -49,16 +40,26 @@ public class CreateUserAction extends BaseAction<CreateUserAction.Input, OutputD
         if (userService.existsByQQNumber(input.qq)) {
             context.resolve(MessageOutput.error("user already exists"));
         } else {
-            final String initPassword = UUID.randomUUID().toString();
+            final String initPassword = UUIDv7.randomUUID().toString();
             User newUser = new User(input.name, input.qq, initPassword);
             newUser.setRole(roleService.findByType(input.roleType)
                     .orElse(Role.getInstance(input.roleType, -1)));
             userService.save(newUser);
-            
+
             context.resolve(new SuccessOutput(initPassword));
-            
+
             Message<User> message = Message.of("addUser", newUser);
             webSocketService.sendMessageToAll(message);
+        }
+    }
+
+    public record Input(long qq, String name, String roleType) implements InputData {
+    }
+
+    public record SuccessOutput(String initPassword) implements OutputData {
+        @Override
+        public Result result() {
+            return Result.SUCCESS;
         }
     }
 }

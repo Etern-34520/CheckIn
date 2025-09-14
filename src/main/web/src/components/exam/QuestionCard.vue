@@ -57,7 +57,7 @@ const subQuestionCount = computed(() => {
             </div>
         </el-tag>
     </div>
-    <div class="panel" style="flex: 1;height: 0;">
+    <div class="panel-1" style="flex: 1;height: 0;">
         <el-scrollbar view-style="display: contents;" v-loading="!question">
             <question-view style="height: 100%" v-if="question" :question="question" v-model="model"/>
         </el-scrollbar>

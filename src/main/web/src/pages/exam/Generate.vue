@@ -89,7 +89,7 @@ function reset() {
     turnstile.value.reset();
 }
 const siteKey = ref(proxy.$cookies.get("siteKey"));
-const verifyExam = ref(proxy.$cookies.get("verifyExam"));
+const verifyExam = ref(proxy.$cookies.get("verifyExam") === "true");
 proxy.$http.get("checkTurnstile").then((resp) => {
     proxy.$cookies.set("verifyLogin", resp.enableTurnstileOnLogin, "7d", "/checkIn");
     proxy.$cookies.set("verifyExam", resp.enableTurnstileOnExam, "7d", "/checkIn");

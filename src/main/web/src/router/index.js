@@ -31,6 +31,11 @@ const router = createRouter({
             }
         },
         {
+            path: "/oauth2/error",
+            name: "oauth2-error",
+            component: () => import("@/pages/manage/OAuth2ErrorView.vue")
+        },
+        {
             path: "/manage/",
             name: "manage-base",
             component: () => import("@/pages/manage/ManageBase.vue"),
@@ -140,6 +145,11 @@ const router = createRouter({
                                     component: () => import("@/pages/manage/settingGroup/globalSetting/AdvanceSettingView.vue")
                                 },
                                 {
+                                    path: "oauth2-setting/",
+                                    name: "oauth2-setting",
+                                    component: () => import("@/pages/manage/settingGroup/globalSetting/OAuth2SettingView.vue")
+                                },
+                                {
                                     path: "generating-setting/",
                                     name: "generating-setting",
                                     component: () => import("@/pages/manage/settingGroup/globalSetting/GeneratingSettingView.vue"),
@@ -170,6 +180,11 @@ const router = createRouter({
                                     path: "my-data/",
                                     name: "my-data",
                                     component: () => import("@/pages/manage/settingGroup/account/MyDataTab.vue")
+                                },
+                                {
+                                    path: "oauth2-binding",
+                                    name: "oauth2-binding",
+                                    component: () => import("@/pages/manage/settingGroup/account/OAuth2AccountBinding.vue")
                                 }
                             ]
                         }, {

@@ -163,6 +163,7 @@ div.panel {
     --phrase-2: 200ms;
     /*transition: transform 5s var(--ease-in-out-quint);*/
     transition: transform var(--phrase-1) var(--ease-in-quint),
+    opacity var(--phrase-1) ease-in,
     margin var(--phrase-2) var(--ease-in-out-quint) var(--phrase-1),
     grid-template-rows var(--phrase-2) var(--ease-in-out-quint) var(--phrase-1) !important;
     overflow: hidden;
@@ -172,6 +173,7 @@ div.panel {
     --phrase-1: 200ms;
     --phrase-2: 300ms;
     transition: transform var(--phrase-2) var(--ease-out-quint) var(--phrase-1),
+    opacity var(--phrase-2) ease-out var(--phrase-1),
     margin var(--phrase-1) var(--ease-in-out-quint),
     grid-template-rows var(--phrase-1) var(--ease-in-out-quint) !important;
     overflow: hidden;
@@ -181,12 +183,14 @@ div.panel {
     margin-top: 0 !important;
     transform: translateX(-100%);
     grid-template-rows: 0fr !important;
+    opacity: 0;
 }
 
 .slide-hide-leave-to {
     margin-top: 0 !important;
     transform: translateX(100%);
     grid-template-rows: 0fr !important;
+    opacity: 0;
 }
 
 .smooth-height-enter-active {

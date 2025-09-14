@@ -7,7 +7,7 @@ import {VueDraggable} from "vue-draggable-plus";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import GradingLevelCard from "@/pages/manage/settingGroup/globalSetting/GradingLevelCard.vue";
-import randomUUIDv4 from "@/utils/UUID.js";
+import { uuidv7 } from "uuidv7";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const editing = ref(false);
@@ -44,7 +44,7 @@ const finishEditing = () => {
             ElMessage({
                 type: "error", message: "保存失败"
             })
-        })
+        });
     }
 }
 const getData = () => {
@@ -83,7 +83,7 @@ const addLevel = () => {
             data.value.splits.push(number);
         }
         data.value.levels.push({
-            id: randomUUIDv4(),
+            id: uuidv7(),
             name: "new level",
             colorHex: predefine[data.value.levels.length],
             description: "",
