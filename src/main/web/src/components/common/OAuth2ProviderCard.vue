@@ -19,15 +19,23 @@ const error = defineModel("error", {
     type: Boolean
 });
 
-watchEffect(() => {
-    error.value = !model.value.name ||
-        !model.value.iconDomain ||
-        !model.value.authorizationUri ||
-        !model.value.tokenUri ||
-        !model.value.userInfoUri ||
-        !model.value.clientId ||
-        !model.value.clientSecret ||
-        !model.value.userNameAttribute;
+const unwatch = watch(() => model.value,
+    () => {
+        error.value = !model.value.name ||
+            !model.value.iconDomain ||
+            !model.value.authorizationUri ||
+            !model.value.jwksUri ||
+            !model.value.userInfoUri ||
+            !model.value.clientId ||
+            !model.value.clientSecret ||
+            !model.value.userIdAttributeName;
+}, {
+    deep: true,
+    immediate: true
+});
+
+onBeforeUnmount(() => {
+    unwatch();
 });
 
 const props = defineProps({
@@ -87,21 +95,35 @@ const autoFillOidc = () => {
         autoFilling.value = false;
     }
 };
+
+const optionValues = ["disabled","required", "optional"];
+const optionNames = {
+    disabled: "禁用",
+    required: "必须",
+    optional: "可选",
+}
 </script>
 
 <template>
     <div class="slide-hide-base">
         <div class="panel-1 disable-init-animate">
             <div class="oauth2-provider-card">
-                <div class="title" style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: stretch">
+                <div class="title" style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: stretch;gap: 0 12px">
                     <transition name="handle" mode="out-in">
-                        <div v-if="editing" class="handle"
-                             style="cursor: grab;width: 20px;height: 32px;display: flex;align-items: center">
-                            <HarmonyOSIcon_Handle :size="20"/>
+                        <div v-if="editing" style="display: flex;flex-direction: row;align-items: center">
+                            <div class="handle"
+                                 style="cursor: grab;width: 20px;height: 32px;display: flex;align-items: center;margin-right: 16px">
+                                <HarmonyOSIcon_Handle :size="20"/>
+                            </div>
+                            <el-button class="disable-init-animate"
+                                       style="min-height: 32px;" link
+                                       @click="emit('removeProvider')">
+                                <HarmonyOSIcon_Remove/>
+                            </el-button>
                         </div>
                     </transition>
                     <el-image :src="'https://favicon.im/' + model.iconDomain"
-                              style="width: 24px;height: 24px;padding: 4px">
+                              style="width: 24px;height: 24px;padding: 4px;margin-right: 8px;">
                         <template #error>
                             <el-icon :size="24">
                                 <PictureRounded/>
@@ -110,19 +132,24 @@ const autoFillOidc = () => {
                     </el-image>
                     <div>
                         <el-text style="align-self: center" type="info">
-                            启用
+                            后台登录
                         </el-text>
                         <el-switch :disabled="!editing" class="disable-init-animate"
-                                   style="align-self: center" v-model="model.enabled"/>
+                                   style="align-self: center" v-model="model.enabledInLogin"/>
                     </div>
-                    <transition name="blur-scale">
-                        <el-button class="disable-init-animate"
-                                   style="min-height: 32px;"
-                                   v-if="editing" link
-                                   @click="emit('removeProvider')">
-                            <HarmonyOSIcon_Remove/>
-                        </el-button>
-                    </transition>
+                    <div>
+                        <el-text style="align-self: center" type="info">
+                            生成试题
+                        </el-text>
+                        <transition name="blur-scale" mode="out-in">
+                            <el-segmented :options="optionValues" v-if="editing" v-model="model.examLoginMode">
+                                <template #default="{item}">
+                                    <el-text>{{ optionNames[item] }}</el-text>
+                                </template>
+                            </el-segmented>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">{{ optionNames[model.examLoginMode] }}</el-text>
+                        </transition>
+                    </div>
                 </div>
                 <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: stretch">
                     <div class="provider-item">
@@ -133,7 +160,7 @@ const autoFillOidc = () => {
                             <el-input class="disable-init-animate" v-if="editing" :class="{error: !model.name}"
                                       placeholder="注册名"
                                       style="height: 32px;flex: 1;max-width: 120px;min-width: 0" v-model="model.name"/>
-                            <el-text v-else>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.name || "null" }}
                             </el-text>
                         </transition>
@@ -147,7 +174,7 @@ const autoFillOidc = () => {
                                       placeholder="用于获取图标"
                                       style="height: 32px;flex: 1;max-width: 200px;min-width: 0"
                                       v-model="model.iconDomain"/>
-                            <el-text v-else>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.iconDomain || "null" }}
                             </el-text>
                         </transition>
@@ -157,7 +184,7 @@ const autoFillOidc = () => {
                             Issuer 根 URL
                         </el-text>
                         <transition name="blur-scale" mode="out-in">
-                            <div style="height: 32px;flex: 1;min-width: 0;display: flex;flex-direction: row"
+                            <div style="min-height: 32px;flex: 1;min-width: 0;display: flex;flex-direction: row"
                                  v-if="editing">
                                 <el-input class="disable-init-animate"
                                           placeholder="用于自动补全"
@@ -174,7 +201,7 @@ const autoFillOidc = () => {
                                 >自动补全
                                 </el-button>
                             </div>
-                            <el-text v-else>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.issuerUri || "null" }}
                             </el-text>
                         </transition>
@@ -191,7 +218,7 @@ const autoFillOidc = () => {
                                       placeholder="需参考提供商文档"
                                       style="height: 32px;flex: 1;max-width: 300px;min-width: 0"
                                       v-model="model.authorizationUri"/>
-                            <el-text v-else>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.authorizationUri || "null" }}
                             </el-text>
                         </transition>
@@ -205,7 +232,7 @@ const autoFillOidc = () => {
                                       placeholder="需参考提供商文档"
                                       style="height: 32px;flex: 1;max-width: 300px;min-width: 0"
                                       v-model="model.jwksUri"/>
-                            <el-text v-else>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.jwksUri || "null" }}
                             </el-text>
                         </transition>
@@ -219,7 +246,7 @@ const autoFillOidc = () => {
                                       :class="{error: !model.userInfoUri}"
                                       style="height: 32px;flex: 1;max-width: 300px;min-width: 0"
                                       v-model="model.userInfoUri"/>
-                            <el-text v-else>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.userInfoUri || "null" }}
                             </el-text>
                         </transition>
@@ -235,7 +262,7 @@ const autoFillOidc = () => {
                                       :class="{error: !model.clientId}"
                                       style="height: 32px;flex: 1;max-width: 400px;min-width: 0"
                                       v-model="model.clientId"/>
-                            <el-text v-else>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.clientId || "null" }}
                             </el-text>
                         </transition>
@@ -249,7 +276,7 @@ const autoFillOidc = () => {
                                       :class="{error: !model.clientSecret}"
                                       style="height: 32px;flex: 1;max-width: 400px;min-width: 0"
                                       v-model="model.clientSecret"/>
-                            <el-text v-else>
+                            <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.clientSecret || "null" }}
                             </el-text>
                         </transition>
@@ -257,11 +284,11 @@ const autoFillOidc = () => {
                 </div>
                 <div class="provider-item" style="margin-right: 0;">
                     <el-text type="info">
-                        scope
+                        Scope
                     </el-text>
                     <div style="display: flex;flex-direction: row;flex-wrap: wrap;gap: 4px">
                         <el-tag v-for="(scopeItem,index) of model.scope"
-                                closable @close="removeScopeItem(index)" type="info">
+                                :closable="editing" @close="removeScopeItem(index)" type="info">
                             {{ scopeItem || "null" }}
                         </el-tag>
                         <el-popover trigger="click" popper-style="width: 260px" v-model="addScopeItemVisible">
@@ -294,7 +321,7 @@ const autoFillOidc = () => {
                         <el-input class="disable-init-animate" v-if="editing" placeholder="需参考提供商文档"
                                   :class="{error: !model.userIdAttributeName}"
                                   style="height: 32px;flex: 1;max-width: 140px" v-model="model.userIdAttributeName"/>
-                        <el-text v-else>
+                        <el-text v-else style="text-wrap: wrap;word-break: break-all">
                             {{ model.userIdAttributeName || "null" }}
                         </el-text>
                     </transition>
@@ -365,7 +392,7 @@ const autoFillOidc = () => {
 .provider-item {
     display: flex;
     flex-direction: row;
-    height: 32px;
+    min-height: 32px;
 }
 
 .provider-item:not(:last-child) {
@@ -397,7 +424,8 @@ const autoFillOidc = () => {
 
 /*noinspection CssUnusedSymbol*/
 .handle-enter-from, .handle-leave-to {
-    margin-left: -32px;
+    margin-left: -80px;
     opacity: 0;
+    filter: blur(4px);
 }
 </style>

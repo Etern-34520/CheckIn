@@ -75,9 +75,9 @@ const signUp = () => {
         let errDescription = "unknown";
         if (typeof err === "string") {
             errDescription = err
-        } else if (err.response && err.response.data.message) {
+        } else if (err && err.response && err.response.data.message) {
             errDescription = err.response.data.message;
-        } else if (typeof err.message === "string") {
+        } else if (err && typeof err.message === "string") {
             errDescription = err.message;
         }
         tip.value = {

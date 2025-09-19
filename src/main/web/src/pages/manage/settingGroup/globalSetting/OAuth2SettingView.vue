@@ -102,7 +102,7 @@ const removeProvider = (index) => {
                         <transition-group name="blur-scale">
                             <el-button class="disable-init-animate" style="margin-right: 4px;"
                                        @click="editing ? finishEditing():startEditing()"
-                                       :disabled="loading || error" key="edit">
+                                       :disabled="loading || error || inputErrors.find(o => o)" key="edit">
                                 {{ editing ? '完成' : '编辑' }}
                             </el-button>
                             <el-button class="disable-init-animate" style="margin-right: 24px;"

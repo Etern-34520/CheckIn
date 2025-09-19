@@ -18,12 +18,13 @@ import indi.etern.checkIn.throwable.entity.UserExistsException;
 import indi.etern.checkIn.throwable.exam.ExamException;
 import indi.etern.checkIn.throwable.exam.ExamIllegalStateException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -52,15 +53,15 @@ public class UserService extends DefaultOAuth2UserService implements UserDetails
     private UserRepository userRepository;
     @Resource
     private OAuth2BindingRepository oAuth2BindingRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    protected UserService(RoleService roleService, RoleRepository roleRepository, WebSocketService webSocketService, OAuth2Service oauth2Service) {
+    protected UserService(RoleService roleService, RoleRepository roleRepository, WebSocketService webSocketService, OAuth2Service oauth2Service, ObjectMapper objectMapper) {
         singletonInstance = this;
         this.roleService = roleService;
         this.roleRepository = roleRepository;
         this.webSocketService = webSocketService;
         this.oauth2Service = oauth2Service;
+        this.objectMapper = objectMapper;
     }
 
     public boolean check(long qq, String password) {
@@ -134,9 +135,19 @@ public class UserService extends DefaultOAuth2UserService implements UserDetails
                 User user = new User(name, examData.getQqNumber(), rawPassword);
                 user.setRole(role);
                 user.setEnabled(enabled);
+                save(user);
+                for (Map.Entry<String, String> oAuth2BindingEntry : examData.getOAuth2Bindings().entrySet()) {
+                    String id = oAuth2BindingEntry.getKey();
+                    if (!oAuth2BindingRepository.existsByProviderId(id)) {
+                        OAuth2Binding oAuth2Binding = OAuth2Binding.of(id, oAuth2BindingEntry.getValue());
+                        oAuth2Binding.setUser(user);
+                        oAuth2BindingRepository.save(oAuth2Binding);
+                        user.getOauth2Bindings().add(oAuth2Binding);
+                    }
+                }
+                save(user);
                 Message<User> message = Message.of("addUser", user);
                 webSocketService.sendMessageToAll(message);
-                save(user);
             }
         } else {
             throw new ExamInvalidException();
@@ -166,37 +177,67 @@ public class UserService extends DefaultOAuth2UserService implements UserDetails
             HttpServletRequest request = servletRequestAttributes.getRequest();
             if (response != null) {
                 Cookie[] cookies = request.getCookies();
-                boolean inOAuthBinding = false;
+                String oAuth2Mode = null;
                 String previousToken = null;
+                String previousExamToken = null;
                 if (cookies != null) {
                     for (Cookie cookie : cookies) {
-                        if (cookie.getName().equals("token")) {
-                            previousToken = cookie.getValue();
-                        } else if (cookie.getName().equals("inOAuth2Binding")) {
-                            inOAuthBinding = Boolean.parseBoolean(cookie.getValue());
+                        switch (cookie.getName()) {
+                            case "token" -> previousToken = cookie.getValue();
+                            case "OAuth2Mode" -> oAuth2Mode = cookie.getValue();
+                            case "examToken" -> previousExamToken = cookie.getValue();
                         }
                     }
                 }
-                if (inOAuthBinding) {
-                    if (user != null) {
-                        throw new OAuth2AuthenticationException("该第三方账号已绑定其他账号");
-                    } else {
-                        user = JwtTokenProvider.singletonInstance.getUser(previousToken);
-                        OAuth2Binding oAuth2Binding = OAuth2Binding.of(providerId, subObject.toString());
-                        oAuth2Binding.setUser(user);
-                        oAuth2BindingRepository.save(oAuth2Binding);
-                        user.getOauth2Bindings().add(oAuth2Binding);
-                        save(user);
-                        return user;
+                switch (oAuth2Mode) {
+                    case "binding" -> {
+                        if (user != null) {
+                            throw new OAuth2AuthenticationException("该第三方账号已绑定其他账号");
+                        } else {
+                            user = JwtTokenProvider.singletonInstance.getUser(previousToken);
+                            OAuth2Binding oAuth2Binding = OAuth2Binding.of(providerId, subObject.toString());
+                            oAuth2Binding.setUser(user);
+                            oAuth2BindingRepository.save(oAuth2Binding);
+                            user.getOauth2Bindings().add(oAuth2Binding);
+                            save(user);
+                            return user;
+                        }
                     }
-                } else if (user != null){
-                    addCookies(user, response);
-                } else {
-                    throw new OAuth2AuthenticationException("找不到对应用户");
+                    case "login" -> {
+                        if (user != null) {
+                            addCookies(user, response);
+                        } else {
+                            throw new OAuth2AuthenticationException("找不到对应用户");
+                        }
+                    }
+                    case "exam" -> {
+                        User anonymous = User.ANONYMOUS;
+                        Jws<Claims> claimsJws;
+                        if (previousExamToken != null) {
+                            claimsJws = JwtTokenProvider.singletonInstance.parseToken(previousExamToken);
+                        } else {
+                            claimsJws = null;
+                        }
+                        String examToken = JwtTokenProvider.singletonInstance.generateToken(anonymous, jwtBuilder -> {
+                            Map<String, String> oAuth2Map;
+                            if (claimsJws != null && claimsJws.getHeader().get("OAuth2") instanceof Map<?,?> map) {
+                                //noinspection unchecked
+                                oAuth2Map = (Map<String, String>) map;
+                            } else {
+                                oAuth2Map = new HashMap<>();
+                            }
+                            oAuth2Map.put(providerId, subObject.toString());
+                            jwtBuilder.header().add("OAuth2", oAuth2Map);
+                        });
+                        Cookie examTokenCookie = new Cookie("examToken", examToken);
+                        examTokenCookie.setPath("/checkIn");
+                        response.addCookie(examTokenCookie);
+                        return anonymous;
+                    }
+                    case null, default -> throw new OAuth2AuthenticationException("不支持的验证类型");
                 }
             }
         }
-
         return user;
     }
 

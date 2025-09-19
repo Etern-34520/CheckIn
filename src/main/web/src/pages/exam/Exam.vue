@@ -22,6 +22,7 @@ const routeToResult = () => {
     proxy.$cookies.set("phase", "result", "7d");
     router.push({name: "result"});
 }
+
 onBeforeMount(() => {
     const result = proxy.$cookies.get("result");
     if (result) {
@@ -43,29 +44,34 @@ if (!timestamps.value) timestamps.value = {};
 const loadedIndexes = new Set();
 const refreshedQuestion = ref({});
 let alerting = false;
+
+function regenerateMessageBox(description, title) {
+    if (!alerting)
+        ElMessageBox.alert(
+            description, title,
+            {
+                type: "error",
+                draggable: true,
+                showClose: false,
+                confirmButtonText: "重新生成试题",
+            }
+        ).then(() => {
+            alerting = false;
+            proxy.$cookies.set("phase", "generate", "7d");
+            proxy.$cookies.remove("submissions");
+            proxy.$cookies.remove("timestamps");
+            proxy.$cookies.remove("examInfo");
+            router.push({name: "generate"});
+        });
+    alerting = true;
+    console.error("EXAM INVALIDED");
+}
+
 const handleError = (data, actionDescription) => {
-    if (data.message) {
+    if (data && data.message) {
         switch (data.message) {
             case "Exam invalided":
-                if (!alerting)
-                    ElMessageBox.alert(
-                            "试题已无效", actionDescription,
-                            {
-                                type: "error",
-                                draggable: true,
-                                showClose: false,
-                                confirmButtonText: "重新生成试题",
-                            }
-                    ).then(() => {
-                        alerting = false;
-                        proxy.$cookies.set("phase", "generate", "7d");
-                        proxy.$cookies.remove("submissions");
-                        proxy.$cookies.remove("timestamps");
-                        proxy.$cookies.remove("examInfo");
-                        router.push({name: "generate"});
-                    });
-                alerting = true;
-                console.error("EXAM INVALIDED");
+                regenerateMessageBox("试题已无效", actionDescription);
                 break;
             case "Exam has already submitted":
                 if (!alerting)
@@ -131,6 +137,13 @@ const handleError = (data, actionDescription) => {
                 console.error(message);
         }
     } else {
+        regenerateMessageBox("需要重新生成试题", "未知错误")
+/*
+        ElMessage({
+            type: "error",
+            message: actionDescription
+        })
+*/
         console.error(actionDescription, data);
     }
 }
@@ -418,8 +431,8 @@ const submitExam = () => {
                 handleError(response, "提交时出错");
                 submitting.value = false;
             }
-        }, (error) => {
-            handleError(error, "提交时出错");
+        }, (e) => {
+            handleError(e, "提交时出错");
             submitting.value = false;
         });
     }

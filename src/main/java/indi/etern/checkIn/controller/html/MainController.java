@@ -23,7 +23,8 @@ public class MainController {
         final Cookie[] cookies = request.getCookies();
         final String referer = request.getHeader("referer");
         final boolean byServiceWorker = referer != null && referer.contains("sw.js"); /*For workbox.js auto ajax request below*/
-        final boolean isLogin = cookies != null && Arrays.stream(cookies).anyMatch(cookie -> cookie.getName().equals("token"));
+        final boolean isLogined = cookies != null && Arrays.stream(cookies).anyMatch(cookie -> cookie.getName().equals("token"));
+        final boolean isInOAuth2 = cookies != null && Arrays.stream(cookies).anyMatch(cookie -> cookie.getName().equals("OAuth2Mode"));
         boolean enabledOnLogin = turnstileService.isTurnstileEnabledOnLogin();
         boolean enabledOnExam = turnstileService.isTurnstileEnabledOnExam();
         if (enabledOnLogin || enabledOnExam) {
@@ -37,10 +38,10 @@ public class MainController {
             verifyExam.setPath("/checkIn");
             response.addCookie(verifyExam);
         }
-        if (byServiceWorker) {
+        if (byServiceWorker || isInOAuth2) {
             return "front-face/index.html";
         }
-        if (isLogin) {
+        if (isLogined) {
             return "redirect:/manage/";
         } else {
             return "redirect:/exam/";

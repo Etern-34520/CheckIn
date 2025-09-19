@@ -1,6 +1,5 @@
 package indi.etern.checkIn;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.auth.JwtAuthenticationFilter;
 import indi.etern.checkIn.auth.LogoutHandler;
 import indi.etern.checkIn.service.dao.UserService;
@@ -36,15 +35,13 @@ public class SecurityConfig {
     final UserService userService;
     final LogoutHandler logoutHandler;
     AuthenticationManager authenticationManager;
-    private ObjectMapper objectMapper;
 
     @Value("${oauth2.redirectUriTemplatePrefix}")
     protected String oauth2CallbackBaseUri;
 
-    public SecurityConfig(UserService userService, LogoutHandler logoutHandler, ObjectMapper objectMapper) {
+    public SecurityConfig(UserService userService, LogoutHandler logoutHandler) {
         this.userService = userService;
         this.logoutHandler = logoutHandler;
-        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -54,6 +51,7 @@ public class SecurityConfig {
                                 .requestMatchers("/manage/**").authenticated()
                                 .requestMatchers("/api/websocket/**").authenticated()
                                 .requestMatchers("/api/qualify").authenticated()
+                                .requestMatchers("/api/generate").authenticated()
                                 .anyRequest().permitAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
@@ -76,8 +74,20 @@ public class SecurityConfig {
                         .failureHandler(oauth2AuthenticationFailureHandler())
                 )
                 .exceptionHandling((exceptionHandling) -> exceptionHandling
-                        .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/checkIn/login/"))
-                        .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect("/checkIn/login/"))
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            if (request.getMethod().equals("GET")) {
+                                response.sendRedirect("/checkIn/login/");
+                            } else {
+                                response.setStatus(401);
+                            }
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            if (request.getMethod().equals("GET")) {
+                                response.sendRedirect("/checkIn/login/");
+                            } else {
+                                response.setStatus(401);
+                            }
+                        })
                 ).logout((logout) -> {
                     logout.addLogoutHandler(logoutHandler);
                 });
@@ -114,7 +124,7 @@ public class SecurityConfig {
 
     public AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler() {
         return (request, response, authentication) -> {
-            response.sendRedirect("/checkIn/manage");
+            response.sendRedirect("/checkIn");
         };
     }
 

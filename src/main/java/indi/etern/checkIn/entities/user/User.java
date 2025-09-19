@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class User implements UserDetails, OAuth2User {
     @Fetch(value = FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE},
             fetch = FetchType.EAGER)
-    protected Set<OAuth2Binding> oauth2Bindings;
+    protected Set<OAuth2Binding> oauth2Bindings = new HashSet<>();
 
     @JsonSerialize(using = Role.TypeSerializer.class)
     @Getter

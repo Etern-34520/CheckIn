@@ -19,9 +19,11 @@ defineExpose({
 
 const showGeneratingSetting = ref(false);
 const showAdvanceSetting = ref(false);
+const showOAuth2Setting = ref(false);
 watch(() => PermissionInfo.permissions.value, () => {
     showGeneratingSetting.value = PermissionInfo.hasPermission('setting', 'get generating setting');
     showAdvanceSetting.value = PermissionInfo.hasPermission('setting', 'get advance setting');
+    showOAuth2Setting.value = PermissionInfo.hasPermission('setting', 'get OAuth2 setting');
 }, {immediate: true, deep: true});
 
 const groups = [
@@ -70,6 +72,7 @@ const groups = [
             {
                 name: "OAuth2",
                 description: "第三方登录 验证范围",
+                show: showOAuth2Setting,
                 icon: HarmonyOSIcon_PersonShield,
                 action: () => {
                     router.push({name: "oauth2-setting"});

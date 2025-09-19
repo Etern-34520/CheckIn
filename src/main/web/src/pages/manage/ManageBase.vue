@@ -24,11 +24,6 @@ function autoLogin() {
     if (user !== null) {
         console.debug("Login from cookie:", user);
         UserDataInterface.loginAs(user).then(() => {
-            const inOAuthBinding = proxy.$cookies.get("inOAuth2Binding", "/checkIn");
-            if (inOAuthBinding) {//TODO interact with OAuth binding page
-                proxy.$cookies.remove("inOAuth2Binding", "/checkIn");
-                router.push({name: "oauth2-binding"});
-            }
         }, (err) => {
             if (err === "token expired") {
                 showReLogin.value = true;

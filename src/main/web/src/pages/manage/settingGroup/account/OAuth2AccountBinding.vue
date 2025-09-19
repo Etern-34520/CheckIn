@@ -1,6 +1,6 @@
 <script setup>
 import WebSocketConnector from "@/api/websocket.js";
-import {PictureRounded} from "@element-plus/icons-vue";
+import {Close, Link, PictureRounded} from "@element-plus/icons-vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import _Loading_ from "@/components/common/_Loading_.vue";
 
@@ -56,9 +56,11 @@ const loadData = () => {
 }
 loadData();
 
-const switchBinding = (provider) => {
+const switchBinding = (provider,index) => {
     if (oAuth2Bindings.value[provider.id] === undefined) {
-        proxy.$cookies.set("inOAuth2Binding", "true", "10m", "/checkIn");
+        loadingIconIndex.value = index;
+        proxy.$cookies.set("OAuth2Mode", "binding", "10m", "/checkIn");
+        proxy.$cookies.set("OAuth2FallbackRouteName", proxy.$router.currentRoute.value.name, "10m", "/checkIn");
         window.location.href = `${window.location.origin}/checkIn/api/oauth2/authorization/${provider.id}`;
     } else {
         ElMessageBox.confirm(
@@ -115,7 +117,10 @@ const switchBinding = (provider) => {
                                 {{ oAuth2Bindings[provider.id] === undefined ? "未绑定" : "已绑定" }}
                             </el-text>
                             <el-button :loading="loadingIconIndex === index" :disabled="loadingIconIndex !== -1"
-                                       :loading-icon="_Loading_" link :type="oAuth2Bindings[provider.id] === undefined ? 'primary' : 'danger'" style="align-self: center" @click="switchBinding(provider)">
+                                       :icon="oAuth2Bindings[provider.id] === undefined ? Link : Close"
+                                       :loading-icon="_Loading_" link
+                                       :type="oAuth2Bindings[provider.id] === undefined ? 'primary' : 'danger'"
+                                       style="align-self: center" @click="switchBinding(provider, index)">
                                 {{ oAuth2Bindings[provider.id] === undefined ? "绑定" : "解绑" }}
                             </el-button>
                         </div>

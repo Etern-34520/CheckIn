@@ -7,10 +7,10 @@ import indi.etern.checkIn.entities.BaseEntity;
 import indi.etern.checkIn.entities.converter.MapConverter;
 import indi.etern.checkIn.entities.converter.ObjectJsonConverter;
 import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
+import indi.etern.checkIn.entities.question.impl.MultipleChoicesQuestion;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.question.impl.QuestionGroupAnswer;
-import indi.etern.checkIn.entities.question.impl.MultipleChoicesQuestion;
 import indi.etern.checkIn.entities.question.interfaces.answer.Answer;
 import indi.etern.checkIn.entities.question.interfaces.answer.SingleQuestionAnswer;
 import indi.etern.checkIn.service.dao.ExamDataService;
@@ -107,7 +107,13 @@ public class ExamData implements BaseEntity<String> , Comparable<ExamData>{
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime expireTime;
-    
+
+    @Setter
+    @Getter
+    @Convert(converter = ObjectJsonConverter.class)
+    @Column(name = "oauth2_bindings", columnDefinition = "mediumtext")
+    Map<String, String> oAuth2Bindings;
+
     public ExamResult checkAnswerMap(Map<String, Object> answerMap) {
         List<Question> orderedQuestions =
                 QuestionService.singletonInstance.findAllById(questionIds).stream()

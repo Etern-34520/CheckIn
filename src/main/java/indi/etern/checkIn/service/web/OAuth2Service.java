@@ -56,7 +56,7 @@ public class OAuth2Service implements ClientRegistrationRepository {
 
             List<OAuth2ProviderInfo> providers = getProviderInfos();
             for (OAuth2ProviderInfo provider : providers) {
-                if (provider.isEnabled()) {
+                if (provider.isEnabledInLogin() || provider.getExamLoginMode() != OAuth2ProviderInfo.ExamLoginMode.DISABLED) {
                     ClientRegistration registration = ClientRegistration.withRegistrationId(provider.getId())
                             .clientName(provider.getName())
                             .clientId(provider.getClientId())

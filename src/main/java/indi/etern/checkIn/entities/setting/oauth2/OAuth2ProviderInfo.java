@@ -1,6 +1,7 @@
 package indi.etern.checkIn.entities.setting.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonValue;
 import indi.etern.checkIn.entities.converter.ListJsonConverter;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,6 +26,20 @@ public class OAuth2ProviderInfo {
     ) {
     }
 
+
+    public enum ExamLoginMode {
+        DISABLED, REQUIRED, OPTIONAL;
+
+        @JsonValue
+        public String lowerCaseName() {
+            return this.name().toLowerCase();
+        }
+
+        public static ExamLoginMode of(String s) {
+            return Enum.valueOf(ExamLoginMode.class, s.toUpperCase());
+        }
+    }
+
     @Id
     private String id;
     private String name;
@@ -38,7 +53,10 @@ public class OAuth2ProviderInfo {
     @Convert(converter = ListJsonConverter.class)
     private List<String> scope;
     private String userIdAttributeName;
-    private boolean enabled;
+    private boolean enabledInLogin;
+//    private boolean enabledInExam;
+    @Enumerated
+    private ExamLoginMode examLoginMode;
     private int orderIndex;
 
     @ElementCollection(targetClass = Attribute.class, fetch = FetchType.EAGER)

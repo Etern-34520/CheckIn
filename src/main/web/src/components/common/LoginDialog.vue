@@ -19,9 +19,9 @@ function reset() {
     turnstile.value.reset();
 }
 
-const siteKey = ref(proxy.$cookies.get("siteKey"));
-const verifyLogin = ref(proxy.$cookies.get("verifyLogin") === "true");
-proxy.$http.get("checkTurnstile").then((resp) => {
+const siteKey = ref(proxy.$cookies.get("siteKey", "/checkIn"));
+const verifyLogin = ref(proxy.$cookies.get("verifyLogin", "/checkIn") === "true");
+proxy.$http.get("check-turnstile").then((resp) => {
     proxy.$cookies.set("verifyLogin", resp.enableTurnstileOnLogin, "7d", "/checkIn");
     proxy.$cookies.set("verifyExam", resp.enableTurnstileOnExam, "7d", "/checkIn");
     proxy.$cookies.set("siteKey", resp.siteKey, "7d", "/checkIn");
@@ -52,7 +52,7 @@ const props = defineProps({
 
 function startOAuth2(provider, index) {
     oauth2LoginProceedingIndex.value = index;
-    proxy.$cookies.set("inOAuth2Login", "true", "10m", "/checkIn");
+    proxy.$cookies.set("OAuth2Mode", "login", "10m", "/checkIn");
     proxy.$cookies.set("OAuth2FallbackRouteName", proxy.$router.currentRoute.value.name, "10m", "/checkIn");
     window.location.href = `${window.location.origin}/checkIn/api/oauth2/authorization/${provider.id}`;
 }
@@ -154,7 +154,7 @@ onErrorCaptured((e) => {
                 </div>
             </div>
         </transition>
-        <div style="height: 30px;display: flex;place-items: stretch;place-content: center;">
+        <div style="min-height: 30px;display: flex;place-items: stretch;place-content: center;">
             <Transition name="message" mode="out-in">
                 <el-text :key="key">{{ loginMessage }}</el-text>
             </Transition>

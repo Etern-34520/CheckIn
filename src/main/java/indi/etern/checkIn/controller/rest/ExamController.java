@@ -5,16 +5,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.interfaces.ResultContext;
+import indi.etern.checkIn.action.oauth2.GetOAuth2ProvidersSimpleInfoAction;
 import indi.etern.checkIn.action.partition.GetPartitionsAction;
 import indi.etern.checkIn.action.setting.get.GetFacadeSetting;
 import indi.etern.checkIn.action.setting.get.GetGradingSetting;
+import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.exam.ExamData;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.entities.setting.grading.GradingLevel;
+import indi.etern.checkIn.entities.setting.oauth2.OAuth2ProviderInfo;
+import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.*;
 import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
+import indi.etern.checkIn.service.web.OAuth2Service;
 import indi.etern.checkIn.service.web.TurnstileService;
 import indi.etern.checkIn.throwable.entity.UserExistsException;
 import indi.etern.checkIn.throwable.exam.ExamException;
@@ -23,7 +28,11 @@ import indi.etern.checkIn.throwable.exam.ExamSubmittedException;
 import indi.etern.checkIn.throwable.exam.generate.ExamGenerateFailedException;
 import indi.etern.checkIn.throwable.exam.generate.PartitionsOutOfRangeException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +50,8 @@ public class ExamController {
     private final ExamDataService examDataService;
     private final ObjectMapper objectMapper;
     private final Logger logger = LoggerFactory.getLogger(ExamController.class);
+    private final String TOKEN_REFRESHED_SUCCESSFULLY_JSON = "{\"type\":\"success\",\"message\":\"Token refreshed successfully\"}";
+    private final String MISSING_REQUIRED_BINDING = "{\"type\":\"error\",\"message\":\"Missing required OAuth2 binding\", \"description\": \"未绑定要求的第三方账户\"}";
     private final String EXAM_IS_NOT_EXIST_JSON = "{\"type\":\"error\",\"message\":\"Exam is not exist\"}";
     private final String EXAM_INVALIDED_JSON = "{\"type\":\"error\",\"message\":\"Exam invalided\"}";
     private final String EXAM_SUBMITTED_JSON = "{\"type\":\"error\",\"message\":\"Exam has already submitted\"}";
@@ -52,11 +63,13 @@ public class ExamController {
     private final UserService userService;
     private final GradingLevelService gradingLevelService;
     private final TurnstileService turnstileService;
+    private final OAuth2Service oAuth2Service;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public ExamController(PartitionService partitionService, ActionExecutor actionExecutor, ExamGenerator examGenerator,
                           ExamDataService examDataService, ObjectMapper objectMapper, QuestionStatisticService questionStatisticService,
                           SettingService settingService, UserService userService, GradingLevelService gradingLevelService,
-                          TurnstileService turnstileService) {
+                          TurnstileService turnstileService, OAuth2Service oAuth2Service, JwtTokenProvider jwtTokenProvider) {
         this.partitionService = partitionService;
         this.actionExecutor = actionExecutor;
         this.examGenerator = examGenerator;
@@ -67,15 +80,36 @@ public class ExamController {
         this.userService = userService;
         this.gradingLevelService = gradingLevelService;
         this.turnstileService = turnstileService;
+        this.oAuth2Service = oAuth2Service;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record GenerateRequest(long qq, List<String> partitionIds, String turnstileToken) {
-    }
-    
     @PostMapping(path = "/api/generate")
     @Transactional(noRollbackFor = Throwable.class)
     public String generateExam(@RequestBody GenerateRequest generateRequest, HttpServletRequest httpServletRequest) throws JsonProcessingException {
+        Cookie examTokenCookie = Arrays.stream(httpServletRequest.getCookies())
+                .filter(c -> c.getName().equals("examToken")).findFirst().orElseThrow(IllegalStateException::new);
+        String examToken = examTokenCookie.getValue();
+        Jws<Claims> claimsJws = jwtTokenProvider.parseToken(examToken);
+        Map<String, String> examOAuth2Map = null;
+        if (claimsJws != null && claimsJws.getHeader().get("OAuth2") instanceof Map<?,?> map) {
+            //noinspection unchecked
+            examOAuth2Map = (Map<String, String>) map;
+        }
+        List<OAuth2ProviderInfo> providerInfos = oAuth2Service.getProviderInfos().stream()
+                .filter(o -> o.getExamLoginMode() == OAuth2ProviderInfo.ExamLoginMode.REQUIRED).toList();
+        if (!providerInfos.isEmpty()) {
+            if (examOAuth2Map == null) {
+                return MISSING_REQUIRED_BINDING;
+            } else {
+                for (OAuth2ProviderInfo providerInfo : providerInfos) {
+                    if (!examOAuth2Map.containsKey(providerInfo.getId())) {
+                        return MISSING_REQUIRED_BINDING;
+                    }
+                }
+            }
+        }
+
         if (turnstileService.isTurnstileEnabledOnExam() && turnstileService.isServiceEnable()) {
             try {
                 turnstileService.check(generateRequest.turnstileToken, httpServletRequest);
@@ -90,7 +124,7 @@ public class ExamController {
         try {
             List<Integer> range = null;
             try {
-                SettingItem item = settingService.getItem("generating","partitionRange");
+                SettingItem item = settingService.getItem("generating", "partitionRange");
                 final ArrayList<?> value = item.getValue(ArrayList.class);
                 if (value.size() == 2) {
                     //noinspection unchecked
@@ -105,6 +139,7 @@ public class ExamController {
             if (range == null || (size >= range.getFirst() && size <= range.getLast())) {
                 final ExamData examData = examGenerator.generateExam(generateRequest.qq, partitionService.findAllByIds(generateRequest.partitionIds));
                 examDataService.invalidAllByQQ(generateRequest.qq);
+                examData.setOAuth2Bindings(examOAuth2Map);
                 examDataService.save(examData);
                 questionStatisticService.appendStatistic(examData);
                 Map<String, Object> result = new HashMap<>();
@@ -123,10 +158,7 @@ public class ExamController {
             return objectMapper.writeValueAsString(errorDataMap);
         }
     }
-    
-    public record GetQuestionsByIndexRequest(String examId, int[] indexes) {
-    }
-    
+
     @RequestMapping(method = RequestMethod.POST, path = "/api/exam-questions", produces = "application/json;charset=UTF-8")
     @Transactional(propagation = Propagation.NESTED)
     public String getQuestionsByExamIdAndIndexes(@RequestBody GetQuestionsByIndexRequest request) throws JsonProcessingException, ExamException {
@@ -144,9 +176,7 @@ public class ExamController {
             return EXAM_IS_NOT_EXIST_JSON;
         }
     }
-    
-    public record GetResultRequest(String examId) {}
-    
+
     @SneakyThrows
     @Transactional
     @RequestMapping(method = RequestMethod.POST, path = "/api/get-result")
@@ -164,10 +194,7 @@ public class ExamController {
             return EXAM_IS_NOT_EXIST_JSON;
         }
     }
-    
-    public record SubmitRequest(String examId, Map<String, Object> answer) {
-    }
-        
+
     @SneakyThrows
     @Transactional
     @RequestMapping(method = RequestMethod.POST, path = "/api/submit")
@@ -199,37 +226,42 @@ public class ExamController {
 //            throw new BadRequestException();
         }
     }
-    
+
     @Transactional
     @RequestMapping(method = RequestMethod.GET, path = "/api/exam-data")
     public Map<String, Object> getData() {
         Map<String, Object> result = new HashMap<>();
         var facadeSettingContext = actionExecutor.execute(GetFacadeSetting.class);
         var gradingSettingContext = actionExecutor.execute(GetGradingSetting.class);
-        
+
         final Boolean showRequiredPartitions = settingService.getItem("generating", "showRequiredPartitions").getValue(Boolean.class);
         //noinspection unchecked
         final List<String> requiredPartitionIds = settingService.getItem("generating", "requiredPartitions").getValue(ArrayList.class);
         Set<String> requiredPartitionIdSet = new HashSet<>(requiredPartitionIds);
         List<String> selectablePartitionIds = new ArrayList<>();
-        
+
         ResultContext<GetPartitionsAction.Output> context = actionExecutor.execute(GetPartitionsAction.class);
         final Map<String, String> usedPartitionsNameMap = getPartitionsNameMap(context, requiredPartitionIdSet, selectablePartitionIds);
-        
+
         final GetFacadeSetting.SuccessOutput output = facadeSettingContext.getOutput();
         result.put("facadeData", output.data());
 //        result.put("generatingData", generatingSettingMap);
         result.put("gradingData", gradingSettingContext.getOutput().data());
-        
+
         Map<String, Object> extraData = output.extraData();
         extraData.put("partitions", usedPartitionsNameMap);
+        var resultContext = actionExecutor.execute(GetOAuth2ProvidersSimpleInfoAction.class);
+        var oAuth2ProviderInfos = resultContext.getOutput().providerInfos().stream()
+                .filter(o -> o.getExamLoginMode() != OAuth2ProviderInfo.ExamLoginMode.DISABLED)
+                .map(ProviderItem::from).toList();
+        extraData.put("oAuth2Providers", oAuth2ProviderInfos);
         extraData.put("selectablePartitionIds", selectablePartitionIds);
         if (showRequiredPartitions)
             extraData.put("requiredPartitionIds", requiredPartitionIds);
         result.put("extraData", extraData);
         return result;
     }
-    
+
     private Map<String, String> getPartitionsNameMap(ResultContext<GetPartitionsAction.Output> context, Set<String> requiredPartitionIdSet, List<String> selectablePartitionIds) {
         List<Partition> partitions = context.getOutput().partitions();
         Map<String, String> usedPartitionsNameMap = new HashMap<>();
@@ -245,10 +277,42 @@ public class ExamController {
         });
         return usedPartitionsNameMap;
     }
-    
-    public record SignUpRequest(String examId, String name, String password) {}
-    
-    @Transactional()
+
+    @RequestMapping(method = RequestMethod.POST, path = "/api/refresh-exam-token")
+    public String refreshExamToken(@RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletRequest request, HttpServletResponse response) {
+        List<String> unbindOAuth2s = refreshTokenRequest.unbindOAuth2s;
+        Optional<Cookie> previousTokenCookieOptional = Arrays.stream(request.getCookies()).filter(c -> c.getName().equals("examToken")).findFirst();
+        String previousExamToken = previousTokenCookieOptional.map(Cookie::getValue).orElse(null);
+        User anonymous = User.ANONYMOUS;
+        Jws<Claims> claimsJws;
+        if (previousExamToken != null) {
+            claimsJws = JwtTokenProvider.singletonInstance.parseToken(previousExamToken);
+        } else {
+            claimsJws = null;
+        }
+        String examToken = JwtTokenProvider.singletonInstance.generateToken(anonymous, jwtBuilder -> {
+            Map<String, String> oAuth2Map;
+            if (claimsJws != null && claimsJws.getHeader().get("OAuth2") instanceof Map<?, ?> map) {
+                //noinspection unchecked
+                oAuth2Map = (Map<String, String>) map;
+            } else {
+                oAuth2Map = new HashMap<>();
+            }
+            if (unbindOAuth2s != null) {
+                for (String providerId : unbindOAuth2s) {
+                    oAuth2Map.remove(providerId);
+                }
+            }
+            jwtBuilder.header().add("OAuth2", oAuth2Map);
+
+        });
+        Cookie examTokenCookie = new Cookie("examToken", examToken);
+        examTokenCookie.setPath("/checkIn");
+        response.addCookie(examTokenCookie);
+        return TOKEN_REFRESHED_SUCCESSFULLY_JSON;
+    }
+
+    @Transactional
     @RequestMapping(method = RequestMethod.POST, path = "/api/sign-up")
     public String signUpWith(@RequestBody SignUpRequest signUpRequest) throws JsonProcessingException, ExamException {
         final Optional<ExamData> optionalExamData = examDataService.findById(signUpRequest.examId);
@@ -266,7 +330,7 @@ public class ExamController {
                     examData.setStatus(ExamData.Status.SIGN_UP_COMPLETED);
                     examData.sendUpdateExamRecord();
                     examDataService.save(examData);
-                    Map<String,String> message = new HashMap<>();
+                    Map<String, String> message = new HashMap<>();
                     message.put("type", "success");
                     message.put("message", "Signed up successfully");
                     message.put("completingType", creatingUserStrategy.name());
@@ -281,7 +345,7 @@ public class ExamController {
             } catch (UserExistsException e) {
                 return USER_EXISTS_JSON;
             } catch (Exception e) {
-                Map<String,String> message = new HashMap<>();
+                Map<String, String> message = new HashMap<>();
                 message.put("type", "error");
                 message.put("message", e.getMessage());
                 return objectMapper.writeValueAsString(message);
@@ -289,5 +353,31 @@ public class ExamController {
         } else {
             return EXAM_IS_NOT_EXIST_JSON;
         }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record GenerateRequest(long qq, List<String> partitionIds, String turnstileToken) {
+    }
+
+    public record GetQuestionsByIndexRequest(String examId, int[] indexes) {
+    }
+
+    public record GetResultRequest(String examId) {
+    }
+
+    public record SubmitRequest(String examId, Map<String, Object> answer) {
+    }
+
+    public record ProviderItem(String id, String name, String iconDomain, boolean required) {
+        public static ProviderItem from(OAuth2ProviderInfo info) {
+            return new ProviderItem(info.getId(), info.getName(), info.getIconDomain(), info.getExamLoginMode() == OAuth2ProviderInfo.ExamLoginMode.REQUIRED);
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record RefreshTokenRequest(List<String> unbindOAuth2s) {
+    }
+
+    public record SignUpRequest(String examId, String name, String password) {
     }
 }

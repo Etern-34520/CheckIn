@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface OAuth2BindingRepository extends JpaRepository<OAuth2Binding, String> {
     Optional<OAuth2Binding> findByProviderIdAndUserId(String providerId, String userId);
+
+    boolean existsByProviderId(String providerId);
 }

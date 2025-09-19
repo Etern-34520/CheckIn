@@ -1,5 +1,6 @@
 package indi.etern.checkIn.action.oauth2;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import indi.etern.checkIn.action.BaseAction;
 import indi.etern.checkIn.action.NullInput;
 import indi.etern.checkIn.action.interfaces.Action;
@@ -24,17 +25,17 @@ public class GetOAuth2ProvidersSimpleInfoAction extends BaseAction<NullInput, Ge
         List<OAuth2ProviderInfo> providerInfos = oAuth2Service.getProviderInfos();
         providerInfos.sort(Comparator.comparingInt(OAuth2ProviderInfo::getOrderIndex));
         List<ProviderItem> providers = providerInfos.stream().map(ProviderItem::from).toList();
-        context.resolve(new SuccessOutput(providers));
+        context.resolve(new SuccessOutput(providers, providerInfos));
     }
 
-    public record SuccessOutput(List<ProviderItem> providers) implements OutputData {
+    public record SuccessOutput(List<ProviderItem> providers, @JsonIgnore List<OAuth2ProviderInfo> providerInfos) implements OutputData {
         @Override
         public Result result() {
             return Result.SUCCESS;
         }
     }
 
-    private record ProviderItem(String id, String name, String iconDomain) {
+    public record ProviderItem(String id, String name, String iconDomain) {
         public static ProviderItem from(OAuth2ProviderInfo info) {
             return new ProviderItem(info.getId(), info.getName(), info.getIconDomain());
         }

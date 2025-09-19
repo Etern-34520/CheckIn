@@ -2,13 +2,12 @@
 const {proxy} = getCurrentInstance();
 const errorMessage = proxy.$cookies.get("OAuth2ErrorMessage", "/checkIn");
 const showError = ref(false);
-const inOAuth2Binding = proxy.$cookies.get("inOAuth2Binding", "/checkIn");
+const oAuth2Mode = proxy.$cookies.get("OAuth2Mode", "/checkIn");
 const OAuth2FallbackRouteName = proxy.$cookies.get("OAuth2FallbackRouteName", "/checkIn");
-const inOAuth2Login = proxy.$cookies.get("inOAuth2Login", "/checkIn");
-if (inOAuth2Binding === "true") {
-    proxy.$cookies.remove("inOAuth2Binding", "/checkIn");
+if (oAuth2Mode === "binding") {
+    proxy.$cookies.remove("OAuth2Mode", "/checkIn");
     proxy.$router.push({name: "oauth2-binding"});
-} else if (inOAuth2Login === "true"){
+} else if (oAuth2Mode === "login"){
     proxy.$router.push({name: OAuth2FallbackRouteName});
 } else {
     showError.value = true;

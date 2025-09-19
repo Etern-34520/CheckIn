@@ -36,7 +36,8 @@ const breadcrumbMap = {
     "grading-setting": "评级设置",
     "advance-setting": "高级设置",
     "about": "关于",
-    "oauth2-binding": "关联"
+    "oauth2-binding": "关联",
+    "oauth2-setting": "OAuth2 设置",
 }
 
 let breadcrumbPathArray = reactive([]);

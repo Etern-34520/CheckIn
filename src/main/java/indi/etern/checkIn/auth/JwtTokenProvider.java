@@ -22,6 +22,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 @Component
 public class JwtTokenProvider {
@@ -59,15 +60,24 @@ public class JwtTokenProvider {
 
     // 生成 JWT token
     public String generateToken(User user) {
+        return generateToken(user, null);
+    }
+
+    public String generateToken(User user, Consumer<JwtBuilder> processor) {
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
-        return Jwts.builder()
+        JwtBuilder jwtBuilder = Jwts.builder()
                 .subject(String.valueOf(user.getQQNumber()))
                 .issuedAt(currentDate)
                 .expiration(expireDate)
-                .signWith(key())
+                .signWith(key());
+        if (processor != null) {
+            processor.accept(jwtBuilder);
+        }
+        return jwtBuilder
                 .compact();
     }
+
 
     private SecretKey key() {
         return Keys.hmacShaKeyFor(
@@ -144,5 +154,12 @@ public class JwtTokenProvider {
                 .expiration(expireDate)
                 .signWith(key())
                 .compact();
+    }
+
+    public Jws<Claims> parseToken(String token) {
+        return Jwts.parser()
+                .verifyWith(key())
+                .build()
+                .parseSignedClaims(token);
     }
 }

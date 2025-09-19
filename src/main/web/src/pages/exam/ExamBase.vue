@@ -39,7 +39,8 @@ const getData = () => {
                 });
                 break;
         }
-    }, () => {
+    }, (e) => {
+        console.error(e);
         loading.value = false;
         error.value = true;
     })

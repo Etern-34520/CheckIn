@@ -101,7 +101,7 @@ const getAlertStatusDescription = (status) => {
                     <transition-group name="smooth-height">
                         <div class="smooth-height-base" key="generateAvailability" style="flex: 1;"
                              v-if="serverStatuses.generateAvailability && displayStatuses.includes(serverStatuses.generateAvailability.status)">
-                            <div style="min-width: min(140px, 80dvw);display: flex;flex-direction: column;">
+                            <div style="min-width: min(50%, 140px, 80dvw);display: flex;flex-direction: column;">
                                 <el-alert :closable="false" style="border-radius: 4px;flex: 1"
                                           :type="getAlertType(serverStatuses.generateAvailability.status)">
                                     <div style="display: flex;flex-direction: row;flex-wrap: wrap">
@@ -119,7 +119,7 @@ const getAlertStatusDescription = (status) => {
                         </div>
                         <div class="smooth-height-base" key="submitAvailability" style="flex: 1;"
                              v-if="serverStatuses.submitAvailability && displayStatuses.includes(serverStatuses.submitAvailability.status)">
-                            <div style="min-width: min(140px, 80dvw);display: flex;flex-direction: column;">
+                            <div style="min-width: min(50%, 140px, 80dvw);display: flex;flex-direction: column;">
                                 <el-alert :closable="false" style="border-radius: 4px;flex: 1"
                                           :type="getAlertType(serverStatuses.submitAvailability.status)">
                                     <div style="display: flex;flex-direction: row;flex-wrap: wrap">

@@ -83,7 +83,7 @@ public class LoginController {
         return nameOrQQOrPasswordWrongStr;
     }
 
-    @GetMapping(path = "/api/checkTurnstile")
+    @GetMapping(path = "/api/check-turnstile")
     public String checkTurnstile() throws JsonProcessingException {
         boolean enableTurnstileOnLogin = turnstileService.isTurnstileEnabledOnLogin();
         boolean enableTurnstileOnExam = turnstileService.isTurnstileEnabledOnExam();

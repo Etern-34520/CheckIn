@@ -1110,6 +1110,10 @@
     display: block;
 }
 
+.el-segmented__item-selected.is-disabled::after {
+    background: var(--el-color-primary-3);
+}
+
 .el-segmented__item {
     transition: 200ms var(--ease-in-out-quint);
 }
@@ -1120,6 +1124,10 @@
 
 .el-dropdown-menu__item:hover, .el-dropdown-menu__item:focus {
     background: var(--panel-bg-color-overlay) !important;
+}
+
+.el-segmented__item-label > .el-text {
+    margin: 0 !important;
 }
 
 .md-editor-modal,

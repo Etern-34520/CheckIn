@@ -21,10 +21,11 @@ public class JwtAuthenticationFilter implements Filter {
                          ServletResponse servletResponse,
                          FilterChain filterChain) throws ServletException, IOException {
         if (servletRequest instanceof HttpServletRequest request && servletResponse instanceof HttpServletResponse response) {
-            // 从 request 获取 JWT token
-            String token = getTokenFromRequest(request);
-//        String token = request.getParameter("token");
-            // 校验 token
+            TokenData tokenData = getTokenFromRequest(request);
+            String token = null;
+            if (tokenData != null) {
+                token = tokenData.token;
+            }
             if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
                 User userDetails;
                 
@@ -42,8 +43,11 @@ public class JwtAuthenticationFilter implements Filter {
                         return;
                     }
                 } catch (Exception e) {
-//                response.sendRedirect("/checkIn/login/");
-                    return;
+                    if (tokenData.authenticationMode == TokenData.AuthenticationMode.EXAM) {
+                        userDetails = User.ANONYMOUS;
+                    } else {
+                        return;
+                    }
                 }
                 
                 setUserToSecurityContextHolder(userDetails);
@@ -63,24 +67,39 @@ public class JwtAuthenticationFilter implements Filter {
         authenticationToken.setDetails(userDetails);
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
+
+    private record TokenData(String token, AuthenticationMode authenticationMode) {
+        enum AuthenticationMode {
+            LOGIN, EXAM
+        }
+    }
     
-    private String getTokenFromRequest(HttpServletRequest request) {
+    private TokenData getTokenFromRequest(HttpServletRequest request) {
         String bearerTokenFromParameter = request.getParameter("token");
         
         if (StringUtils.hasText(bearerTokenFromParameter)) {
-            return bearerTokenFromParameter;
+            return new TokenData(bearerTokenFromParameter, TokenData.AuthenticationMode.LOGIN);
         } else {
             final String header = request.getHeader("Token");
             if (header != null) {
-                return header;
+                return new TokenData(header, TokenData.AuthenticationMode.LOGIN);
             } else {
                 final Cookie[] cookies = request.getCookies();
-                if (cookies != null)
+                if (cookies != null) {
+                    String token = null;
                     for (Cookie cookie : cookies) {
                         if (cookie.getName().equals("token")) {
-                            return cookie.getValue();
+                            token = cookie.getValue();
+                            return new TokenData(token, TokenData.AuthenticationMode.LOGIN);
+                        }
+                        if (cookie.getName().equals("examToken") && token == null) {
+                            token = cookie.getValue();
                         }
                     }
+                    if (token != null) {
+                        return new TokenData(token, TokenData.AuthenticationMode.EXAM);
+                    }
+                }
             }
         }
         return null;
