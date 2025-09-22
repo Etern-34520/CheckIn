@@ -1,4 +1,4 @@
-package indi.etern.checkIn.dto.manage;
+package indi.etern.checkIn.dto.manage.question;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -47,7 +47,9 @@ public class BasicQuestionDTO {
         if (linkWrapper instanceof ToPartitionsLink toPartitionsLink) {
             partitionIds = toPartitionsLink.getTargets().stream().map(Partition::getId).toList();
         }
-        authorQQ = question.getAuthor().getQQNumber();
+        if (question.getAuthor() != null) {
+            authorQQ = question.getAuthor().getQQNumber();
+        }
     }
     
     public void inheritFrom(Question question) {

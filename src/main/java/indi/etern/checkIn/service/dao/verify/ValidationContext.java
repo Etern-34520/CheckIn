@@ -80,9 +80,9 @@ public class ValidationContext {
         boolean shouldAdd = switch (currentRule.getVerificationType()) {
             case "min" -> num < data;
             case "max" -> num > data;
-            case "empty" -> num == data; // FIXME
+            case "empty" -> num == data;
             case "count" -> num < data;
-            default -> false; // 根据需求调整
+            default -> false;
         };
         
         if (shouldAdd) {

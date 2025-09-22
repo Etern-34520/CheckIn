@@ -30,6 +30,7 @@ import indi.etern.checkIn.throwable.exam.generate.PartitionsOutOfRangeException;
 import indi.etern.checkIn.throwable.exam.grading.ExamInvalidException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -286,13 +287,18 @@ public class ExamController {
         User anonymous = User.ANONYMOUS;
         Jws<Claims> claimsJws;
         if (previousExamToken != null) {
-            claimsJws = JwtTokenProvider.singletonInstance.parseToken(previousExamToken);
+            try {
+                claimsJws = JwtTokenProvider.singletonInstance.parseToken(previousExamToken);
+            } catch (SignatureException e) {
+                claimsJws = null;
+            }
         } else {
             claimsJws = null;
         }
+        Jws<Claims> finalClaimsJws = claimsJws;
         String examToken = JwtTokenProvider.singletonInstance.generateToken(anonymous, jwtBuilder -> {
             Map<String, String> oAuth2Map;
-            if (claimsJws != null && claimsJws.getHeader().get("OAuth2") instanceof Map<?, ?> map) {
+            if (finalClaimsJws != null && finalClaimsJws.getHeader().get("OAuth2") instanceof Map<?, ?> map) {
                 //noinspection unchecked
                 oAuth2Map = (Map<String, String>) map;
             } else {

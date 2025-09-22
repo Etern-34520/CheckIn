@@ -263,7 +263,7 @@ public class UserService extends DefaultOAuth2UserService implements UserDetails
         return optionalBinding.map(OAuth2Binding::getUser);
     }
 
-    private String getSubKey(OAuth2UserRequest userRequest) {//TODO
+    private String getSubKey(OAuth2UserRequest userRequest) {
         String provider = userRequest.getClientRegistration().getRegistrationId();
         OAuth2ProviderInfo oAuth2ProviderInfo = oauth2Service.getProviderInfo(provider);
         return oAuth2ProviderInfo.getUserIdAttributeName();

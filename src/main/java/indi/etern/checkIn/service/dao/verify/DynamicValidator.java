@@ -1,7 +1,7 @@
 package indi.etern.checkIn.service.dao.verify;
 
-import indi.etern.checkIn.dto.manage.BasicQuestionDTO;
-import indi.etern.checkIn.dto.manage.QuestionGroupDTO;
+import indi.etern.checkIn.dto.manage.question.BasicQuestionDTO;
+import indi.etern.checkIn.dto.manage.question.QuestionGroupDTO;
 import indi.etern.checkIn.entities.setting.verification.VerificationRule;
 import indi.etern.checkIn.throwable.entity.VerifyException;
 import org.slf4j.Logger;

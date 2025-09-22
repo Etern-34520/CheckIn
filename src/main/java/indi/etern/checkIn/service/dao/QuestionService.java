@@ -8,6 +8,7 @@ import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.QuestionRepository;
 import indi.etern.checkIn.repositories.QuestionStatisticRepository;
+import indi.etern.checkIn.service.exam.StatusService;
 import jakarta.annotation.Resource;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -51,6 +52,7 @@ public class QuestionService {
     
 //    @CachePut(key = "#question.id")
     public Question save(Question question) {
+        StatusService.singletonInstance.flush();
         evictRelatedPartitionCache(question);
         return questionRepository.save(question);
     }
@@ -62,6 +64,7 @@ public class QuestionService {
     
 //    @CacheEvict(key = "#question.id")
     public void delete(Question question) {
+        StatusService.singletonInstance.flush();
         if (question.getLinkWrapper() instanceof ToPartitionsLink toPartitionsLink) {
             toPartitionsLink.getTargets().forEach(partition -> {
                 partition.getQuestionLinks().remove(toPartitionsLink);
@@ -85,6 +88,7 @@ public class QuestionService {
     
 //    @CacheEvict(allEntries = true)
     public void saveAll(Collection<Question> questions) {
+        StatusService.singletonInstance.flush();
         for (Question question : questions) {
             evictRelatedPartitionCache(question);
         }

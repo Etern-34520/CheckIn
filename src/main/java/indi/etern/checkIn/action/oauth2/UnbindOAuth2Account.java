@@ -39,7 +39,6 @@ public class UnbindOAuth2Account extends BaseAction<UnbindOAuth2Account.Input, O
                     userService.save(currentUser);
                 });
         context.resolve(MessageOutput.success("OAuth2 account unbound"));
-        //TODO
     }
 
     public record Input(String providerId) implements InputData {}

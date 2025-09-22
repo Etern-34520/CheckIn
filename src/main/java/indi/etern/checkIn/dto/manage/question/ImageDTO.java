@@ -1,4 +1,4 @@
-package indi.etern.checkIn.dto.manage;
+package indi.etern.checkIn.dto.manage.question;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;

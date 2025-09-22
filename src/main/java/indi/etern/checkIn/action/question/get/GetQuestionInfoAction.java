@@ -6,12 +6,11 @@ import indi.etern.checkIn.action.interfaces.Action;
 import indi.etern.checkIn.action.interfaces.ExecuteContext;
 import indi.etern.checkIn.action.interfaces.InputData;
 import indi.etern.checkIn.action.interfaces.OutputData;
-import indi.etern.checkIn.dto.manage.CommonQuestionDTO;
-import indi.etern.checkIn.dto.manage.ManageDTOUtils;
+import indi.etern.checkIn.dto.manage.question.CommonQuestionDTO;
+import indi.etern.checkIn.dto.manage.question.ManageDTOUtils;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.VerificationRuleService;
-import indi.etern.checkIn.service.dao.verify.ValidationResult;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,29 +49,8 @@ public class GetQuestionInfoAction extends BaseAction<GetQuestionInfoAction.Inpu
             final Question question = questionOptional.get();
             final CommonQuestionDTO commonQuestionDTO = ManageDTOUtils.ofQuestion(question);
             context.resolve(new SuccessOutput(commonQuestionDTO));
-            
-            final String currentDigest = verificationRuleService.digest(commonQuestionDTO);
-            final String previousDigest = question.getVerificationDigest();
-            if (!currentDigest.equals(previousDigest)) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Verify question[\"{}\"] due to invalid digest, previous:\"{}\", current:\"{}\"",question.getId(),previousDigest,currentDigest);
-                }
-                final ValidationResult result = verificationRuleService.verify(commonQuestionDTO, VerificationRuleService.VerifyTargetType.ANY);
-                // 检查结果
-                if (logger.isDebugEnabled() && !result.getErrors().isEmpty()) {
-                    logger.debug("Verify result errors:");
-                    result.getErrors().forEach((key, msg) -> logger.debug("{}: {}", key, msg));
-                    logger.debug("========");
-                }
-                if (logger.isDebugEnabled() && !result.getWarnings().isEmpty()) {
-                    logger.debug("Verify result warnings:");
-                    result.getWarnings().forEach((key, msg) -> logger.debug("{}: {}", key, msg));
-                    logger.debug("========");
-                }
-                question.setVerificationDigest(currentDigest);
-                question.setValidationResult(result);
-                questionService.save(question);
-            }
+
+            verificationRuleService.updateValidation(commonQuestionDTO, question);
         }
     }
 }

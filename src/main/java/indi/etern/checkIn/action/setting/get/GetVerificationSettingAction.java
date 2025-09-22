@@ -29,7 +29,7 @@ public class GetVerificationSettingAction extends BaseAction<NullInput, GetVerif
     
     @Override
     public void execute(ExecuteContext<NullInput, SuccessOutput> context) {
-        List<VerificationRule> ruleList = verificationRuleService.findAll();
+        List<VerificationRule> ruleList = verificationRuleService.getAll();
         ArrayList<Object> arrayList = new ArrayList<>();
         for (VerificationRule verificationRule : ruleList) {
             LinkedHashMap<String,Object> verificationRuleMap = new LinkedHashMap<>();

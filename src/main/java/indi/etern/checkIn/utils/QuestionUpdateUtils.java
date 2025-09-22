@@ -1,8 +1,8 @@
 package indi.etern.checkIn.utils;
 
 import indi.etern.checkIn.api.webSocket.Message;
-import indi.etern.checkIn.dto.manage.BasicQuestionDTO;
-import indi.etern.checkIn.dto.manage.ManageDTOUtils;
+import indi.etern.checkIn.dto.manage.question.BasicQuestionDTO;
+import indi.etern.checkIn.dto.manage.question.ManageDTOUtils;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.web.WebSocketService;
 

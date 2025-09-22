@@ -2,6 +2,7 @@ package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.repositories.PartitionRepository;
+import indi.etern.checkIn.service.exam.StatusService;
 import jakarta.annotation.Resource;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -30,19 +31,22 @@ public class PartitionService {
     
     @CachePut(key = "#partition.id")
     public Partition save(Partition partition) {
+        StatusService.singletonInstance.flush();
         return partitionRepository.save(partition);
     }
 
     public List<Partition> findAll() {
         return partitionRepository.findAll();
     }
-    
-    @Cacheable(key = "#name")//TODO test
+
+    @Cacheable(key = "#name")
     public Optional<Partition> findByName(String name) {
         return partitionRepository.findByName(name);
     }
+
 //    @CacheEvict(key = "#partition.id")
     public void delete(Partition partition) {
+        StatusService.singletonInstance.flush();
         cache.evict(partition.getId());
         cache.evict(partition.getName());
         partitionRepository.delete(partition);

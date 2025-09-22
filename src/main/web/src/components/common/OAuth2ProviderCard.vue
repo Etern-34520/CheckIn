@@ -76,7 +76,7 @@ const autoFillOidc = () => {
             data: {
                 issuerUrl: model.value.issuerUri + "/.well-known/openid-configuration"
             }
-        }).then((resp) => {//TODO test
+        }).then((resp) => {
             const data = resp.data.data;
             model.value.authorizationUri = data.authorizationUri;
             model.value.userInfoUri = data.userInfoUri;
@@ -291,7 +291,7 @@ const optionNames = {
                                 :closable="editing" @close="removeScopeItem(index)" type="info">
                             {{ scopeItem || "null" }}
                         </el-tag>
-                        <el-popover trigger="click" popper-style="width: 260px" v-model="addScopeItemVisible">
+                        <el-popover trigger="click" popper-style="width: 260px" v-model:visible="addScopeItemVisible">
                             <template #reference>
                                 <el-button link class="disable-init-animate">
                                     <el-icon>

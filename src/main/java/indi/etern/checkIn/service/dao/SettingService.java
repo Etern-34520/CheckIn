@@ -2,6 +2,7 @@ package indi.etern.checkIn.service.dao;
 
 import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.repositories.SettingRepository;
+import indi.etern.checkIn.service.exam.StatusService;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
@@ -24,13 +25,17 @@ public class SettingService {
         this.settingRepository = settingRepository;
         cache = cacheManager.getCache("setting");
     }
-    
+
     public SettingItem getItem(String root, String name) {
         final String key = root + "." + name;
         final SettingItem cachedItem = cache.get(key, SettingItem.class);
-        return Objects.requireNonNullElseGet(cachedItem, () -> settingRepository.findById(key).orElseThrow());
+        return Objects.requireNonNullElseGet(cachedItem, () -> {
+            SettingItem settingItem = settingRepository.findById(key).orElseThrow();
+            cache.put(key, settingItem);
+            return settingItem;
+        });
     }
-    
+
     public List<SettingItem> findAllByKeys(Collection<String> keys) {
         List<SettingItem> settingItems = new ArrayList<>(keys.size());
         List<String> uncachedKeys = new ArrayList<>();
@@ -51,11 +56,13 @@ public class SettingService {
     }
     
     public void setSetting(SettingItem settingItem) {
+        StatusService.singletonInstance.flush();
         cache.put(settingItem.getKey(), settingItem);
         settingRepository.save(settingItem);
     }
     
     public void setAll(Iterable<SettingItem> settingItems) {
+        StatusService.singletonInstance.flush();
         for (SettingItem settingItem : settingItems) {
             cache.put(settingItem.getKey(), settingItem);
         }

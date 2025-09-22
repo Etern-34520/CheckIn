@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.io.IOException;
 import java.util.ArrayList;

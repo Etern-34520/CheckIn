@@ -1,10 +1,11 @@
-package indi.etern.checkIn.dto.manage;
+package indi.etern.checkIn.dto.manage.question;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.entities.question.statistic.QuestionStatistic;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionStatisticService;
 import lombok.AccessLevel;
@@ -55,9 +56,17 @@ public abstract class CommonQuestionDTO extends BasicQuestionDTO {
         if (author != null) {
             authorQQ = author.getQQNumber();
         }
+        QuestionStatistic questionStatistic = question.getQuestionStatistic();
+        if (questionStatistic != null) {
+            statistic = new StatisticDTO(questionStatistic);
+        } else {
+            statistic = null;
+        }
+/*
         QuestionStatisticService.singletonInstance.findById(question.getId()).ifPresent(questionStatistic -> {
             statistic = new StatisticDTO(questionStatistic);
         });
+*/
     }
     
     // for Jackson

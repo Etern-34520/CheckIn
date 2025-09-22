@@ -9,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.util.List;
 
@@ -32,19 +30,18 @@ public class QuestionStatistic implements BaseEntity<String> {
     @JsonIgnore
     String id;
     
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnore
     Question question;
     
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "statistic_exam_data_mapping",
             foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
             inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
             joinColumns = @JoinColumn(name = "exam_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)),
             inverseJoinColumns = @JoinColumn(name = "statistic_id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)))
-    @Fetch(FetchMode.SUBSELECT)
     @JsonIgnore
     List<ExamData> drewExamData;
     

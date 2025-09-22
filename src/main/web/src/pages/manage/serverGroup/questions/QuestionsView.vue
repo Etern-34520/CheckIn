@@ -1060,8 +1060,6 @@ const getTypeName = (obj) => {
     filter: blur(32px);
 }
 
-/*TODO width*/
-
 .create-selection {
     display: flex;
     flex-direction: row;

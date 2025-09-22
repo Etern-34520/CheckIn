@@ -3,6 +3,7 @@ package indi.etern.checkIn.service.exam.specialPartitionLimit;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.service.dao.SettingService;
+import indi.etern.checkIn.service.exam.StatusService;
 import io.jsonwebtoken.lang.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,9 @@ public class SpecialPartitionLimitService {
     
     public void flush() {
         try {
+            if (StatusService.singletonInstance != null) {
+                StatusService.singletonInstance.flush();
+            }
             SettingItem settingItem4 = settingService.getItem("generating","specialPartitionLimits");
             //noinspection unchecked
             Map<String,Map<String,Object>> map = settingItem4.getValue(Map.class);

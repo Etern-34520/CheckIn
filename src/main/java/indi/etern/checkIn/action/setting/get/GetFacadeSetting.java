@@ -17,7 +17,7 @@ import java.util.Map;
 @Action("getFacadeSetting")
 public class GetFacadeSetting extends BaseAction<NullInput, GetFacadeSetting.SuccessOutput> {
     private final StatusService statusService;
-    
+
     public record SuccessOutput(Map<String, Object> data, Map<String, Object> extraData) implements OutputData {
         @Override
         public Result result() {
@@ -36,7 +36,6 @@ public class GetFacadeSetting extends BaseAction<NullInput, GetFacadeSetting.Suc
     public void execute(ExecuteContext<NullInput, SuccessOutput> context) {
         GetSettingCommon getSettingCommon = new GetSettingCommon(SaveFacadeSetting.KEYS, "facade");
         final LinkedHashMap<String, Object> extraData = new LinkedHashMap<>();
-        statusService.flush();
         final StatusService.Status generateStatus = statusService.getStatus().generateAvailability().status();
         final StatusService.Status submitStatus = statusService.getStatus().submitAvailability().status();
         boolean serviceAvailable = generateStatus != StatusService.Status.UNAVAILABLE && submitStatus != StatusService.Status.UNAVAILABLE;

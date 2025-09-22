@@ -3,7 +3,7 @@ package indi.etern.checkIn.entities.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import indi.etern.checkIn.CheckInApplication;
+import indi.etern.checkIn.utils.ApplicationContextUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,12 +48,12 @@ public class User implements UserDetails, OAuth2User {
     @JsonIgnore
     @Fetch(value = FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE},
-            fetch = FetchType.EAGER)
+            fetch = FetchType.LAZY)
     protected Set<OAuth2Binding> oauth2Bindings = new HashSet<>();
 
     @JsonSerialize(using = Role.TypeSerializer.class)
     @Getter
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE_TYPE", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     protected Role role;
 
@@ -63,7 +63,7 @@ public class User implements UserDetails, OAuth2User {
     public User(String name, long QQNumber, String password) {
         this.name = name;
         this.QQNumber = QQNumber;
-        PasswordEncoder encoder = CheckInApplication.applicationContext.getBean(PasswordEncoder.class);
+        PasswordEncoder encoder = ApplicationContextUtils.getApplicationContext().getBean(PasswordEncoder.class);
         this.password = password == null ? null : encoder.encode(password);
 //        role = Role.ofName("user",null);
     }

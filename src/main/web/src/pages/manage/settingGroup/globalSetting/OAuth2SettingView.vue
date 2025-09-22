@@ -66,7 +66,6 @@ const finishEditing = () => {
             })
         });
     }
-    //TODO
 }
 const addProvider = () => {
     data.value.providers.push(

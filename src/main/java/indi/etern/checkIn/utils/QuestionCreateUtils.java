@@ -1,6 +1,6 @@
 package indi.etern.checkIn.utils;
 
-import indi.etern.checkIn.dto.manage.*;
+import indi.etern.checkIn.dto.manage.question.*;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.MultipleChoicesQuestion;
 import indi.etern.checkIn.entities.question.impl.Partition;

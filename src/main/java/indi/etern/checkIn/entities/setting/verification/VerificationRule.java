@@ -1,8 +1,8 @@
 package indi.etern.checkIn.entities.setting.verification;
 
-import indi.etern.checkIn.dto.manage.CommonQuestionDTO;
-import indi.etern.checkIn.dto.manage.MultipleChoicesQuestionDTO;
-import indi.etern.checkIn.dto.manage.QuestionGroupDTO;
+import indi.etern.checkIn.dto.manage.question.CommonQuestionDTO;
+import indi.etern.checkIn.dto.manage.question.MultipleChoicesQuestionDTO;
+import indi.etern.checkIn.dto.manage.question.QuestionGroupDTO;
 import indi.etern.checkIn.entities.converter.ListJsonConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

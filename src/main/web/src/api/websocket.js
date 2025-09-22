@@ -16,19 +16,13 @@ function getCurrentIsoTime() {
     return new Date().toISOString();
 }
 
-
-// const textEncoder = new TextEncoder();
-// const textDecoder = new TextDecoder();
-
-function encodeMessage(message) {//TODO MessagePack
-    // return StringToBase64(JSON.stringify(message));
+function encodeMessage(message) {
     return JSON.stringify(message, (key, value) => {
         return value === undefined ? null : value;
     });
 }
 
-function decodeMessage(message) {//TODO MessagePack
-    // return JSON.parse(base64ToString(message));
+function decodeMessage(message) {
     return JSON.parse(message);
 }
 

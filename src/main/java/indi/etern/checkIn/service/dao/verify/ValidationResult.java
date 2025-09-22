@@ -1,6 +1,6 @@
 package indi.etern.checkIn.service.dao.verify;
 
-import indi.etern.checkIn.dto.manage.IssueDTO;
+import indi.etern.checkIn.dto.manage.question.IssueDTO;
 import indi.etern.checkIn.entities.converter.MapConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

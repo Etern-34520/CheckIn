@@ -1,18 +1,19 @@
 package indi.etern.checkIn.service.dao;
 
-import indi.etern.checkIn.dto.manage.CommonQuestionDTO;
-import indi.etern.checkIn.dto.manage.QuestionGroupDTO;
+import indi.etern.checkIn.dto.manage.question.CommonQuestionDTO;
+import indi.etern.checkIn.dto.manage.question.QuestionGroupDTO;
+import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.setting.verification.VerificationRule;
 import indi.etern.checkIn.repositories.VerificationRuleRepository;
 import indi.etern.checkIn.service.dao.verify.DynamicValidator;
 import indi.etern.checkIn.service.dao.verify.ValidationContext;
 import indi.etern.checkIn.service.dao.verify.ValidationResult;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -25,33 +26,38 @@ public class VerificationRuleService {
     public static VerificationRuleService singletonInstance;
     final VerificationRuleRepository verificationRuleRepository;
     final Cache cache;
-    
-    public VerificationRuleService(VerificationRuleRepository verificationRuleRepository, CacheManager cacheManager) {
+    private final QuestionService questionService;
+    List<VerificationRule> rules;
+    Logger logger = LoggerFactory.getLogger(VerificationRuleService.class);
+
+    public VerificationRuleService(VerificationRuleRepository verificationRuleRepository, CacheManager cacheManager, QuestionService questionService) {
         this.verificationRuleRepository = verificationRuleRepository;
         cache = cacheManager.getCache("verificationRule");
         singletonInstance = this;
+        this.questionService = questionService;
     }
     
-    @CacheEvict(key = "'all'")
     public void deleteAll() {
         verificationRuleRepository.deleteAll();
+        rules = List.of();
     }
     
-    public void saveAll(Iterable<VerificationRule> verificationRules) {
-        
-        cache.put("all", verificationRules);
+    public void saveAll(List<VerificationRule> verificationRules) {
+        rules = verificationRules;
         verificationRuleRepository.saveAll(verificationRules);
     }
     
-    @Cacheable(key = "'all'")
-    public List<VerificationRule> findAll() {
-        return verificationRuleRepository.findAll(Sort.by("index"));
+    public List<VerificationRule> getAll() {
+        if (rules == null) {
+            rules = verificationRuleRepository.findAll(Sort.by("index"));
+        }
+        return rules;
     }
     
     public String digest(CommonQuestionDTO commonQuestionDTO) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(commonQuestionDTO.getLastModifiedTime());
-        singletonInstance.findAll().forEach(rule -> {
+        getAll().forEach(rule -> {
             if (rule.isApplicable(commonQuestionDTO)) {
                 stringBuilder.append(rule.hashCode());
             }
@@ -61,7 +67,7 @@ public class VerificationRuleService {
     
     public ValidationResult verify(CommonQuestionDTO commonQuestionDTO, VerifyTargetType verifyTargetType) {
         ValidationResult result = new ValidationResult();
-        singletonInstance.findAll().stream().filter(rule ->
+        getAll().stream().filter(rule ->
                 verifyTargetType == VerifyTargetType.ANY ||
                         rule.getObjectName().equals(verifyTargetType.getTypeName())
         ).forEach(verificationRule -> {
@@ -109,6 +115,34 @@ public class VerificationRuleService {
         
         VerifyTargetType(String typeName) {
             this.typeName = typeName;
+        }
+    }
+
+    public ValidationResult updateValidation(CommonQuestionDTO commonQuestionDTO, Question question) {
+        final String currentDigest = digest(commonQuestionDTO);
+        final String previousDigest = question.getVerificationDigest();
+        if (!currentDigest.equals(previousDigest)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Verify question[\"{}\"] due to invalid digest, previous:\"{}\", current:\"{}\"", question.getId(),previousDigest,currentDigest);
+            }
+            final ValidationResult result = verify(commonQuestionDTO, VerificationRuleService.VerifyTargetType.ANY);
+            // 检查结果
+            if (logger.isDebugEnabled() && !result.getErrors().isEmpty()) {
+                logger.debug("Verify result errors:");
+                result.getErrors().forEach((key, msg) -> logger.debug("{}: {}", key, msg));
+                logger.debug("========");
+            }
+            if (logger.isDebugEnabled() && !result.getWarnings().isEmpty()) {
+                logger.debug("Verify result warnings:");
+                result.getWarnings().forEach((key, msg) -> logger.debug("{}: {}", key, msg));
+                logger.debug("========");
+            }
+            question.setVerificationDigest(currentDigest);
+            question.setValidationResult(result);
+            questionService.save(question);
+            return result;
+        } else {
+            return question.getValidationResult();
         }
     }
 }

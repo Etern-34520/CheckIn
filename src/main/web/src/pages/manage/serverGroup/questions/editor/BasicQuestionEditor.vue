@@ -11,6 +11,8 @@ import {MdEditor} from "md-editor-v3";
 import UIMeta from "@/utils/UI_Meta.js";
 import 'md-editor-v3/lib/style.css';
 import PermissionInfo from "@/auth/PermissionInfo.js";
+import {Link, Picture} from "@element-plus/icons-vue"
+import {uuidv7} from "uuidv7";
 
 const imageViewerVisible = ref(false);
 const upload = ref();
@@ -146,6 +148,34 @@ const ableToChangeAuthor = () => {
     }
     return ableToChangeAuthor;
 }
+
+const addUrlImageVisible = ref(false);
+const newImageURL = ref();
+const newImageError = ref(false);
+const newImageVerified = ref(false);
+const confirmAddUrlImage = () => {
+    if (!questionInfo.value.question.images) {
+        questionInfo.value.question.images = [];
+    }
+    questionInfo.value.question.images.push({
+        name: uuidv7(),
+        size: newImageURL.value.length * 0.75,
+        url: newImageURL.value,
+    });
+    addUrlImageVisible.value = false;
+}
+
+watch(() => newImageURL.value, () => {
+    newImageError.value = false;
+})
+
+const newImageLoadError = () => {
+    newImageError.value = true;
+    newImageVerified.value = true;
+}
+const newImageLoaded = () => {
+    newImageVerified.value = true;
+}
 </script>
 
 <template>
@@ -170,13 +200,15 @@ const ableToChangeAuthor = () => {
         <template #content>
             <div style="display: flex;min-height: 450px !important;">
                 <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
-                           preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']" style="height: 50dvh;min-height: 450px;"
+                           preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
+                           style="height: 50dvh;min-height: 450px;"
                            :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value"
-                           :preview="!UIMeta.mobile.value" :footers="['scrollSwitch']" />
+                           :preview="!UIMeta.mobile.value" :footers="['scrollSwitch']"/>
             </div>
         </template>
     </collapse>
-    <collapse :content-background="false" :expanded="questionInfo.question.images && questionInfo.question.images.length > 0"
+    <collapse :content-background="false"
+              :expanded="questionInfo.question.images && questionInfo.question.images.length > 0"
               class="question-input" :class="questionInfo.inputMeta['images-0']">
         <template #title>
             <div style="display: flex;flex-direction: row;align-items: center">
@@ -200,22 +232,59 @@ const ableToChangeAuthor = () => {
                            action="ignore"
                            :on-change="filter"
                            :on-preview="onPreview">
-                    <HarmonyOSIcon_Plus :size="32"/>
+                    <div style="display: flex;flex-direction: column;gap: 4px">
+                        <div style="display: flex;flex-direction: row;align-items: center;justify-content: center">
+                            <HarmonyOSIcon_Plus style="align-self: center;margin-right: 4px"/>
+                            <el-text style="align-self: center">选择文件</el-text>
+                        </div>
+                        <el-text type="info">或</el-text>
+                        <el-popover trigger="click" @click.stop popper-style="width: 260px" v-model:visible="addUrlImageVisible">
+                            <template #reference>
+                                <el-button link @click.stop="newImageURL = ''" :icon="Link" class="disable-init-animate">
+                                    <el-text type="primary">使用 URL</el-text>
+                                </el-button>
+                            </template>
+                            <template #default>
+                                <div class="no-pop-padding" style="display: flex;flex-direction: column;width: 260px">
+                                    <el-image style="width: 260px;min-height: 180px;border-radius: 4px;margin-bottom: 4px"
+                                              :src="newImageURL"
+                                              @error="newImageLoadError()" @load="newImageLoaded()">
+                                        <template #error>
+                                            <div style="display: flex;align-items: center;justify-content: center;height: 180px">
+                                                <el-icon style="align-self: center;justify-self: center" :size="32">
+                                                    <Picture/>
+                                                </el-icon>
+                                            </div>
+                                        </template>
+                                    </el-image>
+                                    <div style="display: flex;flex-direction: row;width: 260px">
+                                        <el-input placeholder="URL" class="disable-init-animate" style="margin-right: 4px"
+                                                  v-model="newImageURL"/>
+                                        <el-button type="primary" class="disable-init-animate"
+                                                   :disabled="!newImageURL || !newImageVerified || newImageError"
+                                                   @click="confirmAddUrlImage">
+                                            完成
+                                        </el-button>
+                                    </div>
+                                </div>
+                            </template>
+                        </el-popover>
+                    </div>
                 </el-upload>
             </div>
         </template>
     </collapse>
     <div style="display: flex;flex-direction: row;margin-bottom: 8px">
         <el-select
-                class="not-empty" :class="questionInfo.inputMeta['partitions-0']"
-                v-model="questionInfo.question.partitionIds"
-                placeholder="分区"
-                multiple
-                filterable
-                @focusout="hideCreating"
-                @remove-tag="preventEmptyPartition"
-                @change="onPartitionChange"
-                style="flex:4;width:0">
+            class="not-empty" :class="questionInfo.inputMeta['partitions-0']"
+            v-model="questionInfo.question.partitionIds"
+            placeholder="分区"
+            multiple
+            filterable
+            @focusout="hideCreating"
+            @remove-tag="preventEmptyPartition"
+            @change="onPartitionChange"
+            style="flex:4;width:0">
             <el-option v-for="(partition,id) in partitions" :key="partition.id"
                        :label="partition.name" :value="partition.id"></el-option>
             <template #footer v-if="PermissionInfo.hasPermission('partition', 'create partition')">

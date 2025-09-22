@@ -47,7 +47,6 @@ public class QuestionStatisticService {
                         case CORRECT -> questionStatistic.increaseCorrectCount();
                         case HALF_CORRECT -> {
                             questionStatistic.increaseWrongCount();
-                            //TODO
                         }
                         case WRONG -> questionStatistic.increaseWrongCount();
                         case null, default -> {

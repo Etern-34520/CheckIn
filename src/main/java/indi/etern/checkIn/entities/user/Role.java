@@ -8,6 +8,8 @@ import indi.etern.checkIn.service.dao.RoleService;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.io.IOException;
 import java.util.*;
@@ -15,6 +17,7 @@ import java.util.*;
 @Getter
 @Entity
 @Table(name = "ROLE")
+@NamedEntityGraph(name = "Role.users", attributeNodes = {@NamedAttributeNode("users")})
 public class Role {
     public static final Role ANONYMOUS;
     static {
@@ -24,9 +27,13 @@ public class Role {
     protected static final Map<String, Role> roleMap = new HashMap<>();
     @Id
     private String type;
+
+    @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<User> users = new HashSet<>();
+
+    @Fetch(FetchMode.SUBSELECT)
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "ROLE_PERMISSION_MAPPING",
             foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),

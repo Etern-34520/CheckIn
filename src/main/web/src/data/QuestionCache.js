@@ -36,7 +36,6 @@ function isQuestionsEqual(q1, q2) {
             }
             if (!choiceNotEqual) {
                 index = 0;
-                //TODO ignoreOrder
                 let partitionsNotEqual = false;
                 if (q1.partitionIds && q2.partitionIds) {
                     for (const q1PartitionId of q1.partitionIds) {
@@ -513,7 +512,7 @@ const QuestionCache = {
                 questionInfos.push(questionInfo);
                 if (questionInfo.question.type === "QuestionGroup") {
                     const copiedInfo = JSON.parse(JSON.stringify(questionInfo));
-                    const questions = [];//TODO test
+                    const questions = [];
                     for (const questionInfo1 of copiedInfo.questionInfos) {
                         questions.push(questionInfo1.question);
                     }

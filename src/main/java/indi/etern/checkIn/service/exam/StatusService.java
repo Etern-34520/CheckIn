@@ -1,5 +1,6 @@
 package indi.etern.checkIn.service.exam;
 
+import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
@@ -10,38 +11,42 @@ import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.SettingService;
 import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLimit;
 import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLimitService;
+import indi.etern.checkIn.service.web.WebSocketService;
+import indi.etern.checkIn.utils.TransactionTemplateUtil;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
 @Aspect
 public class StatusService {
+    public static StatusService singletonInstance;
     private final GradingLevelService gradingLevelService;
     private final QuestionService questionService;
     private final PartitionService partitionService;
     private final SettingService settingService;
     private final SpecialPartitionLimitService specialPartitionLimitService;
+    private final WebSocketService webSocketService;
     private ServerStatuses serverStatuses;
-    
-    public StatusService(GradingLevelService gradingLevelService, QuestionService questionService, PartitionService partitionService, SettingService settingService, SpecialPartitionLimitService specialPartitionLimitService) {
+
+    public StatusService(GradingLevelService gradingLevelService, QuestionService questionService, PartitionService partitionService, SettingService settingService, SpecialPartitionLimitService specialPartitionLimitService, WebSocketService webSocketService) {
         this.gradingLevelService = gradingLevelService;
         this.questionService = questionService;
         this.partitionService = partitionService;
         this.settingService = settingService;
         this.specialPartitionLimitService = specialPartitionLimitService;
+        singletonInstance = this;
+        this.webSocketService = webSocketService;
     }
-    
-    @Transactional
+
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
         flush();
     }
-    
+
     public StatusInfo checkSubmitAvailability() {
         Status submitAvailability;
         String type;
@@ -56,7 +61,7 @@ public class StatusService {
         }
         return new StatusInfo(submitAvailability, type, reason);
     }
-    
+
     public StatusInfo checkGenerateAvailability() {
         Status generateAvailability;
         String type;
@@ -64,7 +69,7 @@ public class StatusService {
         try {
             SettingItem settingItem2 = settingService.getItem("generating", "questionAmount");
             int questionAmount = Math.max(settingItem2.getValue(Integer.class), 1);
-            
+
             List<Partition> requiredPartitions = null;
             if (questionService.countEnabled() < questionAmount) {
                 generateAvailability = Status.UNAVAILABLE;
@@ -102,7 +107,7 @@ public class StatusService {
                     fullyAvailableQuestionsCount += requiredPartitionsQuestionsCount;
                 } catch (NoSuchElementException ignored) {
                 }
-                
+
                 int min = 0;
                 int max;
                 try {
@@ -117,7 +122,7 @@ public class StatusService {
                 } catch (NoSuchElementException ignored) {
                     max = partitionService.count();
                 }
-                
+
                 final List<Partition> partitions = partitionService.findAll();
                 if (requiredPartitions != null) {
                     partitions.removeAll(requiredPartitions);
@@ -165,7 +170,7 @@ public class StatusService {
                     reason = "在选择某些分区进行生成时可能失败";
                 }
             }
-            
+
         } catch (NoSuchElementException e) {
             generateAvailability = Status.UNAVAILABLE;
             type = "questionAmountSettingMissing";
@@ -173,26 +178,28 @@ public class StatusService {
         }
         return new StatusInfo(generateAvailability, type, reason);
     }
-    
+
     //    @AfterReturning("relationChanged()")
-    @Transactional(readOnly = true)
     public synchronized void flush() {
-        serverStatuses = new ServerStatuses(checkGenerateAvailability(), checkSubmitAvailability());
+        TransactionTemplateUtil.getTransactionTemplate().executeWithoutResult((transactionStatus) -> {
+            serverStatuses = new ServerStatuses(checkGenerateAvailability(), checkSubmitAvailability());
+            webSocketService.sendMessageToAll(Message.of("updateServiceStatuses", serverStatuses));
+        });
     }
-    
+
     public ServerStatuses getStatus() {
         return serverStatuses;
     }
-    
+
     public enum Status {
         FULLY_AVAILABLE,
         MAY_FAIL,
         UNAVAILABLE,
     }
-    
+
     public record StatusInfo(Status status, String type, String reason) {
     }
-    
+
     public record ServerStatuses(StatusInfo generateAvailability, StatusInfo submitAvailability) {
     }
 }

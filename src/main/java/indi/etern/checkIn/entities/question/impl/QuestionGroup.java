@@ -63,15 +63,7 @@ public class QuestionGroup extends Question implements
         this.questionLinks = new HashSet<>();
         this.id = id;
     }
-    
-/*
-    @Setter
-    @Convert(converter = MapConverter.class)
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "image_base64_strings", columnDefinition = "mediumblob")
-    Map<String, String> imageBase64Strings;
-*/
-    
+
     @SuppressWarnings("UnusedReturnValue")
     @Getter
     public static class Builder {
@@ -140,7 +132,6 @@ public class QuestionGroup extends Question implements
                 targets.clear();
                 targets.addAll(partitions);
             }
-            //TODO test
             partitions.forEach(partition -> partition.getQuestionLinks().add(link));
             if (questions.isEmpty()) {
                 questionGroup = new QuestionGroup(id, content, author, explanation);

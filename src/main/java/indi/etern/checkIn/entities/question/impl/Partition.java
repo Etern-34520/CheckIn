@@ -10,8 +10,6 @@ import indi.etern.checkIn.utils.UUIDv7;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -20,6 +18,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "partitions")
+@NamedEntityGraph(name = "Partition.questionLinks", attributeNodes = @NamedAttributeNode("questionLinks"))
 public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     @Getter
     @Id
@@ -33,8 +32,8 @@ public class Partition implements Serializable, LinkTarget, BaseEntity<String> {
     
     @Getter
     @JsonIgnore
-    @ManyToMany(mappedBy = "targets", fetch = FetchType.EAGER)
-    @Fetch(value = FetchMode.SUBSELECT)
+    @ManyToMany(mappedBy = "targets", fetch = FetchType.LAZY)
+//    @Fetch(value = FetchMode.SUBSELECT)
     Set<ToPartitionsLink> questionLinks;
     
     protected Partition() {

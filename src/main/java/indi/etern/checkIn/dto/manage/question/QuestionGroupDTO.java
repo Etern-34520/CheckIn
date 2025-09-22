@@ -1,4 +1,4 @@
-package indi.etern.checkIn.dto.manage;
+package indi.etern.checkIn.dto.manage.question;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import indi.etern.checkIn.entities.question.impl.Question;

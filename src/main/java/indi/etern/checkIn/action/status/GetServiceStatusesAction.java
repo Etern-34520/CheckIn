@@ -25,7 +25,6 @@ public class GetServiceStatusesAction extends BaseAction<NullInput, GetServiceSt
     
     @Override
     public void execute(ExecuteContext<NullInput, SuccessOutput> context) {
-        statusService.flush();
         context.resolve(new SuccessOutput(statusService.getStatus()));
     }
 }
