@@ -122,7 +122,16 @@ const getTypeName = (type) => {
                         <div v-if="questionInfo.question.type==='QuestionGroup'" style="margin-bottom: 4px">
                             <collapse @click.stop :expanded="subQuestionExpanded" :content-background="false">
                                 <template #title>
-                                    <el-text style="line-height: 32px;margin-left: 8px;">子题目</el-text>
+                                    <div style="display: flex;flex-direction: row">
+                                        <el-text style="line-height: 32px;margin-left: 8px;align-self: center">子题目</el-text>
+                                        <div class="flex-blank-1"/>
+                                        <el-text type="info" style="margin-right: 4px;align-self: center">
+                                            数量
+                                            {{
+                                                questionInfo.questionInfos ? questionInfo.questionInfos.length : 0
+                                            }}
+                                        </el-text>
+                                    </div>
                                 </template>
                                 <template #content>
                                     <transition-group name="slide-hide">

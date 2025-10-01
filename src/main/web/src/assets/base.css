@@ -51,6 +51,7 @@
     --primary-button-text-color: rgba(255, 255, 255, 0.95);
     --border-color-2: rgba(50, 50, 50, 0.4);
     --border-2: solid 1px var(--border-color-2);
+    --el-color-info: #646464;
 }
 
 .dark:root {
@@ -82,6 +83,7 @@
     --primary-button-text-color: rgba(0, 0, 0, 0.95);
     --border-color-2: rgba(200, 200, 200, 0.4);
     --border-2: solid 1px var(--border-color-2);
+    --el-color-info: #b8b8b8;
 }
 
 *:not(.el-divider) {
@@ -777,6 +779,11 @@
     transition: 100ms var(--ease-in-out-quint);
 }
 
+.el-tag__close:hover {
+    background: none !important;
+    opacity: 0.4;
+}
+
 .el-tag, .el-check-tag {
     background: var(--el-tag-bg-color) var(--lighting-effect-background-3);
     border: var(--border-1) !important;
@@ -786,6 +793,10 @@
     height: auto !important;
     min-height: 22px !important;
     padding: 2px 9px !important;
+}
+
+.el-tag__content {
+    color: var(--el-tag-text-color);
 }
 
 .el-check-tag {
@@ -874,12 +885,18 @@
     flex-direction: column-reverse;
 }
 
+.md-editor-custom-scrollbar__track .md-editor-custom-scrollbar__thumb,
 .el-scrollbar__bar.is-vertical .el-scrollbar__thumb {
     transition: background-color 150ms var(--ease-in-out-quint),
     width 150ms var(--ease-in-out-quint),
+    margin 150ms var(--ease-in-out-quint),
     opacity 150ms var(--ease-in-out-quint) !important;
     width: 3px !important;
     background: var(--el-scrollbar-bg-color) !important;
+}
+
+.md-editor-custom-scrollbar__track .md-editor-custom-scrollbar__thumb {
+    margin-left: 3px;
 }
 
 .el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
@@ -890,16 +907,19 @@
     background: var(--el-scrollbar-bg-color) !important;
 }
 
-.scrollbar__thumb,
+.md-editor-custom-scrollbar__thumb,
 .el-scrollbar__thumb {
     opacity: 0.5;
 }
 
+.md-editor-custom-scrollbar__track:hover .md-editor-custom-scrollbar__thumb,
+.md-editor-custom-scrollbar__track .md-editor-custom-scrollbar__thumb:active,
 #app .el-scrollbar__bar.is-vertical:hover > .el-scrollbar__thumb,
 #app .el-scrollbar__bar.is-vertical > .el-scrollbar__thumb:active {
     width: 6px !important;
     background: var(--el-scrollbar-bg-color) !important;
     opacity: 0.75;
+    margin-left: 0;
 }
 
 #app .el-scrollbar__bar.is-horizontal:hover > .el-scrollbar__thumb,

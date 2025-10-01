@@ -56,13 +56,17 @@ public class SettingService {
     }
     
     public void setSetting(SettingItem settingItem) {
-        StatusService.singletonInstance.flush();
+        if (StatusService.singletonInstance != null) {
+            StatusService.singletonInstance.flush();
+        }
         cache.put(settingItem.getKey(), settingItem);
         settingRepository.save(settingItem);
     }
     
     public void setAll(Iterable<SettingItem> settingItems) {
-        StatusService.singletonInstance.flush();
+        if (StatusService.singletonInstance != null) {
+            StatusService.singletonInstance.flush();
+        }
         for (SettingItem settingItem : settingItems) {
             cache.put(settingItem.getKey(), settingItem);
         }

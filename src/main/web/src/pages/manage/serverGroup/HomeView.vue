@@ -200,7 +200,7 @@ const openRecord = (exam) => {
                                                     <exam-record-item style="min-height: 0"
                                                                       :record="record"
                                                                       class="clickable"
-                                                                      @click="openRecord(record.id)"/>
+                                                                      @click="openRecord(record)"/>
                                                 </div>
                                             </div>
                                         </transition-group>

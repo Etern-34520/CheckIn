@@ -36,24 +36,24 @@ public class VerificationRuleService {
         singletonInstance = this;
         this.questionService = questionService;
     }
-    
+
     public void deleteAll() {
         verificationRuleRepository.deleteAll();
         rules = List.of();
     }
-    
+
     public void saveAll(List<VerificationRule> verificationRules) {
         rules = verificationRules;
         verificationRuleRepository.saveAll(verificationRules);
     }
-    
+
     public List<VerificationRule> getAll() {
         if (rules == null) {
             rules = verificationRuleRepository.findAll(Sort.by("index"));
         }
         return rules;
     }
-    
+
     public String digest(CommonQuestionDTO commonQuestionDTO) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(commonQuestionDTO.getLastModifiedTime());
@@ -64,7 +64,7 @@ public class VerificationRuleService {
         });
         return DigestUtils.md5DigestAsHex(stringBuilder.toString().getBytes());
     }
-    
+
     public ValidationResult verify(CommonQuestionDTO commonQuestionDTO, VerifyTargetType verifyTargetType) {
         ValidationResult result = new ValidationResult();
         getAll().stream().filter(rule ->
@@ -104,29 +104,21 @@ public class VerificationRuleService {
         }
         return result;
     }
-    
-    public enum VerifyTargetType {
-        QUESTION_GROUP("QuestionGroup"),
-        MULTIPLE_CHOICES_QUESTION("MultipleChoicesQuestion"),
-        ANY("");
-        
-        @Getter
-        private final String typeName;
-        
-        VerifyTargetType(String typeName) {
-            this.typeName = typeName;
-        }
-    }
 
     public ValidationResult updateValidation(CommonQuestionDTO commonQuestionDTO, Question question) {
         final String currentDigest = digest(commonQuestionDTO);
         final String previousDigest = question.getVerificationDigest();
         if (!currentDigest.equals(previousDigest)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Verify question[\"{}\"] due to invalid digest, previous:\"{}\", current:\"{}\"", question.getId(),previousDigest,currentDigest);
+                logger.debug("Verify question[\"{}\"] due to invalid digest, previous:\"{}\", current:\"{}\"", question.getId(), previousDigest, currentDigest);
             }
-            final ValidationResult result = verify(commonQuestionDTO, VerificationRuleService.VerifyTargetType.ANY);
-            // 检查结果
+            final ValidationResult result;
+//            synchronized (question.getId()) {
+            result = verify(commonQuestionDTO, VerificationRuleService.VerifyTargetType.ANY);
+            question.setVerificationDigest(currentDigest);
+            question.setValidationResult(result);
+            questionService.save(question);
+//            }
             if (logger.isDebugEnabled() && !result.getErrors().isEmpty()) {
                 logger.debug("Verify result errors:");
                 result.getErrors().forEach((key, msg) -> logger.debug("{}: {}", key, msg));
@@ -137,12 +129,22 @@ public class VerificationRuleService {
                 result.getWarnings().forEach((key, msg) -> logger.debug("{}: {}", key, msg));
                 logger.debug("========");
             }
-            question.setVerificationDigest(currentDigest);
-            question.setValidationResult(result);
-            questionService.save(question);
             return result;
         } else {
             return question.getValidationResult();
+        }
+    }
+
+    public enum VerifyTargetType {
+        QUESTION_GROUP("QuestionGroup"),
+        MULTIPLE_CHOICES_QUESTION("MultipleChoicesQuestion"),
+        ANY("");
+
+        @Getter
+        private final String typeName;
+
+        VerifyTargetType(String typeName) {
+            this.typeName = typeName;
         }
     }
 }

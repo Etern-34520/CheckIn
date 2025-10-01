@@ -16,7 +16,9 @@ const oauth2LoginProceedingIndex = ref(-1);
 const turnstile = ref(null);
 
 function reset() {
-    turnstile.value.reset();
+    if (turnstile.value) {
+        turnstile.value.reset();
+    }
 }
 
 const siteKey = ref(proxy.$cookies.get("siteKey", "/checkIn"));

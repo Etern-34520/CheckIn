@@ -169,10 +169,13 @@ const showIP = ref(false);
                                                         <el-text style="align-self: center;margin-right: 16px;">
                                                             {{ dateString }}
                                                         </el-text>
-                                                        <el-tag type="info" size="small">{{
+                                                        <div class="flex-blank-1"/>
+                                                        <el-text type="info" style="margin-right: 4px;align-self: center">
+                                                            {{
                                                                 data[dateString] ? Object.keys(data[dateString]).length : 0
                                                             }}
-                                                        </el-tag>
+                                                            条记录
+                                                        </el-text>
                                                     </div>
                                                 </template>
                                                 <template #content>

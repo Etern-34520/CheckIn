@@ -334,7 +334,7 @@ onBeforeUnmount(() => {
                                                                      :sub-question-expanded="true"
                                                                      disable-error-and-warning/>
                                                 <div class="panel-1"
-                                                     style="flex: 1;margin: 4px;padding: 4px;display: flex;flex-direction: column"
+                                                     style="flex: 1;margin: 4px;padding: 4px;display: flex;flex-direction: column;min-width: 50%;"
                                                      v-if="data.answers">
                                                     <el-watermark
                                                         :font="{color: 'rgba(128,128,128,0.01)', fontSize: 16}"

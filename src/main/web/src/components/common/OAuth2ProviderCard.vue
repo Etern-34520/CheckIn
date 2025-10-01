@@ -291,26 +291,28 @@ const optionNames = {
                                 :closable="editing" @close="removeScopeItem(index)" type="info">
                             {{ scopeItem || "null" }}
                         </el-tag>
-                        <el-popover trigger="click" popper-style="width: 260px" v-model:visible="addScopeItemVisible">
-                            <template #reference>
-                                <el-button link class="disable-init-animate">
-                                    <el-icon>
-                                        <HarmonyOSIcon_Plus/>
-                                    </el-icon>
-                                </el-button>
-                            </template>
-                            <template #default>
-                                <div class="no-pop-padding" style="display: flex;flex-direction: row;width: 260px">
-                                    <el-input placeholder="需参考提供商文档" class="disable-init-animate"
-                                              v-model="newScopeItemName"/>
-                                    <el-button type="primary" class="disable-init-animate"
-                                               :disabled="!newScopeItemName || model.scope.includes(newScopeItemName)"
-                                               @click="confirmAddScopeItem">
-                                        完成
+                        <transition name="blur-scale" mode="out-in">
+                            <el-popover trigger="click" v-if="editing" popper-style="width: 260px" v-model:visible="addScopeItemVisible">
+                                <template #reference>
+                                    <el-button link class="disable-init-animate">
+                                        <el-icon>
+                                            <HarmonyOSIcon_Plus/>
+                                        </el-icon>
                                     </el-button>
-                                </div>
-                            </template>
-                        </el-popover>
+                                </template>
+                                <template #default>
+                                    <div class="no-pop-padding" style="display: flex;flex-direction: row;width: 260px">
+                                        <el-input placeholder="需参考提供商文档" class="disable-init-animate"
+                                                  v-model="newScopeItemName"/>
+                                        <el-button type="primary" class="disable-init-animate"
+                                                   :disabled="!newScopeItemName || model.scope.includes(newScopeItemName)"
+                                                   @click="confirmAddScopeItem">
+                                            完成
+                                        </el-button>
+                                    </div>
+                                </template>
+                            </el-popover>
+                        </transition>
                     </div>
                 </div>
                 <div class="provider-item">

@@ -228,10 +228,11 @@ const routeToExamRecords = () => {
                         <el-button v-if="currentUser.qq !== user.qq && PermissionInfo.hasPermission('manage user','delete user') && PermissionInfo.hasPermission('role','operate role ' + user.role)">
                             <el-text type="danger" @click="deleteUser">删除</el-text>
                         </el-button>
-                        <div style="margin-left: 12px" v-if="currentUser.qq!==user.qq
+                        <div style="margin-left: 12px;display: flex;flex-direction: row;align-self: baseline;"
+                             v-if="currentUser.qq!==user.qq
                          && PermissionInfo.hasPermission('manage user','change user state')
                          && PermissionInfo.hasPermission('role','operate role ' + user.role)">
-                            <el-text style="line-height: 20px;margin-right: 4px">启用</el-text>
+                            <el-text style="line-height: 20px;margin-right: 8px;align-self: center">启用</el-text>
                             <el-switch v-model="user.enabled" :loading="switching" :before-change="switchEnableUser"/>
                         </div>
                     </div>

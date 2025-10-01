@@ -2,6 +2,7 @@
 import Collapse from "@/components/common/Collapse.vue";
 import Waterfall from "@/components/common/Waterfall.vue";
 import icon from "@/assets/icons/icon-accent-light.svg";
+import {ElMessageBox} from "element-plus";
 
 const data = [{
     type: "前端",
@@ -17,6 +18,7 @@ const data = [{
         "Axios",
         "Splitpanes",
         "JWT Decode",
+        "uuidv7",
         "...",
     ]
 }, {
@@ -42,6 +44,28 @@ const getIcon = () => {
 }
 
 const version = __APP_VERSION__.replaceAll("-", " ");
+
+const clearCaches = () => {
+    ElMessageBox.confirm(
+        "确认操作？",
+        "清除缓存并刷新",
+        {
+            showClose: false,
+            draggable: true,
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning"
+        }
+    ).then(() => {
+        caches.keys().then((names) => {
+            for (let name of names)
+                caches.delete(name);
+        }).then(() => {
+            location.reload(true);
+        })
+    }).catch(() => {
+    });
+}
 </script>
 
 <template>
@@ -58,6 +82,10 @@ const version = __APP_VERSION__.replaceAll("-", " ");
                                  href="https://github.com/Etern-34520/CheckIn" target="_blank">Github
                         </el-link>
                     </div>
+                    <div class="flex-blank-1"></div>
+                    <el-button link @click="clearCaches()" type="info">
+                        清除缓存并刷新
+                    </el-button>
                 </div>
                 <collapse expanded>
                     <template #title>

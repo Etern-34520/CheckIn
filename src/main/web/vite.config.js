@@ -11,22 +11,24 @@ import {VitePWA} from 'vite-plugin-pwa'
 
 const appVersion = process.env.npm_package_version;
 
+const target = "http://localhost:8080";
+// const target = "https://checkin.pickybunny.fun";
 export default defineConfig({
     server: {
         port: 5173, host: '0.0.0.0', // 配置项目可以局域网访问
         cors: true, // 默认启用并允许任何源
         proxy: {
             '/checkIn/api': {
-                target: 'http://localhost:8080',
+                target: target,
                 changeOrigin: true
             },
             "/checkIn/api/websocket/": {
-                target: "http://localhost:8080",
+                target: target,
                 changeOrigin: true,
                 ws: true
             },
             "/checkIn/icons": {
-                target: "http://localhost:8080",
+                target: target,
                 changeOrigin: true
             }
         },
@@ -51,6 +53,7 @@ export default defineConfig({
                 lang: 'zh-CN',
                 id: "CheckIn-" + appVersion,
                 registerType: "autoUpdate",
+                injectRegister: 'auto',
                 display: "minimal-ui",
                 "display_override": ["window-controls-overlay"],
                 icons: [

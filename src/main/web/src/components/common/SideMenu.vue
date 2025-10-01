@@ -77,7 +77,13 @@ const props = defineProps({
         type: Object,
         required: true,
     }
-})
+});
+
+const unwatch = watch(() => UI_Meta.mobile.value, (value, oldValue, onCleanup) => {
+    if (value && expandBool.value && !inlineBool.value) {
+        expandBool.value = false;
+    }
+});
 
 </script>
 

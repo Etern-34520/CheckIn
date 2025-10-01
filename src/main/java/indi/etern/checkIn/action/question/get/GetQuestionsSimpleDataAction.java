@@ -9,6 +9,7 @@ import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.dto.manage.question.BasicQuestionDTO;
 import indi.etern.checkIn.dto.manage.question.CommonQuestionDTO;
 import indi.etern.checkIn.dto.manage.question.ManageDTOUtils;
+import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.PartitionService;
@@ -23,6 +24,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Action("getQuestionSimpleData")
 public class GetQuestionsSimpleDataAction extends BaseAction<GetQuestionsSimpleDataAction.Input, OutputData> {
@@ -46,7 +48,9 @@ public class GetQuestionsSimpleDataAction extends BaseAction<GetQuestionsSimpleD
             Optional<Partition> optionalPartition = partitionService.findById(input.partitionId);
             if (optionalPartition.isPresent()) {
                 List<BasicQuestionDTO> questionList = new ArrayList<>();
-                for (var questionLink : optionalPartition.get().getQuestionLinks()) {
+                Partition partition = optionalPartition.get();
+                Set<ToPartitionsLink> questionLinks = Set.copyOf(partition.getQuestionLinks());
+                for (var questionLink : questionLinks) {
                     final Question question = questionLink.getSource();
                     final BasicQuestionDTO questionInfo = ManageDTOUtils.ofQuestionBasic(question);
                     final CommonQuestionDTO questionInfoForVerify = ManageDTOUtils.ofQuestion(question);

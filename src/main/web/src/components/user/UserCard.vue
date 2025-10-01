@@ -175,16 +175,16 @@ const showDropdown = (user) => {
         </custom-dialog>
         <el-avatar shape="circle" :size="36" style="margin-right: 8px;flex: none;"
                    :src="getAvatarUrlOf(user.qq)"/>
-        <div style="line-height: 16px;">
-            <el-text style="font-size: 16px;align-self: baseline;max-height:21px;text-wrap: wrap;word-break: break-all;">{{
+        <div style="line-height: 16px;flex: 1;width: 0">
+            <el-text style="font-size: 16px;align-self: baseline;max-height:21px;min-width: 0" truncated>{{
                     user.name
                 }}
             </el-text>
             <br/>
-            <el-text style="font-size: 12px;align-self: baseline;text-wrap: wrap;word-break: break-all;" type="info">{{ user.qq }}</el-text>
+            <el-text style="align-self: baseline;text-wrap: wrap;word-break: break-all;margin-right: 8px;"
+                     type="info" size="small">{{ user.qq }}</el-text>
+            <el-text type="info" size="small">{{ user.role }}</el-text>
         </div>
-        <div class="flex-blank-1"></div>
-        <el-tag style="font-size: 12px" type="info">{{ user.role }}</el-tag>
         <el-dropdown trigger="click" v-if="showDropdown(user)">
             <el-button link @click.stop>
                 <el-icon>
