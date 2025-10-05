@@ -80,7 +80,8 @@ const addProvider = () => {
             clientSecret: "",
             scope: [],
             userNameAttribute: "",
-            enabled: false,
+            enabledInLogin: false,
+            examLoginMode: "disabled",
             otherAttributes: []
         }
     )

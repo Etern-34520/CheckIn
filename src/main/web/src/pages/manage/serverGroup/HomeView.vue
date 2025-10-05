@@ -211,7 +211,7 @@ const openRecord = (exam) => {
                         </div>
                     </div>
                 </pane>
-                <pane min-size="40">
+                <pane min-size="40" size="70">
                     <div class="panel" style="display: flex;flex-direction: column;padding: 8px 16px 0">
                         <el-text size="large" style="align-self: baseline;margin-top: 4px">最近更新的题目</el-text>
                         <div v-loading="loadingRecentUpdatedQuestions"

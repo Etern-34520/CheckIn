@@ -48,7 +48,7 @@ public class DynamicValidator {
         final List<String> trace = new ArrayList<>(rule.getTrace());
         List<String> tokens = trace.stream().flatMap(s -> Arrays.stream(s.split("\\."))).skip(1).toList();
         processTokens(tokens, rule.isIgnoreMissingField());
-        executeChain(rule);
+        executeChain(rule, tokens);
     }
     
     private String getObjectType(Object obj) {
@@ -283,14 +283,13 @@ public class DynamicValidator {
     }
     
     // ===== 执行校验链 =====
-    private void executeChain(VerificationRule rule) {
+    private void executeChain(VerificationRule rule, List<String> tokens) {
         try {
-            // 空检查不需要最终动作
-            Consumer<Object> finalAction = data -> {
+            Consumer<Object> chain = data1 -> {
                 if (!isEmptyCheck) {
                     // 非空检查的常规校验逻辑
                     double resultValue = 0;
-                    
+
                     if (aggregateType != null) {
                         resultValue = switch (aggregateType) {
                             case "count" -> context.getCount();
@@ -307,40 +306,37 @@ public class DynamicValidator {
                             case null, default -> 0;
                         };
                     } else {
-                        if (data instanceof String) {
-                            resultValue = ((String) data).length();
-                        } else if (data instanceof Number) {
-                            resultValue = ((Number) data).doubleValue();
+                        if (data1 instanceof String) {
+                            resultValue = ((String) data1).length();
+                        } else if (data1 instanceof Number) {
+                            resultValue = ((Number) data1).doubleValue();
                         }
                     }
-                    
+
                     // 特殊处理：图片大小转换
-                    if (rule.getTrace().contains("images") && rule.getTrace().contains("size")) {
+                    if (tokens.contains("images") && (tokens.contains("$size") || tokens.contains("size"))) {
                         resultValue = resultValue / 1048576.0;
                         resultValue = Math.round(resultValue * 100.0) / 100.0;
                     }
-                    
+
                     // 获取比较值
-                    double limitValue = 0;
+                    double limitValue1 = 0;
                     if (!rule.getValues().isEmpty()) {
-                        Object val = rule.getValues().getFirst();
-                        if (val instanceof Number) {
-                            limitValue = ((Number) val).doubleValue();
-                        } else if (val instanceof String) {
+                        Object val1 = rule.getValues().getFirst();
+                        if (val1 instanceof Number) {
+                            limitValue1 = ((Number) val1).doubleValue();
+                        } else if (val1 instanceof String) {
                             try {
-                                limitValue = Double.parseDouble((String) val);
-                            } catch (NumberFormatException e) {
+                                limitValue1 = Double.parseDouble((String) val1);
+                            } catch (NumberFormatException e1) {
                                 // 使用默认值
                             }
                         }
                     }
-                    
-                    context.validateNumber(resultValue, limitValue);
+
+                    context.validateNumber(resultValue, limitValue1);
                 }
             };
-            
-            // 构建操作链
-            Consumer<Object> chain = finalAction;
             for (int i = operations.size() - 1; i >= 0; i--) {
                 Operation op = operations.get(i);
                 Consumer<Object> next = chain;

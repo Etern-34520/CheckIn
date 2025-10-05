@@ -56,6 +56,7 @@ public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Inpu
             } else {
                 if (logger.isDebugEnabled())
                     logger.debug("partition \"{}\" is not empty", partition.getName());
+                List<Question> deleteQuestions = new ArrayList<>();
                 for (ToPartitionsLink questionLink : partition.getQuestionLinks()) {
                     final Set<Partition> partitions = questionLink.getTargets();
                     partitions.remove(partition);
@@ -63,7 +64,7 @@ public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Inpu
                     if (partitions.isEmpty()) {
                         if (logger.isDebugEnabled())
                             logger.debug("deleting question (not belonged to other partitions) \"{}\"", question.getId());
-                        questionService.delete(question);
+                        deleteQuestions.add(question);
                         deletedQuestionIds.add(question.getId());
                     } else {
                         if (logger.isDebugEnabled())
@@ -73,6 +74,7 @@ public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Inpu
                         updatedQuestionIds.add(question.getId());
                     }
                 }
+                questionService.deleteAll(deleteQuestions);
                 partitionService.delete(optionalPartition.orElse(null));
                 Message<?> message = Message.of("deleteQuestions", deletedQuestionIds);
                 webSocketService.sendMessageToAll(message);

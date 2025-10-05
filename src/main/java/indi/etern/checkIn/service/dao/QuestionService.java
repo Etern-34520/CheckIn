@@ -25,7 +25,6 @@ import java.util.Set;
 
 
 @Service
-//@CacheConfig(cacheNames = "question")
 public class QuestionService {
     public static QuestionService singletonInstance;
     final PartitionService partitionService;
@@ -50,21 +49,29 @@ public class QuestionService {
         }
     }
     
-//    @CachePut(key = "#question.id")
     public Question save(Question question) {
         StatusService.singletonInstance.flush();
         evictRelatedPartitionCache(question);
         return questionRepository.save(question);
     }
     
-//    @Cacheable(key = "#id")
     public Optional<Question> findById(String id) {
         return questionRepository.findById(id);
     }
     
-//    @CacheEvict(key = "#question.id")
     public void delete(Question question) {
+        deleteInner(question);
         StatusService.singletonInstance.flush();
+    }
+
+    public void deleteAll(Collection<Question> questions) {
+        for (Question question : questions) {
+            deleteInner(question);
+        }
+        StatusService.singletonInstance.flush();
+    }
+
+    private void deleteInner(Question question) {
         if (question.getLinkWrapper() instanceof ToPartitionsLink toPartitionsLink) {
             toPartitionsLink.getTargets().forEach(partition -> {
                 partition.getQuestionLinks().remove(toPartitionsLink);
@@ -81,7 +88,7 @@ public class QuestionService {
         evictRelatedPartitionCache(question);
         questionRepository.delete(question);
     }
-    
+
     public List<Question> findAllById(List<String> questionIds) {
         return questionRepository.findAllById(questionIds);
     }
