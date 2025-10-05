@@ -263,9 +263,7 @@ function initInfoWithoutCaching(questionInfo, question) {
             questionInfo.questionInfos = [];
             for (const subQuestion of question[key]) {
                 const subQuestionInfo = initQuestionInfo(undefined, subQuestion);
-                subQuestionInfo.getGroup = () => {
-                    return questionInfo;
-                }
+                subQuestionInfo.getGroup = () => questionInfo;
                 questionInfo.questionInfos.push(subQuestionInfo);
             }
         } else {
@@ -694,7 +692,17 @@ const QuestionCache = {
     },
     restoreChanges(id) {
         const reactiveQuestionInfo = QuestionCache.reactiveQuestionInfos.value[id];
-        reactiveQuestionInfo.question = JSON.parse(JSON.stringify(QuestionCache.originalQuestionInfos[id].question));
+        const originalQuestionInfo = QuestionCache.originalQuestionInfos[id];
+        reactiveQuestionInfo.question = JSON.parse(JSON.stringify(originalQuestionInfo.question));
+        if (originalQuestionInfo.questionInfos instanceof Array) {
+            reactiveQuestionInfo.questionInfos = JSON.parse(JSON.stringify(originalQuestionInfo.questionInfos))
+            for (const subQuestionInfo of reactiveQuestionInfo.questionInfos) {
+                subQuestionInfo.verify = () => {
+                    verify(subQuestionInfo);
+                }
+                subQuestionInfo.getGroup = () => reactiveQuestionInfo;
+            }
+        }
         reactiveQuestionInfo.question.upVoters = [];
         reactiveQuestionInfo.question.downVoters = [];
         QuestionCache.update(reactiveQuestionInfo);

@@ -12,7 +12,6 @@ import {VitePWA} from 'vite-plugin-pwa'
 const appVersion = process.env.npm_package_version;
 
 const target = "http://localhost:8080";
-// const target = "https://checkin.pickybunny.fun";
 export default defineConfig({
     server: {
         port: 5173, host: '0.0.0.0', // 配置项目可以局域网访问

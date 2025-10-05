@@ -549,10 +549,15 @@
     border-width: 2px !important;
     border-radius: 1px;
     transition: 200ms var(--ease-in-bounce) !important;
+    transform: scale(0) !important;
 }
 
 .el-checkbox__inner:before {
     top: 7px !important;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner:after {
+    transform: rotate(45deg) !important;
 }
 
 .el-date-editor--daterange {
