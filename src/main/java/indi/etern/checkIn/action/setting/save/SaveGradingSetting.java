@@ -9,6 +9,7 @@ import indi.etern.checkIn.entities.setting.grading.GradingLevel;
 import indi.etern.checkIn.entities.user.Role;
 import indi.etern.checkIn.service.dao.GradingLevelService;
 import indi.etern.checkIn.service.dao.RoleService;
+import indi.etern.checkIn.service.exam.StatusService;
 import indi.etern.checkIn.utils.SaveSettingCommon;
 import jakarta.transaction.Transactional;
 
@@ -69,6 +70,7 @@ public class SaveGradingSetting extends BaseAction<SaveGradingSetting.Input, Mes
         });
         gradingLevelService.deleteAll();
         gradingLevelService.saveAll(gradingLevels);
+        StatusService.singletonInstance.flush();
         context.resolve(MessageOutput.success("Grading setting saved"));
     }
 }

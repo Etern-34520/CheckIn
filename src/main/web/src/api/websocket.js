@@ -1,7 +1,7 @@
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {ElNotification} from "element-plus";
 import {h} from "vue";
-import { uuidv7 } from "uuidv7";
+import {uuidv7} from "uuidv7";
 import Reconnect from "@/components/common/Reconnect.vue";
 import {jwtDecode} from "jwt-decode";
 // import {encode,decode} from "@ygoe/msgpack"
@@ -234,13 +234,12 @@ const WebSocketConnector = {
                 ws.onclose = function (e) {
                     if (!normallyClose && autoRetriedTimes < 3) {
                         autoRetriedTimes++;
-                        setTimeout(() => {
-                            WebSocketConnector.reconnect().then(() => {
-                                autoRetriedTimes = 0;
-                            }, () => {
-                                reject();
-                            });
-                        }, 3000);
+                        console.info(`[ ${getCurrentIsoTime()} ][ WebSocket ] retrying to connect (${autoRetriedTimes})...`);
+                        WebSocketConnector.reconnect().then(() => {
+                            autoRetriedTimes = 0;
+                        }, () => {
+                            reject();
+                        });
                     } else {
                         autoRetriedTimes = 0;
                         if (!normallyClose) {

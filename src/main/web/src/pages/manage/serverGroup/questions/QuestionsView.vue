@@ -563,7 +563,7 @@ const switchMenuVisible = (button) => {
 const rectifyCheck = (nodeObj, checkStatus) => {
     function rectify1(currentPartitionNode) {
         const childNodes = currentPartitionNode.childNodes;
-        const hasQuestion = childNodes.find((childNode) => childNode.type === "Question" || childNode.type === "QuestionGroup");
+        const hasQuestion = childNodes.find((childNode) => childNode.data.data.type === "Question" || childNode.data.data.type === "QuestionGroup");
         const hasNotCheckedQuestion = childNodes.find((childNode) => childNode.data.data.type !== "createQuestion" && (!childNode.checked));
         const hasCheckedQuestion = childNodes.find((childNode) => childNode.data.data.type !== "createQuestion" && childNode.checked);
         const allQuestionChecked = !hasNotCheckedQuestion;

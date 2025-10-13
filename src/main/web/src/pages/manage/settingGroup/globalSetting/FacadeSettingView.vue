@@ -3,7 +3,7 @@ import WebSocketConnector from "@/api/websocket.js";
 import {ElMessage} from "element-plus";
 import {Picture} from "@element-plus/icons-vue";
 import UIMeta from "@/utils/UI_Meta.js";
-import {MdEditor} from "md-editor-v3";
+import {MdEditor, MdPreview} from "md-editor-v3";
 import 'md-editor-v3/lib/style.css';
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import PermissionInfo from "@/auth/PermissionInfo.js";
@@ -224,13 +224,12 @@ const deleteIcon = () => {
                                 </div>
                             </div>
                             <div style="flex:1;width: 100%;background: var(--html-bg) var(--lighting-effect-background-2);z-index: 1;margin-top: 64px;display: flex;flex-direction: column;align-items: center;padding-bottom: 200px">
-                                <md-editor no-upload-img placeholder="描述" v-model="data.description"
+                                <md-preview no-upload-img placeholder="描述" v-model="data.description"
                                            class="preview-only"
                                            preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                                           style="height: 100dvh;"
+                                           style="height: 100dvh;width: 80%;padding: 0"
                                            :theme="UIMeta.colorScheme.value"
-                                           :show-toolbar-name="UIMeta.mobile.value"
-                                           :preview="true"/>
+                                           :show-toolbar-name="UIMeta.mobile.value"/>
                             </div>
                         </div>
                         <div v-else

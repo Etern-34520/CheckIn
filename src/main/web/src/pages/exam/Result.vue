@@ -1,7 +1,7 @@
 <script setup>
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import UIMeta from "@/utils/UI_Meta.js";
-import {MdEditor} from "md-editor-v3";
+import {MdPreview} from "md-editor-v3";
 import 'md-editor-v3/lib/style.css';
 import router from "@/router/index.js";
 
@@ -84,13 +84,12 @@ const routeToSignUpOrLogin = () => {
             </div>
         </div>
         <div style="flex:1;width: 100%;background: var(--html-bg) var(--lighting-effect-background-2);z-index: 1;margin-top: 64px;display: flex;flex-direction: column;align-items: center;padding-bottom: 200px">
-            <md-editor no-upload-img placeholder="结果" v-model="result.message"
+            <md-preview no-upload-img placeholder="结果" v-model="result.message"
                        class="preview-only"
                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
                        style="height: 100dvh;max-width:calc(90dvw - 100px);"
                        :theme="UIMeta.colorScheme.value"
-                       :show-toolbar-name="UIMeta.touch.value"
-                       :preview="true"/>
+                       :show-toolbar-name="UIMeta.touch.value"/>
         </div>
         <div class="flex-blank-1"></div>
         <div style="display: flex;flex-direction: row;justify-content: center;flex-wrap: wrap">

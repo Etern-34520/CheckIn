@@ -14,6 +14,7 @@ import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.VerificationRuleService;
 import indi.etern.checkIn.service.dao.verify.ValidationResult;
+import indi.etern.checkIn.service.exam.StatusService;
 import indi.etern.checkIn.utils.QuestionCreateUtils;
 import jakarta.annotation.Nonnull;
 
@@ -89,6 +90,7 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<CreateOrUpdateQuesti
                 questionService.saveAll(questionGroup.getQuestionLinks().stream().map(QuestionLinkImpl::getSource).toList());
                 questionService.save(questionGroup);
                 context.resolve(new SuccessOutput(questionGroup));
+                StatusService.singletonInstance.flush();
             } else {
                 context.resolve(new ErrorOutput(errors.values().stream().map(IssueDTO::getContent).toList()));
             }

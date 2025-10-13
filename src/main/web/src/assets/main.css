@@ -312,6 +312,7 @@ div.panel {
     height: auto !important;
     backdrop-filter: none !important;
     border: none !important;
+    padding: 0 32px;
 }
 
 .preview-only .md-editor-toolbar-wrapper,

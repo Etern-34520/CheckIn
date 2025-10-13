@@ -608,7 +608,7 @@ const QuestionCache = {
         if (questionInfos === undefined) {
             questionInfos = [];
             for (let i = 0; i < 2; i++) {
-                questionInfos.push(QuestionCache.create({
+                const subQuestion = QuestionCache.create({
                     id: uuidv7(),
                     content: "",
                     type: "MultipleChoicesQuestion",
@@ -622,7 +622,9 @@ const QuestionCache = {
                     }, {
                         id: uuidv7(), correct: false, content: ""
                     }]
-                }, false));
+                }, false);
+                delete subQuestion.dirty;
+                questionInfos.push(subQuestion);
             }
         }
         let info = reactive({

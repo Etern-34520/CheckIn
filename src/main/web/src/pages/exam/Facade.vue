@@ -1,8 +1,9 @@
 <script setup>
-import {MdEditor} from "md-editor-v3";
+import {MdPreview} from "md-editor-v3";
 import 'md-editor-v3/lib/style.css';
 import UIMeta from "@/utils/UI_Meta.js";
 import router from "@/router/index.js";
+import {Close} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 
@@ -44,17 +45,17 @@ const routeGenerateExam = () => {
             <div class="flex-blank-1"></div>
             <div class="panel-1 exam-info">
                 <el-text size="large" style="align-self: start;">答题信息</el-text>
-                <div style="display: flex;flex-direction: row;align-items: center;margin-top: 8px;">
+                <div style="display: flex;flex-direction: row;align-items: center;margin-top: 16px;">
                     <div style="display: flex;flex-direction: column;margin-right: 8px">
-                        <div style="display: flex;flex-direction: row;align-items: center">
-                            <el-tag style="align-self: start;margin-right: 12px;" type="info">题量
-                            </el-tag>
+                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px">
+                            <el-text style="align-self: start;margin-right: 12px;" type="info">题量
+                            </el-text>
                             <el-text>{{ extraData.questionAmount }}</el-text>
                         </div>
-                        <div style="display: flex;flex-direction: row;align-items: center">
-                            <el-tag style="align-self: start;margin-right: 12px;" type="info">
+                        <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px;">
+                            <el-text style="align-self: start;margin-right: 12px;" type="info">
                                 分区数
-                            </el-tag>
+                            </el-text>
                             <el-text v-if="extraData.partitionRange" style="margin-right: 4px">
                                 {{ extraData.partitionRange[0] }}
                             </el-text>
@@ -66,10 +67,8 @@ const routeGenerateExam = () => {
                         </div>
                     </div>
                 </div>
-                <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;">
-                    <el-tag style="align-self: start" type="info">分数段</el-tag>
-                </div>
-                <div style="display: flex">
+                <div style="display: flex;align-items: center">
+                    <el-text style="align-self: center;margin-right: 16px" type="info">分数段</el-text>
                     <el-text style="margin-right: 8px;">{{ gradingData.splits[0] }}</el-text>
                     <div style="display: flex;flex-direction: column;flex: 1;margin-right: 8px;">
                         <div class="score-bar"
@@ -99,14 +98,13 @@ const routeGenerateExam = () => {
             </div>
         </div>
         <div class="facade-content">
-            <md-editor no-upload-img placeholder="描述" v-model="facadeData.description"
-                       class="preview-only"
+            <md-preview no-upload-img placeholder="描述" v-model="facadeData.description"
+                       class="preview-only auto-padding-center"
                        preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                       style="height: 100dvh;max-width:calc(90dvw - 100px);"
+                       style="height: 100dvh;"
                        :theme="UIMeta.colorScheme.value"
-                       :show-toolbar-name="UIMeta.touch.value"
-                       :preview="true"/>
-            <div>
+                       :show-toolbar-name="UIMeta.touch.value"/>
+            <div style="flex: 1;display: flex;flex-direction: column;align-items: center;justify-content: end">
                 <el-button type="primary" size="large" style="margin-top: 36px;align-self: center;min-width: 180px"
                            :disabled="!extraData.serviceAvailable" @click="routeGenerateExam">
                     {{extraData.serviceAvailable?"生成题目":"服务暂不可用"}}
@@ -124,6 +122,7 @@ const routeGenerateExam = () => {
     align-items: center;
     width: 100%;
     margin-top: 10dvh;
+    min-height: 100dvh;
 }
 
 .icon-image {
@@ -135,6 +134,7 @@ const routeGenerateExam = () => {
     margin-right: 40px;
     display: flex;
     flex-direction: column;
+
     align-items: center;
     justify-content: center;
 }

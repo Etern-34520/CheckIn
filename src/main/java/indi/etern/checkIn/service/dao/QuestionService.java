@@ -8,7 +8,6 @@ import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.repositories.QuestionRepository;
 import indi.etern.checkIn.repositories.QuestionStatisticRepository;
-import indi.etern.checkIn.service.exam.StatusService;
 import jakarta.annotation.Resource;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -32,7 +31,7 @@ public class QuestionService {
     private QuestionRepository questionRepository;
     private final Cache partitionCache;
     private final QuestionStatisticRepository questionStatisticRepository;
-    
+
     protected QuestionService(PartitionService partitionService, CacheManager cacheManager, QuestionStatisticRepository questionStatisticRepository) {
         singletonInstance = this;
         this.partitionService = partitionService;
@@ -50,7 +49,6 @@ public class QuestionService {
     }
     
     public Question save(Question question) {
-        StatusService.singletonInstance.flush();
         evictRelatedPartitionCache(question);
         return questionRepository.save(question);
     }
@@ -61,14 +59,12 @@ public class QuestionService {
     
     public void delete(Question question) {
         deleteInner(question);
-        StatusService.singletonInstance.flush();
     }
 
     public void deleteAll(Collection<Question> questions) {
         for (Question question : questions) {
             deleteInner(question);
         }
-        StatusService.singletonInstance.flush();
     }
 
     private void deleteInner(Question question) {
@@ -95,7 +91,6 @@ public class QuestionService {
     
 //    @CacheEvict(allEntries = true)
     public void saveAll(Collection<Question> questions) {
-        StatusService.singletonInstance.flush();
         for (Question question : questions) {
             evictRelatedPartitionCache(question);
         }
@@ -125,10 +120,6 @@ public class QuestionService {
     public List<Question> findLatestModifiedQuestions() {
         return questionRepository.findAllByLastModifiedTimeBeforeAndLinkWrapper_LinkType(
                 LocalDateTime.now(), QuestionLinkImpl.LinkType.PARTITION_LINK, Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
-    }
-    
-    public int countEnabled() {
-        return Math.toIntExact(questionRepository.countByEnabledIsTrue());
     }
 }
 

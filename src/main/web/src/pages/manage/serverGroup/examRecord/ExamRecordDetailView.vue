@@ -3,7 +3,7 @@ import {useRoute} from "vue-router";
 import WebSocketConnector from "@/api/websocket.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import Collapse from "@/components/common/Collapse.vue";
-import {MdEditor} from "md-editor-v3";
+import {MdPreview} from "md-editor-v3";
 import UI_Meta from "@/utils/UI_Meta.js";
 import PartitionCache from "@/data/PartitionCache.js";
 import router from "@/router/index.js";
@@ -270,14 +270,13 @@ onBeforeUnmount(() => {
                                             </div>
                                         </template>
                                         <template #content>
-                                            <md-editor no-upload-img placeholder="结果" v-model="data.result.message"
+                                            <md-preview no-upload-img placeholder="结果" v-model="data.result.message"
                                                        class="preview-only"
                                                        preview-theme="vuepress"
                                                        :toolbars-exclude="['save','catalog','github']"
                                                        style="height: 100dvh;max-width:calc(90dvw - 100px);"
                                                        :theme="UI_Meta.colorScheme.value"
-                                                       :show-toolbar-name="UIMeta.touch.value"
-                                                       :preview="true"/>
+                                                       :show-toolbar-name="UIMeta.touch.value"/>
                                         </template>
                                     </collapse>
                                     <div v-if="partitionNames && Object.keys(partitionNames).length > 0"

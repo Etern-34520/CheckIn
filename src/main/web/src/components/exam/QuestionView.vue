@@ -1,5 +1,5 @@
 <script setup>
-import {MdEditor} from "md-editor-v3";
+import {MdPreview} from "md-editor-v3";
 import MultipleChoicesViewModule from "@/components/exam/MultipleChoicesViewModule.vue";
 import QuestionGroupSubQuestionViewModule from "@/components/exam/QuestionGroupSubQuestionViewModule.vue";
 import ImagesViewer from "@/components/viewer/ImagesViewer.vue";
@@ -58,7 +58,7 @@ const model = defineModel({
 <template>
     <div :class="{mobile:mobile,desktop:!mobile}" class="question-view-base"
          ref="preview">
-        <images-viewer :images="images" v-model="imageViewerVisible" v-model:index="viewerIndex"
+        <images-viewer :images="Object.values(question.images)" v-model="imageViewerVisible" v-model:index="viewerIndex"
                        v-if="question && question.images"/>
         <el-scrollbar ref="imagesScrollbar" class="images-scrollbar"
                       v-if="question && question.images" @mousewheel="transformScroll"
@@ -76,7 +76,7 @@ const model = defineModel({
             </div>
         </el-scrollbar>
         <div class="content" style="flex:1;display: flex;flex-direction: column">
-            <md-editor preview-theme="vuepress" :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value" :model-value="question.content"
+            <md-preview preview-theme="vuepress" :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value" :model-value="question.content"
                        class="preview-only" style="flex:1;overflow: visible;"/>
             <multiple-choices-view-module style="padding: 32px"
                                              v-if="question.type==='MultipleChoicesQuestion'"

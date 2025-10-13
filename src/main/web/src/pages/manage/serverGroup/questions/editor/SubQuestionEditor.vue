@@ -240,11 +240,12 @@ const newImageLoaded = () => {
                          :class="questionInfo.inputMeta['content-0']"
                          style="flex: 4;max-height: 80px;padding:8px 16px;margin: 0">
                         <el-scrollbar>
-                            <el-text type="info">字数 {{ questionInfo.question.content.length }}</el-text>
-                            <br/>
-                            <el-text>
-                                {{ questionInfo.question.content }}
-                            </el-text>
+                            <div style="display: flex;flex-direction: column">
+                                <el-text type="info" style="align-self: start">字数 {{ questionInfo.question.content.length }}</el-text>
+                                <el-text style="align-self: start;word-break: break-all;word-wrap: break-word;white-space: break-spaces" >
+                                    {{ questionInfo.question.content }}
+                                </el-text>
+                            </div>
                         </el-scrollbar>
                     </div>
                     <div style="flex-grow:1;width: 60px;margin-left: 2px;display: flex;flex-direction: column;justify-content: stretch">
@@ -270,7 +271,7 @@ const newImageLoaded = () => {
                             </el-option>
                         </el-select>
                         <div class="panel-1 disable-init-animate"
-                             style="padding: 2px;display: flex;flex-direction: row;align-items: center;flex:1">
+                             style="padding: 8px;display: flex;flex-direction: row;align-items: center;flex: 1">
                             <el-button-group>
                                 <el-button link @click="switchLike" class="disable-init-animate"
                                            :disabled="questionInfo.localNew||questionInfo.remoteDeleted">

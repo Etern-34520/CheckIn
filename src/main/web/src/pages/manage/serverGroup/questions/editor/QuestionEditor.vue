@@ -472,7 +472,7 @@ onMounted(() => {
                                                             </div>
                                                             <link-panel
                                                                 @click="routeToRelatedExamRecords"
-                                                                :description="'共 ' + (questionInfo.question.statistic?questionInfo.question.statistic.examDataCount:0) + ' 个'"
+                                                                :description="'共 ' + (questionInfo.question.statistic?questionInfo.question.statistic.drewCount:0) + ' 个'"
                                                                 name="使用了该题的测试" :icon="Check"></link-panel>
                                                         </div>
                                                     </div>

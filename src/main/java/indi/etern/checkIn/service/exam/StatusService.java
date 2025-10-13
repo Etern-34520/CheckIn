@@ -4,6 +4,7 @@ import indi.etern.checkIn.api.webSocket.Message;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
+import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.setting.SettingItem;
 import indi.etern.checkIn.service.dao.GradingLevelService;
 import indi.etern.checkIn.service.dao.PartitionService;
@@ -71,11 +72,11 @@ public class StatusService {
             int questionAmount = Math.max(settingItem2.getValue(Integer.class), 1);
 
             List<Partition> requiredPartitions = null;
-            if (questionService.countEnabled() < questionAmount) {
+            /*if (questionService.countEnabled() < questionAmount) {
                 generateAvailability = Status.UNAVAILABLE;
                 type = "questionsNotEnough";
                 reason = "可用题目不足";
-            } else {
+            } else {*/
                 int fullyAvailableQuestionsCount = 0;
                 int leastRequiredPartitionsQuestionsCount = 0;
                 try {
@@ -96,7 +97,7 @@ public class StatusService {
                             if (source.isEnabled() &&
                                     uniqueValues.add(source)) {
                                 if (limit == null || limit.checkMax(partitionQuestionsCount + 1)) {
-                                    partitionQuestionsCount++;
+                                    partitionQuestionsCount += source instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size() : 1;
                                 } else {
                                     break;
                                 }
@@ -169,7 +170,7 @@ public class StatusService {
                     type = "specificOptionsMayFail";
                     reason = "在选择某些分区进行生成时可能失败";
                 }
-            }
+//            }
 
         } catch (NoSuchElementException e) {
             generateAvailability = Status.UNAVAILABLE;

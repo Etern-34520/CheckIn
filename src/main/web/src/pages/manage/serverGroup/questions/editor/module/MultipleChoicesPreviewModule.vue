@@ -13,7 +13,7 @@ const props = defineProps({
     <waterfall :data="questionInfo.question.choices" :min-row-width="400" :even="true">
         <template #item="{item,index}">
             <div style="padding: 4px;">
-                <el-button style="width: 100%;height: 100%">
+                <el-button style="width: 100%;height: 100%;min-height: 32px">
                     <el-text class="choice-text" :type="item.correct?'success':'danger'">{{item.content}}</el-text>
                 </el-button>
             </div>

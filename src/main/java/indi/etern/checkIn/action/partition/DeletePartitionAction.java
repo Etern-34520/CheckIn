@@ -12,6 +12,7 @@ import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.QuestionService;
+import indi.etern.checkIn.service.exam.StatusService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.utils.PartitionUpdateUtils;
 import indi.etern.checkIn.utils.QuestionUpdateUtils;
@@ -83,6 +84,7 @@ public class DeletePartitionAction extends BaseAction<DeletePartitionAction.Inpu
             }
             PartitionUpdateUtils.sendDeletePartitionToAll(optionalPartition.orElse(null));
             context.resolve(new SuccessOutput(deletedQuestionIds, updatedQuestionIds));
+            StatusService.singletonInstance.flush();
         } else {
             context.resolve(MessageOutput.error("Partition not exist"));
         }

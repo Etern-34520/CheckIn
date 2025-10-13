@@ -10,6 +10,7 @@ import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.QuestionService;
+import indi.etern.checkIn.service.exam.StatusService;
 import jakarta.annotation.Nonnull;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,7 @@ public class DeleteQuestionAction extends BaseAction<DeleteQuestionAction.Input,
             }
             questionService.delete(question);
             context.resolve(new Output(question));
+            StatusService.singletonInstance.flush();
         } else {
             context.resolve(MessageOutput.warning("Question not found"));
         }

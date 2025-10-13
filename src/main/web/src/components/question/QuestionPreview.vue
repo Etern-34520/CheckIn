@@ -3,13 +3,12 @@ import MultipleChoicesPreviewModule
     from "@/pages/manage/serverGroup/questions/editor/module/MultipleChoicesPreviewModule.vue";
 import QuestionGroupSubQuestionPreviewModule
     from "@/pages/manage/serverGroup/questions/editor/module/QuestionGroupSubQuestionPreviewModule.vue";
-import {MdEditor} from "md-editor-v3";
+import {MdPreview} from "md-editor-v3";
 import UIMeta from "@/utils/UI_Meta.js";
 import ImagesViewer from "@/components/viewer/ImagesViewer.vue";
 import router from "@/router/index.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import {Picture} from "@element-plus/icons-vue";
-// import 'md-editor-v3/lib/preview.css';
 
 const props = defineProps({
     questionInfo: {
@@ -95,10 +94,9 @@ const onPreview = (file) => {
                     </el-button>
                 </template>
             </div>
-            <md-editor preview-theme="vuepress" :theme="UIMeta.colorScheme.value"
+            <md-preview preview-theme="vuepress" :theme="UIMeta.colorScheme.value"
                        :show-toolbar-name="UIMeta.touch.value" :model-value="questionInfo.question.content"
-                       class="preview-only"/>
-            <!--            <v-md-preview :text="questionInfo.question.content"/>-->
+                       class="preview-only" style="padding: 16px 32px"/>
             <multiple-choices-preview-module style="padding: 32px"
                                              v-if="questionInfo.question.type==='MultipleChoicesQuestion'"
                                              :question-info="questionInfo"/>

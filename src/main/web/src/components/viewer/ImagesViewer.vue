@@ -52,7 +52,8 @@ onBeforeUnmount(() => {
                 <div style="flex: 1;display: flex;align-items: center;justify-content: center">
                     <div class="slide-switch-base" :class="slideWay?'left-to-right':''">
                         <transition :name="slideWay?'slide-left-to-right':'slide-right-to-left'">
-                            <el-image :src="images[nextIndex].url" :key="nextIndex" @click.stop
+                            <el-image :src="images[nextIndex].url ? images[nextIndex].url : images[nextIndex]"
+                                      :key="nextIndex" @click.stop
                                       style="height: calc(100dvh - 60px);" fit="contain"/>
                         </transition>
                     </div>

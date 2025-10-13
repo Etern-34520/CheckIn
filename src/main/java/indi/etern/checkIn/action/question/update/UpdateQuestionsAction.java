@@ -16,6 +16,7 @@ import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.question.impl.QuestionGroup;
 import indi.etern.checkIn.service.dao.PartitionService;
 import indi.etern.checkIn.service.dao.QuestionService;
+import indi.etern.checkIn.service.exam.StatusService;
 import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
 import indi.etern.checkIn.utils.QuestionUpdateUtils;
@@ -156,8 +157,10 @@ public class UpdateQuestionsAction extends BaseAction<UpdateQuestionsAction.Inpu
             result = OutputData.Result.ERROR;
         } else if (!failedQuestionIdReasons.isEmpty()) {
             result = OutputData.Result.WARNING;
+            StatusService.singletonInstance.flush();
         } else {
             result = OutputData.Result.SUCCESS;
+            StatusService.singletonInstance.flush();
         }
         context.resolve(new Output(result, succeedUpdatedQuestionIds, succeedDeletedQuestionIds, failedQuestionIdReasons));
     }

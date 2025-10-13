@@ -143,8 +143,8 @@ const getTagType = (checkedResultType) => {
                                                                     }}
                                                                 </el-tag>
                                                                 <div class="panel-1"
-                                                                     style="padding: 4px;display: flex;flex-direction: row;flex: 1">
-                                                                    <el-tag style="margin: 2px;"
+                                                                     style="padding: 4px;display: flex;flex-direction: row;flex-wrap: wrap;flex: 1">
+                                                                    <el-tag style="margin: 2px;min-width:60px;"
                                                                             v-for="(subAnswerDatum,index) of answerDatum"
                                                                             :type="subAnswerDatum.selected?'primary':'info'">
                                                                         {{ subAnswerDatum.content }}
