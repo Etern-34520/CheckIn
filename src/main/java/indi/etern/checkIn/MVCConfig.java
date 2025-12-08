@@ -1,5 +1,6 @@
 package indi.etern.checkIn;
 
+import org.springframework.boot.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
@@ -8,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -27,5 +29,11 @@ public class MVCConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/view/front-face/assets/")
                 .addResourceLocations("classpath:/static/view/front-face/")
                 .setCacheControl(CacheControl.maxAge(60, TimeUnit.DAYS).cachePublic());
+    }
+
+    @Bean
+    public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutor() {
+        return protocolHandler ->
+                protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
     }
 }

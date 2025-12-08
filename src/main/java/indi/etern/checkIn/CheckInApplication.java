@@ -16,10 +16,8 @@ import java.util.concurrent.TimeUnit;
 @SpringBootApplication
 @EnableCaching
 public class CheckInApplication {
-//	public static ConfigurableApplicationContext applicationContext;
-	
+
 	public static void main(String[] args) {
-        /*CheckInApplication.applicationContext = */
 		SpringApplication.run(CheckInApplication.class, args);
 	}
 	

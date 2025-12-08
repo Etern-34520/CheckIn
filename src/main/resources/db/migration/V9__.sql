@@ -1,0 +1,1 @@
+ALTER TABLE oauth2_providers_info_attributes RENAME COLUMN oauth2provider_info_id TO oauth2_provider_info_id;

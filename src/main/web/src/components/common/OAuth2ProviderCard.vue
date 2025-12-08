@@ -159,7 +159,7 @@ const optionNames = {
                         <transition name="blur-scale" mode="out-in">
                             <el-input class="disable-init-animate" v-if="editing" :class="{error: !model.name}"
                                       placeholder="注册名"
-                                      style="height: 32px;flex: 1;max-width: 120px;min-width: 0" v-model="model.name"/>
+                                      style="height: 32px;flex: 1;max-width: 120px;width: 120px;min-width: 0" v-model="model.name"/>
                             <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.name || "null" }}
                             </el-text>
@@ -172,7 +172,7 @@ const optionNames = {
                         <transition name="blur-scale" mode="out-in">
                             <el-input class="disable-init-animate" :class="{error: !model.iconDomain}" v-if="editing"
                                       placeholder="用于获取图标"
-                                      style="height: 32px;flex: 1;max-width: 200px;min-width: 0"
+                                      style="height: 32px;flex: 1;max-width: 200px;width: 200px;min-width: 0"
                                       v-model="model.iconDomain"/>
                             <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.iconDomain || "null" }}
@@ -188,7 +188,7 @@ const optionNames = {
                                  v-if="editing">
                                 <el-input class="disable-init-animate"
                                           placeholder="用于自动补全"
-                                          style="height: 32px;flex: 1;max-width: 200px;min-width: 0"
+                                          style="height: 32px;flex: 1;max-width: 200px;width: 200px;min-width: 0"
                                           v-model="model.issuerUri"/>
                                 <el-button
                                     v-if="editing"
@@ -216,7 +216,7 @@ const optionNames = {
                             <el-input class="disable-init-animate" v-if="editing"
                                       :class="{error: !model.authorizationUri}"
                                       placeholder="需参考提供商文档"
-                                      style="height: 32px;flex: 1;max-width: 300px;min-width: 0"
+                                      style="height: 32px;flex: 1;max-width: 300px;width: 300px;min-width: 0"
                                       v-model="model.authorizationUri"/>
                             <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.authorizationUri || "null" }}
@@ -230,7 +230,7 @@ const optionNames = {
                         <transition name="blur-scale" mode="out-in">
                             <el-input class="disable-init-animate" v-if="editing" :class="{error: !model.jwksUri}"
                                       placeholder="需参考提供商文档"
-                                      style="height: 32px;flex: 1;max-width: 300px;min-width: 0"
+                                      style="height: 32px;flex: 1;max-width: 300px;width: 300px;min-width: 0"
                                       v-model="model.jwksUri"/>
                             <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.jwksUri || "null" }}
@@ -244,7 +244,7 @@ const optionNames = {
                         <transition name="blur-scale" mode="out-in">
                             <el-input class="disable-init-animate" v-if="editing" placeholder="需参考提供商文档"
                                       :class="{error: !model.userInfoUri}"
-                                      style="height: 32px;flex: 1;max-width: 300px;min-width: 0"
+                                      style="height: 32px;flex: 1;max-width: 300px;width: 300px;min-width: 0"
                                       v-model="model.userInfoUri"/>
                             <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.userInfoUri || "null" }}
@@ -260,7 +260,7 @@ const optionNames = {
                         <transition name="blur-scale" mode="out-in">
                             <el-input class="disable-init-animate" v-if="editing" placeholder="需从提供商获取"
                                       :class="{error: !model.clientId}"
-                                      style="height: 32px;flex: 1;max-width: 400px;min-width: 0"
+                                      style="height: 32px;flex: 1;max-width: 400px;width: 400px;min-width: 0"
                                       v-model="model.clientId"/>
                             <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.clientId || "null" }}
@@ -274,7 +274,7 @@ const optionNames = {
                         <transition name="blur-scale" mode="out-in">
                             <el-input class="disable-init-animate" v-if="editing" placeholder="需从提供商获取"
                                       :class="{error: !model.clientSecret}"
-                                      style="height: 32px;flex: 1;max-width: 400px;min-width: 0"
+                                      style="height: 32px;flex: 1;max-width: 400px;width: 400px;min-width: 0"
                                       v-model="model.clientSecret"/>
                             <el-text v-else style="text-wrap: wrap;word-break: break-all">
                                 {{ model.clientSecret || "null" }}
@@ -322,7 +322,7 @@ const optionNames = {
                     <transition name="blur-scale" mode="out-in">
                         <el-input class="disable-init-animate" v-if="editing" placeholder="需参考提供商文档"
                                   :class="{error: !model.userIdAttributeName}"
-                                  style="height: 32px;flex: 1;max-width: 140px" v-model="model.userIdAttributeName"/>
+                                  style="height: 32px;flex: 1;max-width: 140px;width: 140px;min-width: 0" v-model="model.userIdAttributeName"/>
                         <el-text v-else style="text-wrap: wrap;word-break: break-all">
                             {{ model.userIdAttributeName || "null" }}
                         </el-text>

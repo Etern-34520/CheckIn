@@ -41,7 +41,7 @@ public class VerificationRule {
     }
     
     public boolean isApplicable(CommonQuestionDTO commonQuestionDTO) {
-        return objectName.equals("question") && commonQuestionDTO instanceof MultipleChoicesQuestionDTO ||
-                objectName.equals("questionGroup") && commonQuestionDTO instanceof QuestionGroupDTO;
+        return (objectName.equals("MultipleChoicesQuestion")) && commonQuestionDTO instanceof MultipleChoicesQuestionDTO ||
+                objectName.equals("QuestionGroup") && commonQuestionDTO instanceof QuestionGroupDTO;
     }
 }
