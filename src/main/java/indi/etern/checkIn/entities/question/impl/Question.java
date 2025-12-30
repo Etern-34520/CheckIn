@@ -12,6 +12,7 @@ import indi.etern.checkIn.utils.UUIDv7;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -81,12 +82,14 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     @JsonIgnore
     Set<User> downVoters = new HashSet<>();
 
-    @Getter
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id", referencedColumnName = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnore
     QuestionLinkImpl<?> linkWrapper;
 
+    public QuestionLinkImpl<?> getLinkWrapper() {
+        return (QuestionLinkImpl<?>) Hibernate.unproxy(linkWrapper);
+    }
 
     /**
      * Notice: data saved as base64

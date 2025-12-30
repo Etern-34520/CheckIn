@@ -10,15 +10,12 @@ import lombok.Setter;
 
 @Getter
 @Entity
+//@DiscriminatorValue("ToQuestionGroupLink")
 public class ToQuestionGroupLink extends QuestionLinkImpl<QuestionGroup> implements ToOneLink<Question, QuestionGroup> {
 
     public void setTarget(QuestionGroup target) {
         this.target = target;
         target.addQuestionLink(this);
-    }
-    
-    {
-        linkType = LinkType.QUESTION_GROUP_LINK;
     }
 
     @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.EAGER)

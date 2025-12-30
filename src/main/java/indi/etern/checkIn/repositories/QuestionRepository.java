@@ -1,6 +1,5 @@
 package indi.etern.checkIn.repositories;
 
-import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.entities.user.User;
 import org.springframework.data.domain.Limit;
@@ -21,5 +20,5 @@ public interface QuestionRepository extends JpaRepository<Question, String> {
     List<Question> findAllByAuthor(User user, Pageable pageable);
 
     @EntityGraph(value = "Question.LinkWrapper", type = EntityGraph.EntityGraphType.FETCH)
-    List<Question> findAllByLastModifiedTimeBeforeAndLinkWrapper_LinkType(LocalDateTime localDateTime, QuestionLinkImpl.LinkType linkType, Sort sort, Limit limit);
+    List<Question> findAllByLastModifiedTimeBeforeAndLinkWrapper_Class(LocalDateTime localDateTime, Class<?> linkClass, Sort sort, Limit limit);
 }

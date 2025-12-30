@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-//@Table("partitions_questions_mapping")
+//@DiscriminatorValue("ToPartitionsLink")
 @Getter
 public class ToPartitionsLink extends QuestionLinkImpl<Partition> implements ToManyLink<Question, Partition> {
     
@@ -24,11 +24,7 @@ public class ToPartitionsLink extends QuestionLinkImpl<Partition> implements ToM
             joinColumns = @JoinColumn(name = "question_id", referencedColumnName = "id", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)),
             inverseJoinColumns = @JoinColumn(name = "partition_id", referencedColumnName = "id", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
     Set<Partition> targets = new HashSet<>();
-    
-    {
-        linkType = LinkType.PARTITION_LINK;
-    }
-    
+
     @FunctionalInterface
     public interface Configurator {
         void configure(ToPartitionsLink linkWrapper);

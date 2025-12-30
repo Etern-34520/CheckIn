@@ -1,0 +1,1 @@
+ALTER TABLE question_link DROP COLUMN link_type;

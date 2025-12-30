@@ -1,6 +1,5 @@
 package indi.etern.checkIn.service.dao;
 
-import indi.etern.checkIn.entities.linkUtils.impl.QuestionLinkImpl;
 import indi.etern.checkIn.entities.linkUtils.impl.ToPartitionsLink;
 import indi.etern.checkIn.entities.question.impl.Partition;
 import indi.etern.checkIn.entities.question.impl.Question;
@@ -118,8 +117,8 @@ public class QuestionService {
     }
     
     public List<Question> findLatestModifiedQuestions() {
-        return questionRepository.findAllByLastModifiedTimeBeforeAndLinkWrapper_LinkType(
-                LocalDateTime.now(), QuestionLinkImpl.LinkType.PARTITION_LINK, Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
+        return questionRepository.findAllByLastModifiedTimeBeforeAndLinkWrapper_Class(
+                LocalDateTime.now(), ToPartitionsLink.class, Sort.by(Sort.Direction.DESC,"lastModifiedTime"), Limit.of(20));
     }
 }
 

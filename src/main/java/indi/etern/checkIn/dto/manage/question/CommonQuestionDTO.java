@@ -62,11 +62,6 @@ public abstract class CommonQuestionDTO extends BasicQuestionDTO {
         } else {
             statistic = null;
         }
-/*
-        QuestionStatisticService.singletonInstance.findById(question.getId()).ifPresent(questionStatistic -> {
-            statistic = new StatisticDTO(questionStatistic);
-        });
-*/
     }
     
     // for Jackson

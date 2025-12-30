@@ -12,8 +12,6 @@ import indi.etern.checkIn.entities.question.impl.Question;
 import indi.etern.checkIn.service.dao.QuestionService;
 import indi.etern.checkIn.service.dao.VerificationRuleService;
 import jakarta.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -21,8 +19,6 @@ import java.util.Optional;
 @Action("getQuestionInfo")
 public class GetQuestionInfoAction extends BaseAction<GetQuestionInfoAction.Input,OutputData> {
     private final VerificationRuleService verificationRuleService;
-    private final Logger logger = LoggerFactory.getLogger(GetQuestionInfoAction.class);
-    
     public record Input(@Nonnull String questionId) implements InputData {}
     public record SuccessOutput(CommonQuestionDTO question) implements OutputData {
         @Override

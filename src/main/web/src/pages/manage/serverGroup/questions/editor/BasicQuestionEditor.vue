@@ -96,7 +96,7 @@ const hideCreating = () => {
 }
 
 
-let lastPartitionId = questionInfo.value.question.partitionIds[0];
+// let lastPartitionId = questionInfo.value.question?.partitionIds[0];
 
 const preventEmptyPartition = (val) => {
     if (questionInfo.value.question.partitionIds.length === 0) {
@@ -104,12 +104,13 @@ const preventEmptyPartition = (val) => {
     }
 }
 
-/**
+/*
+/!**
  * For the bug that function preventEmptyPartition will not be called
  * when the selection of the multiple el-select is deleted by using backspace
  *
  * 修复多选el-select使用退格键删除选项时不会触发preventEmptyPartition的问题
- * */
+ * *!/
 const onPartitionChange = (val) => {
     if (val.length === 0) {
         questionInfo.value.question.partitionIds.push(lastPartitionId);
@@ -117,6 +118,7 @@ const onPartitionChange = (val) => {
         lastPartitionId = val[0];
     }
 }
+*/
 
 const viewerIndex = ref(0);
 
@@ -283,7 +285,6 @@ const newImageLoaded = () => {
             filterable
             @focusout="hideCreating"
             @remove-tag="preventEmptyPartition"
-            @change="onPartitionChange"
             style="flex:4;width:0">
             <el-option v-for="(partition,id) in partitions" :key="partition.id"
                        :label="partition.name" :value="partition.id"></el-option>

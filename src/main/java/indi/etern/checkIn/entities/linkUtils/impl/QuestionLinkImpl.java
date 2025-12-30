@@ -6,17 +6,14 @@ import indi.etern.checkIn.entities.question.impl.Question;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DiscriminatorOptions;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "question_link")
-public class QuestionLinkImpl<T extends BaseEntity<?>> implements Link<Question, T>, BaseEntity<String> {
-    public enum LinkType {
-        PARTITION_LINK,QUESTION_GROUP_LINK
-    }
-    
-    protected LinkType linkType;
+@DiscriminatorOptions(force = true)
+public abstract class QuestionLinkImpl<T extends BaseEntity<?>> implements Link<Question, T>, BaseEntity<String> {
     
     @OneToOne(mappedBy = "linkWrapper")
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))

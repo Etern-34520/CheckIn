@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ public class PermissionGroup {
     public String description;
     
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "group")
-//    @JoinColumn(name = "group_name", referencedColumnName = "name", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private List<Permission> permissions;
     
     public PermissionGroup(String name) {

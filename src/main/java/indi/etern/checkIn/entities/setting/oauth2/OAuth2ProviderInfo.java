@@ -54,7 +54,6 @@ public class OAuth2ProviderInfo {
     private List<String> scope;
     private String userIdAttributeName;
     private boolean enabledInLogin;
-//    private boolean enabledInExam;
     @Enumerated
     private ExamLoginMode examLoginMode;
     private int orderIndex;
