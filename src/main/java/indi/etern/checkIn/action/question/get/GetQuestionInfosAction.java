@@ -1,9 +1,11 @@
 package indi.etern.checkIn.action.question.get;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import indi.etern.checkIn.action.ActionExecutor;
 import indi.etern.checkIn.action.BaseAction;
-import indi.etern.checkIn.action.interfaces.*;
+import indi.etern.checkIn.action.interfaces.Action;
+import indi.etern.checkIn.action.interfaces.ExecuteContext;
+import indi.etern.checkIn.action.interfaces.InputData;
+import indi.etern.checkIn.action.interfaces.OutputData;
 import indi.etern.checkIn.dto.manage.question.CommonQuestionDTO;
 import indi.etern.checkIn.dto.manage.question.MultipleChoicesQuestionDTO;
 import indi.etern.checkIn.dto.manage.question.QuestionGroupDTO;
@@ -21,12 +23,10 @@ import java.util.Map;
 
 @Action("getQuestionInfos")
 public class GetQuestionInfosAction extends BaseAction<GetQuestionInfosAction.Input, OutputData> {
-    private final ActionExecutor actionExecutor;
     private final QuestionService questionService;
 
-    public GetQuestionInfosAction(ActionExecutor actionExecutor, QuestionService questionService) {
+    public GetQuestionInfosAction(QuestionService questionService) {
         super();
-        this.actionExecutor = actionExecutor;
         this.questionService = questionService;
     }
 

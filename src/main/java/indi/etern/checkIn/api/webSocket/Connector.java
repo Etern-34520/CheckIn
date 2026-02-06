@@ -95,7 +95,6 @@ public class Connector {
     
     @OnMessage
     public void onMessage(String message) {
-//        final byte[] decoded = Base64.getDecoder().decode(message);
         try {
             JsonRawMessage contextJsonMessage = objectMapper.readValue(message, JsonRawMessage.class);
             if (!checkToken(contextJsonMessage)) {
