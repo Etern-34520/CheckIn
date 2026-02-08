@@ -116,12 +116,15 @@ watch(() => filterText.value, () => textBlocks = filterText.value.split(';'));
 const doFilter = (filterText, record) => {
     for (const textBlock of textBlocks) {
         if (textBlock === '' || record.id.toLowerCase().includes(textBlock.toLowerCase()) ||
-                record.qqNumber.toString().toLowerCase().includes(textBlock.toLowerCase()) ||
-                record.status.toLowerCase().includes(textBlock.toLowerCase()) ||
-                record.questionAmount.toString().includes(textBlock) ||
+            record.qqNumber.toString().toLowerCase().includes(textBlock.toLowerCase()) ||
+            record.status.toLowerCase().includes(textBlock.toLowerCase()) ||
+            record.questionAmount.toString().includes(textBlock) ||
+            (record.examResult && (
                 record.examResult.score.toString().includes(textBlock) ||
                 record.examResult.level.toString().includes(textBlock) ||
-                record.examResult.message.toString().includes(textBlock)) {
+                record.examResult.message.toString().includes(textBlock)
+            ))
+        ) {
             return true;
         }
     }
@@ -170,17 +173,19 @@ const showEmptyDates = ref(false);
                                          v-if="showEmptyDates || Boolean(data[dateString])">
                                         <div>
                                             <collapse
-                                                    :expanded="Boolean(data[dateString])"
-                                                    :title-background="false"
-                                                    :content-background="false"
-                                                    style="margin-top: 16px">
+                                                :expanded="Boolean(data[dateString])"
+                                                :title-background="false"
+                                                :content-background="false"
+                                                style="margin-top: 16px">
                                                 <template #title>
-                                                    <div style="display: flex;flex-direction: row;align-items: center;height: 100%;">
+                                                    <div
+                                                        style="display: flex;flex-direction: row;align-items: center;height: 100%;">
                                                         <el-text style="align-self: center;margin-right: 16px;">
                                                             {{ dateString }}
                                                         </el-text>
                                                         <div class="flex-blank-1"/>
-                                                        <el-text type="info" style="margin-right: 4px;align-self: center">
+                                                        <el-text type="info"
+                                                                 style="margin-right: 4px;align-self: center">
                                                             {{
                                                                 data[dateString] ? Object.keys(data[dateString]).length : 0
                                                             }}

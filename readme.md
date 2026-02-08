@@ -3,7 +3,6 @@
 # CheckIn
 #### 更易用的入群测试系统
 ![Static Badge](https://img.shields.io/badge/Java-21-red?style=for-the-badge)
-![Static Badge](https://img.shields.io/badge/Stable-2.2.1-blue?style=for-the-badge)
 ![Static Badge](https://img.shields.io/badge/Status-Maintaining-green?style=for-the-badge)
 ---
 

@@ -19,8 +19,10 @@ const updatePartition = (partition) => {
         callback(partition);
     }
     const oldPartition = PartitionCache.refPartitions.value[partition.id];
-    for (const [key, value] of Object.entries(partition)) {
-        oldPartition[key] = value;
+    if (oldPartition) {
+        for (const [key, value] of Object.entries(partition)) {
+            oldPartition[key] = value;
+        }
     }
 };
 

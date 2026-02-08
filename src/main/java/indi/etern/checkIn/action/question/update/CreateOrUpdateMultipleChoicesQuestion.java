@@ -64,7 +64,11 @@ public class CreateOrUpdateMultipleChoicesQuestion extends BaseAction<CreateOrUp
             } else {
                 context.requirePermission("edit others questions");
             }
-            if (multipleChoicesQuestionDTO.getEnabled() != null) {
+            Boolean dtoEnabled = multipleChoicesQuestionDTO.getEnabled();
+            if (dtoEnabled != null &&
+                    ((previousQuestion.isPresent() && previousQuestion.get().isEnabled() != dtoEnabled) ||
+                            (previousQuestion.isEmpty() && dtoEnabled))
+            ) {
                 context.requirePermission("enable and disable questions");
             }
             question.setVerificationDigest(verificationRuleService.digest(multipleChoicesQuestionDTO));

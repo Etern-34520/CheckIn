@@ -67,10 +67,13 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<CreateOrUpdateQuesti
             } else {
                 context.requirePermission("edit others question groups");
             }
-            if (questionGroupDTO.getEnabled() != null) {
+            Boolean dtoEnabled = questionGroupDTO.getEnabled();
+            if (dtoEnabled != null &&
+                    ((previousQuestion.isPresent() && previousQuestion.get().isEnabled() != dtoEnabled) ||
+                            (previousQuestion.isEmpty() && dtoEnabled))
+            ) {
                 context.requirePermission("enable and disable question groups");
             }
-            
             int count = 0;
             for (CommonQuestionDTO commonQuestionDTO : questionGroupDTO.getQuestions()) {
                 final ValidationResult result1 = verificationRuleService.verify(commonQuestionDTO, VerificationRuleService.VerifyTargetType.MULTIPLE_CHOICES_QUESTION);

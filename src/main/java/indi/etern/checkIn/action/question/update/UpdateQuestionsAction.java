@@ -47,100 +47,117 @@ public class UpdateQuestionsAction extends BaseAction<UpdateQuestionsAction.Inpu
     @Transactional
     public void execute(ExecuteContext<Input, Output> context) {
         final Input input = context.getInput();
-        final List<CommonQuestionDTO> questions = input.updatedQuestions;
-        final List<String> deletedQuestionIds = input.deletedQuestionIds;
+        final List<CommonQuestionDTO> questionsToUpdate = input.updatedQuestions;
+        final List<String> questionIdsToDelete = input.deletedQuestionIds;
         List<Question> succeedQuestions = new ArrayList<>();
         Map<String, Collection<String>> failedQuestionIdReasons = new HashMap<>();
         Set<Partition> infectedPartitions = new HashSet<>();
         List<String> succeedDeletedQuestionIds = new ArrayList<>();
-        TransactionTemplateUtil.getTransactionTemplate().executeWithoutResult((status) -> {
-            if (questions != null)
-                for (CommonQuestionDTO questionDTO : questions) {
-                    try {
-                        Question result = null;
-                        if (questionDTO instanceof MultipleChoicesQuestionDTO multipleChoicesQuestionDTO) {
-                            ResultContext<OutputData> resultContext =
-                                    actionExecutor.execute(CreateOrUpdateMultipleChoicesQuestion.class,
-                                            new CreateOrUpdateMultipleChoicesQuestion.Input(multipleChoicesQuestionDTO));
-                            final OutputData output = resultContext.getOutput();
-                            if (output instanceof CreateOrUpdateMultipleChoicesQuestion.SuccessOutput(Question question)) {
-                                result = question;
-                            } else if (output instanceof CreateOrUpdateMultipleChoicesQuestion.ErrorOutput(Collection<String> messages)){
-                                failedQuestionIdReasons.put(questionDTO.getId(), messages);
-                            } else {
-                                throw new IllegalStateException("Unexpected value: " + output);
+        try {
+            TransactionTemplateUtil.getTransactionTemplate().executeWithoutResult((status) -> {
+                if (questionsToUpdate != null)
+                    for (CommonQuestionDTO questionDTO : questionsToUpdate) {
+                        try {
+                            Question result = null;
+                            if (questionDTO instanceof MultipleChoicesQuestionDTO multipleChoicesQuestionDTO) {
+                                ResultContext<OutputData> resultContext =
+                                        actionExecutor.execute(CreateOrUpdateMultipleChoicesQuestion.class,
+                                                new CreateOrUpdateMultipleChoicesQuestion.Input(multipleChoicesQuestionDTO));
+                                final OutputData output = resultContext.getOutput();
+                                if (output instanceof CreateOrUpdateMultipleChoicesQuestion.SuccessOutput(Question question)) {
+                                    result = question;
+                                } else if (output instanceof CreateOrUpdateMultipleChoicesQuestion.ErrorOutput(Collection<String> messages)){
+                                    failedQuestionIdReasons.put(questionDTO.getId(), messages);
+                                } else {
+                                    throw new IllegalStateException("Unexpected value: " + output);
+                                }
+                            } else if (questionDTO instanceof QuestionGroupDTO questionGroupDTO) {
+                                ResultContext<OutputData> resultContext =
+                                        actionExecutor.execute(CreateOrUpdateQuestionGroup.class,
+                                                new CreateOrUpdateQuestionGroup.Input(questionGroupDTO));
+                                final OutputData output = resultContext.getOutput();
+                                if (output instanceof CreateOrUpdateQuestionGroup.SuccessOutput(QuestionGroup questionGroup)) {
+                                    result = questionGroup;
+                                } else if (output instanceof CreateOrUpdateQuestionGroup.ErrorOutput(Collection<String> messages)){
+                                    failedQuestionIdReasons.put(questionDTO.getId(), messages);
+                                } else {
+                                    throw new IllegalStateException("Unexpected value: " + output);
+                                }
                             }
-                        } else if (questionDTO instanceof QuestionGroupDTO questionGroupDTO) {
-                            ResultContext<OutputData> resultContext =
-                                    actionExecutor.execute(CreateOrUpdateQuestionGroup.class,
-                                            new CreateOrUpdateQuestionGroup.Input(questionGroupDTO));
-                            final OutputData output = resultContext.getOutput();
-                            if (output instanceof CreateOrUpdateQuestionGroup.SuccessOutput(QuestionGroup questionGroup)) {
-                                result = questionGroup;
-                            } else if (output instanceof CreateOrUpdateQuestionGroup.ErrorOutput(Collection<String> messages)){
-                                failedQuestionIdReasons.put(questionDTO.getId(), messages);
-                            } else {
-                                throw new IllegalStateException("Unexpected value: " + output);
-                            }
-                        }
-                        
-                        if (result != null) {
-                            succeedQuestions.add(result);
-                            final QuestionLinkImpl<?> linkWrapper = result.getLinkWrapper();
-                            if (linkWrapper instanceof ToPartitionsLink link) {
-                                infectedPartitions.addAll(link.getTargets());
-                            }
-                        } /*else {
+
+                            if (result != null) {
+                                succeedQuestions.add(result);
+                                final QuestionLinkImpl<?> linkWrapper = result.getLinkWrapper();
+                                if (linkWrapper instanceof ToPartitionsLink link) {
+                                    infectedPartitions.addAll(link.getTargets());
+                                }
+                            } /*else {
                             logger.error("unknown error occurred at question of id: {}", questionDTO.getId());
                             failedQuestionIdReasons.put(questionDTO.getId(), Collections.singleton("unknown error"));
                         }
 */                    } catch (PermissionDeniedException e) {
-                        failedQuestionIdReasons.put(questionDTO.getId(), Collections.singleton(e.getMessage()));
+                            failedQuestionIdReasons.put(questionDTO.getId(), Collections.singleton(e.getMessage()));
 //                        throw e;
-                    } catch (Exception e) {
-                        failedQuestionIdReasons.put(questionDTO.getId(), Collections.singleton(e.getMessage()));
-                        logger.error("When executing UpdateQuestionsAction: {} : {}", e.getClass().getSimpleName(), e.getMessage());
-                        if (logger.isDebugEnabled()) {
-                            e.printStackTrace();
-                        }
-//                        throw e;
-                    }
-                }
-            if (deletedQuestionIds != null) {
-                for (String deletedQuestionId : deletedQuestionIds) {
-                    try {
-                        ResultContext<OutputData> context1 = actionExecutor.execute(DeleteQuestionAction.class, new DeleteQuestionAction.Input(deletedQuestionId));
-                        final OutputData output = context1.getOutput();
-                        if (output instanceof DeleteQuestionAction.Output(Question deletedQuestion)) {
-                            succeedDeletedQuestionIds.add(deletedQuestion.getId());
-                            final QuestionLinkImpl<?> linkWrapper = deletedQuestion.getLinkWrapper();
-                            if (linkWrapper instanceof ToPartitionsLink link) {
-                                infectedPartitions.addAll(link.getTargets());
+                        } catch (Exception e) {
+                            failedQuestionIdReasons.put(questionDTO.getId(), Collections.singleton(e.getMessage()));
+                            logger.error("When executing UpdateQuestionsAction: {} : {}", e.getClass().getSimpleName(), e.getMessage());
+                            if (logger.isDebugEnabled()) {
+                                e.printStackTrace();
                             }
-                        } else {
-                            if (output.result().equals(OutputData.Result.SUCCESS) || output.result().equals(OutputData.Result.WARNING)) {
-                                succeedDeletedQuestionIds.add(deletedQuestionId);
+//                        throw e;
+                        }
+                    }
+                if (questionIdsToDelete != null) {
+                    for (String deletedQuestionId : questionIdsToDelete) {
+                        try {
+                            ResultContext<OutputData> context1 = actionExecutor.execute(DeleteQuestionAction.class, new DeleteQuestionAction.Input(deletedQuestionId));
+                            final OutputData output = context1.getOutput();
+                            if (output instanceof DeleteQuestionAction.Output(Question deletedQuestion)) {
+                                succeedDeletedQuestionIds.add(deletedQuestion.getId());
+                                final QuestionLinkImpl<?> linkWrapper = deletedQuestion.getLinkWrapper();
+                                if (linkWrapper instanceof ToPartitionsLink link) {
+                                    infectedPartitions.addAll(link.getTargets());
+                                }
                             } else {
-                                if (output instanceof MessageOutput messageOutput) {
-                                    failedQuestionIdReasons.put(deletedQuestionId, Collections.singleton(messageOutput.message()));
+                                if (output.result().equals(OutputData.Result.SUCCESS) || output.result().equals(OutputData.Result.WARNING)) {
+                                    succeedDeletedQuestionIds.add(deletedQuestionId);
                                 } else {
-                                    failedQuestionIdReasons.put(deletedQuestionId, Collections.singleton("unknown error"));
+                                    if (output instanceof MessageOutput messageOutput) {
+                                        failedQuestionIdReasons.put(deletedQuestionId, Collections.singleton(messageOutput.message()));
+                                    } else {
+                                        failedQuestionIdReasons.put(deletedQuestionId, Collections.singleton("unknown error"));
+                                    }
                                 }
                             }
-                        }
-                    } catch (Exception e) {
-                        failedQuestionIdReasons.put(deletedQuestionId, Collections.singleton(e.getMessage()));
-                        logger.error("When executing DeleteQuestionAction: ", e);
-                        if (logger.isTraceEnabled()) {
-                            e.printStackTrace();
+                        } catch (Exception e) {
+                            failedQuestionIdReasons.put(deletedQuestionId, Collections.singleton(e.getMessage()));
+                            logger.error("When executing DeleteQuestionAction: ", e);
+                            if (logger.isTraceEnabled()) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
+                status.flush();
+            });
+        } catch (Exception e) {
+            if (questionsToUpdate != null) {
+                for (CommonQuestionDTO question : questionsToUpdate) {
+                    failedQuestionIdReasons.put(question.getId(), Collections.singleton(e.getClass().getSimpleName() + ":" + e.getMessage()));
+                }
             }
-            status.flush();
-        });
-        
-        if (deletedQuestionIds != null && !succeedDeletedQuestionIds.isEmpty()) {
+            if (questionIdsToDelete != null) {
+                for (String id : questionIdsToDelete) {
+                    failedQuestionIdReasons.put(id, Collections.singleton(e.getClass().getSimpleName() + ":" + e.getMessage()));
+                }
+            }
+            logger.error("When executing UpdateQuestionsAction: {} : {}", e.getClass().getSimpleName(), e.getMessage());
+            if (logger.isDebugEnabled()) {
+                e.printStackTrace();
+            }
+        }
+
+        if (questionIdsToDelete != null && !succeedDeletedQuestionIds.isEmpty()) {
             Message<?> message = Message.of("deleteQuestions", succeedDeletedQuestionIds);
             webSocketService.sendMessageToAll(message);
         }

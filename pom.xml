@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>indi.etern.checkIn</groupId>
     <artifactId>checkIn</artifactId>
-    <version>2.2.3 stable</version>
+    <version>2.2.4 stable</version>
     <name>checkIn</name>
     <description>CheckIn use Spring Boot</description>
     <properties>
@@ -39,7 +39,7 @@
                         <configuration>
                             <enableDirtyTracking>true</enableDirtyTracking>
                             <enableAssociationManagement>true</enableAssociationManagement>
-                            <enableExtendedEnhancement>false</enableExtendedEnhancement>
+                            <enableExtendedEnhancement>true</enableExtendedEnhancement>
                         </configuration>
                     </execution>
                 </executions>

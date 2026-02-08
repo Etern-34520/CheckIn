@@ -96,7 +96,7 @@ public class RequestRecord implements BaseEntity<String> {
     }
     
     public enum Type {
-        VISIT, GENERATE, SUBMIT, GET_EXAM_DATA, GET_EXAM_QUESTIONS, SIGN_UP
+        VISIT, GENERATE, SUBMIT, GET_EXAM_DATA, GET_EXAM_QUESTIONS, OAUTH2, SIGN_UP
     }
     
     public enum Status {
@@ -137,7 +137,7 @@ public class RequestRecord implements BaseEntity<String> {
         }
         while (requestHeaderNames.hasMoreElements()) {
             String headName = requestHeaderNames.nextElement();
-            if (!headName.equals("cookie")) {
+            if (!headName.equalsIgnoreCase("cookie")) {
                 String headValue = httpServletRequest.getHeader(headName);
                 requestHeaderMap.put(headName, headValue);
             }
