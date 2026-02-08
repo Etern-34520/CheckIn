@@ -220,7 +220,6 @@ const WebSocketConnector = {
         let url = window.location.host;
         return new Promise((resolve, reject) => {
             const decoded = jwtDecode(token);
-            // console.log(decoded);
             if (decoded.exp * 1000 < Date.now()) {
                 reject("token expired");
             } else {
@@ -263,19 +262,6 @@ const WebSocketConnector = {
                 }
                 ws.onerror = function (error) {
                     console.error(`[ ${getCurrentIsoTime()} ][ WebSocket ] error:`, error);
-                    /*
-                                        if (autoRetriedTimes === 3) {
-                                            if (WebSocketConnector.showGlobalNotifications
-                                                && !notifications["error"])
-                                                notifications["error"] = ElNotification({
-                                                    title: '连接服务器失败',
-                                                    message: '请检查网络连接',
-                                                    position: 'bottom-right',
-                                                    type: 'error',
-                                                });
-                                            reject();
-                                        }
-                    */
                 }
                 ws.onopen = function () {
                     this.send({
@@ -317,7 +303,6 @@ const WebSocketConnector = {
                 this.ws = ws;
             }
         });
-        // });
     },
     reconnect() {
         WebSocketConnector.ws.close();

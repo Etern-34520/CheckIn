@@ -95,12 +95,12 @@ onUnmounted(() => {
         </collapse>
         <el-text class="field-label disable-init-animate">分数</el-text>
         <div style="display: flex;flex-direction: row;flex-wrap: wrap">
-            <el-input-number class="disable-init-animate" :min="min + index" :max="max - (split.length - index)"
+            <el-input-number class="disable-init-animate" :max="split[index + 1] ? min + split[index + 1] : max"
                              v-model="split[index]"
                              :disabled="index === 0 || disabled" style="margin-right: 16px"></el-input-number>
             <el-text size="large" style="margin-right: 16px">~</el-text>
-            <el-input-number class="disable-init-animate" :min="min + index" :max="max - (split.length - index)"
-                             v-if="split[index+1]"
+            <el-input-number class="disable-init-animate" :min="min + split[index]"
+                             v-if="split[index+1] !== undefined"
                              :disabled="disabled" v-model="split[index+1]"></el-input-number>
             <el-input-number class="disable-init-animate" v-else :model-value="max" disabled></el-input-number>
         </div>

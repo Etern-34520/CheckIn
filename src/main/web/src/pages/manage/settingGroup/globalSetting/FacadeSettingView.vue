@@ -107,6 +107,12 @@ const uploadImage = (event) => {
 const deleteIcon = () => {
     data.value.icon = null;
 }
+
+const getSplitsFlexRate = (index) => {
+    const max = extraData.value.questionScore * extraData.value.questionAmount;
+    const next = gradingData.value.splits[index + 1] !== undefined ? gradingData.value.splits[index + 1] : max;
+    return next - gradingData.value.splits[index];
+}
 </script>
 
 <template>
@@ -158,19 +164,18 @@ const deleteIcon = () => {
                                     </el-text>
                                 </div>
                                 <div class="flex-blank-1"></div>
-                                <div class="panel-1 exam-info">
+                                <div class="exam-info">
                                     <el-text size="large" style="align-self: start;">答题信息</el-text>
                                     <div style="display: flex;flex-direction: row;align-items: center;margin-top: 8px;">
-                                        <div style="display: flex;flex-direction: column;margin-right: 8px">
-                                            <div style="display: flex;flex-direction: row;align-items: center">
-                                                <el-tag style="align-self: start;margin-right: 12px;" type="info">题量
-                                                </el-tag>
+                                        <div style="display: flex;flex-direction: column;margin-right: 8px;">
+                                            <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;">
+                                                <el-text style="align-self: start;margin-right: 12px;" type="info">题量</el-text>
                                                 <el-text>{{ extraData.questionAmount }}</el-text>
                                             </div>
-                                            <div style="display: flex;flex-direction: row;align-items: center">
-                                                <el-tag style="align-self: start;margin-right: 12px;" type="info">
+                                            <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;">
+                                                <el-text style="align-self: start;margin-right: 12px;" type="info">
                                                     分区数
-                                                </el-tag>
+                                                </el-text>
                                                 <el-text v-if="extraData.partitionRange" style="margin-right: 4px">
                                                     {{ extraData.partitionRange[0] }}
                                                 </el-text>
@@ -187,7 +192,7 @@ const deleteIcon = () => {
                                         </el-link>
                                     </div>
                                     <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 4px;">
-                                        <el-tag style="align-self: start" type="info">分数段</el-tag>
+                                        <el-text style="align-self: start" type="info">分数段</el-text>
                                         <div class="flex-blank-1"></div>
                                         <el-link class="el-link el-link--info is-underline"
                                                  @click="router.push({name:'grading-setting'})">
@@ -195,31 +200,51 @@ const deleteIcon = () => {
                                         </el-link>
                                     </div>
                                     <div style="display: flex">
-                                        <el-text style="margin-right: 8px;">{{ gradingData.splits[0] }}</el-text>
-                                        <div style="display: flex;flex-direction: column;flex: 1;margin-right: 8px;">
+                                        <div style="display: flex;flex-direction: column;flex: 1;margin-right: 16px;">
                                             <div class="score-bar"
-                                                 style="background: rgba(0,0,0,0);margin-bottom: 4px;overflow: visible">
-                                                <template v-for="(level,$index) of gradingData.levels">
-                                                    <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : extraData.questionScore * extraData.questionAmount - gradingData.splits[$index]}"
-                                                         style="display: flex;flex-direction: column">
-                                                        <el-text>{{ level.name }}</el-text>
-                                                    </div>
-                                                    <el-text v-if="gradingData.splits[$index + 1]">
-                                                        {{ gradingData.splits[$index + 1] }}
+                                                 style="background: rgba(0,0,0,0);overflow: visible">
+                                                <div style="width: 0;overflow: visible;display: flex;flex-direction: row;">
+                                                    <el-text style="text-wrap: nowrap">
+                                                        {{ gradingData.splits[0] }}
                                                     </el-text>
+                                                </div>
+                                                <template v-for="(level,$index) of gradingData.levels">
+                                                    <div :style="{flex: getSplitsFlexRate($index)}"
+                                                         style="display: flex;flex-direction: column">
+                                                    </div>
+                                                    <div style="width: 0;overflow: visible;display: flex;flex-direction: row;">
+                                                        <el-text v-if="gradingData.splits[$index + 1]" style="text-wrap: nowrap">
+                                                            {{ gradingData.splits[$index + 1] }}
+                                                        </el-text>
+                                                    </div>
                                                 </template>
+                                                <div style="width: 0;overflow: visible;display: flex;flex-direction: row;">
+                                                    <el-text style="text-wrap: nowrap">
+                                                        {{ extraData.questionScore * extraData.questionAmount }}
+                                                    </el-text>
+                                                </div>
                                             </div>
-                                            <div class="score-bar" style="margin-bottom: 16px;">
+                                            <div class="score-bar">
                                                 <template v-for="(level,$index) of gradingData.levels">
                                                     <div :style="{
                                                  background: level.colorHex,
-                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : extraData.questionScore * extraData.questionAmount - gradingData.splits[$index]
+                                                 flex: getSplitsFlexRate($index)
                                              }"
                                                          style="height: 6px"></div>
                                                 </template>
                                             </div>
+                                            <div class="score-bar"
+                                                 style="background: rgba(0,0,0,0);overflow: visible;">
+                                                <template v-for="(level,$index) of gradingData.levels">
+                                                    <div :style="{flex: getSplitsFlexRate($index)}"
+                                                         style="display: flex;flex-direction: row;justify-content: start">
+                                                        <div style="width: 0;overflow: visible;display: flex;flex-direction: row;">
+                                                            <el-text style="text-wrap: nowrap;">{{level.name}}</el-text>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
                                         </div>
-                                        <el-text>{{ extraData.questionScore * extraData.questionAmount }}</el-text>
                                     </div>
                                 </div>
                             </div>

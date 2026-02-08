@@ -24,6 +24,12 @@ const routeGenerateExam = () => {
     proxy.$cookies.set("phase", "generate", "7d");
     router.push({name: 'generate'});
 }
+
+const getSplitsFlexRate = (index) => {
+    const max = props.extraData.questionScore * props.extraData.questionAmount;
+    const next = props.gradingData.splits[index + 1] !== undefined ? props.gradingData.splits[index + 1] : max;
+    return next - props.gradingData.splits[index];
+}
 </script>
 
 <template>
@@ -36,14 +42,13 @@ const routeGenerateExam = () => {
                 <el-image class="icon-main" :src="facadeData.icon" fit="contain"
                           style="width: 100%;height: 100%;"></el-image>
             </div>
-            <div style="margin: 32px 16px;z-index: 1;display: flex;flex-direction: column;justify-content: center;">
+            <div style="margin: 32px 0;z-index: 1;display: flex;flex-direction: column;justify-content: center;">
                 <el-text class="title">{{ facadeData.title }}</el-text>
                 <el-text class="subtitle">
                     {{ facadeData.subTitle }}
                 </el-text>
             </div>
-            <div class="flex-blank-1"></div>
-            <div class="panel-1 exam-info">
+            <div class="exam-info">
                 <el-text size="large" style="align-self: start;">答题信息</el-text>
                 <div style="display: flex;flex-direction: row;align-items: center;margin-top: 16px;">
                     <div style="display: flex;flex-direction: column;margin-right: 8px">
@@ -69,31 +74,53 @@ const routeGenerateExam = () => {
                 </div>
                 <div style="display: flex;align-items: center">
                     <el-text style="align-self: center;margin-right: 16px" type="info">分数段</el-text>
-                    <el-text style="margin-right: 8px;">{{ gradingData.splits[0] }}</el-text>
-                    <div style="display: flex;flex-direction: column;flex: 1;margin-right: 8px;">
-                        <div class="score-bar"
-                             style="background: rgba(0,0,0,0);margin-bottom: 4px;overflow: visible">
-                            <template v-for="(level,$index) of gradingData.levels">
-                                <div :style="{flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : extraData.questionScore * extraData.questionAmount - gradingData.splits[$index]}"
-                                     style="display: flex;flex-direction: column">
-                                    <el-text>{{ level.name }}</el-text>
+                    <div style="display: flex;flex: 1">
+                        <div style="display: flex;flex-direction: column;flex: 1;margin-right: 16px;">
+                            <div class="score-bar"
+                                 style="background: rgba(0,0,0,0);overflow: visible">
+                                <div style="width: 0;overflow: visible;display: flex;flex-direction: row;">
+                                    <el-text style="text-wrap: nowrap">
+                                        {{ gradingData.splits[0] }}
+                                    </el-text>
                                 </div>
-                                <el-text v-if="gradingData.splits[$index + 1]">
-                                    {{ gradingData.splits[$index + 1] }}
-                                </el-text>
-                            </template>
-                        </div>
-                        <div class="score-bar" style="margin-bottom: 16px;">
-                            <template v-for="(level,$index) of gradingData.levels">
-                                <div :style="{
+                                <template v-for="(level,$index) of gradingData.levels">
+                                    <div :style="{flex: getSplitsFlexRate($index)}"
+                                         style="display: flex;flex-direction: column">
+                                    </div>
+                                    <div style="width: 0;overflow: visible;display: flex;flex-direction: row;">
+                                        <el-text v-if="gradingData.splits[$index + 1]" style="text-wrap: nowrap">
+                                            {{ gradingData.splits[$index + 1] }}
+                                        </el-text>
+                                    </div>
+                                </template>
+                                <div style="width: 0;overflow: visible;display: flex;flex-direction: row;">
+                                    <el-text style="text-wrap: nowrap">
+                                        {{ extraData.questionScore * extraData.questionAmount }}
+                                    </el-text>
+                                </div>
+                            </div>
+                            <div class="score-bar">
+                                <template v-for="(level,$index) of gradingData.levels">
+                                    <div :style="{
                                                  background: level.colorHex,
-                                                 flex: gradingData.splits[$index+1] ? gradingData.splits[$index+1] : extraData.questionScore * extraData.questionAmount - gradingData.splits[$index]
+                                                 flex: getSplitsFlexRate($index)
                                              }"
-                                     style="height: 6px"></div>
-                            </template>
+                                         style="height: 6px"></div>
+                                </template>
+                            </div>
+                            <div class="score-bar"
+                                 style="background: rgba(0,0,0,0);overflow: visible;">
+                                <template v-for="(level,$index) of gradingData.levels">
+                                    <div :style="{flex: getSplitsFlexRate($index)}"
+                                         style="display: flex;flex-direction: row;justify-content: start">
+                                        <div style="width: 0;overflow: visible;display: flex;flex-direction: row;">
+                                            <el-text style="text-wrap: nowrap;">{{level.name}}</el-text>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
-                    <el-text>{{ extraData.questionScore * extraData.questionAmount }}</el-text>
                 </div>
             </div>
         </div>
@@ -218,11 +245,12 @@ const routeGenerateExam = () => {
 
 .exam-info {
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: stretch;
     justify-content: start;
-    width: 400px;
-    padding: 20px 32px;
+    min-width: min(400px,80dvw);
+    max-width: max(500px,50dvw);
     z-index: 1;
     align-self: center;
 

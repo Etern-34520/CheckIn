@@ -7,7 +7,7 @@ import {VueDraggable} from "vue-draggable-plus";
 import HarmonyOSIcon_Handle from "@/components/icons/HarmonyOSIcon_Handle.vue";
 import HarmonyOSIcon_Remove from "@/components/icons/HarmonyOSIcon_Remove.vue";
 import GradingLevelCard from "@/pages/manage/settingGroup/globalSetting/GradingLevelCard.vue";
-import { uuidv7 } from "uuidv7";
+import {uuidv7} from "uuidv7";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 
 const editing = ref(false);
@@ -105,7 +105,13 @@ const unwatch = watch(() => errors.value, () => {
 
 onUnmounted(() => {
     unwatch();
-})
+});
+
+const getSplitsFlexRate = (index) => {
+    const max = extraData.value.questionScore * extraData.value.questionAmount;
+    const next = data.value.splits[index + 1] !== undefined ? data.value.splits[index + 1] : max;
+    return next - data.value.splits[index];
+}
 </script>
 
 <template>
@@ -135,7 +141,8 @@ onUnmounted(() => {
                 </transition-group>
             </div>
         </div>
-        <div style="display: flex;flex-direction: column;flex:1;height:0;max-width: 1080px;width: min(95%, 1080px);align-self: center">
+        <div
+            style="display: flex;flex-direction: column;flex:1;height:0;max-width: 1080px;width: min(95%, 1080px);align-self: center">
             <div v-if="!loading && !loadingError" style="display: flex;flex-wrap: wrap;margin-top: 20px;">
                 <div style="display: flex;margin-right: 32px;align-items: center">
                     <el-text type="info" style="margin-right: 16px;">题数</el-text>
@@ -150,13 +157,14 @@ onUnmounted(() => {
                     <el-text>{{ extraData.questionScore * extraData.questionAmount }}</el-text>
                 </div>
             </div>
-            <div class="score-bar" style="margin-bottom: 16px;" v-if="!loading && !loadingError">
+            <div class="score-bar" style="margin-bottom: 16px" v-if="!loading && !loadingError">
                 <div v-for="(level,$index) of data.levels"
                      :style="{
                 background: level.colorHex,
-                flex: data.splits[$index+1] ? data.splits[$index+1] : extraData.questionScore * extraData.questionAmount - data.splits[$index]
+                flex: getSplitsFlexRate($index)
                 }"
-                     style="height: 6px"></div>
+                     style="height: 6px">
+                </div>
             </div>
             <el-scrollbar style="flex: 1" v-loading="loading">
                 <div style="display: flex;flex-direction: column;align-items: stretch">
@@ -164,12 +172,12 @@ onUnmounted(() => {
                         <div v-if="!loading && !loadingError"
                              style="display:flex;flex-direction:column;flex: 1">
                             <VueDraggable
-                                    ref="draggable"
-                                    v-model="data.levels"
-                                    :animation="150"
-                                    :disabled="!editing"
-                                    ghostClass="ghost"
-                                    handle=".handle">
+                                ref="draggable"
+                                v-model="data.levels"
+                                :animation="150"
+                                :disabled="!editing"
+                                ghostClass="ghost"
+                                handle=".handle">
                                 <transition-group name="slide-hide">
                                     <div class="slide-hide-base" style="display: grid;margin-top: 8px;"
                                          v-for="(level,$index) of data.levels" :key="level.id">
@@ -207,15 +215,19 @@ onUnmounted(() => {
                                 <el-text size="large">
                                     题目判分标准
                                 </el-text>
-                                <div style="display: flex;flex-direction: column;margin-top: 16px;margin-bottom: 20dvh;margin-left: 8px">
+                                <div
+                                    style="display: flex;flex-direction: column;margin-top: 16px;margin-bottom: 20dvh;margin-left: 8px">
                                     <el-text style="align-self: start">
                                         选择题（单选/多选）
                                     </el-text>
-                                    <el-radio-group :disabled="!editing" v-model="data.multipleChoicesQuestionsCheckingStrategy">
+                                    <el-radio-group :disabled="!editing"
+                                                    v-model="data.multipleChoicesQuestionsCheckingStrategy">
                                         <el-radio label="全部正确才可得分" value="all_correct"/>
                                         <el-radio label="错误时不得分，部分正确时按正确选项占比" value="correct_rated"/>
-                                        <el-radio label="按正确选项和错误选项占比" value="correct_rated_and_wrong_rated"/>
-                                        <el-radio label="按正确选项占比和错误双倍占比" value="correct_rated_and_wrong_double_rated"/>
+                                        <el-radio label="按正确选项和错误选项占比"
+                                                  value="correct_rated_and_wrong_rated"/>
+                                        <el-radio label="按正确选项占比和错误双倍占比"
+                                                  value="correct_rated_and_wrong_double_rated"/>
                                     </el-radio-group>
                                     <div>
                                         <el-text type="info" style="margin-right: 12px">启用倒扣分制</el-text>
