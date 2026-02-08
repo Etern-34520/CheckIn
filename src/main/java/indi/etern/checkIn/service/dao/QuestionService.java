@@ -98,22 +98,21 @@ public class QuestionService {
     
     public List<Question> findAllByAuthor(User author) {
         return questionRepository.findAllByAuthor(author)
-                .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink)
+                .stream().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink)
                 .toList();
     }
     
     public List<Question> findAllByUpVotersContains(User user) {
-        return questionRepository.findAllByUpVotersContains(user).stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink).toList();
+        return questionRepository.findAllByUpVotersContains(user).stream().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink).toList();
     }
     
     public List<Question> findAllByDownVotersContains(User user) {
-        return questionRepository.findAllByDownVotersContains(user).stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink).toList();
+        return questionRepository.findAllByDownVotersContains(user).stream().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink).toList();
     }
     
     public List<Question> findFirstLimitByUser(User user, int limit) {
         return questionRepository.findAllByAuthor(user, PageRequest.of(0, limit))
-                .stream().parallel().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink)
-                .toList();
+                .stream().filter((question) -> question.getLinkWrapper() instanceof ToPartitionsLink).toList();
     }
     
     public List<Question> findLatestModifiedQuestions() {

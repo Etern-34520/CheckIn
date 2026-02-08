@@ -39,7 +39,7 @@
                         <configuration>
                             <enableDirtyTracking>true</enableDirtyTracking>
                             <enableAssociationManagement>true</enableAssociationManagement>
-                            <enableExtendedEnhancement>true</enableExtendedEnhancement>
+                            <enableExtendedEnhancement>false</enableExtendedEnhancement>
                         </configuration>
                     </execution>
                 </executions>
