@@ -29,7 +29,7 @@ onMounted(() => {
 const onClick = () => {
     if (result.signUpCompletingType === "CREATE_AND_ENABLED") {
         router.push({name: "login"});
-    } else if (!result.signUpCompletingType){
+    } else if (!result.signUpCompletingType || result.signUpCompletingType === "INCOMPLETED"){
         signUp();
     } else {
         back();

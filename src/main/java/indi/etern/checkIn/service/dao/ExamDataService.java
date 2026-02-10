@@ -139,7 +139,7 @@ public class ExamDataService {
     
     public Optional<ExamData> findMaxByQQ(long qq) {
         List<ExamData> examDataList = examDataRepository.findAllByQqNumberIs(qq);
-        return examDataList.stream().max(Comparator.comparing(ExamData::getExamResult));//TODO expire time
+        return examDataList.stream().max(Comparator.comparing(examData -> examData.getExamResult() == null ? ExamResult.EMPTY :examData.getExamResult()));
     }
     
     public void invalidAllByQQ(long qq) {

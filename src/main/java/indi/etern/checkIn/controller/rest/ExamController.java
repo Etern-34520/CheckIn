@@ -19,6 +19,7 @@ import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.*;
 import indi.etern.checkIn.service.exam.ExamGenerator;
 import indi.etern.checkIn.service.exam.ExamResult;
+import indi.etern.checkIn.service.exam.SignUpCompletingType;
 import indi.etern.checkIn.service.web.OAuth2Service;
 import indi.etern.checkIn.service.web.TurnstileService;
 import indi.etern.checkIn.throwable.entity.UserExistsException;
@@ -210,7 +211,9 @@ public class ExamController {
                 try {
                     final ExamResult examResult = examDataService.handleSubmit(examData, submitRequest.answer);
                     if (userService.existsByQQNumber(examResult.getQq())) {
-                        examResult.setSignUpCompletingType("USER_EXISTS");
+                        examResult.setSignUpCompletingType(SignUpCompletingType.USER_EXISTS);
+                    } else {
+                        examResult.setSignUpCompletingType(SignUpCompletingType.INCOMPLETED);
                     }
                     examData.sendUpdateExamRecord();
                     questionStatisticService.appendStatistic(examData);
@@ -218,13 +221,11 @@ public class ExamController {
                 } catch (ExamInvalidException e) {
                     logger.error("ExamController[{}] invalided", examData.getId());
                     return EXAM_INVALIDED_JSON;
-//                throw new BadRequestException();
                 }
             }
         } else {
             logger.error("Could not found examData({})", submitRequest.examId);
             return EXAM_IS_NOT_EXIST_JSON;
-//            throw new BadRequestException();
         }
     }
 
@@ -334,6 +335,12 @@ public class ExamController {
                     final boolean enabled = creatingUserStrategy == GradingLevel.CreatingUserStrategy.CREATE_AND_ENABLED;
                     userService.handleSignUp(examData, signUpRequest.name, signUpRequest.password, level.getCreatingUserRole(), enabled);
                     examData.setStatus(ExamData.Status.SIGN_UP_COMPLETED);
+                    if (creatingUserStrategy == GradingLevel.CreatingUserStrategy.CREATE_AND_ENABLED ||
+                            creatingUserStrategy == GradingLevel.CreatingUserStrategy.CREATE_AND_DISABLED) {
+                        examData.getExamResult().setSignUpCompletingType(SignUpCompletingType.COMPLETED);
+                    } else {
+                        examData.getExamResult().setSignUpCompletingType(SignUpCompletingType.INSPECT_REQUIRED);
+                    }
                     examData.sendUpdateExamRecord();
                     examDataService.save(examData);
                     Map<String, String> message = new HashMap<>();

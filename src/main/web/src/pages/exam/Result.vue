@@ -22,7 +22,7 @@ const backToExam = () => {
 }
 
 const routeToSignUpOrLogin = () => {
-    if (result.signUpCompletingType) {
+    if (result.signUpCompletingType && result.signUpCompletingType !== 'INCOMPLETED') {
         router.push({name: "login"});
     } else {
         router.push({name: "sign-up"}).then(() => {
@@ -95,8 +95,8 @@ const routeToSignUpOrLogin = () => {
         <div style="display: flex;flex-direction: row;justify-content: center;flex-wrap: wrap">
             <el-button @click="backToExam()" style="min-width: 180px">重新答题</el-button>
             <el-button v-if="result.showCreatingAccountGuide" style="min-width: 180px"
-                       :type="result.signUpCompletingType?undefined:'primary'" @click="routeToSignUpOrLogin()">
-                {{ result.signUpCompletingType ? "前往登录页" : "注册" }}
+                       :type="result.signUpCompletingType && result.signUpCompletingType !== 'INCOMPLETED'?undefined:'primary'" @click="routeToSignUpOrLogin()">
+                {{ result.signUpCompletingType && result.signUpCompletingType !== 'INCOMPLETED' ? "前往登录页" : "注册" }}
             </el-button>
         </div>
     </div>

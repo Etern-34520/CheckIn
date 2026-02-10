@@ -11,14 +11,14 @@ import java.util.Objects;
 @Getter
 @Setter
 public final class ExamResult implements Comparable<ExamResult> {
-    private long qq;
-    private float score;
-    private int correctCount;
-    private int halfCorrectCount;
-    private int wrongCount;
-    private int questionCount;
-    private boolean showCreatingAccountGuide;
-    private String signUpCompletingType;
+    private long qq = -1;
+    private float score = 0;
+    private int correctCount = -1;
+    private int halfCorrectCount = -1;
+    private int wrongCount = -1;
+    private int questionCount = -1;
+    private boolean showCreatingAccountGuide = false;
+    private SignUpCompletingType signUpCompletingType;
     private String examDataId;
     private String message;
     private String level;
@@ -28,6 +28,7 @@ public final class ExamResult implements Comparable<ExamResult> {
     @JsonIgnore
     private List<String> questionIds;
     private String colorHex;
+    public static final ExamResult EMPTY = new ExamResult();
     
     private ExamResult() {
     }
@@ -36,10 +37,8 @@ public final class ExamResult implements Comparable<ExamResult> {
         ExamResult examResult = new ExamResult();
         examResult.qq = examData.getQqNumber();
         examResult.examData = examData;
-        //noinspection DataFlowIssue (used by jackson)
-        examResult.questionCount = examResult.getQuestionCount();
-        //noinspection DataFlowIssue (used by jackson)
-        examResult.questionIds = examResult.getQuestionIds();
+        examResult.questionCount = examData.getQuestionAmount();
+        examResult.questionIds = examData.getQuestionIds();
         examResult.examDataId = examData.getId();
         return examResult;
     }

@@ -132,6 +132,22 @@ WebSocketConnector.registerAction("updateQuestions", (response) => {
         update();
     }
 
+    let retryTimes = 0;
+    function loadQuestions(questionIds) {
+        QuestionCache.getAllAsync(newQuestionIds, retryTimes < 2).then((questionInfos) => {
+            for (const [id,questionInfo] of Object.entries(questionInfos)) {
+                QuestionCache.update(questionInfo);
+            }
+        }, (error) => {
+            retryTimes++;
+            if (retryTimes <= 2) {
+                setTimeout(() => loadQuestions(questionIds), 500);
+            } else {
+                console.error(error);
+            }
+        });
+    }
+
     function update() {
         let newQuestionIds = [];
         for (const question of response.data) {
@@ -158,13 +174,7 @@ WebSocketConnector.registerAction("updateQuestions", (response) => {
             }
         }
         if (newQuestionIds.length > 0) {
-            QuestionCache.getAllAsync(newQuestionIds).then((questionInfos) => {
-                for (const [id,questionInfo] of Object.keys(questionInfos)) {
-                    QuestionCache.update(questionInfo);
-                }
-            }, (error) => {
-                console.error(error);
-            });
+            loadQuestions(newQuestionIds);
         }
     }
 

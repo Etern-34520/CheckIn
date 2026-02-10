@@ -232,7 +232,7 @@ java -jar checkIn-x.x.x.jar
 > Body
 > ```json
 > {
->  "qq": 123456789
+>     "qq": 123456789
 > }
 > ```
 > response
@@ -242,8 +242,8 @@ java -jar checkIn-x.x.x.jar
 > >
 > > ```json 
 > > {
-> > "result": "examData not found",
-> > "type": "error"
+> >     "result": "examData not found",
+> >     "type": "error"
 > > }
 > > ```
 > > 
@@ -254,28 +254,33 @@ java -jar checkIn-x.x.x.jar
 > >
 > > ```json
 > > {
-> > "examData": {
-> > "id": "4fb9ec45-bffa-402e-92ff-078b993eb303",
-> > "qqNumber": 10001,
-> > "questionAmount": 10,
-> > "status": "SUBMITTED",
-> > "examResult": {
-> > "qq": 10001,
-> > "score": 100.0,
-> > "correctCount": 10,
-> > "halfCorrectCount": 0,
-> > "wrongCount": 0,
-> > "questionCount": 0,
-> > "message": "[markdown text1]",
-> > "level": "通过",
-> > "colorHex": "#67C23A"
-> > },
-> > "generateTime": "2025-02-11 23:03:45",
-> > "submitTime": "2025-02-11 23:03:58",
-> > "expireTime": "2025-02-18 23:03:45"
-> > },
-> > "level": "通过",
-> > "type": "success"
+> >     "examData": {
+> >         "id": "4fb9ec45-bffa-402e-92ff-078b993eb303",
+> >         "qqNumber": 10001,
+> >         "questionAmount": 10,
+> >         "status": "SUBMITTED",
+> >         "examResult": {
+> >             "qq": 10001,
+> >             "score": 100.0,
+> >             "correctCount": 10,
+> >             "halfCorrectCount": 0,
+> >             "wrongCount": 0,
+> >             "questionCount": 10,
+> >             "message": "[markdown text1]",
+> >             "level": "通过",
+> >             "levelId": "6aa0dad5-10c5-4d50-9d03-bff7ff669e02",
+> >             "colorHex": "#67C23A",
+> >             "examDataId": "4fb9ec45-bffa-402e-92ff-078b993eb303",
+> >             "showCreatingAccountGuide": false,
+> >             "signUpCompletingType": null
+> >         },
+> >         "generateTime": "2025-02-11 23:03:45",
+> >         "submitTime": "2025-02-11 23:03:58",
+> >         "expireTime": "2025-02-18 23:03:45"
+> >     },
+> >     "level": "通过",
+> >     "levelId": "6aa0dad5-10c5-4d50-9d03-bff7ff669e02",
+> >     "type": "success"
 > > }
 > > ```
 > > 
@@ -286,32 +291,55 @@ java -jar checkIn-x.x.x.jar
 > > 
 > >  ```json
 > >  {
-> >  "examData": {
-> >  "id": "9e2b4566-33c5-4279-9b76-0140926f5cab",
-> >  "qqNumber": 10002,
-> >  "questionAmount": 10,
-> >  "status": "SUBMITTED",
-> >  "examResult": {
-> >  "qq": 10002,
-> >  "score": 0.0,
-> >  "correctCount": 0,
-> >  "halfCorrectCount": 0,
-> >  "wrongCount": 10,
-> >  "questionCount": 0,
-> >  "message": "[markdown text1]",
-> >  "level": "未通过",
-> >  "colorHex": "#F56C6C"
-> >  },
-> >  "generateTime": "2025-02-11 23:05:54",
-> >  "submitTime": "2025-02-11 23:06:03",
-> >  "expireTime": "2025-02-18 23:05:54"
-> >  },
-> >  "level": "未通过",
-> >  "type": "success"
+> >     "examData": {
+> >         "id": "9e2b4566-33c5-4279-9b76-0140926f5cab",
+> >         "qqNumber": 10002,
+> >         "questionAmount": 10,
+> >         "status": "SUBMITTED",
+> >         "examResult": {
+> >             "qq": 10002,
+> >             "score": 0.0,
+> >             "correctCount": 0,
+> >             "halfCorrectCount": 0,
+> >             "wrongCount": 10,
+> >             "questionCount": 10,
+> >             "message": "[markdown text2]",
+> >             "level": "未通过",
+> >             "levelId": "3325af76-e7e4-4c8f-a981-8f4c35e8261b",
+> >             "colorHex": "#F56C6C",
+> >             "examDataId": "9e2b4566-33c5-4279-9b76-0140926f5cab",
+> >             "showCreatingAccountGuide": false,
+> >             "signUpCompletingType": null
+> >         },
+> >         "generateTime": "2025-02-11 23:05:54",
+> >         "submitTime": "2025-02-11 23:06:03",
+> >         "expireTime": "2025-02-18 23:05:54"
+> >     },
+> >     "level": "未通过",
+> >     "levelId": "3325af76-e7e4-4c8f-a981-8f4c35e8261b",
+> >     "type": "success"
 > >  }
 > >  ```
-> > 
 > > </details>
+>
+> > 部分字段说明
+> >
+> > - type: `"success"|"error"`
+> > 
+> > 对于成功获取到记录时
+> >
+> > 部分由于内部数据结构而在某些情况下值相同的字段
+> >
+> > - examData.qqNumber, examData.examResult.qq: `均为 QQ 号，`在获取未完成的测试记录时 `examData.examResult.qq 为 -1`
+> > - examData.questionAmount, examData.examResult.questionCount: `均为抽取题目数量,在获取未完成的测试记录时 examData.examResult.questionCount 为 -1`
+> > - examData.id, examData.result.examDataId: `均为答题记录的内部 id, 在获取未完成的测试记录时 examData.result.examDataId 为 null`
+> > - level, examData.result.level: `均与评级设置中的不同等级名称对应，在获取未完成的测试记录时为 null`
+> > - levelId, examData.result.levelId: `均与评级设置中的不同等级 id 对应，机器人判断应优先使用该字段，在获取未完成的测试记录时为 null`
+> > 
+> > 一些枚举类字段
+> >
+> > - examData.status: `"ONGOING"(进行中) | "SUBMITTED"(已提交) | "MANUAL_INVALIDED"(已手动无效) | "EXPIRED"(已过期(7d)) | "SIGN_UP_COMPLETED(已注册完成,需在评级设置中设置注册方式)"`
+> > - examData.examResult.signUpCompletingType: `"USER_EXISTS"(用户已存在) | "INCOMPLETED"(未完成) | "INSPECT_REQUIRED"(需通过Qualify API审查，但 Qualify API 被调用时状态变更为 COMPLETED，因此一般无法出现) | "COMPLETED(完成)"`
 ---
 <details>
 <summary>如何修改默认的8080端口</summary>

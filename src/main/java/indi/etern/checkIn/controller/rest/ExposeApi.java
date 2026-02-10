@@ -10,6 +10,8 @@ import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.dao.ExamDataService;
 import indi.etern.checkIn.service.dao.GradingLevelService;
 import indi.etern.checkIn.service.dao.UserService;
+import indi.etern.checkIn.service.exam.ExamResult;
+import indi.etern.checkIn.service.exam.SignUpCompletingType;
 import indi.etern.checkIn.service.web.WebSocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,32 +45,40 @@ public class ExposeApi {
     @Transactional
     @PostMapping(path = "/api/qualify", produces = "application/json")
     public Map<String, Object> qualify(@RequestBody QualifyRequest qualifyRequest) {
-        Map<String, Object> map = new HashMap<>();
-        final Optional<ExamData> optionalExamData = examDataService.findMaxByQQ(qualifyRequest.qq);
-        if (optionalExamData.isPresent()) {
-            ExamData examData = optionalExamData.get();
-            map.put("type", "success");
-            map.put("examData", examData);
-            map.put("level", examData.getExamResult().getLevel());
-            map.put("levelId", examData.getExamResult().getLevelId());
-            try {
-                final GradingLevel level = levelService.findById(examData.getExamResult().getLevelId());
-                if (level.getCreatingUserStrategy() == GradingLevel.CreatingUserStrategy.CREATE_AND_ENABLED_AFTER_VALIDATED) {
-                    userService.findByQQNumber(examData.getQqNumber()).ifPresent((user) -> {
-                        user.setEnabled(true);
-                        Message<User> message = Message.of("updateUser", user);
-                        webSocketService.sendMessageToAll(message);
-                        userService.save(user);
-                    });
+        try {
+            Map<String, Object> map = new HashMap<>();
+            final Optional<ExamData> optionalExamData = examDataService.findMaxByQQ(qualifyRequest.qq);
+            if (optionalExamData.isPresent()) {
+                ExamData examData = optionalExamData.get();
+                map.put("type", "success");
+                map.put("examData", examData);
+                ExamResult examResult = examData.getExamResult();
+                if (examResult != null) {
+                    map.put("level", examResult.getLevel());
+                    map.put("levelId", examResult.getLevelId());
+                    try {
+                        final GradingLevel level = levelService.findById(examResult.getLevelId());
+                        if (level.getCreatingUserStrategy() == GradingLevel.CreatingUserStrategy.CREATE_AND_ENABLED_AFTER_VALIDATED) {
+                            userService.findByQQNumber(examData.getQqNumber()).ifPresent((user) -> {
+                                user.setEnabled(true);
+                                Message<User> message = Message.of("updateUser", user);
+                                webSocketService.sendMessageToAll(message);
+                                userService.save(user);
+                            });
+                            examResult.setSignUpCompletingType(SignUpCompletingType.COMPLETED);
+                        }
+                    } catch (Exception e) {
+                        logger.error("When load grading level:{}", e.getMessage());
+                    }
                 }
-            } catch (Exception e) {
-                logger.error("When load grading level:{}", e.getMessage());
+            } else {
+                map.put("type", "error");
+                map.put("result", "examData not found");
             }
-        } else {
-            map.put("type", "error");
-            map.put("result", "examData not found");
+            return map;
+        } catch (Exception e) {
+            return Map.of("type", "error", "result", e.getClass().getSimpleName() + ":" + e.getMessage());
         }
-        return map;
     }
 
     @GetMapping("/api/oauth2/providers")
