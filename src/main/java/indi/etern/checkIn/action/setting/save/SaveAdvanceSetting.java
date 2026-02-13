@@ -27,6 +27,7 @@ public class SaveAdvanceSetting extends BaseAction<SaveAdvanceSetting.Input, Sav
     
     public static final String[] KEYS = {
             "ipSource",
+            "ipSourceCustomHeaderRegex",
             "useRequestIpIfSourceIsNull",
             "autoCreateUserMode",
             "enableTurnstileOnLogin",

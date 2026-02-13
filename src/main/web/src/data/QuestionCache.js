@@ -719,6 +719,11 @@ const QuestionCache = {
         reactiveQuestionInfo.question.downVoters = [];
         QuestionCache.update(reactiveQuestionInfo);
     },
+    restoreAllChanges() {
+        for (const id of Object.keys(QuestionCache.dirtyQuestionInfos)) {
+            QuestionCache.restoreChanges(id);
+        }
+    },
     syncQuestion(questionInfo) {
         delete questionInfo.localNew;
         questionInfo.remoteUpdated = true;

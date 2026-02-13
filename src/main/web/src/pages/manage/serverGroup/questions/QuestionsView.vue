@@ -4,7 +4,7 @@ import "splitpanes/dist/splitpanes.css"
 import router from "@/router/index.js";
 import QuestionCache from "@/data/QuestionCache.js";
 import PartitionCache from "@/data/PartitionCache.js";
-import { uuidv7 } from "uuidv7";
+import {uuidv7} from "uuidv7";
 import HarmonyOSIcon_Plus from "@/components/icons/HarmonyOSIcon_Plus.vue";
 import HarmonyOSIcon_CheckBox from "@/components/icons/HarmonyOSIcon_CheckBox.vue";
 import EditPartitionNameDialog from "@/components/question/EditPartitionNameDialog.vue";
@@ -339,37 +339,43 @@ const failedQuestionIdReason = ref({});
 const showFailedQuestionIdReason = ref(false);
 
 const upload = () => {
-    let hasErrorQuestions = QuestionCache.getDirtyErrorQuestions().length > 0;
-    const doUpload = () => {
-        QuestionCache.uploadAll().then((data) => {
-            uploading.value = false;
-            console.log(data);
-            console.log(data.succeedUpdatedQuestionIds);
-            console.log(data.failedQuestionIdReason);
-            failedQuestionIdReason.value = data.failedQuestionIdReason;
-            let showFailedQuestionIdReason1 = Object.keys(failedQuestionIdReason.value).length > 0;
-            showFailedQuestionIdReason.value = showFailedQuestionIdReason1;
-            showTree.value = !showFailedQuestionIdReason1;
-            errorsDisplay.value = !showFailedQuestionIdReason1;
-            if (showFailedQuestionIdReason1) {
-                responsiveSplitpane.value.showLeft();
-            }
-        }, (err) => {
-            uploading.value = false;
-        });
-    }
-    if (hasErrorQuestions && showTree.value === true) {
-        errorsDisplay.value = true;
-        showTree.value = false;
-        responsiveSplitpane.value.showLeft();
-    } else if (hasErrorQuestions && showTree.value === false) {
-        uploading.value = true;
-        doUpload();
-    } else if (!hasErrorQuestions) {
-        uploading.value = true;
-        doUpload();
-    }
-    // QuestionTempStorage.uploadAll();
+    return new Promise((resolve, reject) => {
+        let hasErrorQuestions = QuestionCache.getDirtyErrorQuestions().length > 0;
+        const doUpload = () => {
+            QuestionCache.uploadAll().then((data) => {
+                uploading.value = false;
+                console.log(data);
+                console.log(data.succeedUpdatedQuestionIds);
+                console.log(data.failedQuestionIdReason);
+                failedQuestionIdReason.value = data.failedQuestionIdReason;
+                let showFailedQuestionIdReason1 = Object.keys(failedQuestionIdReason.value).length > 0;
+                showFailedQuestionIdReason.value = showFailedQuestionIdReason1;
+                showTree.value = !showFailedQuestionIdReason1;
+                errorsDisplay.value = !showFailedQuestionIdReason1;
+                if (showFailedQuestionIdReason1) {
+                    responsiveSplitpane.value.showLeft();
+                    reject();
+                } else {
+                    resolve();
+                }
+            }, (err) => {
+                uploading.value = false;
+                reject();
+            });
+        }
+        if (hasErrorQuestions && showTree.value === true) {
+            errorsDisplay.value = true;
+            showTree.value = false;
+            responsiveSplitpane.value.showLeft();
+            reject();
+        } else if (hasErrorQuestions && showTree.value === false) {
+            uploading.value = true;
+            doUpload();
+        } else if (!hasErrorQuestions) {
+            uploading.value = true;
+            doUpload();
+        }
+    });
 }
 
 const backToTree = () => {
@@ -605,6 +611,14 @@ const rectifyCheck = (nodeObj, checkStatus) => {
 }
 
 function onDeleteNode(nodeObj) {
+    function doAction(partition, alartNotEmpty, doDelete) {
+        if (partition.questionAmount !== 0) {
+            alartNotEmpty();
+        } else {
+            doDelete();
+        }
+    }
+
     if (nodeObj.data.type === 'Question' || nodeObj.data.type === 'QuestionGroup') {
         if (nodeObj.data.question.localDeleted) {
             QuestionCache.restoreDelete(nodeObj.data.question.id);
@@ -632,12 +646,27 @@ function onDeleteNode(nodeObj) {
         const doDelete = () => {
             PartitionCache.tryDeleteRemote(partition.id);
         }
-        if (partition.questionAmount !== 0) {
-            alartNotEmpty();
+        if (QuestionCache.dirty) {
+            ElMessageBox.confirm(
+                "删除分区前需要上传题目更改",
+                "上传题目更改？",
+                {
+                    showClose: false,
+                    draggable: true,
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    type: "warning"
+                }
+            ).then(() => {
+                upload().then(() => {
+                    doAction(partition, alartNotEmpty, doDelete);
+                }).catch(() => {
+                });
+            }).catch(() => {
+            });
         } else {
-            doDelete();
+            doAction(partition, alartNotEmpty, doDelete);
         }
-        // });
     }
 }
 
@@ -665,6 +694,23 @@ const restoreAllErrorUploadChanges = () => {
     }
 }
 
+const restoreAllChanges = () => {
+    ElMessageBox.confirm(
+        "无法撤销，确认操作？",
+        "重置所有本地更改",
+        {
+            showClose: false,
+            draggable: true,
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning"
+        }
+    ).then(() => {
+        QuestionCache.restoreAllChanges();
+    }).catch(() => {
+    });
+}
+
 const getTypeName = (obj) => {
     if (obj.question) {
         const type1 = obj.question.type;
@@ -683,12 +729,16 @@ const getTypeName = (obj) => {
     <responsive-splitpane ref="responsiveSplitpane" :left-loading="loading" show-left-label="题目列表">
         <template #left>
             <el-input prefix-icon="Search" v-model="filterText" placeholder="搜索 (以 &quot;;&quot; 分词)"/>
-            <el-button type="primary" style="margin-top: 8px" @click="upload" :loading="uploading"
-                       :loading-icon="_Loading_" :icon="HarmonyOSIcon_Upload"
-                       :disabled="!QuestionCache.reactiveDirty.value">
-                <el-text>{{ errorsDisplay && !showTree ? "确认上传" : "上传题目更改" }}</el-text>
-            </el-button>
-            <!--                    <el-scrollbar>-->
+            <el-button-group style="margin-top: 8px;display: flex;flex-direction: row">
+                <el-button type="primary" style="flex: 1" @click="upload" :loading="uploading"
+                           :loading-icon="_Loading_" :icon="HarmonyOSIcon_Upload"
+                           :disabled="!QuestionCache.reactiveDirty.value">
+                    <el-text>{{ errorsDisplay && !showTree ? "确认上传" : "上传题目更改" }}</el-text>
+                </el-button>
+                <el-button :icon="RefreshLeft" @click="restoreAllChanges"
+                           :disabled="!QuestionCache.reactiveDirty.value">
+                </el-button>
+            </el-button-group>
             <div class="slide-base"
                  style="display: flex;flex-direction: row;overflow-y:overlay;overflow-x: hidden;">
                 <div class="question-tree-base" style="display: flex;flex-direction: column;overflow:overlay;"
@@ -920,12 +970,17 @@ const getTypeName = (obj) => {
             </div>
         </template>
         <template #right-top>
-            <el-button type="primary" @click="upload" :loading="uploading"
-                       :loading-icon="_Loading_" style="height: 24px;width: 160px"
-                       :icon="HarmonyOSIcon_Upload"
-                       :disabled="!QuestionCache.reactiveDirty.value">
-                <el-text>{{ errorsDisplay && !showTree ? "确认上传" : "上传题目更改" }}</el-text>
-            </el-button>
+            <el-button-group>
+                <el-button type="primary" @click="upload" :loading="uploading"
+                           :loading-icon="_Loading_" style="height: 24px;width: 160px"
+                           :icon="HarmonyOSIcon_Upload"
+                           :disabled="!QuestionCache.reactiveDirty.value">
+                    <el-text>{{ errorsDisplay && !showTree ? "确认上传" : "上传题目更改" }}</el-text>
+                </el-button>
+                <el-button :icon="RefreshLeft" style="height: 24px;"
+                           @click="restoreAllChanges" :disabled="!QuestionCache.reactiveDirty.value">
+                </el-button>
+            </el-button-group>
         </template>
         <template #right>
             <router-view v-slot="{ Component }">

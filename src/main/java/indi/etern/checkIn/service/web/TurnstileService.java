@@ -85,7 +85,7 @@ public class TurnstileService {
             throw new BadRequestException("Turnstile token is required");
         } else {
             try (HttpClient client = HttpClient.newHttpClient()) {
-                String remoteIp = RequestRecord.getIpOf(httpServletRequest);
+                String remoteIp = RequestRecord.getIpOf(httpServletRequest).ipString();
 
                 TurnstileRequest turnstileRequest = new TurnstileRequest(getSecretKey(), turnstileToken, remoteIp);
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -93,8 +93,8 @@ public class TurnstileService {
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(SITEVERIFY_URL))
-                        .header("Content-Type", "application/json") // 关键：告诉服务器发送的是 JSON
-                        .POST(HttpRequest.BodyPublishers.ofString(requestBody)) // 设置方法和请求体
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                         .timeout(Duration.ofSeconds(10))
                         .build();
 

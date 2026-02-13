@@ -1,7 +1,7 @@
 <img width="64" height="64" src="icon.svg" alt="icon">
 
 # CheckIn
-#### 更易用的入群测试系统
+#### 简单易用的入群测试系统
 ![Static Badge](https://img.shields.io/badge/Java-21-red?style=for-the-badge)
 ![Static Badge](https://img.shields.io/badge/Status-Maintaining-green?style=for-the-badge)
 ---

@@ -1282,6 +1282,12 @@ input::-webkit-inner-spin-button {
     transform: none !important;
 }
 
+.el-radio {
+    height: auto !important;
+    min-height: 24px !important;
+    margin: 4px 0;
+}
+
 .el-radio__input.is-disabled.is-checked .el-radio__inner {
     background-color: var(--el-color-primary-3) !important;
 }
@@ -1295,6 +1301,10 @@ input::-webkit-inner-spin-button {
     background-color: var(--front-color-reverse) !important;
     width: 8px !important;
     height: 8px !important;
+}
+
+.el-radio__label {
+    text-wrap: wrap;
 }
 
 .el-color-picker-panel__footer {

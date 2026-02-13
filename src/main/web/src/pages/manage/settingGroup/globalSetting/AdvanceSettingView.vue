@@ -174,7 +174,7 @@ const deleteToken = (index) => {
                     <div v-if="!loading && !error"
                          style="max-width: 1280px;width: min(85%,1280px);display: flex;flex-direction: column;align-items: stretch">
                         <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 12px">
-                            <el-text size="large" style="align-self: center;margin-right: 16px">IP 兼容</el-text>
+                            <el-text size="large" style="align-self: center;margin-bottom: 8px">IP 兼容</el-text>
                             <el-radio-group v-model="data.ipSource" :disabled="!editing">
                                 <el-radio value="request">使用传入 IP (默认)</el-radio>
                                 <el-radio value="x_real_ip">从请求头 "x-real-ip" 解析 IP</el-radio>
@@ -182,14 +182,26 @@ const deleteToken = (index) => {
                                 <el-radio value="remote_host">从请求头 "remote-host" 解析 IP</el-radio>
                                 <el-radio value="cf_connecting_ip">从请求头 "cf-connecting-ip" 解析 IP (Cloudflare)</el-radio>
                                 <el-radio value="true_client_ip">从请求头 "true-client-ip" 解析 IP (Cloudflare Enterprise)</el-radio>
+                                <el-radio value="custom_header_regex">从与正则表达式匹配的自定义请求头解析 IP</el-radio>
                             </el-radio-group>
                         </div>
-                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 12px">
-                            <el-text size="large" style="align-self: center;margin-right: 16px">无法从请求头中获取 IP 时回退至请求</el-text>
+                        <transition name="smooth-height" mode="out-in">
+                            <div class="smooth-height-base" v-if="data.ipSource === 'custom_header_regex'">
+                                <div>
+                                    <div style="display: flex;flex-direction: column;flex-wrap: wrap;align-items: start;margin-bottom: 12px">
+                                        <el-text size="large" style="align-self: start;margin-bottom: 8px;">自定义正则表达式</el-text>
+                                        <el-input class="disable-init-animate" style="max-width: min(100%, 400px)"
+                                                  v-model="data.ipSourceCustomHeaderRegex" :disabled="!editing"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;margin-bottom: 24px">
+                            <el-text size="large" style="align-self: center;margin-right: 16px">无法从请求头中获取 IP 时回退至从请求获取</el-text>
                             <el-switch class="disable-init-animate" v-model="data.useRequestIpIfSourceIsNull" :disabled="!editing"></el-switch>
                         </div>
                         <div style="display: flex;flex-direction: column;flex-wrap: wrap;align-items: start;margin-bottom: 4px">
-                            <el-text size="large" style="align-self: start;">启用 Cloudflare Turnstile</el-text>
+                            <el-text size="large" style="align-self: start;margin-bottom: 8px;">启用 Cloudflare Turnstile</el-text>
                             <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;">
                                 <div style="margin-right: 36px;margin-left: 12px">
                                     <el-text style="margin-right: 16px">登录</el-text>

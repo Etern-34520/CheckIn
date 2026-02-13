@@ -108,22 +108,13 @@ public class RequestRecord implements BaseEntity<String> {
         requestRecord.id = UUIDv7.randomUUID().toString();
         requestRecord.sessionId = httpServletRequest.getSession().getId();
         requestRecord.time = LocalDateTime.now();
-        String ipString = getIpOf(httpServletRequest);
 
-        boolean useRequestIpIfSourceIsNull = true;
-        
-        try {
-            final SettingItem item = SettingService.singletonInstance.getItem("advance", "useRequestIpIfSourceIsNull");
-            useRequestIpIfSourceIsNull = item.getValue(Boolean.class);
-        } catch (Exception ignored) {
-            logger.warn("Setting: advance.useRequestIpIfSourceIsNull not found");
-        }
-        
-        if (useRequestIpIfSourceIsNull && (ipString == null || ipString.isEmpty())) {
-            ipString = IpSourceProcessor.REQUEST.process(httpServletRequest);
-        }
-        requestRecord.ipString = ipString;
+        IpResult ipResult = getIpOf(httpServletRequest);
+        requestRecord.ipString = ipResult.ipString;
         requestRecord.status = Status.SUCCESS;
+        if (ipResult.useFallback || ipResult.ipString == null) {
+            requestRecord.getExtraData().put("Ip-Combat", "Cannot get IP from target processor");
+        }
         Enumeration<String> requestHeaderNames = httpServletRequest.getHeaderNames();
         Map<String, String> requestHeaderMap = new HashMap<>();
         Map<String, String> responseHeaderMap = new HashMap<>();
@@ -154,19 +145,42 @@ public class RequestRecord implements BaseEntity<String> {
         return requestRecord;
     }
 
-    public static String getIpOf(HttpServletRequest httpServletRequest) {
-        IpSourceProcessor ipSourceProcessor;
-
+    public record IpResult(String ipString, boolean useFallback) {}
+    public static IpResult getIpOf(HttpServletRequest httpServletRequest) {
+        String ipString;
+        boolean useFallback = false;
         try {
-            final SettingItem item = SettingService.singletonInstance.getItem("advance", "ipSource");
-            String ipSourceType = item.getValue(String.class);
-            ipSourceProcessor = IpSourceProcessor.valueOf(ipSourceType.toUpperCase());
-        } catch (Exception ignored) {
-            logger.warn("Setting: advance.ipSource not found");
-            ipSourceProcessor = IpSourceProcessor.REQUEST;
-        }
+            boolean useRequestIpIfSourceIsNull = true;
+            try {
+                final SettingItem item = SettingService.singletonInstance.getItem("advance", "useRequestIpIfSourceIsNull");
+                useRequestIpIfSourceIsNull = item.getValue(Boolean.class);
+            } catch (Exception ignored) {
+                logger.error("Setting: advance.useRequestIpIfSourceIsNull not found");
+            }
 
-        return ipSourceProcessor.process(httpServletRequest);
+            IpSourceProcessor ipSourceProcessor = null;
+            try {
+                final SettingItem item = SettingService.singletonInstance.getItem("advance", "ipSource");
+                String ipSourceType = item.getValue(String.class);
+                ipSourceProcessor = IpSourceProcessor.valueOf(ipSourceType.toUpperCase());
+            } catch (Exception ignored) {
+                logger.error("Setting: advance.ipSource not found");
+                if (useRequestIpIfSourceIsNull) {
+                    ipSourceProcessor = IpSourceProcessor.REQUEST;
+                    useFallback = true;
+                }
+            }
+            ipString = ipSourceProcessor == null ? null : ipSourceProcessor.process(httpServletRequest);
+
+            if (useRequestIpIfSourceIsNull && (ipString == null || ipString.isEmpty())) {
+                ipString = IpSourceProcessor.REQUEST.process(httpServletRequest);
+                useFallback = true;
+            }
+        } catch (Exception e) {
+            ipString = IpSourceProcessor.REQUEST.process(httpServletRequest);
+            useFallback = true;
+        }
+        return new IpResult(ipString, useFallback);
     }
 
     public static RequestRecord from(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Throwable throwable) {
@@ -180,7 +194,7 @@ public class RequestRecord implements BaseEntity<String> {
         return requestRecord;
     }
     
-    private enum IpSourceProcessor {
+    public enum IpSourceProcessor {
         REQUEST {
             @Override
             String process(HttpServletRequest request) {
@@ -194,8 +208,8 @@ public class RequestRecord implements BaseEntity<String> {
         }, X_FORWARDED_FOR {
             @Override
             String process(HttpServletRequest request) {
-                final String[] split = request.getHeader("x-forwarded-fot").split(",");
-                return split[split.length - 1].strip();
+                final String[] split = request.getHeader("x-forwarded-for").split(",");
+                return split[0].strip();
             }
         }, REMOTE_HOST {
             @Override
@@ -211,6 +225,25 @@ public class RequestRecord implements BaseEntity<String> {
             @Override
             String process(HttpServletRequest request) {
                 return request.getHeader("true-client-ip");
+            }
+        }, CUSTOM_HEADER_REGEX {
+            @Override
+            String process(HttpServletRequest request) {
+                try {
+                    final SettingItem item = SettingService.singletonInstance.getItem("advance", "ipSourceCustomHeaderRegex");
+                    String ipSourceCustomHeaderRegex = item.getValue(String.class);
+                    Enumeration<String> requestHeaderNames = request.getHeaderNames();
+                    while (requestHeaderNames.hasMoreElements()) {
+                        String headerName = requestHeaderNames.nextElement();
+                        if (headerName.matches(ipSourceCustomHeaderRegex)) {
+                            return request.getHeader(headerName);
+                        }
+                    }
+                    return null;
+                } catch (Exception ignored) {
+                    logger.error("Setting: advance.ipSourceCustomHeaderRegex not found");
+                    return null;
+                }
             }
         };
         abstract String process(HttpServletRequest request);
