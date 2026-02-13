@@ -665,7 +665,7 @@ const QuestionCache = {
     appendToGroup: (questionGroupInfo, subQuestionInfo) => {
         delete subQuestionInfo.partitionIds;
         subQuestionInfo.getGroup = () => questionGroupInfo;
-        questionGroupInfo.value.questionInfos.push(subQuestionInfo);
+        questionGroupInfo.questionInfos.push(subQuestionInfo);
     },
     completelyRemove(questionInfo) {
         const id = questionInfo.question.id;

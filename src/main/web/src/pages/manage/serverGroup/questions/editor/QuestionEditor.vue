@@ -333,13 +333,9 @@ onMounted(() => {
                                                                  :class="questionInfo.inputMeta['subquestions-0']"
                                                                  style="display: flex;flex-direction:column;justify-items: stretch;padding: 12px 20px;position: relative">
                                                                 <div
-                                                                    style="display: flex;flex-direction: row;align-items: center">
+                                                                    style="display: flex;flex-direction: row;align-items: center;margin-bottom: 8px;">
                                                                     <el-text>子题目</el-text>
                                                                     <div class="flex-blank-1"></div>
-                                                                    <!--
-                                                                                                                <el-text type="info" style="margin-right: 8px;">启用乱序子题目</el-text>
-                                                                                                                <el-switch v-model="questionInfo.question.randomOrdered"/>
-                                                                    -->
                                                                 </div>
                                                                 <VueDraggable ref="draggable"
                                                                               v-model="questionInfo.questionInfos"
@@ -351,7 +347,7 @@ onMounted(() => {
                                                                 >
                                                                     <transition-group name="slide-hide">
                                                                         <div class="slide-hide-base"
-                                                                             style="display: grid;margin-top: 4px;grid-template-columns: 0fr 1fr;"
+                                                                             style="display: grid;grid-template-columns: 0fr 1fr;"
                                                                              v-for="(questionInfo1, $index) of questionInfo.questionInfos"
                                                                              :key="questionInfo1.question.id">
                                                                             <div style="min-height: 0;grid-column: 1;">
@@ -368,10 +364,9 @@ onMounted(() => {
                                                                                     </el-button>
                                                                                 </transition>
                                                                             </div>
-                                                                            <div style="min-height: 0;grid-column: 2"
-                                                                                 class="question-input"
-                                                                                 :class="'TODO'">
-                                                                                <sub-question-editor
+                                                                            <div style="min-height: 0;grid-column: 2;margin-bottom: 0;"
+                                                                                 class="question-input">
+                                                                                <sub-question-editor style="padding-bottom: 8px;"
                                                                                     v-model:question-info="questionInfo.questionInfos[$index]"/>
                                                                             </div>
                                                                         </div>

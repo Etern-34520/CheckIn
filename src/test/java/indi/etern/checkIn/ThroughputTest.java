@@ -30,10 +30,10 @@ import java.util.concurrent.TimeUnit;
 public class ThroughputTest {
     // 每个线程处理请求的数量
 //    private static final int REQUESTS_PER_THREAD = 500000;
-    private static final int REQUESTS_PER_THREAD = 100000;
+    private static final int REQUESTS_PER_THREAD = 500000;
     // 线程的数量
 //    private static final int NUMBER_OF_THREADS = 20;
-    private static final int NUMBER_OF_THREADS = 30;
+    private static final int NUMBER_OF_THREADS = 100;
     @Autowired
     private ExamGenerator examGenerator;
     @Autowired
@@ -46,7 +46,7 @@ public class ThroughputTest {
     public void test() throws InterruptedException {
         long startTime;
         Map<Integer, List<String>> threadResultMap = new HashMap<>();
-        try (ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_THREADS)) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             startTime = System.currentTimeMillis();
             for (int i = 0; i < NUMBER_OF_THREADS; i++) {
                 int finalI = i;
