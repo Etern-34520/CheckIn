@@ -1,6 +1,6 @@
 {
   "name": "check-in",
-  "version": "2.2.8-stable",
+  "version": "2.2.9-stable",
   "private": true,
   "type": "module",
   "scripts": {
