@@ -42,7 +42,7 @@ const getSplitsFlexRate = (index) => {
                 <el-image class="icon-main" :src="facadeData.icon" fit="contain"
                           style="width: 100%;height: 100%;"></el-image>
             </div>
-            <div style="margin: 32px 0;z-index: 1;display: flex;flex-direction: column;justify-content: center;">
+            <div style="margin: 32px 16px;z-index: 1;display: flex;flex-direction: column;justify-content: center;">
                 <el-text class="title">{{ facadeData.title }}</el-text>
                 <el-text class="subtitle">
                     {{ facadeData.subTitle }}
@@ -83,6 +83,7 @@ const getSplitsFlexRate = (index) => {
                                         {{ gradingData.splits[0] }}
                                     </el-text>
                                 </div>
+                                <div style="flex: 1" v-if="!gradingData.levels || gradingData.levels.length === 0"></div>
                                 <template v-for="(level,$index) of gradingData.levels">
                                     <div :style="{flex: getSplitsFlexRate($index)}"
                                          style="display: flex;flex-direction: column">

@@ -44,7 +44,7 @@ public enum SamplingStrategy {
                 PartitionQuestionSampler partitionQuestionSampler = partitionQuestionDrawerPart.getT();
                 try {
                     final int rest = targetQuestionAmount - count;
-                    final Question question = partitionQuestionSampler.drawOneCountLessThanOrEqual(rest);
+                    final Question question = partitionQuestionSampler.sampleOneCountLessThanOrEqual(rest);
                     questions.add(question);
                     logger.debug("WEIGHTED:{} added, previous has {}, rest {}", question, count, rest);
                 } catch (PartitionMaxLimitReachedException|PartitionEmptiedException e) {
@@ -73,7 +73,7 @@ public enum SamplingStrategy {
                 PartitionQuestionSampler partitionQuestionSampler = map.values().stream().toList().get(random.nextInt(randomBound));
                 try {
                     final int rest = targetQuestionAmount - count;
-                    final Question question = partitionQuestionSampler.drawOneCountLessThanOrEqual(rest);
+                    final Question question = partitionQuestionSampler.sampleOneCountLessThanOrEqual(rest);
                     questions.add(question);
                     logger.debug("RANDOM: {} added, previous has {}, rest {}", question, count, rest);
                 } catch (PartitionMaxLimitReachedException | PartitionEmptiedException e) {

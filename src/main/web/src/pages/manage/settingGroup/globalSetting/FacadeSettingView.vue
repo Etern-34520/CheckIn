@@ -208,6 +208,7 @@ const getSplitsFlexRate = (index) => {
                                                         {{ gradingData.splits[0] }}
                                                     </el-text>
                                                 </div>
+                                                <div style="flex: 1" v-if="!gradingData.levels || gradingData.levels.length === 0"></div>
                                                 <template v-for="(level,$index) of gradingData.levels">
                                                     <div :style="{flex: getSplitsFlexRate($index)}"
                                                          style="display: flex;flex-direction: column">

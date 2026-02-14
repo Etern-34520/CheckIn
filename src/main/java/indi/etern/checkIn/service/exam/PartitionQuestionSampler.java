@@ -7,6 +7,7 @@ import indi.etern.checkIn.service.exam.specialPartitionLimit.SpecialPartitionLim
 import indi.etern.checkIn.throwable.exam.generate.PartitionEmptiedException;
 import indi.etern.checkIn.throwable.exam.generate.PartitionMaxLimitReachedException;
 import indi.etern.checkIn.throwable.exam.generate.UnachievableLimitException;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,37 +23,41 @@ public class PartitionQuestionSampler {
     @Getter
     int availableCount;
     int unavailableCount = 0;
-    final List<Question> drewQuestions;
-    int drewCount = 0;
+    final List<Question> sampledQuestions;
+    int sampledCount = 0;
     @Setter
     @Getter
     SpecialPartitionLimit specialPartitionLimit;
-    private final int allEnabledQuestionCount;
+//    private final int allEnabledQuestionCount;
     
     public PartitionQuestionSampler(Partition partition, Random random) {
         this.partition = partition;
         this.random = random;
         partitionAllEnabledQuestions = partition.getEnabledQuestionsSet();
         availableQuestions = new ArrayList<>(partitionAllEnabledQuestions);
-        availableCount = availableQuestions.size();
-        drewQuestions = new ArrayList<>();
+        availableCount = availableQuestions.stream()
+                .map(question -> question instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size():1)
+                .reduce(0, Integer::sum);
+        sampledQuestions = new ArrayList<>();
         //TODO improve throughput 68745ms
+/*
         allEnabledQuestionCount = availableQuestions.stream()
                 .mapToInt(question -> question instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size() : 1)
                 .sum();
+*/
     }
     
     private int count(Question question) {
         return question instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size() : 1;
     }
-    
-    private Question draw(Question question, int count) {
-        drewCount += count;
+
+    private Question sample(Question question, int count) {
+        sampledCount += count;
         unavailableCount += count;
         availableCount -= count;
         //TODO improve throughput 9981ms
         availableQuestions.remove(question);
-        drewQuestions.add(question);
+        sampledQuestions.add(question);
         return question;
     }
     
@@ -70,34 +75,36 @@ public class PartitionQuestionSampler {
         unavailableCount += removeCount;
         availableCount -= removeCount;
     }
-    
+
     public List<Question> initLeastQuestions() {
-        if (specialPartitionLimit == null) return drewQuestions;
-        int min = Math.min(specialPartitionLimit.getMinLimit(), allEnabledQuestionCount);
+        if (specialPartitionLimit == null) return sampledQuestions;
+//        int min = specialPartitionLimit.isMinLimitEnabled() ? Math.min(specialPartitionLimit.getMinLimit(), allEnabledQuestionCount) : 0;
         try {
-            while (unavailableCount < min && drewCount < min) {
-                drawOneCountLessThanOrEqual(min - drewCount);
+            while (!specialPartitionLimit.checkMin(sampledCount)) {
+                sampleOneCountLessThanOrEqual(null);
             }
         } catch (PartitionEmptiedException emptiedException) {
             throw new UnachievableLimitException();
         }
-        return drewQuestions;
+        return sampledQuestions;
     }
     
-    public Question drawOneCountLessThanOrEqual(int limit) {
-        if (limit <= 0) throw new IllegalArgumentException("limit must greater than 0");
+    public Question sampleOneCountLessThanOrEqual(@Nullable Integer limit) {
+        if (limit != null && limit <= 0) throw new IllegalArgumentException("limit must greater than 0");
         while (true) {
-            if (specialPartitionLimit != null && !specialPartitionLimit.checkMax(drewCount)) {
-                throw new PartitionMaxLimitReachedException();
-            }
             final int bound = availableQuestions.size() - 1;
             if (bound < 0) throw new PartitionEmptiedException();
             final int randomIndex = bound > 0 ? random.nextInt(0, bound) : 0;
             Question question = availableQuestions.get(randomIndex);
             int count = count(question);
-            if (count <= limit) {
+            if (specialPartitionLimit != null && !specialPartitionLimit.checkMax(sampledCount + count)) {
+                invalid(question, count);
+                if (availableQuestions.isEmpty()) {
+                    throw new PartitionMaxLimitReachedException();
+                }
+            } else if (limit == null || count <= limit) {
                 //TODO improve throughput 10177ms
-                return draw(question, count);
+                return sample(question, count);
             } else {
                 invalid(question, count);
             }

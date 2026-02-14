@@ -72,104 +72,99 @@ public class StatusService {
             int questionAmount = Math.max(settingItem2.getValue(Integer.class), 1);
 
             List<Partition> requiredPartitions = null;
-            /*if (questionService.countEnabled() < questionAmount) {
+            int fullyAvailableQuestionsCount = 0;
+            int leastRequiredPartitionsQuestionsCount = 0;
+            try {
+                SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
+                //noinspection unchecked
+                List<String> requiredPartitionIds = (List<String>) settingItem3.getValue(List.class);
+                requiredPartitions = partitionService.findAllByIds(requiredPartitionIds);
+                final Map<Partition, SpecialPartitionLimit> limits = specialPartitionLimitService.getAll();
+                int requiredPartitionsQuestionsCount = 0;
+                Set<Question> uniqueValues = new HashSet<>();
+                for (Partition partition : requiredPartitions) {
+                    Set<ToPartitionsLink> questionLinks = partition.getQuestionLinks();
+                    int partitionQuestionsCount = 0;
+                    final SpecialPartitionLimit limit = limits.get(partition);
+                    leastRequiredPartitionsQuestionsCount += limit != null ? limit.getMinLimit() : 0;
+                    for (ToPartitionsLink toPartitionsLink : questionLinks) {
+                        Question source = toPartitionsLink.getSource();
+                        if (source.isEnabled() &&
+                                uniqueValues.add(source)) {
+                            if (limit == null || limit.checkMax(partitionQuestionsCount + 1)) {
+                                partitionQuestionsCount += source instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size() : 1;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    requiredPartitionsQuestionsCount += partitionQuestionsCount;
+                }
+                fullyAvailableQuestionsCount += requiredPartitionsQuestionsCount;
+            } catch (NoSuchElementException ignored) {
+            }
+
+            int min = 0;
+            int max;
+            try {
+                SettingItem item = settingService.getItem("generating", "partitionRange");
+                final ArrayList<?> value = item.getValue(ArrayList.class);
+                if (value.size() == 2) {
+                    min = (int) value.getFirst();
+                    max = (int) value.getLast();
+                } else {
+                    max = partitionService.count();
+                }
+            } catch (NoSuchElementException ignored) {
+                max = partitionService.count();
+            }
+
+            final List<Partition> partitions = partitionService.findAll();
+            if (requiredPartitions != null) {
+                partitions.removeAll(requiredPartitions);
+            }
+            partitions.sort(Comparator.comparing(Partition::getEnabledQuestionCount));
+            int countMin = 0;
+            int countMax = 0;
+            Set<Question> uniqueValues1 = new HashSet<>();
+            Set<Question> uniqueValues2 = new HashSet<>();
+            int minLimit = min;
+            int maxLimit = max;
+            for (int i = 0; i < partitions.size(); i++) {
+                Partition least = partitions.get(i);
+                Partition most = partitions.get(partitions.size() - 1 - i);
+                Set<ToPartitionsLink> mostLinks = most.getQuestionLinks();
+                Set<ToPartitionsLink> leastLinks = least.getQuestionLinks();
+                for (ToPartitionsLink mostLink : mostLinks) {
+                    Question source = mostLink.getSource();
+                    if (source.isEnabled() && uniqueValues1.add(source) && maxLimit > 0) {
+                        countMax++;
+                    }
+                }
+                for (ToPartitionsLink leastLink : leastLinks) {
+                    Question source = leastLink.getSource();
+                    if (source.isEnabled() && uniqueValues2.add(source) && minLimit > 0) {
+                        countMin++;
+                    }
+                }
+                if (minLimit-- <= 0 && maxLimit-- <= 0) break;
+            }
+            if (leastRequiredPartitionsQuestionsCount > questionAmount) {
+                generateAvailability = Status.UNAVAILABLE;
+                type = "unachievableMinLimits";
+                reason = "最低题目数量限制超过设定数量";
+            } else if (fullyAvailableQuestionsCount + countMin >= questionAmount) {
+                generateAvailability = Status.FULLY_AVAILABLE;
+                type = "available";
+            } else if (fullyAvailableQuestionsCount + countMax < questionAmount) {
                 generateAvailability = Status.UNAVAILABLE;
                 type = "questionsNotEnough";
                 reason = "可用题目不足";
-            } else {*/
-                int fullyAvailableQuestionsCount = 0;
-                int leastRequiredPartitionsQuestionsCount = 0;
-                try {
-                    SettingItem settingItem3 = settingService.getItem("generating", "requiredPartitions");
-                    //noinspection unchecked
-                    List<String> requiredPartitionIds = (List<String>) settingItem3.getValue(List.class);
-                    requiredPartitions = partitionService.findAllByIds(requiredPartitionIds);
-                    final Map<Partition, SpecialPartitionLimit> limits = specialPartitionLimitService.getAll();
-                    int requiredPartitionsQuestionsCount = 0;
-                    Set<Question> uniqueValues = new HashSet<>();
-                    for (Partition partition : requiredPartitions) {
-                        Set<ToPartitionsLink> questionLinks = partition.getQuestionLinks();
-                        int partitionQuestionsCount = 0;
-                        final SpecialPartitionLimit limit = limits.get(partition);
-                        leastRequiredPartitionsQuestionsCount += limit != null ? limit.getMinLimit() : 0;
-                        for (ToPartitionsLink toPartitionsLink : questionLinks) {
-                            Question source = toPartitionsLink.getSource();
-                            if (source.isEnabled() &&
-                                    uniqueValues.add(source)) {
-                                if (limit == null || limit.checkMax(partitionQuestionsCount + 1)) {
-                                    partitionQuestionsCount += source instanceof QuestionGroup questionGroup ? questionGroup.getQuestionLinks().size() : 1;
-                                } else {
-                                    break;
-                                }
-                            }
-                        }
-                        requiredPartitionsQuestionsCount += partitionQuestionsCount;
-                    }
-                    fullyAvailableQuestionsCount += requiredPartitionsQuestionsCount;
-                } catch (NoSuchElementException ignored) {
-                }
-
-                int min = 0;
-                int max;
-                try {
-                    SettingItem item = settingService.getItem("generating", "partitionRange");
-                    final ArrayList<?> value = item.getValue(ArrayList.class);
-                    if (value.size() == 2) {
-                        min = (int) value.getFirst();
-                        max = (int) value.getLast();
-                    } else {
-                        max = partitionService.count();
-                    }
-                } catch (NoSuchElementException ignored) {
-                    max = partitionService.count();
-                }
-
-                final List<Partition> partitions = partitionService.findAll();
-                if (requiredPartitions != null) {
-                    partitions.removeAll(requiredPartitions);
-                }
-                partitions.sort(Comparator.comparing(Partition::getEnabledQuestionCount));
-                int countMin = 0;
-                int countMax = 0;
-                Set<Question> uniqueValues1 = new HashSet<>();
-                Set<Question> uniqueValues2 = new HashSet<>();
-                int minLimit = min;
-                int maxLimit = max;
-                for (int i = 0; i < partitions.size(); i++) {
-                    Partition least = partitions.get(i);
-                    Partition most = partitions.get(partitions.size() - 1 - i);
-                    Set<ToPartitionsLink> mostLinks = most.getQuestionLinks();
-                    Set<ToPartitionsLink> leastLinks = least.getQuestionLinks();
-                    for (ToPartitionsLink mostLink : mostLinks) {
-                        Question source = mostLink.getSource();
-                        if (source.isEnabled() && uniqueValues1.add(source) && maxLimit > 0) {
-                            countMax++;
-                        }
-                    }
-                    for (ToPartitionsLink leastLink : leastLinks) {
-                        Question source = leastLink.getSource();
-                        if (source.isEnabled() && uniqueValues2.add(source) && minLimit > 0) {
-                            countMin++;
-                        }
-                    }
-                    if (minLimit-- <= 0 && maxLimit-- <= 0) break;
-                }
-                if (leastRequiredPartitionsQuestionsCount > questionAmount) {
-                    generateAvailability = Status.UNAVAILABLE;
-                    type = "unachievableMinLimits";
-                    reason = "最低题目数量限制超过设定数量";
-                } else if (fullyAvailableQuestionsCount + countMin >= questionAmount) {
-                    generateAvailability = Status.FULLY_AVAILABLE;
-                    type = "available";
-                } else if (fullyAvailableQuestionsCount + countMax < questionAmount) {
-                    generateAvailability = Status.UNAVAILABLE;
-                    type = "questionsNotEnough";
-                    reason = "可用题目不足";
-                } else {
-                    generateAvailability = Status.MAY_FAIL;
-                    type = "specificOptionsMayFail";
-                    reason = "在选择某些分区进行生成时可能失败";
-                }
+            } else {
+                generateAvailability = Status.MAY_FAIL;
+                type = "specificOptionsMayFail";
+                reason = "在选择某些分区进行生成时可能失败";
+            }
 //            }
 
         } catch (NoSuchElementException e) {
