@@ -71,6 +71,13 @@ public class CreateOrUpdateMultipleChoicesQuestion extends BaseAction<CreateOrUp
             ) {
                 context.requirePermission("enable and disable questions");
             }
+            Boolean dtoUnsafeXss = multipleChoicesQuestionDTO.getUnsafeXss();
+            if (dtoUnsafeXss != null &&
+                    ((previousQuestion.isPresent() && previousQuestion.get().isUnsafeXss() != dtoUnsafeXss) ||
+                            (previousQuestion.isEmpty() && dtoUnsafeXss))
+            ) {
+                context.requirePermission("enable and disable unsafe xss for questions");
+            }
             question.setVerificationDigest(verificationRuleService.digest(multipleChoicesQuestionDTO));
             question.setValidationResult(result);
             questionService.save(question);

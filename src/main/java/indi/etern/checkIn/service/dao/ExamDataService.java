@@ -122,7 +122,6 @@ public class ExamDataService {
                 examDataRepository.save(examData1);
                 questionStatisticService.appendStatistic(examData);
                 return getExamDataQuestions(indexes, examData);
-//            throw new RuntimeException("Questions not found");
             }
             Map<Integer, Question> indexQuestionMap = new HashMap<>();
             questions.forEach(question -> indexQuestionMap.put(allQuestionIds.indexOf(question.getId()), question));

@@ -74,7 +74,13 @@ public class CreateOrUpdateQuestionGroup extends BaseAction<CreateOrUpdateQuesti
             ) {
                 context.requirePermission("enable and disable question groups");
             }
-            int count = 0;
+            Boolean dtoUnsafeXss = questionGroupDTO.getUnsafeXss();
+            if (dtoUnsafeXss != null &&
+                    ((previousQuestion.isPresent() && previousQuestion.get().isUnsafeXss() != dtoUnsafeXss) ||
+                            (previousQuestion.isEmpty() && dtoUnsafeXss))
+            ) {
+                context.requirePermission("enable and disable unsafe xss for question groups");
+            }            int count = 0;
             for (CommonQuestionDTO commonQuestionDTO : questionGroupDTO.getQuestions()) {
                 final ValidationResult result1 = verificationRuleService.verify(commonQuestionDTO, VerificationRuleService.VerifyTargetType.MULTIPLE_CHOICES_QUESTION);
                 if (!result1.getErrors().isEmpty()) {

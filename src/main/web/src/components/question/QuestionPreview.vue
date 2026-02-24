@@ -9,6 +9,7 @@ import ImagesViewer from "@/components/viewer/ImagesViewer.vue";
 import router from "@/router/index.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import {Picture} from "@element-plus/icons-vue";
+import sanitizeHtml from "sanitize-html";
 
 const props = defineProps({
     questionInfo: {
@@ -50,6 +51,14 @@ const onPreview = (file) => {
     viewerIndex.value = props.questionInfo.question.images.findIndex(item => item.uid === file.uid);
     imageViewerVisible.value = true;
 }
+
+const sanitize = (html) => {
+    if (props.questionInfo.question.unsafeXss) {
+        return html;
+    } else {
+        return sanitizeHtml(html);
+    }
+}
 </script>
 
 <template>
@@ -85,9 +94,9 @@ const onPreview = (file) => {
                 <template v-if="questionInfo.question.authorQQ">
                     <el-text type="info" size="small">作者</el-text>
                     <el-button
-                            @click.stop="router.push({name:'user-detail', params: {id: questionInfo.question.authorQQ}})"
-                            link class="disable-init-animate"
-                            style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
+                        @click.stop="router.push({name:'user-detail', params: {id: questionInfo.question.authorQQ}})"
+                        link class="disable-init-animate"
+                        style="margin-right: 6px;padding: 4px;transition: 200ms var(--ease-in-out-quint)">
                         <el-avatar shape="circle" :size="20" :src="getAvatarUrlOf(questionInfo.question.authorQQ)"
                                    style="margin-right: 4px;"></el-avatar>
                         <el-text style="margin-left: 4px;">{{ questionInfo.question.authorQQ }}</el-text>
@@ -95,8 +104,9 @@ const onPreview = (file) => {
                 </template>
             </div>
             <md-preview preview-theme="vuepress" :theme="UIMeta.colorScheme.value"
-                       :show-toolbar-name="UIMeta.touch.value" :model-value="questionInfo.question.content"
-                       class="preview-only" style="padding: 16px 32px"/>
+                        :sanitize="sanitize"
+                        :show-toolbar-name="UIMeta.touch.value" :model-value="questionInfo.question.content"
+                        class="preview-only" style="padding: 16px 32px"/>
             <multiple-choices-preview-module style="padding: 32px"
                                              v-if="questionInfo.question.type==='MultipleChoicesQuestion'"
                                              :question-info="questionInfo"/>

@@ -13,6 +13,7 @@ import 'md-editor-v3/lib/style.css';
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {Link, Picture} from "@element-plus/icons-vue"
 import {uuidv7} from "uuidv7";
+import sanitizeHtml from 'sanitize-html';
 
 const imageViewerVisible = ref(false);
 const upload = ref();
@@ -132,6 +133,18 @@ const ableToSwitchEnable = () => {
     return ableToSwitchEnable;
 }
 
+const ableToSwitchEnableXss = () => {
+    let ableToSwitchEnableXssQuestion = PermissionInfo.hasPermission('question', 'enable and disable unsafe xss for questions')
+    let ableToSwitchEnableXssQuestionGroup = PermissionInfo.hasPermission('question group', 'enable and disable unsafe xss for question groups')
+    let ableToSwitchEnable;
+    if (questionInfo.value.question.type === "QuestionGroup") {
+        ableToSwitchEnable = ableToSwitchEnableXssQuestionGroup;
+    } else {
+        ableToSwitchEnable = ableToSwitchEnableXssQuestion;
+    }
+    return ableToSwitchEnable;
+}
+
 const ableToChangeAuthor = () => {
     let ableToChangeQuestionAuthor = PermissionInfo.hasPermission('question', 'change question author')
     let ableToChangeQuestionGroupAuthor = PermissionInfo.hasPermission('question group', 'change question group author')
@@ -171,6 +184,14 @@ const newImageLoadError = () => {
 const newImageLoaded = () => {
     newImageVerified.value = true;
 }
+
+const sanitize = (html) => {
+    if (questionInfo.value.question.unsafeXss) {
+        return html;
+    } else {
+        return sanitizeHtml(html);
+    }
+}
 </script>
 
 <template>
@@ -196,6 +217,7 @@ const newImageLoaded = () => {
             <div style="display: flex;min-height: 450px !important;">
                 <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
                            preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
+                           :sanitize="sanitize"
                            style="height: 50dvh;min-height: 450px;"
                            :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value"
                            :preview="!UIMeta.mobile.value" :footers="['scrollSwitch']"/>
@@ -233,19 +255,23 @@ const newImageLoaded = () => {
                             <el-text style="align-self: center">选择文件</el-text>
                         </div>
                         <el-text type="info">或</el-text>
-                        <el-popover trigger="click" @click.stop popper-style="width: 260px" v-model:visible="addUrlImageVisible">
+                        <el-popover trigger="click" @click.stop popper-style="width: 260px"
+                                    v-model:visible="addUrlImageVisible">
                             <template #reference>
-                                <el-button link @click.stop="newImageURL = ''" :icon="Link" class="disable-init-animate">
+                                <el-button link @click.stop="newImageURL = ''" :icon="Link"
+                                           class="disable-init-animate">
                                     <el-text type="primary">使用 URL</el-text>
                                 </el-button>
                             </template>
                             <template #default>
                                 <div class="no-pop-padding" style="display: flex;flex-direction: column;width: 260px">
-                                    <el-image style="width: 260px;min-height: 180px;border-radius: 4px;margin-bottom: 4px"
-                                              :src="newImageURL"
-                                              @error="newImageLoadError()" @load="newImageLoaded()">
+                                    <el-image
+                                        style="width: 260px;min-height: 180px;border-radius: 4px;margin-bottom: 4px"
+                                        :src="newImageURL"
+                                        @error="newImageLoadError()" @load="newImageLoaded()">
                                         <template #error>
-                                            <div style="display: flex;align-items: center;justify-content: center;height: 180px">
+                                            <div
+                                                style="display: flex;align-items: center;justify-content: center;height: 180px">
                                                 <el-icon style="align-self: center;justify-self: center" :size="32">
                                                     <Picture/>
                                                 </el-icon>
@@ -253,7 +279,8 @@ const newImageLoaded = () => {
                                         </template>
                                     </el-image>
                                     <div style="display: flex;flex-direction: row;width: 260px">
-                                        <el-input placeholder="URL" class="disable-init-animate" style="margin-right: 4px"
+                                        <el-input placeholder="URL" class="disable-init-animate"
+                                                  style="margin-right: 4px"
                                                   v-model="newImageURL"/>
                                         <el-button type="primary" class="disable-init-animate"
                                                    :disabled="!newImageURL || !newImageVerified || newImageError"
@@ -316,11 +343,19 @@ const newImageLoaded = () => {
                 </el-option>
             </el-select>
             <div class="panel-1"
-                 style="padding: 2px;display: flex;flex-direction: row;align-items: center">
-                <el-text style="margin: 0 8px;">
-                    启用
-                </el-text>
-                <el-switch v-model="questionInfo.question.enabled" :disabled="!ableToSwitchEnable(questionInfo)"/>
+                 style="padding: 2px;display: flex;flex-direction: row;align-items: center;flex-wrap: wrap">
+                <div style="display: flex;flex-direction: row;align-items: center;margin-right: 8px;">
+                    <el-text style="margin: 0 8px;">
+                        启用题目
+                    </el-text>
+                    <el-switch v-model="questionInfo.question.enabled" :disabled="!ableToSwitchEnable(questionInfo)"/>
+                </div>
+                <div style="display: flex;flex-direction: row;align-items: center;">
+                    <el-text style="margin: 0 8px;">
+                        启用 XSS
+                    </el-text>
+                    <el-switch v-model="questionInfo.question.unsafeXss" :disabled="!ableToSwitchEnableXss(questionInfo)"/>
+                </div>
             </div>
         </div>
     </div>

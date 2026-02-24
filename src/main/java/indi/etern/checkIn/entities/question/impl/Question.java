@@ -55,6 +55,10 @@ public class Question implements LinkSource<QuestionLinkImpl<?>>, BaseEntity<Str
     boolean enabled = false;
 
     @Getter
+    @Setter
+    boolean unsafeXss = false;
+
+    @Getter
     @JoinTable(name = "upvoters_questions_mapping",
             foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
             inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),

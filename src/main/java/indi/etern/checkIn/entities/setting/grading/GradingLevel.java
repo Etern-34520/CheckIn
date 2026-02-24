@@ -22,7 +22,9 @@ public class GradingLevel {
     private String name;
     @Column(columnDefinition = "char(7)")
     private String colorHex;
+    @Column(columnDefinition = "text")
     private String description;
+    @Column(columnDefinition = "text")
     private String message;
     private CreatingUserStrategy creatingUserStrategy;
     private int levelIndex;

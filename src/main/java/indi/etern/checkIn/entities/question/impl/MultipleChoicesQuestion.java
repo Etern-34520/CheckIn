@@ -185,6 +185,7 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
         String questionContent;
         User author;
         boolean enable = false;
+        boolean unsafeXss = false;
         QuestionLinkImpl<?> linkWrapper;
         private String explanation;
 
@@ -193,12 +194,13 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
                     .addChoices(question.getChoices())
                     .setAuthor(question.getAuthor())
                     .setEnable(question.isEnabled())
+                    .setUnsafeXss(question.isUnsafeXss())
                     .setId(question.getId())
                     .setExplanation(question.getExplanation());
             builder.setLink(question.getLinkWrapper());
             return builder;
         }
-        
+
         private void setLink(QuestionLinkImpl<?> link) {
             linkWrapper = link;
         }
@@ -248,6 +250,11 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
             this.enable = enable;
             return this;
         }
+
+        public Builder setUnsafeXss(boolean unsafeXss) {
+            this.unsafeXss = unsafeXss;
+            return this;
+        }
         
         public MultipleChoicesQuestion build() {
             boolean singleCorrect = false;
@@ -282,6 +289,7 @@ public class MultipleChoicesQuestion extends Question implements Answerable<List
             }
             multipleQuestion = new MultipleChoicesQuestion(questionContent, choices, author, explanation);
             multipleQuestion.setEnabled(enable);
+            multipleQuestion.setUnsafeXss(unsafeXss);
             if (id != null) {
                 multipleQuestion.setId(id);
             } else {

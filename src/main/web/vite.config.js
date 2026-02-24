@@ -35,7 +35,9 @@ export default defineConfig({
     },
     base: '/checkIn/',
     plugins: [
-        vue(),
+        vue({
+            vapor: true
+        }),
         VueDevTools(),
         AutoImport({
             imports: ['vue', 'vue-router'],

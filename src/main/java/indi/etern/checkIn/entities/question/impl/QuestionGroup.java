@@ -74,7 +74,8 @@ public class QuestionGroup extends Question implements
         private String id;
         private final Set<Question> questions = new HashSet<>();
         private boolean enabled = false;
-        
+        private boolean unsafeXss = false;
+
         @Getter
         final Map<String, String> imageBase64Strings = new LinkedHashMap<>();
         private String explanation;
@@ -86,6 +87,7 @@ public class QuestionGroup extends Question implements
             final Builder builder = new Builder().setContent(previousQuestionGroup.getContent())
                     .setAuthor(previousQuestionGroup.getAuthor())
                     .setEnable(previousQuestionGroup.isEnabled())
+                    .setUnsafeXss(previousQuestionGroup.isUnsafeXss())
                     .setId(previousQuestionGroup.getId())
                     .setExplanation(previousQuestionGroup.getExplanation());
             builder.getPartitions().clear();
@@ -142,6 +144,7 @@ public class QuestionGroup extends Question implements
                 questionGroup.setImages(imageBase64Strings);
             }
             questionGroup.setEnabled(enabled);
+            questionGroup.setUnsafeXss(unsafeXss);
             questionGroup.setLinkWrapper(link);
             return questionGroup;
         }
@@ -158,6 +161,11 @@ public class QuestionGroup extends Question implements
 
         public Builder setExplanation(String explanation) {
             this.explanation = explanation;
+            return this;
+        }
+
+        public Builder setUnsafeXss(boolean unsafeXss) {
+            this.unsafeXss = unsafeXss;
             return this;
         }
     }

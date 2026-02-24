@@ -84,7 +84,7 @@ WebSocketConnector.registerAction("updatePermissions", (message) => {
     const userGroup = UserDataInterface.roles[currentRole];
     if (userGroup && userGroup.permissionGroups) {
         for (const permissionGroup of userGroup.permissionGroups) {
-            const updatedPermissionsOfGroup = message.data.permissions[permissionGroup.name];
+            const updatedPermissionsOfGroup = message.data[permissionGroup.name];
             if (updatedPermissionsOfGroup) {
                 for (const permission of permissionGroup.permissions) {
                     permission.enabled = Boolean(updatedPermissionsOfGroup.find(permission1 => permission1.name === permission.name));

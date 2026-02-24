@@ -188,12 +188,9 @@ spring.datasource.url=jdbc:mysql://localhost:3306/checkIn?useUnicode=true&charac
 > ```
 > H2Database (文件模式)
 > ```properties
-> spring.datasource.url=jdbc:h2:file:./check_in
+> spring.datasource.url=jdbc:h2:file:./check_in;MODE=MySQL
 > spring.datasource.username=root
 > spring.datasource.password=root
-> #===open web console(http://localhost:8080/h2-console)===
-> #spring.h2.console.enabled=true
-> #spring.h2.console.path=/h2-console
 > ```
 </details>
 

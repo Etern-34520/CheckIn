@@ -10,10 +10,7 @@ import indi.etern.checkIn.auth.JwtTokenProvider;
 import indi.etern.checkIn.entities.user.User;
 import indi.etern.checkIn.service.web.WebSocketService;
 import indi.etern.checkIn.throwable.auth.PermissionDeniedException;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
+import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.Getter;
@@ -77,6 +74,15 @@ public class Connector {
         CONNECTORS.add(this);
         this.sid = sid;
         logger.info("sid_{}:connected", sid);
+    }
+
+    @OnError
+    public void onError(Throwable throwable) {
+        if (throwable instanceof IOException) {
+            logger.trace("Websocket connector error, may cause by normal disconnection",throwable);
+        } else {
+            logger.error("Websocket connector error",throwable);
+        }
     }
     
     @SneakyThrows
@@ -203,11 +209,6 @@ public class Connector {
                 sendError(message.getMessageId(), "sid is not equal to qq");
                 return false;
             }
-            
-/*
-            actionExecutor.execute(SendPermissionsToUsersAction.class,
-                    new SendPermissionsToUsersAction.Input(List.of(sessionUser)));
-*/
             return false;
         } else if (sessionUser != null) {
             JwtAuthenticationFilter.setUserToSecurityContextHolder(sessionUser);
