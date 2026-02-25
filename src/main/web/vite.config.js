@@ -90,7 +90,8 @@ export default defineConfig({
                 ],
                 navigateFallbackDenylist: [
                     /^\/checkIn\/api\/*/
-                ]
+                ],
+                maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
             },
             includeAssets: ['src/assets/icons/*.svg'],
             devOptions: {
