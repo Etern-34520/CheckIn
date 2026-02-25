@@ -10,6 +10,7 @@ import router from "@/router/index.js";
 import getAvatarUrlOf from "@/utils/Avatar.js";
 import {Picture} from "@element-plus/icons-vue";
 import sanitizeHtml from "sanitize-html";
+import customSanitizeHtml from "@/utils/santize.js";
 
 const props = defineProps({
     questionInfo: {
@@ -56,7 +57,7 @@ const sanitize = (html) => {
     if (props.questionInfo.question.unsafeXss) {
         return html;
     } else {
-        return sanitizeHtml(html);
+        return customSanitizeHtml(html);
     }
 }
 </script>

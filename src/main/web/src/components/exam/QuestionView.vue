@@ -5,7 +5,7 @@ import QuestionGroupSubQuestionViewModule from "@/components/exam/QuestionGroupS
 import ImagesViewer from "@/components/viewer/ImagesViewer.vue";
 import UIMeta from "@/utils/UI_Meta.js";
 import {Picture} from "@element-plus/icons-vue";
-import sanitizeHtml from "sanitize-html";
+import customSanitizeHtml from "@/utils/santize.js";
 
 const props = defineProps({
     question: {
@@ -58,7 +58,7 @@ const sanitize = (html) => {
     if (props.question.unsafeXss) {
         return html;
     } else {
-        return sanitizeHtml(html);
+        return customSanitizeHtml(html);
     }
 }
 </script>

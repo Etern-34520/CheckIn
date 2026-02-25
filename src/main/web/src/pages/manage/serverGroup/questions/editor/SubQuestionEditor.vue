@@ -16,7 +16,7 @@ import {MdEditor} from "md-editor-v3";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {uuidv7} from "uuidv7";
 import {Link, Picture} from "@element-plus/icons-vue";
-import sanitizeHtml from "sanitize-html";
+import customSanitizeHtml from "@/utils/santize.js";
 
 const imageDialogVisible = ref(false);
 const viewerIndex = ref(0);
@@ -203,7 +203,7 @@ const sanitize = (html) => {
     if (groupInfo.question.unsafeXss) {
         return html;
     } else {
-        return sanitizeHtml(html);
+        return customSanitizeHtml(html);
     }
 }
 </script>

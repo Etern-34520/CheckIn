@@ -86,7 +86,7 @@
     --el-color-info: #b8b8b8;
 }
 
-*:not(.el-divider) {
+div:not(.el-divider) {
     border-color: var(--border-color-1) !important;
 }
 

@@ -13,7 +13,7 @@ import 'md-editor-v3/lib/style.css';
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {Link, Picture} from "@element-plus/icons-vue"
 import {uuidv7} from "uuidv7";
-import sanitizeHtml from 'sanitize-html';
+import customSanitizeHtml from "@/utils/santize.js";
 
 const imageViewerVisible = ref(false);
 const upload = ref();
@@ -186,10 +186,12 @@ const newImageLoaded = () => {
 }
 
 const sanitize = (html) => {
+    console.log(html)
     if (questionInfo.value.question.unsafeXss) {
         return html;
     } else {
-        return sanitizeHtml(html);
+        console.log(customSanitizeHtml(html));
+        return customSanitizeHtml(html);
     }
 }
 </script>
@@ -376,49 +378,5 @@ const sanitize = (html) => {
     opacity: 0;
     scale: 0.95;
 }
-
-</style>
-
-<style>
-
-/*
-
-#vditor {
-    width: 100% !important;
-    background: var(--panel-bg-color) linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0, transparent 2px calc(100% - 3px), rgba(0, 0, 0, 0.2) 100%);
-    border-radius: 4px;
-}
-
-.vditor-ir pre.vditor-reset {
-    background: none !important;
-}
-
-.vditor-toolbar {
-    background: none;
-    padding: 6px 12px;
-}
-
-.vditor--fullscreen {
-    background: var(--panel-bg-color);
-    backdrop-filter: blur(64px);
-    z-index: 10000 !important;
-}
-
-.vditor-tooltipped--hover::after,
-.vditor-tooltipped:hover::after,
-.vditor-tooltipped:active::after,
-.vditor-tooltipped:focus::after {
-    background: var(--panel-bg-color-overlay) linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0, transparent 2px calc(100% - 2px), rgba(0, 0, 0, 0.07) 100%);
-    backdrop-filter: blur(8px);
-    border-radius: 4px;
-}
-
-.vditor-tooltipped--hover::before,
-.vditor-tooltipped:hover::before,
-.vditor-tooltipped:active::before,
-.vditor-tooltipped:focus::before {
-    border-top-color: var(--panel-bg-color-overlay) !important;
-}
-*/
 
 </style>
