@@ -16,7 +16,7 @@ import {MdEditor} from "md-editor-v3";
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {uuidv7} from "uuidv7";
 import {Link, Picture} from "@element-plus/icons-vue";
-import customSanitizeHtml from "@/utils/santize.js";
+import customSanitizeHtml from "@/utils/sanitize.js";
 
 const imageDialogVisible = ref(false);
 const viewerIndex = ref(0);

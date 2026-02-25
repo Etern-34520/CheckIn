@@ -5,7 +5,7 @@ import QuestionGroupSubQuestionViewModule from "@/components/exam/QuestionGroupS
 import ImagesViewer from "@/components/viewer/ImagesViewer.vue";
 import UIMeta from "@/utils/UI_Meta.js";
 import {Picture} from "@element-plus/icons-vue";
-import customSanitizeHtml from "@/utils/santize.js";
+import customSanitizeHtml from "@/utils/sanitize.js";
 
 const props = defineProps({
     question: {

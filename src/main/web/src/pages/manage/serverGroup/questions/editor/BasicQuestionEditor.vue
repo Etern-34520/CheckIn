@@ -13,7 +13,7 @@ import 'md-editor-v3/lib/style.css';
 import PermissionInfo from "@/auth/PermissionInfo.js";
 import {Link, Picture} from "@element-plus/icons-vue"
 import {uuidv7} from "uuidv7";
-import customSanitizeHtml from "@/utils/santize.js";
+import customSanitizeHtml from "@/utils/sanitize.js";
 
 const imageViewerVisible = ref(false);
 const upload = ref();
