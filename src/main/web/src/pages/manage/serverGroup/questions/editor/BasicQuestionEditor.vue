@@ -186,13 +186,17 @@ const newImageLoaded = () => {
 }
 
 const sanitize = (html) => {
-    console.log(html)
     if (questionInfo.value.question.unsafeXss) {
         return html;
     } else {
-        console.log(customSanitizeHtml(html));
         return customSanitizeHtml(html);
     }
+}
+
+const mdEditorRef = ref();
+
+const reRender = () => {
+    mdEditorRef?.value?.rerender();
 }
 </script>
 
@@ -217,12 +221,11 @@ const sanitize = (html) => {
         </template>
         <template #content>
             <div style="display: flex;min-height: 450px !important;">
-                <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
-                           preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
-                           :sanitize="sanitize"
-                           style="height: 50dvh;min-height: 450px;"
-                           :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value"
-                           :preview="!UIMeta.mobile.value" :footers="['scrollSwitch']"/>
+                <MdEditor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
+                          preview-theme="vuepress" :toolbars-exclude="['save','catalog','github']"
+                          :sanitize="sanitize" ref="mdEditorRef" style="height: 50dvh;min-height: 450px;"
+                          :theme="UIMeta.colorScheme.value" :show-toolbar-name="UIMeta.touch.value"
+                          :preview="!UIMeta.mobile.value" :footers="['scrollSwitch']"/>
             </div>
         </template>
     </collapse>
@@ -356,7 +359,8 @@ const sanitize = (html) => {
                     <el-text style="margin: 0 8px;">
                         启用 XSS
                     </el-text>
-                    <el-switch v-model="questionInfo.question.unsafeXss" :disabled="!ableToSwitchEnableXss(questionInfo)"/>
+                    <el-switch v-model="questionInfo.question.unsafeXss" @change="reRender()"
+                               :disabled="!ableToSwitchEnableXss(questionInfo)"/>
                 </div>
             </div>
         </div>

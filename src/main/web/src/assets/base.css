@@ -86,10 +86,6 @@
     --el-color-info: #b8b8b8;
 }
 
-div:not(.el-divider) {
-    border-color: var(--border-color-1) !important;
-}
-
 .breadcrumb-item-leave-active .el-breadcrumb__separator {
     opacity: 0 !important;
 }

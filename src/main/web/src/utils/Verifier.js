@@ -248,7 +248,7 @@ export default {
             for (const rule of verificationRules) {
                 if (rule.objectName === question.type) {
                     let ruleTrace = rule.property.trace;
-                    console.debug("verify: ruleTrace: " + ruleTrace);
+                    // console.debug("verify: ruleTrace: " + ruleTrace);
                     let copied = false;
                     const copyIfNecessary = () => {
                         if (!copied) {
@@ -330,10 +330,10 @@ export default {
                                 }
                                 const data = rule.values[0];
                                 if (rule.property.trace.includes("question.images") && (rule.property.trace.includes("$size") || rule.property.trace.includes("$*size"))) {
-                                    console.debug("verify: converting value (field: question.images) from: " + num);
+                                    // console.debug("verify: converting value (field: question.images) from: " + num);
                                     num = num / 1048576.0;//转换到MB
                                     num = Math.trunc(num * 100) / 100;
-                                    console.debug("verify: converting value (field: question.images) to: " + num);
+                                    // console.debug("verify: converting value (field: question.images) to: " + num);
                                 }
                                 return {num, data};
                             }
@@ -379,7 +379,7 @@ export default {
                                 invokeCount++;
                             };
                             const catchEmpty = (data) => {
-                                console.debug("verify: catch empty", data, rule);
+                                // console.debug("verify: catch empty", data, rule);
                                 if (!tipTemplate) {
                                     item = ruleTrace[index - 1];
                                     const {data, num} = calcData(item);
@@ -396,7 +396,7 @@ export default {
                                 }
                             };
 
-                            console.debug("verify: final option", streamOption);
+                            // console.debug("verify: final option", streamOption);
                             if (streamOption.validate) {
                                 // streamOption.validate(validateNumberFunc, catchEmpty);
                             } else if (countMode || minMode || maxMode) {
@@ -420,7 +420,7 @@ export default {
                                 }
                                 streamOption.validate(validateNumberFunc, catchEmpty);
                             } else if (streamOption.mapToNumber && verificationTypeName === "empty" || verificationTypeName === "empty-") {
-                                console.log(rule);
+                                // console.log(rule);
                                 streamOption = streamOption.mapToNumber();
                                 streamOption.validate(validateNumberFunc, catchEmpty);
                             }

@@ -11,9 +11,17 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.12.2",
+    "cropperjs": "^2.1.0",
+    "css-tree": "^3.1.0",
     "element-plus": "^2.11.4",
+    "highlight.js": "^11.11.1",
     "jwt-decode": "^4.0.0",
+    "katex": "^0.16.33",
     "md-editor-v3": "^6.3.1",
+    "mermaid": "^11.12.3",
+    "prettier": "^3.8.1",
+    "sanitize-html": "^2.17.1",
+    "screenfull": "^6.0.2",
     "splitpanes": "^4.0.4",
     "uuidv7": "^1.0.2",
     "vite": "^7.3.1",
@@ -22,9 +30,7 @@
     "vue-draggable-plus": "^0.6.0",
     "vue-router": "^4.5.1",
     "vue-turnstile": "^1.0.11",
-    "vue3-cookies": "^1.0.6",
-    "sanitize-html": "^2.17.1",
-    "css-tree": "^3.1.0"
+    "vue3-cookies": "^1.0.6"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.4",

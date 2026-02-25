@@ -206,6 +206,15 @@ const sanitize = (html) => {
         return customSanitizeHtml(html);
     }
 }
+
+
+const mdEditorRef = ref();
+
+const reRender = () => {
+    mdEditorRef?.value?.rerender();
+}
+
+watch(() => questionInfo.value.getGroup().question.unsafeXss, reRender);
 </script>
 
 <template>
@@ -307,7 +316,7 @@ const sanitize = (html) => {
                 <div style="position: relative;">
                     <div class="question-input" style="display: flex;min-height: 200px !important;"
                          :class="questionInfo.inputMeta['content-0']">
-                        <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content"
+                        <md-editor no-upload-img placeholder="内容" v-model="questionInfo.question.content" ref="mdEditorRef"
                                    :show-toolbar-name="UIMeta.touch.value" :footers="['scrollSwitch']"
                                    :key="UIMeta.colorScheme" preview-theme="vuepress" :sanitize="sanitize"
                                    :toolbars-exclude="['save','catalog','github']"

@@ -9,72 +9,121 @@ import * as csstree from 'css-tree';
 function filterMermaidStyle(cssText) {
     let ast;
     try {
-        ast = csstree.parse(cssText, { silent: true });
+        // 解析 CSS 为 AST
+        ast = csstree.parse(cssText, {
+            positions: true,   // 可选，便于调试
+            onParseError: (error) => {
+                // 忽略解析错误，继续尝试
+                console.warn('CSS parse error:', error.message);
+            }
+        });
     } catch (e) {
-        // 解析失败则返回空
+        // 解析失败返回空字符串
         return '';
     }
 
     /**
-     * 递归检查规则是否符合保留条件
-     * @param {Object} rule - CSS 规则对象
-     * @returns {boolean} 是否保留
+     * 判断一个规则（Rule）是否应该保留
+     * 规则是一个 csstree 的 Rule 节点，结构为 {
+     *   type: 'Rule',
+     *   prelude: { type: 'SelectorList', children: [...] },
+     *   block: { type: 'Block', children: [...] }
+     * }
      */
-    function shouldKeepRule(rule) {
-        // keyframes 直接保留
-        if (rule.type === 'keyframes') return true;
-
-        // 普通样式规则：必须至少有一个选择器包含 #mm ID
-        if (rule.type === 'rule') {
-            const selectors = rule.selectors || [];
-            return selectors.some(sel => /#mm[a-zA-Z0-9_-]/.test(sel));
-        }
-
-        // 其他 at-rule（如 media、supports 等）：递归检查内部规则
-        if (rule.type === 'media' || rule.type === 'supports' || rule.type === 'document') {
-            if (rule.rules && rule.rules.some(shouldKeepRule)) {
-                return true;
+    function shouldKeepRule(ruleNode) {
+        // 遍历所有选择器（SelectorList 中的每个 Selector）
+        let hasMmId = false;
+        csstree.walk(ruleNode.prelude, (node) => {
+            if (node.type === 'IdSelector' && node.name.startsWith('mm')) {
+                // 注意：IdSelector.name 不包含 #，例如 #mm123 的 name 是 "mm123"
+                hasMmId = true;
             }
-        }
-
-        // 其余规则（@import, @charset, @page 等）不保留
-        return false;
+        });
+        return hasMmId;
     }
 
     /**
-     * 递归过滤规则列表，返回新规则列表
-     * @param {Array} rules
-     * @returns {Array}
+     * 递归遍历 AST，构建新的 AST 节点列表
      */
-    function filterRules(rules) {
-        const result = [];
-        for (const rule of rules) {
-            if (shouldKeepRule(rule)) {
-                // 对于 at-rule，需要深层过滤其内部规则
-                if ((rule.type === 'media' || rule.type === 'supports' || rule.type === 'document') && rule.rules) {
-                    const filteredChildren = filterRules(rule.rules);
-                    if (filteredChildren.length > 0) {
-                        // 保留外层 at-rule，并用过滤后的内部规则替换
-                        const newRule = { ...rule, rules: filteredChildren };
-                        result.push(newRule);
+    function filter(node) {
+        // 如果没有子节点，直接返回 null（表示删除）
+        if (!node) return null;
+
+        switch (node.type) {
+            case 'StyleSheet':
+                // 对于根节点，过滤其 children
+                const newChildren = [];
+                if (node.children) {
+                    node.children.forEach(child => {
+                        const filtered = filter(child);
+                        if (filtered) newChildren.push(filtered);
+                    });
+                }
+                // 返回新的 StyleSheet 节点，children 替换
+                return {
+                    ...node,
+                    children: newChildren
+                };
+
+            case 'Atrule':
+                // 处理 at-rule
+                if (node.name === 'keyframes' || node.name === '-webkit-keyframes' || node.name === '-moz-keyframes') {
+                    // 直接保留所有 keyframes
+                    return node;
+                } else if (node.name === 'media' || node.name === 'supports' || node.name === 'document') {
+                    // 对于 media/supports 等，需要过滤其内部的子规则
+                    if (node.block && node.block.children) {
+                        const newBlockChildren = [];
+                        node.block.children.forEach(child => {
+                            const filtered = filter(child);
+                            if (filtered) newBlockChildren.push(filtered);
+                        });
+                        if (newBlockChildren.length > 0) {
+                            // 返回新的 Atrule，block 内 children 替换
+                            return {
+                                ...node,
+                                block: {
+                                    ...node.block,
+                                    children: newBlockChildren
+                                }
+                            };
+                        } else {
+                            return null; // 内部无保留规则，丢弃整个 at-rule
+                        }
+                    } else {
+                        return null;
                     }
                 } else {
-                    // 普通规则或 keyframes 直接保留
-                    result.push(rule);
+                    // 其他 at-rule（@import, @charset 等）直接丢弃
+                    return null;
                 }
-            }
+
+            case 'Rule':
+                // 普通样式规则
+                if (shouldKeepRule(node)) {
+                    return node;
+                } else {
+                    return null;
+                }
+
+            default:
+                // 其他类型节点（如 Comment, Raw 等）可以保留或丢弃，根据需求
+                // 这里选择丢弃，因为 Mermaid 生成的 AST 中不应有这些
+                return null;
         }
-        return result;
     }
 
-    const filteredRules = filterRules(ast.stylesheet.rules);
-    if (filteredRules.length === 0) return '';
+    // 执行过滤
+    const filteredAst = filter(ast);
+    if (!filteredAst) return '';
 
-    const newAst = {
-        type: 'stylesheet',
-        stylesheet: { rules: filteredRules }
-    };
-    return csstree.generate(newAst);
+    // 将 AST 重新生成为 CSS 字符串
+    try {
+        return csstree.generate(filteredAst);
+    } catch (e) {
+        console.warn('CSS generation error:', e);
+        return '';
+    }
 }
 
 function preFilterStyles(html) {

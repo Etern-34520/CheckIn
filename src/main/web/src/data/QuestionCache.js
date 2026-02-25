@@ -216,7 +216,7 @@ const uploading = ref(false);
 const debounceTimers = {}
 
 function verify(questionInfo) {
-    console.debug("verify task pushed", questionInfo);
+    // console.debug("verify task pushed", questionInfo);
 
     let question = questionInfo.question;
     if (!question) return;
@@ -225,7 +225,7 @@ function verify(questionInfo) {
         clearTimeout(debounceTimer);
     }
     debounceTimers[questionInfo.question.id] = setTimeout(() => {
-        console.debug("verify started", questionInfo);
+        // console.debug("verify started", questionInfo);
         delete debounceTimers[questionInfo.question.id];
         verifier.verifyQuestionInfo(questionInfo);
     }, 100);
