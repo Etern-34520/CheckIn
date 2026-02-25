@@ -24,7 +24,7 @@
     "vue-turnstile": "^1.0.11",
     "vue3-cookies": "^1.0.6",
     "sanitize-html": "^2.17.1",
-    "css": "^3.0.0"
+    "css-tree": "^3.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.4",

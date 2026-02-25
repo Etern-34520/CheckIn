@@ -1,5 +1,5 @@
 import sanitizeHtml from "sanitize-html";
-import css from 'css';
+import * as csstree from 'css-tree';
 
 /**
  * 严格过滤 Mermaid 样式：只保留包含 #mm ID 选择器的规则和 @keyframes
@@ -9,7 +9,7 @@ import css from 'css';
 function filterMermaidStyle(cssText) {
     let ast;
     try {
-        ast = css.parse(cssText, { silent: true });
+        ast = csstree.parse(cssText, { silent: true });
     } catch (e) {
         // 解析失败则返回空
         return '';
@@ -74,7 +74,7 @@ function filterMermaidStyle(cssText) {
         type: 'stylesheet',
         stylesheet: { rules: filteredRules }
     };
-    return css.stringify(newAst);
+    return csstree.generate(newAst);
 }
 
 function preFilterStyles(html) {
@@ -83,8 +83,7 @@ function preFilterStyles(html) {
     const styleNodes = doc.querySelectorAll('style');
     styleNodes.forEach(style => {
         const originalCss = style.textContent;
-        const filteredCss = filterMermaidStyle(originalCss);
-        style.textContent = filteredCss; // 替换为过滤后的内容
+        style.textContent = filterMermaidStyle(originalCss); // 替换为过滤后的内容
     });
     return doc.documentElement.outerHTML;
 }
