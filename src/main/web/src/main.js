@@ -10,6 +10,8 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import _Loading_ from "@/components/common/_Loading_.vue";
 
 import '@/utils/UI_Meta.js';
+import "katex/dist/katex-swap.min.css"
+import "katex/dist/katex.min.css"
 
 import {config} from 'md-editor-v3';
 import mermaid from 'mermaid';

@@ -136,6 +136,7 @@ function preFilterStyles(html) {
     });
     return doc.documentElement.outerHTML;
 }
+
 const customSanitizeHtml = (dirtyHtml) => {
     dirtyHtml = preFilterStyles(dirtyHtml);
     return sanitizeHtml(dirtyHtml, {
@@ -155,7 +156,13 @@ const customSanitizeHtml = (dirtyHtml) => {
             'lineargradient', 'radialgradient', 'clippath', 'mask', 'pattern',
             'image', 'ellipse', 'polygon', 'polyline',
             'style',
-            'iframe'
+            'iframe',
+            'math', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'mtext',
+            'annotation', 'annotation-xml', 'mpadded', 'mphantom',
+            'mstyle', 'msqrt', 'mroot', 'mfrac', 'msup', 'msub',
+            'msubsup', 'munder', 'mover', 'munderover', 'mmultiscripts',
+            'mtable', 'mtr', 'mtd', 'mlabeledtr', 'merror', 'mprescripts',
+            'mfenced', 'menclose'
         ],
         allowVulnerableTags: true,
         // 关键修改：允许所有属性（但配合协议过滤和标签白名单，风险可控）
@@ -190,5 +197,4 @@ const customSanitizeHtml = (dirtyHtml) => {
         }
     });
 }
-
-export default customSanitizeHtml;
+export {customSanitizeHtml};

@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>indi.etern.checkIn</groupId>
     <artifactId>checkIn</artifactId>
-    <version>2.2.11 stable</version>
+    <version>2.2.12 stable</version>
     <name>checkIn</name>
-    <description>CheckIn use Spring Boot</description>
+    <description>A QQ Group entrance exam solution</description>
     <properties>
         <java.version>21</java.version>
     </properties>
