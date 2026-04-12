@@ -1,3 +1,5 @@
+# **有些人真的是恬不知耻，开源给你用了还要被骂，爱咋咋地吧，后续更新将不再公开**
+
 <img width="64" height="64" src="icon.svg" alt="icon">
 
 # CheckIn
